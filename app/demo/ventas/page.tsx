@@ -1,0 +1,86 @@
+import Link from 'next/link'
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
+const sales = [
+  { id: 1, time: '18:45', product: 'Mojito Clásico', quantity: 2, total: 17.00 },
+  { id: 2, time: '18:52', product: 'Margarita', quantity: 1, total: 9.00 },
+  { id: 3, time: '19:10', product: 'Cerveza Corona', quantity: 4, total: 20.00 },
+  { id: 4, time: '19:25', product: 'Piña Colada', quantity: 2, total: 20.00 },
+  { id: 5, time: '19:40', product: 'Cuba Libre', quantity: 3, total: 22.50 },
+  { id: 6, time: '20:05', product: 'Tequila Shot', quantity: 6, total: 36.00 },
+]
+
+export default function VentasPage() {
+  return (
+    <div className="min-h-svh bg-background">
+      <nav className="border-b neumorphic-inset">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/demo">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                BarFlow
+              </h1>
+            </Link>
+            <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Ventas y Contabilidad</h2>
+            <p className="text-muted-foreground">Registro de transacciones</p>
+          </div>
+          <Button className="neumorphic-hover border-0">+ Registrar Venta</Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="neumorphic border-0 p-6">
+            <div className="text-sm text-muted-foreground mb-1">Ventas Hoy</div>
+            <div className="text-3xl font-bold text-green-600">$4,250</div>
+            <div className="text-xs text-muted-foreground mt-1">+15% vs ayer</div>
+          </Card>
+          <Card className="neumorphic border-0 p-6">
+            <div className="text-sm text-muted-foreground mb-1">Transacciones</div>
+            <div className="text-3xl font-bold">87</div>
+            <div className="text-xs text-muted-foreground mt-1">Hoy</div>
+          </Card>
+          <Card className="neumorphic border-0 p-6">
+            <div className="text-sm text-muted-foreground mb-1">Ticket Promedio</div>
+            <div className="text-3xl font-bold">$48.85</div>
+            <div className="text-xs text-muted-foreground mt-1">+8% vs ayer</div>
+          </Card>
+        </div>
+
+        <Card className="neumorphic border-0 mb-6">
+          <div className="p-6">
+            <h3 className="text-xl font-bold mb-4">Últimas Transacciones</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Hora</TableHead>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Cantidad</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sales.map((sale) => (
+                  <TableRow key={sale.id}>
+                    <TableCell>{sale.time}</TableCell>
+                    <TableCell className="font-medium">{sale.product}</TableCell>
+                    <TableCell>{sale.quantity}x</TableCell>
+                    <TableCell className="text-right font-bold">${sale.total.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+}
