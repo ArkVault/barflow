@@ -431,16 +431,6 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ---
 
-## 📞 Soporte
-
-¿Tienes preguntas o necesitas ayuda?
-
-- 📧 Email: support@barflow.app
-- 🐛 Issues: [GitHub Issues](https://github.com/ArkVault/bar-inventory-saa-s/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/ArkVault/bar-inventory-saa-s/discussions)
-
----
-
 ## 🗺️ Roadmap
 
 ### v1.1 (Próximamente)
