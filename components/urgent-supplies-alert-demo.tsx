@@ -2,9 +2,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import useSWR from "swr";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { usePeriod } from "@/contexts/period-context";
+import { getUserPlan, convertPlanToSupplies, getSuppliesByViewPeriod } from "@/lib/planner-data";
+import { getSuppliesByPeriod, type UrgencyPeriod } from "@/lib/mock-data";
 
 interface UrgentSupply {
   id: string;
@@ -22,27 +23,27 @@ interface UrgentSupply {
   }[];
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-type UrgencyPeriod = "day" | "week" | "month";
-
-function getStockRatio(current: number, min: number) {
-  if (min <= 0) return 1;
-  return current / min;
+function getStockRatio(current: number, max: number) {
+  if (max <= 0) return 1;
+  return current / max;
 }
 
-function getGaugeColor(ratio: number) {
-  if (ratio >= 1) return "text-emerald-500";
-  if (ratio >= 0.6) return "text-amber-500";
-  return "text-red-500";
+function getGaugeColorByRatio(ratio: number) {
+  // 0-2/5 (0-40%) = Rojo (crítico)
+  if (ratio <= 0.4) return "stroke-red-500";
+  // 3/5 (40-60%) = Naranja (bajo)
+  if (ratio <= 0.6) return "stroke-amber-500";
+  // 4/5-5/5 (60-100%+) = Verde (óptimo)
+  return "stroke-emerald-500";
 }
 
-function SemiCircleGauge({ ratio }: { ratio: number }) {
-  const clamped = Math.max(0, Math.min(ratio, 1.5));
-  const percent = (clamped / 1) * 100;
+function SemiCircleGauge({ current, max }: { current: number; max: number }) {
+  const ratio = getStockRatio(current, max);
+  const clamped = Math.max(0, Math.min(ratio, 1));
+  const percent = clamped * 100;
   const circumference = Math.PI * 50;
-  const offset = circumference - (Math.min(percent, 100) / 100) * circumference;
-  const colorClass = getGaugeColor(ratio).replace("text-", "stroke-");
+  const offset = circumference - (percent / 100) * circumference;
+  const colorClass = getGaugeColorByRatio(ratio);
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -67,64 +68,31 @@ function SemiCircleGauge({ ratio }: { ratio: number }) {
   );
 }
 
-export function UrgentSuppliesAlert() {
+export function UrgentSuppliesAlertDemo() {
   const { period } = usePeriod();
   const [statusFilter, setStatusFilter] = useState<"all" | "critical" | "warning" | "optimal">("all");
+  const [planSupplies, setPlanSupplies] = useState<any[]>([]);
 
-  const { data, error, isLoading } = useSWR<{ supplies: UrgentSupply[] }>(
-    `/api/supplies/urgent?period=${period}`,
-    fetcher,
-    {
-      refreshInterval: 300000, // Refresh every 5 minutes
-      revalidateOnFocus: false,
+  useEffect(() => {
+    // Get user's plan from localStorage
+    const userPlan = getUserPlan();
+    
+    if (userPlan) {
+      // Convert plan to supplies format
+      const supplies = convertPlanToSupplies(userPlan);
+      setPlanSupplies(supplies);
+    } else {
+      // Fallback to mock data if no plan exists
+      setPlanSupplies(getSuppliesByPeriod(period as UrgencyPeriod));
     }
-  );
+  }, [period]);
 
-  if (error) {
-    return (
-      <Card className="neumorphic border-0">
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            ⚠️ Insumos urgentes
-          </CardTitle>
-          <CardDescription>Error al cargar los datos</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card className="neumorphic border-0">
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            ⚠️ Insumos urgentes
-          </CardTitle>
-          <CardDescription>Cargando...</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  const urgentSupplies = data?.supplies || [];
-
-  if (urgentSupplies.length === 0) {
-    return (
-      <Card className="neumorphic border-0">
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            ✅ Inventario saludable
-          </CardTitle>
-          <CardDescription>No hay insumos críticos para el periodo seleccionado</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Todos los insumos tienen stock suficiente para el periodo seleccionado.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const urgentSupplies = useMemo(() => {
+    if (planSupplies.length === 0) return [];
+    
+    // Filter by view period (día/semana/mes)
+    return getSuppliesByViewPeriod(planSupplies, period as UrgencyPeriod);
+  }, [planSupplies, period]);
 
   const criticalSupplies = urgentSupplies.filter((s) => s.urgencyLevel === 'critical');
   const warningSupplies = urgentSupplies.filter((s) => s.urgencyLevel === 'warning');
@@ -136,11 +104,21 @@ export function UrgentSuppliesAlert() {
   if (statusFilter === 'warning') visibleSupplies = warningSupplies;
   if (statusFilter === 'optimal') visibleSupplies = optimalSupplies;
 
-  const getUrgencyBadge = (level: string, days: number) => {
+  const getUrgencyBadge = (level: string, days: number, filterActive: string) => {
+    // Si hay un filtro activo que no es 'all', usar el color del filtro
+    if (filterActive === 'critical') {
+      return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
+    } else if (filterActive === 'warning') {
+      return <Badge className="neumorphic-inset bg-amber-500 text-white">Bajo ({days}d)</Badge>;
+    } else if (filterActive === 'optimal') {
+      return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
+    }
+    
+    // Si no hay filtro, usar el nivel real del insumo
     if (level === 'critical') {
       return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
     } else if (level === 'warning') {
-      return <Badge className="neumorphic-inset bg-amber-500 text-white">Urgente ({days}d)</Badge>;
+      return <Badge className="neumorphic-inset bg-amber-500 text-white">Bajo ({days}d)</Badge>;
     } else {
       return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
     }
@@ -152,7 +130,7 @@ export function UrgentSuppliesAlert() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
-              ⚠️ Insumos urgentes
+              📦 Insumos necesarios
             </CardTitle>
             <CardDescription>
               {visibleSupplies.length} insumo{visibleSupplies.length !== 1 ? 's' : ''} en el estado seleccionado para este periodo
@@ -222,12 +200,15 @@ export function UrgentSuppliesAlert() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-center text-xs text-muted-foreground">
-                    <SemiCircleGauge ratio={getStockRatio(supply.current_quantity, supply.min_threshold)} />
+                    <SemiCircleGauge 
+                      current={supply.current_quantity} 
+                      max={supply.min_threshold}
+                    />
                     <span className="mt-1">
                       {supply.current_quantity} / {supply.min_threshold} {supply.unit}
                     </span>
                   </div>
-                  {getUrgencyBadge(supply.urgencyLevel, supply.daysUntilDepleted)}
+                  {getUrgencyBadge(supply.urgencyLevel, supply.daysUntilDepleted, statusFilter)}
                 </div>
               </div>
               

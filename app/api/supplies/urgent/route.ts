@@ -1,9 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+type UrgencyPeriod = 'day' | 'week' | 'month'
+
+export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const period = (searchParams.get('period') as UrgencyPeriod) || 'week'
     
     // Get user's establishment
     const { data: { user } } = await supabase.auth.getUser()
@@ -42,7 +46,7 @@ export async function GET() {
 
     // For each supply, get the products that use it
     const urgentSupplies = await Promise.all(
-      supplies.map(async (supply) => {
+      supplies.map(async (supply: any) => {
         const { data: ingredients } = await supabase
           .from('product_ingredients')
           .select(`
@@ -55,7 +59,7 @@ export async function GET() {
           `)
           .eq('supply_id', supply.id)
 
-        const products = ingredients?.map(ing => ({
+        const products = ingredients?.map((ing: any) => ({
           name: ing.products.name,
           category: ing.products.category,
           quantityNeeded: ing.quantity_needed
@@ -66,11 +70,31 @@ export async function GET() {
           ? Math.floor((supply.current_quantity / supply.min_threshold) * 7)
           : 0
 
+        // Adjust urgency thresholds by selected period
+        let urgencyLevel: 'critical' | 'warning' | 'low' = 'low'
+
+        if (period === 'day') {
+          // Foco en las próximas 24-48h
+          if (daysUntilDepleted <= 1) urgencyLevel = 'critical'
+          else if (daysUntilDepleted <= 2) urgencyLevel = 'warning'
+          else urgencyLevel = 'low'
+        } else if (period === 'week') {
+          // Lógica original basada en ~7 días
+          if (daysUntilDepleted <= 2) urgencyLevel = 'critical'
+          else if (daysUntilDepleted <= 5) urgencyLevel = 'warning'
+          else urgencyLevel = 'low'
+        } else {
+          // month: horizonte más largo
+          if (daysUntilDepleted <= 7) urgencyLevel = 'critical'
+          else if (daysUntilDepleted <= 14) urgencyLevel = 'warning'
+          else urgencyLevel = 'low'
+        }
+
         return {
           ...supply,
           products,
           daysUntilDepleted,
-          urgencyLevel: daysUntilDepleted <= 2 ? 'critical' : daysUntilDepleted <= 5 ? 'warning' : 'low'
+          urgencyLevel
         }
       })
     )

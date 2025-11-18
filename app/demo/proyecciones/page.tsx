@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { DemoSidebar } from "@/components/demo-sidebar"
+import { useLanguage } from "@/hooks/use-language"
 
 const projections = {
   day: [
@@ -29,8 +31,11 @@ const projections = {
 }
 
 export default function ProyeccionesPage() {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-svh bg-background">
+      <DemoSidebar />
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -44,20 +49,20 @@ export default function ProyeccionesPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Proyecciones Inteligentes</h2>
-            <p className="text-muted-foreground">Análisis predictivo basado en IA</p>
+            <h2 className="text-3xl font-bold mb-2">{t('smartProjections')}</h2>
+            <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
           </div>
-          <Button className="neumorphic-hover border-0">🔄 Actualizar Proyecciones</Button>
+          <Button className="neumorphic-hover border-0">🔄 {t('updateProjections')}</Button>
         </div>
 
         <Tabs defaultValue="day" className="w-full">
           <TabsList className="neumorphic border-0 mb-6">
-            <TabsTrigger value="day">Día</TabsTrigger>
-            <TabsTrigger value="week">Semana</TabsTrigger>
-            <TabsTrigger value="month">Mes</TabsTrigger>
+            <TabsTrigger value="day">{t('day')}</TabsTrigger>
+            <TabsTrigger value="week">{t('week')}</TabsTrigger>
+            <TabsTrigger value="month">{t('month')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="day" className="space-y-4">

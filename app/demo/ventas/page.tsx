@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { DemoSidebar } from "@/components/demo-sidebar"
+import { useLanguage } from "@/hooks/use-language"
 
 const sales = [
   { id: 1, time: '18:45', product: 'Mojito Clásico', quantity: 2, total: 17.00 },
@@ -13,8 +17,11 @@ const sales = [
 ]
 
 export default function VentasPage() {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-svh bg-background">
+      <DemoSidebar />
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -28,13 +35,13 @@ export default function VentasPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Ventas y Contabilidad</h2>
-            <p className="text-muted-foreground">Registro de transacciones</p>
+            <h2 className="text-3xl font-bold mb-2">{t('salesAccounting')}</h2>
+            <p className="text-muted-foreground">{t('transactionLog')}</p>
           </div>
-          <Button className="neumorphic-hover border-0">+ Registrar Venta</Button>
+          <Button className="neumorphic-hover border-0">+ {t('registerSale')}</Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -57,14 +64,14 @@ export default function VentasPage() {
 
         <Card className="neumorphic border-0 mb-6">
           <div className="p-6">
-            <h3 className="text-xl font-bold mb-4">Últimas Transacciones</h3>
+            <h3 className="text-xl font-bold mb-4">{t('recentTransactions')}</h3>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Producto</TableHead>
-                  <TableHead>Cantidad</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>{t('time')}</TableHead>
+                  <TableHead>{t('product')}</TableHead>
+                  <TableHead>{t('quantity')}</TableHead>
+                  <TableHead className="text-right">{t('total')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

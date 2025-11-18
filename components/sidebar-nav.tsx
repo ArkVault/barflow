@@ -5,6 +5,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 
 interface SidebarNavProps {
   userName: string;
@@ -24,6 +26,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
 
   const navItems = [
     { href: "/dashboard", label: "Vista General", icon: "🏠" },
+    { href: "/dashboard/planner", label: "Planner", icon: "📋" },
     { href: "/dashboard/insumos", label: "Insumos", icon: "📦" },
     { href: "/dashboard/productos", label: "Productos", icon: "🛒" },
     { href: "/dashboard/ventas", label: "Ventas", icon: "📊" },
@@ -49,11 +52,17 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
           {/* Collapse Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-6 h-10 w-10 rounded-full neumorphic flex items-center justify-center hover:scale-105 transition-transform"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full neumorphic flex items-center justify-center hover:scale-105 transition-transform"
             aria-label={isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
           >
             <span className={cn("text-xl transition-transform", isCollapsed && "rotate-180")}>‹</span>
           </button>
+
+          {/* Theme and Language Toggles - Top Right */}
+          <div className={cn("absolute top-6 right-6 flex gap-2", isCollapsed && "flex-col")}>
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
 
           {/* Logo */}
           <div className="mb-8">
