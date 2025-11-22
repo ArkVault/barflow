@@ -59,7 +59,12 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                }
 
                setStatus('success');
-               setMessage(`✓ ${data.supplies.length} insumos importados exitosamente`);
+               const summary = data.summary || { total: data.supplies?.length || 0, new: 0, matched: 0 };
+               setMessage(
+                    `✓ ${summary.total} insumos importados • ` +
+                    `${summary.new} nuevos • ` +
+                    `${summary.matched} coincidencias con DB`
+               );
                onSuppliesParsed(data.supplies);
 
                // Clear file after success
@@ -148,8 +153,8 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
 
                     {message && (
                          <div className={`flex items-center gap-2 p-3 rounded-lg ${status === 'success'
-                                   ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                                   : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                              ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                              : 'bg-red-500/10 text-red-600 dark:text-red-400'
                               }`}>
                               {status === 'success' ? (
                                    <CheckCircle2 className="h-4 w-4" />

@@ -50,27 +50,73 @@ export async function POST(request: NextRequest) {
                );
           }
 
+          // Fetch real schema from Supabase
+          let categories: string[] = [];
+          let existingSupplies: any[] = [];
+
+          try {
+               const schemaResponse = await fetch(`${request.nextUrl.origin}/api/supply-schema`);
+               if (schemaResponse.ok) {
+                    const schemaData = await schemaResponse.json();
+                    categories = schemaData.categories;
+                    existingSupplies = schemaData.supplies || [];
+               }
+          } catch (error) {
+               console.error('Error fetching schema:', error);
+               // Fallback to default categories
+               categories = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
+          }
+
           const ai = new GoogleGenAI({ apiKey });
 
-          const prompt = `You are a data extraction assistant. Parse the following menu/inventory data and extract ONLY these fields for each item:
-    - name (string): the name of the supply/ingredient
-    - quantity (number): the quantity amount
-    - unit (string): the unit of measurement (e.g., L, kg, ml, units, etc.)
-    - category (string): categorize as one of: "Licores", "Refrescos", "Especias", "Frutas", "Otros"
+          const prompt = `You are a data extraction and validation assistant for a bar inventory system. 
 
-    Return ONLY a valid JSON array with these exact field names. Ignore any other fields in the source data.
-    If a field is missing, use reasonable defaults (quantity: 0, unit: "units", category: "Otros").
+**TASK**: Parse the following menu/inventory data and extract items with proper validation.
 
-    Data to parse:
-    ${fileContent}
+**REQUIRED OUTPUT STRUCTURE** (JSON array):
+[
+  {
+    "name": "string (required)",
+    "quantity": number (required, must be > 0),
+    "unit": "string (required: ml, L, g, kg, units, oz, etc.)",
+    "category": "string (required, must be one of the valid categories)",
+    "matched_existing": boolean (true if matches existing supply),
+    "existing_id": "uuid or null",
+    "confidence": number (0-1, how confident the match is)
+  }
+]
 
-    Examples of expected output format:
-    [
-      {"name": "Ron Blanco", "quantity": 2, "unit": "L", "category": "Licores"},
-      {"name": "Coca Cola", "quantity": 12, "unit": "L", "category": "Refrescos"}
-    ]
+**VALID CATEGORIES** (ONLY use these):
+${categories.join(', ')}
 
-    Return ONLY the JSON array, no other text.`;
+**EXISTING SUPPLIES IN DATABASE** (try to match new items to these):
+${existingSupplies.map(s => `- ${s.name} (${s.category}, unit: ${s.unit})`).join('\n')}
+
+**VALIDATION RULES**:
+1. Name: Must be a valid supply/ingredient name
+2. Quantity: Must be a positive number
+3. Unit: Normalize to standard units (ml, L, g, kg, units, oz, bottles)
+4. Category: MUST pick from the valid categories list above
+5. Matching: If a similar name exists in the database, set matched_existing=true and provide existing_id
+6. If uncertain about category, use "Otros" (Other)
+
+**MATCHING LOGIC**:
+- Check for exact name matches (case-insensitive)
+- Check for partial matches (e.g., "Ron" matches "Ron Blanco")
+- Check for common variations (e.g., "Coca" matches "Coca Cola")
+- Consider Spanish/English translations
+- Set confidence based on match quality
+
+**DATA TO PARSE**:
+${fileContent}
+
+**IMPORTANT**: 
+- Return ONLY valid JSON
+- Every item MUST have all required fields
+- Use existing supply IDs when there's a match
+- Be smart about normalization (e.g., "750ml" -> quantity: 750, unit: "ml")
+
+Return the JSON array now:`;
 
           const response = await ai.models.generateContent({
                model: 'gemini-2.0-flash-exp',
@@ -95,17 +141,44 @@ export async function POST(request: NextRequest) {
                );
           }
 
-          // Validate and format the data
-          const supplies = parsedData.map((item: any, index: number) => ({
-               id: `imported-${Date.now()}-${index}`,
-               name: item.name || `Unknown Item ${index + 1}`,
-               quantity: Number(item.quantity) || 0,
-               unit: item.unit || 'units',
-               category: item.category || 'Otros',
-               selected: true, // Auto-select imported items
-          }));
+          // Validate and format the data with enhanced matching info
+          const supplies = parsedData.map((item: any, index: number) => {
+               const supply: any = {
+                    id: item.matched_existing && item.existing_id
+                         ? item.existing_id
+                         : `imported-${Date.now()}-${index}`,
+                    name: item.name || `Unknown Item ${index + 1}`,
+                    quantity: Number(item.quantity) || 0,
+                    unit: item.unit || 'units',
+                    category: item.category || 'Otros',
+                    selected: true,
+                    // Additional metadata for frontend
+                    isNew: !item.matched_existing,
+                    matchConfidence: item.confidence || 0,
+               };
 
-          return NextResponse.json({ supplies });
+               // If matched to existing, include reference info
+               if (item.matched_existing && item.existing_id) {
+                    supply.existingSupplyId = item.existing_id;
+                    supply.matchedExisting = true;
+               }
+
+               return supply;
+          });
+
+          // Separate new vs matched supplies for better UX
+          const newSupplies = supplies.filter((s: any) => s.isNew);
+          const matchedSupplies = supplies.filter((s: any) => !s.isNew);
+
+          return NextResponse.json({
+               supplies,
+               summary: {
+                    total: supplies.length,
+                    new: newSupplies.length,
+                    matched: matchedSupplies.length,
+                    categories: [...new Set(supplies.map((s: any) => s.category))]
+               }
+          });
 
      } catch (error) {
           console.error('Error in parse-menu API:', error);

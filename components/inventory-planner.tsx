@@ -241,15 +241,32 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[40vh] overflow-y-auto pr-2">
-                    {supplies.filter(s => s.selected).map((supply, index) => (
+                    {supplies.filter(s => s.selected).map((supply: any, index) => (
                       <div
                         key={index}
-                        className="neumorphic-inset p-3 rounded-lg"
+                        className={`neumorphic-inset p-3 rounded-lg ${supply.matchedExisting ? 'ring-1 ring-green-500/30' : 'ring-1 ring-blue-500/30'
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{supply.name}</p>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium text-sm truncate">{supply.name}</p>
+                              {supply.matchedExisting ? (
+                                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
+                                  En DB
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">
+                                  Nuevo
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">{supply.category}</p>
+                            {supply.matchConfidence > 0 && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Confianza: {Math.round(supply.matchConfidence * 100)}%
+                              </p>
+                            )}
                           </div>
                           <button
                             onClick={() => {
