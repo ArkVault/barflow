@@ -302,4 +302,14 @@
         var(--color-destructive),
         oklch(0.70 0.25 25));
   }
+
+  /* Glow effect for secondary buttons - warm orange/gold */
+  .btn-glow-secondary::before,
+  .btn-glow-secondary::after {
+    background: linear-gradient(90deg,
+        var(--color-secondary),
+        oklch(0.75 0.18 60),
+        var(--color-secondary),
+        oklch(0.75 0.18 60));
+  }
 }

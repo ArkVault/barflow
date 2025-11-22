@@ -159,50 +159,54 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Manual Entry Option */}
-                <button
-                  onClick={() => setInputMethod('manual')}
-                  className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden"
-                >
-                  <div className="relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Plus className="h-8 w-8 text-primary" />
+                <div className="btn-glow-wrapper">
+                  <button
+                    onClick={() => setInputMethod('manual')}
+                    className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
+                  >
+                    <div className="relative z-10">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Plus className="h-8 w-8 text-primary" />
+                      </div>
+                      <h4 className="text-lg font-semibold mb-2">Introducir Manualmente</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Selecciona items de nuestro catálogo predefinido o agrega insumos personalizados uno por uno
+                      </p>
+                      <div className="flex items-center text-sm text-primary font-medium">
+                        <span>Continuar</span>
+                        <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <h4 className="text-lg font-semibold mb-2">Introducir Manualmente</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Selecciona items de nuestro catálogo predefinido o agrega insumos personalizados uno por uno
-                    </p>
-                    <div className="flex items-center text-sm text-primary font-medium">
-                      <span>Continuar</span>
-                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                </div>
 
                 {/* Import Option */}
-                <button
-                  onClick={() => setInputMethod('import')}
-                  className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden"
-                >
-                  <div className="relative z-10">
-                    <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Upload className="h-8 w-8 text-secondary" />
+                <div className="btn-glow-wrapper btn-glow-secondary">
+                  <button
+                    onClick={() => setInputMethod('import')}
+                    className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
+                  >
+                    <div className="relative z-10">
+                      <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Upload className="h-8 w-8 text-secondary" />
+                      </div>
+                      <h4 className="text-lg font-semibold mb-2">Importar desde Archivo</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente
+                      </p>
+                      <div className="flex items-center text-sm text-secondary font-medium">
+                        <span>Continuar</span>
+                        <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <h4 className="text-lg font-semibold mb-2">Importar desde Archivo</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente
-                    </p>
-                    <div className="flex items-center text-sm text-secondary font-medium">
-                      <span>Continuar</span>
-                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
+                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
