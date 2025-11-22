@@ -162,10 +162,10 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 <div className="btn-glow-wrapper">
                   <button
                     onClick={() => setInputMethod('manual')}
-                    className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
+                    className="group neumorphic rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
                   >
                     <div className="relative z-10">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Plus className="h-8 w-8 text-primary" />
                       </div>
                       <h4 className="text-lg font-semibold mb-2">Introducir Manualmente</h4>
@@ -187,10 +187,10 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 <div className="btn-glow-wrapper btn-glow-secondary">
                   <button
                     onClick={() => setInputMethod('import')}
-                    className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
+                    className="group neumorphic rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden w-full"
                   >
                     <div className="relative z-10">
-                      <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <div className="w-16 h-16 rounded-3xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Upload className="h-8 w-8 text-secondary" />
                       </div>
                       <h4 className="text-lg font-semibold mb-2">Importar desde Archivo</h4>
