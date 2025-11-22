@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { defaultBarSupplies, type PlanPeriod, type SupplyPlan } from "@/lib/default-supplies";
-import { Plus, Check, X } from "lucide-react";
+import { Plus, Check, X, Upload } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { MenuUpload } from "@/components/menu-upload";
 
@@ -58,6 +58,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
     unit: "L",
     quantity: 0
   });
+  const [inputMethod, setInputMethod] = useState<'none' | 'manual' | 'import'>('none');
 
   const toggleSupply = (index: number) => {
     const updated = [...supplies];
@@ -148,120 +149,279 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
         </CardHeader>
 
         <CardContent>
-          {/* Menu Upload Section */}
-          <div className="mb-6">
-            <MenuUpload onSuppliesParsed={handleImportedSupplies} />
-          </div>
-
-          <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-            {Object.entries(groupedSupplies).map(([category, items]) => (
-              <div key={category}>
-                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                  <span className="h-1 w-8 bg-primary rounded" />
-                  {category}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {items.map(({ index, name, unit, quantity, selected }) => (
-                    <div
-                      key={index}
-                      className={`neumorphic-inset p-3 rounded-lg cursor-pointer transition-all ${selected ? "ring-2 ring-primary" : ""
-                        }`}
-                      onClick={() => toggleSupply(index)}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{name}</p>
-                          <p className="text-xs text-muted-foreground">{unit}</p>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected ? "bg-primary border-primary" : "border-muted-foreground"
-                          }`}>
-                          {selected && <Check className="w-3 h-3 text-primary-foreground" />}
-                        </div>
-                      </div>
-                      <Input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          updateQuantity(index, Number(e.target.value));
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-8 text-sm"
-                        min="0"
-                        disabled={!selected}
-                      />
-                    </div>
-                  ))}
-                </div>
+          {/* Method Selection */}
+          {inputMethod === 'none' && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h3 className="text-xl font-semibold mb-2">¿Cómo deseas agregar tu inventario?</h3>
+                <p className="text-muted-foreground">Elige el método que prefieras para configurar tu plan</p>
               </div>
-            ))}
 
-            {/* Add New Supply */}
-            <div>
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <span className="h-1 w-8 bg-emerald-500 rounded" />
-                Personalizado
-              </h3>
-              {!showAddNew ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Manual Entry Option */}
+                <button
+                  onClick={() => setInputMethod('manual')}
+                  className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden"
+                >
+                  <div className="relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Plus className="h-8 w-8 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-semibold mb-2">Introducir Manualmente</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Selecciona items de nuestro catálogo predefinido o agrega insumos personalizados uno por uno
+                    </p>
+                    <div className="flex items-center text-sm text-primary font-medium">
+                      <span>Continuar</span>
+                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+
+                {/* Import Option */}
+                <button
+                  onClick={() => setInputMethod('import')}
+                  className="group neumorphic rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 text-left relative overflow-hidden"
+                >
+                  <div className="relative z-10">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Upload className="h-8 w-8 text-secondary" />
+                    </div>
+                    <h4 className="text-lg font-semibold mb-2">Importar desde Archivo</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente
+                    </p>
+                    <div className="flex items-center text-sm text-secondary font-medium">
+                      <span>Continuar</span>
+                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Import Method */}
+          {inputMethod === 'import' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Importar desde Archivo</h3>
+                  <p className="text-sm text-muted-foreground">Sube tu archivo y nuestro AI lo procesará</p>
+                </div>
                 <Button
                   variant="outline"
-                  onClick={() => setShowAddNew(true)}
-                  className="w-full neumorphic-hover border-dashed"
+                  onClick={() => setInputMethod('none')}
+                  className="neumorphic-hover"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Agregar nuevo insumo
+                  <X className="h-4 w-4 mr-2" />
+                  Cambiar método
                 </Button>
-              ) : (
-                <div className="neumorphic-inset p-4 rounded-lg space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      placeholder="Nombre del insumo"
-                      value={newSupply.name}
-                      onChange={(e) => setNewSupply({ ...newSupply, name: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Categoría"
-                      value={newSupply.category}
-                      onChange={(e) => setNewSupply({ ...newSupply, category: e.target.value })}
-                    />
+              </div>
+
+              <MenuUpload onSuppliesParsed={handleImportedSupplies} />
+
+              {supplies.filter(s => s.selected).length > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2">Items Importados ({supplies.filter(s => s.selected).length})</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Revisa los items importados y ajusta cantidades si es necesario
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Input
-                      placeholder="Unidad (L, kg, etc.)"
-                      value={newSupply.unit}
-                      onChange={(e) => setNewSupply({ ...newSupply, unit: e.target.value })}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Cantidad"
-                      value={newSupply.quantity || ""}
-                      onChange={(e) => setNewSupply({ ...newSupply, quantity: Number(e.target.value) })}
-                      min="0"
-                    />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[40vh] overflow-y-auto pr-2">
+                    {supplies.filter(s => s.selected).map((supply, index) => (
+                      <div
+                        key={index}
+                        className="neumorphic-inset p-3 rounded-lg"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{supply.name}</p>
+                            <p className="text-xs text-muted-foreground">{supply.category}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const updated = supplies.filter((_, i) => i !== supplies.findIndex(s => s.name === supply.name));
+                              setSupplies(updated);
+                            }}
+                            className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={supply.quantity}
+                            onChange={(e) => {
+                              const updated = [...supplies];
+                              const idx = updated.findIndex(s => s.name === supply.name);
+                              if (idx !== -1) {
+                                updated[idx].quantity = Number(e.target.value);
+                                setSupplies(updated);
+                              }
+                            }}
+                            className="h-8 text-sm"
+                            min="0"
+                          />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{supply.unit}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex gap-2">
-                    <Button onClick={addNewSupply} className="flex-1">
-                      <Check className="w-4 h-4 mr-2" />
-                      Agregar
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowAddNew(false)}>
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+
+                  <Button
+                    onClick={handleComplete}
+                    disabled={supplies.filter(s => s.selected).length === 0}
+                    className="w-full h-12 text-lg neumorphic-hover mt-6"
+                  >
+                    {t('completePlan')} →
+                  </Button>
                 </div>
               )}
             </div>
-          </div>
+          )}
 
-          <div className="mt-6 pt-6 border-t">
-            <Button
-              onClick={handleComplete}
-              disabled={selectedCount === 0}
-              className="w-full h-12 text-lg neumorphic-hover"
-            >
-              {t('completePlan')} →
-            </Button>
-          </div>
+          {/* Manual Method */}
+          {inputMethod === 'manual' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">Introducción Manual</h3>
+                  <p className="text-sm text-muted-foreground">Selecciona items del catálogo o agrega personalizados</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setInputMethod('none')}
+                  className="neumorphic-hover"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cambiar método
+                </Button>
+              </div>
+
+              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+                {Object.entries(groupedSupplies).map(([category, items]) => (
+                  <div key={category}>
+                    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                      <span className="h-1 w-8 bg-primary rounded" />
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {items.map(({ index, name, unit, quantity, selected }) => (
+                        <div
+                          key={index}
+                          className={`neumorphic-inset p-3 rounded-lg cursor-pointer transition-all ${selected ? "ring-2 ring-primary" : ""
+                            }`}
+                          onClick={() => toggleSupply(index)}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{name}</p>
+                              <p className="text-xs text-muted-foreground">{unit}</p>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected ? "bg-primary border-primary" : "border-muted-foreground"
+                              }`}>
+                              {selected && <Check className="w-3 h-3 text-primary-foreground" />}
+                            </div>
+                          </div>
+                          <Input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              updateQuantity(index, Number(e.target.value));
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-8 text-sm"
+                            min="0"
+                            disabled={!selected}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add New Supply */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <span className="h-1 w-8 bg-emerald-500 rounded" />
+                    Personalizado
+                  </h3>
+                  {!showAddNew ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAddNew(true)}
+                      className="w-full neumorphic-hover border-dashed"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Agregar nuevo insumo
+                    </Button>
+                  ) : (
+                    <div className="neumorphic-inset p-4 rounded-lg space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          placeholder="Nombre del insumo"
+                          value={newSupply.name}
+                          onChange={(e) => setNewSupply({ ...newSupply, name: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Categoría"
+                          value={newSupply.category}
+                          onChange={(e) => setNewSupply({ ...newSupply, category: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          placeholder="Unidad (L, kg, etc.)"
+                          value={newSupply.unit}
+                          onChange={(e) => setNewSupply({ ...newSupply, unit: e.target.value })}
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Cantidad"
+                          value={newSupply.quantity || ""}
+                          onChange={(e) => setNewSupply({ ...newSupply, quantity: Number(e.target.value) })}
+                          min="0"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={addNewSupply} className="flex-1">
+                          <Check className="w-4 h-4 mr-2" />
+                          Agregar
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowAddNew(false)}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Complete Plan Button for Manual Mode */}
+          {inputMethod === 'manual' && (
+            <div className="mt-6 pt-6 border-t">
+              <Button
+                onClick={handleComplete}
+                disabled={selectedCount === 0}
+                className="w-full h-12 text-lg neumorphic-hover"
+              >
+                {t('completePlan')} →
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
