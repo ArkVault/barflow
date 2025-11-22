@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Boxes, Package2, Receipt, BarChart3, ChevronLeft, ClipboardList } from "lucide-react";
+import { Boxes, Package2, Receipt, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/hooks/use-language";
 
 const demoNavItems = [
+  { href: "/demo", labelKey: "dashboard" as const, icon: LayoutDashboard },
   { href: "/demo/planner", labelKey: "planner" as const, icon: ClipboardList },
   { href: "/demo/insumos", labelKey: "supplies" as const, icon: Boxes },
   { href: "/demo/productos", labelKey: "products" as const, icon: Package2 },
@@ -74,19 +75,21 @@ export function DemoSidebar() {
                 key={item.href}
                 href={item.href}
                 className="block"
-                title={isCollapsed ? item.label : undefined}
+                title={isCollapsed ? t(item.labelKey) : undefined}
               >
-                <div
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                      : "hover:bg-accent/60",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {!isCollapsed && <span>{t(item.labelKey)}</span>}
+                <div className="relative btn-glow-wrapper">
+                  <div
+                    className={cn(
+                      "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-primary/20 dark:bg-primary/30 text-gray-900 dark:text-gray-100 shadow-lg shadow-primary/30"
+                        : "hover:bg-accent/60 text-gray-900 dark:text-gray-100",
+                      isCollapsed && "justify-center px-0"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && <span>{t(item.labelKey)}</span>}
+                  </div>
                 </div>
               </Link>
             );

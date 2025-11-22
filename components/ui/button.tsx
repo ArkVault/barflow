@@ -48,12 +48,21 @@ function Button({
   }) {
   const Comp = asChild ? Slot : 'button'
 
+  // Determine glow variant class based on button variant
+  const glowVariantClass = variant === 'outline'
+    ? 'btn-glow-outline'
+    : variant === 'destructive'
+      ? 'btn-glow-destructive'
+      : ''
+
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <div className={cn('btn-glow-wrapper', glowVariantClass)}>
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      />
+    </div>
   )
 }
 

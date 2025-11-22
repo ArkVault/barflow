@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { defaultBarSupplies, type PlanPeriod, type SupplyPlan } from "@/lib/default-supplies";
 import { Plus, Check, X } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
+import { MenuUpload } from "@/components/menu-upload";
 
 interface InventoryPlannerProps {
   onComplete: (supplies: SupplyPlan[], period: PlanPeriod) => void;
@@ -28,7 +29,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
         try {
           const plan = JSON.parse(existingPlan);
           setPeriod(plan.period);
-          
+
           // Merge existing plan with default supplies
           const mergedSupplies = defaultBarSupplies.map(defaultSupply => {
             const existingSupply = plan.supplies.find((s: SupplyPlan) => s.name === defaultSupply.name);
@@ -37,12 +38,12 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
             }
             return { ...defaultSupply, quantity: defaultSupply.defaultQuantity, selected: false };
           });
-          
+
           // Add custom supplies that aren't in defaults
-          const customSupplies = plan.supplies.filter((s: SupplyPlan) => 
+          const customSupplies = plan.supplies.filter((s: SupplyPlan) =>
             !defaultBarSupplies.some(d => d.name === s.name)
           );
-          
+
           setSupplies([...mergedSupplies, ...customSupplies]);
         } catch (error) {
           console.error("Error loading plan:", error);
@@ -76,6 +77,12 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
       setNewSupply({ name: "", category: "Otros", unit: "L", quantity: 0 });
       setShowAddNew(false);
     }
+  };
+
+  const handleImportedSupplies = (importedSupplies: any[]) => {
+    // Merge imported supplies with existing supplies
+    const mergedSupplies = [...supplies, ...importedSupplies];
+    setSupplies(mergedSupplies);
   };
 
   const handleComplete = () => {
@@ -119,22 +126,20 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
               <button
                 type="button"
                 onClick={() => setPeriod("week")}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  period === "week"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`px-4 py-2 rounded-full transition-colors ${period === "week"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 📅 {t('week')}
               </button>
               <button
                 type="button"
                 onClick={() => setPeriod("month")}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  period === "month"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`px-4 py-2 rounded-full transition-colors ${period === "month"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 📆 {t('month')}
               </button>
@@ -143,6 +148,11 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
         </CardHeader>
 
         <CardContent>
+          {/* Menu Upload Section */}
+          <div className="mb-6">
+            <MenuUpload onSuppliesParsed={handleImportedSupplies} />
+          </div>
+
           <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
             {Object.entries(groupedSupplies).map(([category, items]) => (
               <div key={category}>
@@ -154,9 +164,8 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                   {items.map(({ index, name, unit, quantity, selected }) => (
                     <div
                       key={index}
-                      className={`neumorphic-inset p-3 rounded-lg cursor-pointer transition-all ${
-                        selected ? "ring-2 ring-primary" : ""
-                      }`}
+                      className={`neumorphic-inset p-3 rounded-lg cursor-pointer transition-all ${selected ? "ring-2 ring-primary" : ""
+                        }`}
                       onClick={() => toggleSupply(index)}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -164,9 +173,8 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                           <p className="font-medium text-sm">{name}</p>
                           <p className="text-xs text-muted-foreground">{unit}</p>
                         </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selected ? "bg-primary border-primary" : "border-muted-foreground"
-                        }`}>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selected ? "bg-primary border-primary" : "border-muted-foreground"
+                          }`}>
                           {selected && <Check className="w-3 h-3 text-primary-foreground" />}
                         </div>
                       </div>

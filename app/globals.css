@@ -6,42 +6,43 @@
 /* Neumorphism design tokens for elegant bar inventory system */
 :root {
   /* Soft, sophisticated color palette */
-  --background: oklch(0.96 0.005 280); /* Soft grey-blue */
+  --background: oklch(0.96 0.005 280);
+  /* Soft grey-blue */
   --foreground: oklch(0.25 0.01 280);
   --card: oklch(0.97 0.005 280);
   --card-foreground: oklch(0.25 0.01 280);
   --popover: oklch(0.98 0.005 280);
   --popover-foreground: oklch(0.25 0.01 280);
-  
+
   /* Primary: Elegant deep blue */
   --primary: oklch(0.45 0.15 260);
   --primary-foreground: oklch(0.99 0 0);
-  
+
   /* Secondary: Warm amber accent */
   --secondary: oklch(0.75 0.12 75);
   --secondary-foreground: oklch(0.15 0.01 280);
-  
+
   --muted: oklch(0.93 0.005 280);
   --muted-foreground: oklch(0.55 0.01 280);
   --accent: oklch(0.94 0.008 280);
   --accent-foreground: oklch(0.25 0.01 280);
-  
+
   /* Success/Warning/Danger */
   --success: oklch(0.65 0.15 145);
   --warning: oklch(0.75 0.15 75);
   --destructive: oklch(0.55 0.20 25);
   --destructive-foreground: oklch(0.99 0 0);
-  
+
   --border: oklch(0.89 0.005 280);
   --input: oklch(0.90 0.005 280);
   --ring: oklch(0.45 0.15 260);
-  
+
   /* Neumorphism shadows */
   --shadow-light: rgba(255, 255, 255, 0.8);
   --shadow-dark: rgba(174, 174, 192, 0.4);
-  
+
   --radius: 1rem;
-  
+
   --chart-1: oklch(0.55 0.20 260);
   --chart-2: oklch(0.75 0.12 75);
   --chart-3: oklch(0.65 0.15 145);
@@ -51,45 +52,63 @@
 
 .dark {
   /* Monokai Ristretto inspired palette */
-  --background: oklch(0.18 0.02 30); /* Warm dark brown #2c2525 */
-  --foreground: oklch(0.92 0.01 60); /* Soft cream #f9f8f6 */
-  --card: oklch(0.21 0.02 30); /* Slightly lighter brown #352f2f */
+  --background: oklch(0.18 0.02 30);
+  /* Warm dark brown #2c2525 */
+  --foreground: oklch(0.92 0.01 60);
+  /* Soft cream #f9f8f6 */
+  --card: oklch(0.21 0.02 30);
+  /* Slightly lighter brown #352f2f */
   --card-foreground: oklch(0.92 0.01 60);
   --popover: oklch(0.20 0.02 30);
   --popover-foreground: oklch(0.92 0.01 60);
-  
+
   /* Primary: Monokai cyan/blue */
-  --primary: oklch(0.70 0.14 220); /* #66d9ef cyan */
+  --primary: oklch(0.70 0.14 220);
+  /* #66d9ef cyan */
   --primary-foreground: oklch(0.18 0.02 30);
-  
+
   /* Secondary: Monokai orange */
-  --secondary: oklch(0.72 0.16 50); /* #fd971f orange */
+  --secondary: oklch(0.72 0.16 50);
+  /* #fd971f orange */
   --secondary-foreground: oklch(0.18 0.02 30);
-  
-  --muted: oklch(0.28 0.02 30); /* #403838 */
-  --muted-foreground: oklch(0.65 0.02 60); /* #a59f85 */
-  --accent: oklch(0.30 0.03 30); /* Slightly lighter for accents */
+
+  --muted: oklch(0.28 0.02 30);
+  /* #403838 */
+  --muted-foreground: oklch(0.65 0.02 60);
+  /* #a59f85 */
+  --accent: oklch(0.30 0.03 30);
+  /* Slightly lighter for accents */
   --accent-foreground: oklch(0.92 0.01 60);
-  
+
   /* Monokai colors */
-  --success: oklch(0.75 0.15 145); /* #a6e22e green */
-  --warning: oklch(0.80 0.16 80); /* #e6db74 yellow */
-  --destructive: oklch(0.65 0.20 20); /* #f92672 pink/red */
+  --success: oklch(0.75 0.15 145);
+  /* #a6e22e green */
+  --warning: oklch(0.80 0.16 80);
+  /* #e6db74 yellow */
+  --destructive: oklch(0.65 0.20 20);
+  /* #f92672 pink/red */
   --destructive-foreground: oklch(0.99 0 0);
-  
-  --border: oklch(0.32 0.02 30); /* #49413f */
+
+  --border: oklch(0.32 0.02 30);
+  /* #49413f */
   --input: oklch(0.28 0.02 30);
-  --ring: oklch(0.70 0.14 220); /* Cyan ring */
-  
+  --ring: oklch(0.70 0.14 220);
+  /* Cyan ring */
+
   --shadow-light: rgba(255, 255, 255, 0.03);
   --shadow-dark: rgba(0, 0, 0, 0.5);
-  
+
   /* Chart colors - Monokai palette */
-  --chart-1: oklch(0.70 0.14 220); /* Cyan */
-  --chart-2: oklch(0.72 0.16 50); /* Orange */
-  --chart-3: oklch(0.75 0.15 145); /* Green */
-  --chart-4: oklch(0.75 0.18 320); /* Purple #ae81ff */
-  --chart-5: oklch(0.80 0.16 80); /* Yellow */
+  --chart-1: oklch(0.70 0.14 220);
+  /* Cyan */
+  --chart-2: oklch(0.72 0.16 50);
+  /* Orange */
+  --chart-3: oklch(0.75 0.15 145);
+  /* Green */
+  --chart-4: oklch(0.75 0.18 320);
+  /* Purple #ae81ff */
+  --chart-5: oklch(0.80 0.16 80);
+  /* Yellow */
 }
 
 @theme inline {
@@ -129,6 +148,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -138,32 +158,148 @@
 @layer utilities {
   .neumorphic {
     background: var(--color-card);
-    box-shadow: 
+    box-shadow:
       8px 8px 16px var(--shadow-dark),
       -8px -8px 16px var(--shadow-light);
   }
-  
+
   .neumorphic-inset {
     background: var(--color-background);
-    box-shadow: 
+    box-shadow:
       inset 6px 6px 12px var(--shadow-dark),
       inset -6px -6px 12px var(--shadow-light);
   }
-  
+
   .neumorphic-pressed {
-    box-shadow: 
+    box-shadow:
       inset 4px 4px 8px var(--shadow-dark),
       inset -4px -4px 8px var(--shadow-light);
   }
-  
+
   .neumorphic-hover {
     transition: all 0.3s ease;
   }
-  
+
   .neumorphic-hover:hover {
-    box-shadow: 
+    box-shadow:
       12px 12px 24px var(--shadow-dark),
       -12px -12px 24px var(--shadow-light);
     transform: translateY(-2px);
+  }
+
+  /* Animated glow border effects for buttons */
+  @keyframes glow-sweep {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes glow-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .btn-glow-wrapper {
+    position: relative;
+    display: inline-flex;
+    border-radius: inherit;
+  }
+
+  /* Intense neon-style glow effect */
+  .btn-glow-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: linear-gradient(90deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-primary),
+        var(--color-secondary));
+    background-size: 300% 300%;
+    opacity: 0;
+    filter: blur(15px);
+    transition: opacity 0.4s ease, filter 0.4s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Additional sharp border glow layer */
+  .btn-glow-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(90deg,
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-primary),
+        var(--color-secondary));
+    background-size: 300% 300%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .btn-glow-wrapper:hover::before,
+  .btn-glow-wrapper:focus-within::before {
+    opacity: 1;
+    filter: blur(25px);
+    animation: glow-sweep 3s ease infinite;
+  }
+
+  .btn-glow-wrapper:hover::after,
+  .btn-glow-wrapper:focus-within::after {
+    opacity: 1;
+    animation: glow-sweep 3s ease infinite;
+  }
+
+  .btn-glow-wrapper:active::before {
+    opacity: 1;
+    filter: blur(30px);
+    animation: glow-sweep 1.5s ease infinite;
+  }
+
+  .btn-glow-wrapper:active::after {
+    opacity: 1;
+    animation: glow-sweep 1.5s ease infinite;
+  }
+
+  /* Glow effect for outline buttons - brighter blue/cyan */
+  .btn-glow-outline::before,
+  .btn-glow-outline::after {
+    background: linear-gradient(90deg,
+        var(--color-ring),
+        var(--color-primary),
+        var(--color-secondary),
+        var(--color-ring));
+  }
+
+  /* Glow effect for destructive buttons - intense red */
+  .btn-glow-destructive::before,
+  .btn-glow-destructive::after {
+    background: linear-gradient(90deg,
+        var(--color-destructive),
+        oklch(0.70 0.25 25),
+        var(--color-destructive),
+        oklch(0.70 0.25 25));
   }
 }

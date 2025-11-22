@@ -25,7 +25,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
   };
 
   const navItems = [
-    { href: "/dashboard", label: "Vista General", icon: "🏠" },
+    { href: "/dashboard", label: "Panel de Control", icon: "🏠" },
     { href: "/dashboard/planner", label: "Planner", icon: "📋" },
     { href: "/dashboard/insumos", label: "Insumos", icon: "📦" },
     { href: "/dashboard/productos", label: "Productos", icon: "🛒" },
@@ -39,7 +39,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
   ];
 
   return (
-    <aside 
+    <aside
       className={cn(
         "fixed left-0 top-0 h-full bg-background transition-all duration-300 z-50",
         isCollapsed ? "w-20" : "w-72"
@@ -48,7 +48,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
       {/* Sidebar Panel with Neumorphism */}
       <div className="h-full p-4">
         <div className="h-full neumorphic rounded-3xl p-6 flex flex-col relative">
-          
+
           {/* Collapse Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -78,20 +78,22 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
           <nav className="flex-1 space-y-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link key={item.href} href={item.href}>
-                  <div
-                    className={cn(
-                      "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200",
-                      isActive 
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
-                        : "hover:bg-accent/50",
-                      isCollapsed && "justify-center px-2"
-                    )}
-                  >
-                    <span className="text-xl flex-shrink-0">{item.icon}</span>
-                    {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                  <div className="relative btn-glow-wrapper">
+                    <div
+                      className={cn(
+                        "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200",
+                        isActive
+                          ? "bg-primary/20 dark:bg-primary/30 text-gray-900 dark:text-gray-100 shadow-lg shadow-primary/30"
+                          : "hover:bg-accent/50 text-gray-900 dark:text-gray-100",
+                        isCollapsed && "justify-center px-2"
+                      )}
+                    >
+                      <span className="text-xl flex-shrink-0">{item.icon}</span>
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                    </div>
                   </div>
                 </Link>
               );
@@ -110,14 +112,14 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
             {/* Account & Settings Navigation */}
             {bottomNavItems.map((item) => {
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link key={item.href} href={item.href}>
                   <div
                     className={cn(
                       "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200",
-                      isActive 
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
                         : "hover:bg-accent/50",
                       isCollapsed && "justify-center px-2"
                     )}
@@ -128,7 +130,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
                 </Link>
               );
             })}
-            
+
             {/* Logout Button */}
             <button
               onClick={handleLogout}
