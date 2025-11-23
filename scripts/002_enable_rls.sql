@@ -7,181 +7,151 @@ ALTER TABLE public.product_ingredients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projections ENABLE ROW LEVEL SECURITY;
 
--- Establishments policies (users can only access their own establishment)
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Users can view their own establishments" ON public.establishments;
+DROP POLICY IF EXISTS "Users can insert their own establishments" ON public.establishments;
+DROP POLICY IF EXISTS "Users can update their own establishments" ON public.establishments;
+DROP POLICY IF EXISTS "Users can delete their own establishments" ON public.establishments;
+
+DROP POLICY IF EXISTS "Users can view supplies from their establishments" ON public.supplies;
+DROP POLICY IF EXISTS "Users can insert supplies to their establishments" ON public.supplies;
+DROP POLICY IF EXISTS "Users can update supplies in their establishments" ON public.supplies;
+DROP POLICY IF EXISTS "Users can delete supplies from their establishments" ON public.establishments;
+
+-- ESTABLISHMENTS TABLE POLICIES
+-- Users can view their own establishments
 CREATE POLICY "Users can view their own establishments"
-  ON public.establishments FOR SELECT
+  ON public.establishments
+  FOR SELECT
   USING (auth.uid() = user_id);
 
+-- Users can create their own establishments
 CREATE POLICY "Users can insert their own establishments"
-  ON public.establishments FOR INSERT
+  ON public.establishments
+  FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+-- Users can update their own establishments
 CREATE POLICY "Users can update their own establishments"
-  ON public.establishments FOR UPDATE
+  ON public.establishments
+  FOR UPDATE
   USING (auth.uid() = user_id);
 
+-- Users can delete their own establishments
 CREATE POLICY "Users can delete their own establishments"
-  ON public.establishments FOR DELETE
+  ON public.establishments
+  FOR DELETE
   USING (auth.uid() = user_id);
 
--- Supplies policies
+-- SUPPLIES TABLE POLICIES
+-- Users can view supplies from their establishments
 CREATE POLICY "Users can view supplies from their establishments"
-  ON public.supplies FOR SELECT
+  ON public.supplies
+  FOR SELECT
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
+-- Users can insert supplies to their establishments
 CREATE POLICY "Users can insert supplies to their establishments"
-  ON public.supplies FOR INSERT
+  ON public.supplies
+  FOR INSERT
   WITH CHECK (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can update supplies from their establishments"
-  ON public.supplies FOR UPDATE
+-- Users can update supplies in their establishments
+CREATE POLICY "Users can update supplies in their establishments"
+  ON public.supplies
+  FOR UPDATE
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
+-- Users can delete supplies from their establishments
 CREATE POLICY "Users can delete supplies from their establishments"
-  ON public.supplies FOR DELETE
+  ON public.supplies
+  FOR DELETE
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
--- Supply movements policies
-CREATE POLICY "Users can view movements from their supplies"
-  ON public.supply_movements FOR SELECT
+-- SUPPLY_MOVEMENTS TABLE POLICIES
+CREATE POLICY "Users can view movements from their establishments"
+  ON public.supply_movements
+  FOR SELECT
   USING (
     supply_id IN (
       SELECT s.id FROM public.supplies s
-      JOIN public.establishments e ON s.establishment_id = e.id
+      INNER JOIN public.establishments e ON s.establishment_id = e.id
       WHERE e.user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can insert movements to their supplies"
-  ON public.supply_movements FOR INSERT
+CREATE POLICY "Users can insert movements to their establishments"
+  ON public.supply_movements
+  FOR INSERT
   WITH CHECK (
     supply_id IN (
       SELECT s.id FROM public.supplies s
-      JOIN public.establishments e ON s.establishment_id = e.id
+      INNER JOIN public.establishments e ON s.establishment_id = e.id
       WHERE e.user_id = auth.uid()
     )
   );
 
--- Products policies
-CREATE POLICY "Users can view products from their establishments"
-  ON public.products FOR SELECT
+-- PRODUCTS TABLE POLICIES
+CREATE POLICY "Users can manage products in their establishments"
+  ON public.products
+  FOR ALL
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can insert products to their establishments"
-  ON public.products FOR INSERT
-  WITH CHECK (
-    establishment_id IN (
-      SELECT id FROM public.establishments WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can update products from their establishments"
-  ON public.products FOR UPDATE
-  USING (
-    establishment_id IN (
-      SELECT id FROM public.establishments WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can delete products from their establishments"
-  ON public.products FOR DELETE
-  USING (
-    establishment_id IN (
-      SELECT id FROM public.establishments WHERE user_id = auth.uid()
-    )
-  );
-
--- Product ingredients policies
-CREATE POLICY "Users can view ingredients from their products"
-  ON public.product_ingredients FOR SELECT
+-- PRODUCT_INGREDIENTS TABLE POLICIES
+CREATE POLICY "Users can manage ingredients in their establishments"
+  ON public.product_ingredients
+  FOR ALL
   USING (
     product_id IN (
       SELECT p.id FROM public.products p
-      JOIN public.establishments e ON p.establishment_id = e.id
+      INNER JOIN public.establishments e ON p.establishment_id = e.id
       WHERE e.user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can insert ingredients to their products"
-  ON public.product_ingredients FOR INSERT
-  WITH CHECK (
-    product_id IN (
-      SELECT p.id FROM public.products p
-      JOIN public.establishments e ON p.establishment_id = e.id
-      WHERE e.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can update ingredients from their products"
-  ON public.product_ingredients FOR UPDATE
-  USING (
-    product_id IN (
-      SELECT p.id FROM public.products p
-      JOIN public.establishments e ON p.establishment_id = e.id
-      WHERE e.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can delete ingredients from their products"
-  ON public.product_ingredients FOR DELETE
-  USING (
-    product_id IN (
-      SELECT p.id FROM public.products p
-      JOIN public.establishments e ON p.establishment_id = e.id
-      WHERE e.user_id = auth.uid()
-    )
-  );
-
--- Sales policies
-CREATE POLICY "Users can view sales from their establishments"
-  ON public.sales FOR SELECT
+-- SALES TABLE POLICIES
+CREATE POLICY "Users can manage sales in their establishments"
+  ON public.sales
+  FOR ALL
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can insert sales to their establishments"
-  ON public.sales FOR INSERT
-  WITH CHECK (
-    establishment_id IN (
-      SELECT id FROM public.establishments WHERE user_id = auth.uid()
-    )
-  );
-
--- Projections policies
-CREATE POLICY "Users can view projections from their establishments"
-  ON public.projections FOR SELECT
+-- PROJECTIONS TABLE POLICIES
+CREATE POLICY "Users can manage projections in their establishments"
+  ON public.projections
+  FOR ALL
   USING (
     establishment_id IN (
       SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can insert projections to their establishments"
-  ON public.projections FOR INSERT
-  WITH CHECK (
-    establishment_id IN (
-      SELECT id FROM public.establishments WHERE user_id = auth.uid()
-    )
-  );
+-- Create indexes for performance with RLS
+CREATE INDEX IF NOT EXISTS idx_establishments_user_id ON public.establishments(user_id);
+CREATE INDEX IF NOT EXISTS idx_supplies_establishment_user ON public.supplies(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_products_establishment_user ON public.products(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_sales_establishment_user ON public.sales(establishment_id);
+CREATE INDEX IF NOT EXISTS idx_projections_establishment_user ON public.projections(establishment_id);
