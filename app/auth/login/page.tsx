@@ -55,10 +55,14 @@ export default function LoginPage() {
             data: {
               bar_name: formData.barName,
             },
+            emailRedirectTo: `${window.location.origin}/demo`,
           },
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          console.error('Signup error:', signUpError);
+          throw signUpError;
+        }
 
         if (authData.user) {
           // Create establishment for the user
@@ -71,28 +75,66 @@ export default function LoginPage() {
 
           if (estError) {
             console.error('Error creating establishment:', estError);
+            // Don't fail - establishment can be created later
           }
 
-          toast.success("¡Cuenta creada exitosamente!");
-          router.push("/demo");
+          // Check if email confirmation is required
+          if (authData.session) {
+            toast.success("¡Cuenta creada exitosamente! Redirigiendo...");
+            setTimeout(() => {
+              router.push("/demo");
+            }, 1000);
+          } else {
+            toast.success("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
+            setFormData({ email: formData.email, password: "", confirmPassword: "", barName: "" });
+            setIsSignUp(false);
+          }
         }
       } else {
         // Login
+        if (!formData.email || !formData.password) {
+          toast.error("Por favor ingresa email y contraseña");
+          setLoading(false);
+          return;
+        }
+
         const { data, error: loginError } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
         });
 
-        if (loginError) throw loginError;
+        if (loginError) {
+          console.error('Login error:', loginError);
+          // Provide specific error messages
+          if (loginError.message.includes('Invalid login credentials')) {
+            toast.error("Email o contraseña incorrectos. ¿No tienes cuenta? Regístrate.");
+          } else if (loginError.message.includes('Email not confirmed')) {
+            toast.error("Por favor confirma tu email antes de iniciar sesión");
+          } else {
+            toast.error(loginError.message);
+          }
+          setLoading(false);
+          return;
+        }
 
-        toast.success("¡Bienvenido de vuelta!");
-        router.push("/demo");
+        if (data.session) {
+          toast.success("¡Bienvenido de vuelta!");
+          setTimeout(() => {
+            router.push("/demo");
+          }, 500);
+        } else {
+          toast.error("No se pudo iniciar sesión. Intenta de nuevo.");
+          setLoading(false);
+        }
       }
     } catch (error: any) {
       console.error("Auth error:", error);
       toast.error(error.message || "Error en la autenticación");
-    } finally {
       setLoading(false);
+    } finally {
+      if (isSignUp) {
+        setLoading(false);
+      }
     }
   };
 
