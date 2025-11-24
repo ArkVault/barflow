@@ -82,7 +82,7 @@ export default function LoginPage() {
           if (authData.session) {
             toast.success("¡Cuenta creada exitosamente! Redirigiendo...");
             setTimeout(() => {
-              router.push("/demo");
+              window.location.href = "/demo";
             }, 1000);
           } else {
             toast.success("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
@@ -118,11 +118,14 @@ export default function LoginPage() {
         }
 
         if (data.session) {
+          console.log('Login successful, session created:', data.session);
           toast.success("¡Bienvenido de vuelta!");
+          // Use window.location for more reliable redirect
           setTimeout(() => {
-            router.push("/demo");
+            window.location.href = "/demo";
           }, 500);
         } else {
+          console.error('No session created after login');
           toast.error("No se pudo iniciar sesión. Intenta de nuevo.");
           setLoading(false);
         }
