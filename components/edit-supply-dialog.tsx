@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -61,7 +61,7 @@ export function EditSupplyDialog({
   const [loading, setLoading] = useState(false);
 
   // Update form data when supply changes
-  useState(() => {
+  useEffect(() => {
     if (supply) {
       setFormData({
         name: supply.name,
@@ -71,7 +71,7 @@ export function EditSupplyDialog({
         min_threshold: supply.min_threshold,
       });
     }
-  });
+  }, [supply]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

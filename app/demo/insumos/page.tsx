@@ -10,8 +10,9 @@ import { useState, useEffect } from "react"
 import { useLanguage } from "@/hooks/use-language"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import { Loader2 } from "lucide-react"
+import { Loader2, Trash2, Pencil } from "lucide-react"
 import { toast } from "sonner"
+import { EditSupplyDialog } from "@/components/edit-supply-dialog"
 
 type Supply = {
   id: string;
@@ -31,6 +32,10 @@ export default function InsumosPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
+  const [deletingSupply, setDeletingSupply] = useState<Supply | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (!authLoading && establishmentId) {
@@ -80,6 +85,38 @@ export default function InsumosPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (supply: Supply) => {
+    setEditingSupply(supply);
+    setShowEditDialog(true);
+  };
+
+  const handleDelete = async (supply: Supply) => {
+    if (!confirm(`¿Estás seguro de eliminar "${supply.name}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from('supplies')
+        .delete()
+        .eq('id', supply.id);
+
+      if (error) throw error;
+
+      toast.success(`${supply.name} eliminado correctamente`);
+      fetchSupplies(); // Reload list
+    } catch (error: any) {
+      console.error('Error deleting supply:', error);
+      toast.error('Error al eliminar: ' + error.message);
+    }
+  };
+
+  const handleEditSuccess = () => {
+    fetchSupplies(); // Reload list after edit
   };
 
   // Helper function to translate category
@@ -215,8 +252,24 @@ export default function InsumosPage() {
                       {supply.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Editar</Button>
-                      <Button variant="ghost" size="sm">Recibir</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(supply)}
+                        className="mr-2"
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(supply)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Eliminar
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -224,6 +277,14 @@ export default function InsumosPage() {
             </Table>
           </Card>
         )}
+
+        {/* Edit Dialog */}
+        <EditSupplyDialog
+          supply={editingSupply}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={handleEditSuccess}
+        />
       </div>
     </div>
   )
