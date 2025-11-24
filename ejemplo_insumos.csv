@@ -1,0 +1,21 @@
+nombre,cantidad,unidad,categoria
+Ron Blanco,10,L,Licores
+Ron Oscuro,8,L,Licores
+Vodka Premium,12,L,Licores
+Tequila Reposado,10,L,Licores
+Ginebra,8,L,Licores
+Triple Sec,3,L,Licores Dulces
+Baileys,4,L,Licores Dulces
+Coca Cola,30,L,Refrescos
+Sprite,20,L,Refrescos
+Agua Tónica,15,L,Refrescos
+Jugo de Naranja,10,L,Refrescos
+Jugo de Limón,12,L,Refrescos
+Limones,5,kg,Frutas
+Limas,4,kg,Frutas
+Naranjas,3,kg,Frutas
+Hierbabuena,2,kg,Hierbas
+Albahaca,1,kg,Hierbas
+Azúcar,10,kg,Especias
+Sal,3,kg,Especias
+Hielo,50,kg,Otros

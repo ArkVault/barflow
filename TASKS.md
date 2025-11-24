@@ -8,9 +8,9 @@
 
 ## 📊 Resumen General
 
-- **Completado**: 75%
-- **En Progreso**: 15%
-- **Pendiente**: 10%
+- **Completado**: 90%
+- **En Progreso**: 5%
+- **Pendiente**: 5%
 
 ---
 
@@ -50,6 +50,7 @@
   - Validación de contraseñas
   - Email confirmation support
   - Manejo de errores específicos
+  - Logout funcional
 
 - [x] **Multi-Tenancy (Aislamiento de Datos)**
   - Cada usuario tiene su establishment único
@@ -106,9 +107,9 @@
   - `/api/save-supplies` - Guardar en Supabase
 
 - [x] **Persistencia**
-  - Guardado en Supabase (primario)
-  - LocalStorage (backup)
-  - Dual persistence strategy
+  - Guardado en Supabase (único source of truth)
+  - Consistencia total entre páginas
+  - Actualización en tiempo real
 
 ### 📋 Planner de Inventario
 
@@ -131,11 +132,38 @@
   - Eliminación de items
 
 - [x] **Planner Manual**
+  - Carga inventario real de Supabase
+  - Muestra estado actual del inventario
   - Catálogo de supplies predefinido
   - Agrupación por categorías
   - Selección de items
   - Ajuste de cantidades
   - Agregar supplies personalizados
+  - Loading states
+
+### 📊 Gestión de Insumos
+
+- [x] **CRUD Completo en /Insumos**
+  - Create: Via Planner (importación o manual)
+  - Read: Lista de DB con filtros por status
+  - Update: Dialog de edición con formulario completo
+  - Delete: Eliminación con confirmación
+  - Stats cards: Crítico/Bajo/OK
+
+- [x] **Consistencia de Datos**
+  - Mismo source of truth (Supabase)
+  - Cambios se reflejan en todas las páginas
+  - Planner → Insumos → Dashboard sincronizados
+
+### 📈 Dashboard
+
+- [x] **Estadísticas en Tiempo Real**
+  - Total de insumos desde DB
+  - Stock crítico calculado (< 50%)
+  - Stock bajo calculado (50-100%)
+  - Stock OK calculado (>= 100%)
+  - Reconfigure plan con confirmación
+  - Logout integrado
 
 ### 🌐 Internacionalización
 
@@ -169,15 +197,14 @@
   - Pendiente: Ejecutar en Supabase SQL Editor
   - Necesario para multi-tenancy completo
 
-- [ ] **Gemini API Key**
-  - Variable en .env.local
-  - Pendiente: Configurar key real
-  - Necesario para importación de menú
+- [x] **Gemini API Key** ✅
+  - Variable configurada en .env.local
+  - Importación de menú funcional
 
 - [ ] **Testing de Auth Flow**
   - Login ✅
   - Signup ✅
-  - Logout - Pendiente
+  - Logout ✅
   - Password reset - Pendiente
 
 ---
@@ -186,17 +213,17 @@
 
 ### Alta Prioridad
 
-- [ ] **Gestión de Insumos Completa**
+- [x] **Gestión de Insumos Completa** ✅
   - Ver lista de supplies guardados en DB
   - Editar supplies existentes
   - Eliminar supplies
-  - Filtros y búsqueda
+  - Filtros por status (crítico/bajo/ok/all)
 
-- [ ] **Dashboard Principal**
-  - Estadísticas de inventario
-  - Gráficas con Recharts
-  - Resumen de ventas
-  - Alerts de stock bajo
+- [x] **Dashboard Principal** ✅
+  - Estadísticas de inventario en tiempo real
+  - Cards con stats calculadas
+  - Indicadores de stock
+  - Gráficas con Recharts - Pendiente
 
 - [ ] **Gestión de Productos**
   - CRUD completo de productos
@@ -222,8 +249,8 @@
   - Recomendaciones de pedidos
   - Análisis de tendencias
 
-- [ ] **Logout Funcional**
-  - Botón de logout en UI
+- [x] **Logout Funcional** ✅
+  - Botón de logout en Dashboard
   - Limpiar sesión
   - Redirección al login
 
@@ -311,7 +338,7 @@
 NEXT_PUBLIC_SUPABASE_URL=https://...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 
-# Google Gemini AI (Pendiente ⚠️)
+# Google Gemini AI (Configurado ✅)
 GEMINI_API_KEY=tu_clave_aqui
 ```
 
@@ -321,7 +348,7 @@ GEMINI_API_KEY=tu_clave_aqui
 2. [x] Instalar dependencias (`npm install`)
 3. [x] Configurar `.env.local`
 4. [ ] Ejecutar script RLS en Supabase
-5. [ ] Configurar Gemini API key
+5. [x] Configurar Gemini API key
 6. [x] Iniciar servidor (`npm run dev`)
 
 ---
@@ -352,10 +379,11 @@ GEMINI_API_KEY=tu_clave_aqui
 ## 🎯 Próximos Pasos Inmediatos
 
 1. **Ejecutar RLS Script** en Supabase SQL Editor
-2. **Configurar Gemini API Key** real
-3. **Implementar Dashboard** principal
-4. **CRUD de Supplies** completo
-5. **Logout** funcional
+2. ~~**Configurar Gemini API Key** real~~ ✅
+3. ~~**Implementar Dashboard** principal~~ ✅
+4. ~~**CRUD de Supplies** completo~~ ✅
+5. ~~**Logout** funcional~~ ✅
+6. **Probar flujo completo** de la aplicación
 
 ---
 
