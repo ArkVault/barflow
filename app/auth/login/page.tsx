@@ -157,36 +157,36 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         {/* Hero Text */}
         <div className="text-white space-y-6 hidden lg:block">
-          <h1 className="text-6xl font-bold leading-tight">
+          <h1 className="text-6xl font-bold leading-tight drop-shadow-lg">
             Gestiona tu bar
             <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-100">
               con inteligencia
             </span>
           </h1>
-          <p className="text-xl text-blue-100/80 leading-relaxed">
+          <p className="text-xl text-white leading-relaxed drop-shadow-md">
             Sistema completo de inventario, ventas y proyecciones con IA.
             Optimiza tu negocio desde el primer día.
           </p>
           <div className="flex gap-4 pt-4">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-blue-100">Análisis en tiempo real</span>
+              <span className="text-sm text-white drop-shadow">Análisis en tiempo real</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-blue-100">IA predictiva</span>
+              <span className="text-sm text-white drop-shadow">IA predictiva</span>
             </div>
           </div>
         </div>
 
         {/* Auth Card */}
-        <Card className="neumorphic border-0 backdrop-blur-xl bg-white/10 shadow-2xl">
+        <Card className="neumorphic border-0 backdrop-blur-xl bg-white/95 shadow-2xl">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-white">
+            <CardTitle className="text-3xl font-bold text-gray-900">
               {isSignUp ? "Crear cuenta" : "Iniciar sesión"}
             </CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-gray-600">
               {isSignUp
                 ? "Comienza a optimizar tu bar hoy"
                 : "Bienvenido de vuelta a Barflow"}
@@ -196,7 +196,7 @@ export default function LoginPage() {
             <form onSubmit={handleAuth} className="space-y-4">
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="barName" className="text-white">
+                  <Label htmlFor="barName" className="text-gray-700 font-medium">
                     Nombre de tu bar
                   </Label>
                   <Input
@@ -207,13 +207,13 @@ export default function LoginPage() {
                       setFormData({ ...formData, barName: e.target.value })
                     }
                     required
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:bg-white/30"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">
+                <Label htmlFor="email" className="text-gray-700 font-medium">
                   Email
                 </Label>
                 <Input
@@ -225,12 +225,12 @@ export default function LoginPage() {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   required
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:bg-white/30"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">
+                <Label htmlFor="password" className="text-gray-700 font-medium">
                   Contraseña
                 </Label>
                 <Input
@@ -242,13 +242,13 @@ export default function LoginPage() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   required
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:bg-white/30"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 />
               </div>
 
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-white">
+                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
                     Confirmar contraseña
                   </Label>
                   <Input
@@ -263,7 +263,7 @@ export default function LoginPage() {
                       })
                     }
                     required
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50 focus:bg-white/30"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
               )}
@@ -271,7 +271,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-white text-purple-600 hover:bg-white/90 font-semibold h-12"
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 font-semibold h-12 shadow-lg"
               >
                 {loading ? (
                   <>
@@ -287,17 +287,17 @@ export default function LoginPage() {
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/20"></div>
+                  <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-transparent px-2 text-white/80">o</span>
+                  <span className="bg-white px-2 text-gray-600">o</span>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="w-full text-center text-white/80 hover:text-white transition-colors text-sm"
+                className="w-full text-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium"
               >
                 {isSignUp
                   ? "¿Ya tienes cuenta? Inicia sesión"
