@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { defaultBarSupplies, type PlanPeriod, type SupplyPlan } from "@/lib/default-supplies";
-import { Plus, Check, X, Upload } from "lucide-react";
+import { Plus, Check, X, Upload, Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { MenuUpload } from "@/components/menu-upload";
+import { useAuth } from "@/contexts/auth-context";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface InventoryPlannerProps {
   onComplete: (supplies: SupplyPlan[], period: PlanPeriod) => void;
@@ -16,41 +19,60 @@ interface InventoryPlannerProps {
 
 export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   const { t } = useLanguage();
+  const { establishmentId, loading: authLoading } = useAuth();
   const [period, setPeriod] = useState<PlanPeriod>("week");
-  const [supplies, setSupplies] = useState<SupplyPlan[]>(
-    defaultBarSupplies.map(s => ({ ...s, quantity: s.defaultQuantity, selected: false }))
-  );
+  const [supplies, setSupplies] = useState<SupplyPlan[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load existing plan if available
+  // Load existing supplies from Supabase
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const existingPlan = localStorage.getItem("barflow_plan");
-      if (existingPlan) {
-        try {
-          const plan = JSON.parse(existingPlan);
-          setPeriod(plan.period);
-
-          // Merge existing plan with default supplies
-          const mergedSupplies = defaultBarSupplies.map(defaultSupply => {
-            const existingSupply = plan.supplies.find((s: SupplyPlan) => s.name === defaultSupply.name);
-            if (existingSupply) {
-              return existingSupply;
-            }
-            return { ...defaultSupply, quantity: defaultSupply.defaultQuantity, selected: false };
-          });
-
-          // Add custom supplies that aren't in defaults
-          const customSupplies = plan.supplies.filter((s: SupplyPlan) =>
-            !defaultBarSupplies.some(d => d.name === s.name)
-          );
-
-          setSupplies([...mergedSupplies, ...customSupplies]);
-        } catch (error) {
-          console.error("Error loading plan:", error);
-        }
-      }
+    if (!authLoading && establishmentId) {
+      loadSuppliesFromDatabase();
     }
-  }, []);
+  }, [establishmentId, authLoading]);
+
+  const loadSuppliesFromDatabase = async () => {
+    try {
+      setLoading(true);
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from('supplies')
+        .select('*')
+        .eq('establishment_id', establishmentId)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Convert database supplies to SupplyPlan format
+        const loadedSupplies: SupplyPlan[] = data.map(supply => ({
+          name: supply.name,
+          category: supply.category || 'Otros',
+          unit: supply.unit,
+          quantity: supply.current_quantity,
+          selected: true, // Mark as selected since they exist
+        }));
+
+        setSupplies(loadedSupplies);
+        toast.success(`${data.length} insumos cargados desde tu inventario`);
+      } else {
+        // No supplies yet, use defaults
+        setSupplies(
+          defaultBarSupplies.map(s => ({ ...s, quantity: s.defaultQuantity, selected: false }))
+        );
+      }
+    } catch (error: any) {
+      console.error('Error loading supplies:', error);
+      toast.error('Error al cargar insumos: ' + error.message);
+      // Fallback to defaults
+      setSupplies(
+        defaultBarSupplies.map(s => ({ ...s, quantity: s.defaultQuantity, selected: false }))
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   const [showAddNew, setShowAddNew] = useState(false);
   const [newSupply, setNewSupply] = useState({
     name: "",
@@ -103,6 +125,19 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
     acc[supply.category].push({ ...supply, index });
     return acc;
   }, {} as Record<string, (SupplyPlan & { index: number })[]>);
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 ml-0 md:ml-20 lg:ml-72">
+        <Card className="w-full max-w-5xl neumorphic border-0 p-12">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-lg text-muted-foreground">Cargando tu inventario...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6 ml-0 md:ml-20 lg:ml-72">

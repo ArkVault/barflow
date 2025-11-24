@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,171 +9,226 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface Supply {
   id: string;
   name: string;
-  category: string | null;
-  unit: string;
+  category: string;
   current_quantity: number;
+  unit: string;
   min_threshold: number;
-  cost_per_unit: number | null;
-  supplier: string | null;
 }
 
 interface EditSupplyDialogProps {
-  supply: Supply;
+  supply: Supply | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSupplyUpdated: (supply: Supply) => void;
+  onSuccess: () => void;
 }
 
-export function EditSupplyDialog({ supply, open, onOpenChange, onSupplyUpdated }: EditSupplyDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const categories = [
+  "Licores",
+  "Licores Dulces",
+  "Refrescos",
+  "Frutas",
+  "Hierbas",
+  "Especias",
+  "Otros",
+];
 
-  const [formData, setFormData] = useState({
-    name: supply.name,
-    category: supply.category || "licores",
-    unit: supply.unit,
-    min_threshold: supply.min_threshold.toString(),
-    cost_per_unit: supply.cost_per_unit?.toString() || "",
-    supplier: supply.supplier || "",
+const units = ["L", "ml", "kg", "g", "units", "oz", "bottles"];
+
+export function EditSupplyDialog({
+  supply,
+  open,
+  onOpenChange,
+  onSuccess,
+}: EditSupplyDialogProps) {
+  const [formData, setFormData] = useState<Partial<Supply>>({});
+  const [loading, setLoading] = useState(false);
+
+  // Update form data when supply changes
+  useState(() => {
+    if (supply) {
+      setFormData({
+        name: supply.name,
+        category: supply.category,
+        current_quantity: supply.current_quantity,
+        unit: supply.unit,
+        min_threshold: supply.min_threshold,
+      });
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    if (!supply) return;
 
+    setLoading(true);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
+
+      const { error } = await supabase
         .from("supplies")
         .update({
           name: formData.name,
           category: formData.category,
+          current_quantity: formData.current_quantity,
           unit: formData.unit,
-          min_threshold: parseFloat(formData.min_threshold),
-          cost_per_unit: formData.cost_per_unit ? parseFloat(formData.cost_per_unit) : null,
-          supplier: formData.supplier || null,
+          min_threshold: formData.min_threshold,
+          updated_at: new Date().toISOString(),
         })
-        .eq("id", supply.id)
-        .select()
-        .single();
+        .eq("id", supply.id);
 
       if (error) throw error;
-      if (data) onSupplyUpdated(data);
+
+      toast.success("Insumo actualizado correctamente");
+      onSuccess();
       onOpenChange(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al actualizar insumo");
+    } catch (error: any) {
+      console.error("Error updating supply:", error);
+      toast.error("Error al actualizar: " + error.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="neumorphic border-0 max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Editar Insumo</DialogTitle>
-          <DialogDescription>
-            Modifica los detalles del insumo
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4 py-4">
+          <DialogHeader>
+            <DialogTitle>Editar Insumo</DialogTitle>
+            <DialogDescription>
+              Modifica los datos del insumo {supply?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nombre *</Label>
+              <Label htmlFor="name">Nombre</Label>
               <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                id="name"
+                value={formData.name || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
-                className="neumorphic-inset border-0"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-category">Categoría</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger className="neumorphic-inset border-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="licores">Licores</SelectItem>
-                  <SelectItem value="refrescos">Refrescos</SelectItem>
-                  <SelectItem value="frutas">Frutas</SelectItem>
-                  <SelectItem value="especias">Especias</SelectItem>
-                  <SelectItem value="hielo">Hielo</SelectItem>
-                  <SelectItem value="otros">Otros</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category">Categoría</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="unit">Unidad</Label>
+                <Select
+                  value={formData.unit}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, unit: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-unit">Unidad *</Label>
-              <Select
-                value={formData.unit}
-                onValueChange={(value) => setFormData({ ...formData, unit: value })}
-              >
-                <SelectTrigger className="neumorphic-inset border-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ml">Mililitros (ml)</SelectItem>
-                  <SelectItem value="l">Litros (l)</SelectItem>
-                  <SelectItem value="g">Gramos (g)</SelectItem>
-                  <SelectItem value="kg">Kilogramos (kg)</SelectItem>
-                  <SelectItem value="unidad">Unidad</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-min-threshold">Stock Mínimo *</Label>
-              <Input
-                id="edit-min-threshold"
-                type="number"
-                step="0.01"
-                value={formData.min_threshold}
-                onChange={(e) => setFormData({ ...formData, min_threshold: e.target.value })}
-                required
-                className="neumorphic-inset border-0"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-cost-per-unit">Costo por Unidad</Label>
-              <Input
-                id="edit-cost-per-unit"
-                type="number"
-                step="0.01"
-                value={formData.cost_per_unit}
-                onChange={(e) => setFormData({ ...formData, cost_per_unit: e.target.value })}
-                className="neumorphic-inset border-0"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-supplier">Proveedor</Label>
-              <Input
-                id="edit-supplier"
-                value={formData.supplier}
-                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                className="neumorphic-inset border-0"
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="quantity">Cantidad Actual</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  step="0.01"
+                  value={formData.current_quantity || 0}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      current_quantity: parseFloat(e.target.value),
+                    })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="min">Mínimo</Label>
+                <Input
+                  id="min"
+                  type="number"
+                  step="0.01"
+                  value={formData.min_threshold || 0}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      min_threshold: parseFloat(e.target.value),
+                    })
+                  }
+                  required
+                />
+              </div>
             </div>
           </div>
-          {error && <p className="text-sm text-destructive mb-4">{error}</p>}
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="neumorphic-hover border-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="neumorphic-hover border-0">
-              {isLoading ? "Guardando..." : "Guardar Cambios"}
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                "Guardar Cambios"
+              )}
             </Button>
           </DialogFooter>
         </form>
