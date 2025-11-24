@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,24 +27,25 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // Refresh session if expired
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
-  const isPublicPage = request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/_next')
+  const isDemoPage = request.nextUrl.pathname.startsWith('/demo')
 
-  // Redirect authenticated users away from auth pages
-  if (user && isAuthPage) {
+  // Protect /demo routes - require authentication
+  if (isDemoPage && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/demo'
+    url.pathname = '/auth/login'
     return NextResponse.redirect(url)
   }
 
-  // Redirect unauthenticated users to login
-  if (!user && !isAuthPage && !isPublicPage && request.nextUrl.pathname.startsWith('/demo')) {
+  // Redirect authenticated users from auth pages to demo
+  if (isAuthPage && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    url.pathname = '/demo'
     return NextResponse.redirect(url)
   }
 
@@ -53,13 +54,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (public folder)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/demo/:path*',
+    '/auth/:path*',
   ],
 }
