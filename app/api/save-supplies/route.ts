@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
      try {
@@ -13,7 +14,23 @@ export async function POST(request: NextRequest) {
                );
           }
 
-          const supabase = createClient(supabaseUrl, supabaseKey);
+          const cookieStore = await cookies();
+          const supabase = createServerClient(
+               supabaseUrl,
+               supabaseKey,
+               {
+                    cookies: {
+                         getAll() {
+                              return cookieStore.getAll();
+                         },
+                         setAll(cookiesToSet) {
+                              cookiesToSet.forEach(({ name, value, options }) =>
+                                   cookieStore.set(name, value, options)
+                              );
+                         },
+                    },
+               }
+          );
 
           const { supplies, period, establishmentId } = await request.json();
 
@@ -24,53 +41,49 @@ export async function POST(request: NextRequest) {
                );
           }
 
+          // Get authenticated user
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+          if (authError || !user) {
+               return NextResponse.json(
+                    { error: 'Authentication required to save to database', saved_locally: true },
+                    { status: 401 }
+               );
+          }
+
           // For demo purposes, we'll use a default establishment ID or create one
           let finalEstablishmentId = establishmentId;
 
           if (!finalEstablishmentId) {
-               // Check if user has an establishment, if not create a demo one
-               const { data: { user } } = await supabase.auth.getUser();
+               // Try to get existing establishment for user
+               const { data: existingEstablishment } = await supabase
+                    .from('establishments')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
 
-               if (user) {
-                    // Try to get existing establishment for user
-                    const { data: existingEstablishment } = await supabase
+               if (existingEstablishment) {
+                    finalEstablishmentId = existingEstablishment.id;
+               } else {
+                    // Create a new establishment
+                    const { data: newEstablishment, error: estError } = await supabase
                          .from('establishments')
+                         .insert({
+                              user_id: user.id,
+                              name: 'Demo Bar',
+                         })
                          .select('id')
-                         .eq('user_id', user.id)
                          .single();
 
-                    if (existingEstablishment) {
-                         finalEstablishmentId = existingEstablishment.id;
-                    } else {
-                         // Create a new establishment
-                         const { data: newEstablishment, error: estError } = await supabase
-                              .from('establishments')
-                              .insert({
-                                   user_id: user.id,
-                                   name: 'Demo Bar',
-                              })
-                              .select('id')
-                              .single();
-
-                         if (estError) {
-                              console.error('Error creating establishment:', estError);
-                              return NextResponse.json(
-                                   { error: 'Failed to create establishment' },
-                                   { status: 500 }
-                              );
-                         }
-
-                         finalEstablishmentId = newEstablishment.id;
+                    if (estError) {
+                         console.error('Error creating establishment:', estError);
+                         return NextResponse.json(
+                              { error: 'Failed to create establishment' },
+                              { status: 500 }
+                         );
                     }
-               } else {
-                    // No authenticated user - cannot save to DB
-                    return NextResponse.json(
-                         {
-                              error: 'Authentication required to save to database',
-                              saved_locally: true
-                         },
-                         { status: 401 }
-                    );
+
+                    finalEstablishmentId = newEstablishment.id;
                }
           }
 
