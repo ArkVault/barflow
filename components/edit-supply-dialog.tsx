@@ -30,6 +30,7 @@ interface Supply {
   current_quantity: number;
   unit: string;
   min_threshold: number;
+  optimal_quantity?: number;
 }
 
 interface EditSupplyDialogProps {
@@ -69,6 +70,7 @@ export function EditSupplyDialog({
         current_quantity: supply.current_quantity,
         unit: supply.unit,
         min_threshold: supply.min_threshold,
+        optimal_quantity: supply.optimal_quantity || 0,
       });
     }
   }, [supply]);
@@ -89,6 +91,7 @@ export function EditSupplyDialog({
           current_quantity: formData.current_quantity,
           unit: formData.unit,
           min_threshold: formData.min_threshold,
+          optimal_quantity: formData.optimal_quantity,
           updated_at: new Date().toISOString(),
         })
         .eq("id", supply.id);
@@ -174,7 +177,7 @@ export function EditSupplyDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="quantity">Cantidad Actual</Label>
                 <Input
@@ -189,6 +192,23 @@ export function EditSupplyDialog({
                     })
                   }
                   required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="optimal">Cantidad Óptima</Label>
+                <Input
+                  id="optimal"
+                  type="number"
+                  step="0.01"
+                  value={formData.optimal_quantity || 0}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      optimal_quantity: parseFloat(e.target.value),
+                    })
+                  }
+                  placeholder="Stock ideal"
                 />
               </div>
 

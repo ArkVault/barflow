@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           let fileContent = '';
+          let detectedSheet = '';
 
           // Parse based on file type
           const fileType = file.name.split('.').pop()?.toLowerCase();
@@ -24,9 +25,51 @@ export async function POST(request: NextRequest) {
                fileContent = buffer.toString('utf-8');
           } else if (fileType === 'xlsx' || fileType === 'xls') {
                const workbook = XLSX.read(buffer, { type: 'buffer' });
-               const sheetName = workbook.SheetNames[0];
-               const worksheet = workbook.Sheets[sheetName];
+
+               // AUTO-DETECT the correct sheet
+               // Look for sheets with names containing inventory-related keywords
+               const inventoryKeywords = [
+                    'inventory', 'inventario', 'insumos', 'supplies',
+                    'stock', 'almacen', 'almacén', 'products', 'productos'
+               ];
+
+               let targetSheetName = workbook.SheetNames[0]; // Default to first sheet
+
+               // Try to find a sheet with inventory keywords
+               for (const sheetName of workbook.SheetNames) {
+                    const lowerName = sheetName.toLowerCase();
+                    if (inventoryKeywords.some(keyword => lowerName.includes(keyword))) {
+                         targetSheetName = sheetName;
+                         detectedSheet = sheetName;
+                         break;
+                    }
+               }
+
+               // If no keyword match, check sheet content (first sheet with substantial data)
+               if (!detectedSheet) {
+                    for (const sheetName of workbook.SheetNames) {
+                         const worksheet = workbook.Sheets[sheetName];
+                         const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+                         const rowCount = range.e.r - range.s.r + 1;
+
+                         // If sheet has more than 3 rows, likely contains data
+                         if (rowCount > 3) {
+                              targetSheetName = sheetName;
+                              detectedSheet = sheetName;
+                              break;
+                         }
+                    }
+               }
+
+               const worksheet = workbook.Sheets[targetSheetName];
                fileContent = XLSX.utils.sheet_to_csv(worksheet);
+
+               console.log(`📊 Excel file processed:`, {
+                    totalSheets: workbook.SheetNames.length,
+                    availableSheets: workbook.SheetNames,
+                    selectedSheet: targetSheetName,
+                    autoDetected: !!detectedSheet
+               });
           } else if (fileType === 'pdf') {
                // For PDF, we'll need to use a different approach
                // For now, we'll return an error asking for CSV/Excel
@@ -176,7 +219,8 @@ Return the JSON array now:`;
                     total: supplies.length,
                     new: newSupplies.length,
                     matched: matchedSupplies.length,
-                    categories: [...new Set(supplies.map((s: any) => s.category))]
+                    categories: [...new Set(supplies.map((s: any) => s.category))],
+                    ...(detectedSheet ? { detectedSheet } : {})
                }
           });
 

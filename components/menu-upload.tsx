@@ -60,11 +60,17 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
 
                setStatus('success');
                const summary = data.summary || { total: data.supplies?.length || 0, new: 0, matched: 0 };
-               setMessage(
-                    `✓ ${summary.total} insumos importados • ` +
+
+               let successMessage = `✓ ${summary.total} insumos importados • ` +
                     `${summary.new} nuevos • ` +
-                    `${summary.matched} coincidencias con DB`
-               );
+                    `${summary.matched} coincidencias con DB`;
+
+               // Add detected sheet info if available
+               if (summary.detectedSheet) {
+                    successMessage += ` • Pestaña: "${summary.detectedSheet}"`;
+               }
+
+               setMessage(successMessage);
                onSuppliesParsed(data.supplies);
 
                // Clear file after success
@@ -72,7 +78,7 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                     setFile(null);
                     setStatus('idle');
                     setMessage('');
-               }, 3000);
+               }, 5000); // Increased timeout to 5s to read sheet name
 
           } catch (error) {
                console.error('Upload error:', error);

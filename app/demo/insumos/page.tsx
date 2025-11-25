@@ -14,13 +14,14 @@ import { Loader2, Trash2, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { EditSupplyDialog } from "@/components/edit-supply-dialog"
 
-type Supply = {
+interface Supply {
   id: string;
   name: string;
   category: string;
   current_quantity: number;
   unit: string;
   min_threshold: number;
+  optimal_quantity?: number;
   status: 'ok' | 'low' | 'critical';
 }
 
@@ -58,7 +59,15 @@ export default function InsumosPage() {
 
       // Calculate status for each supply
       const suppliesWithStatus = (data || []).map(supply => {
-        const percentage = (supply.current_quantity / supply.min_threshold) * 100;
+        // Use optimal_quantity as reference if available, otherwise use min_threshold
+        const referenceQuantity = supply.optimal_quantity && supply.optimal_quantity > 0
+          ? supply.optimal_quantity
+          : supply.min_threshold;
+
+        const percentage = referenceQuantity > 0
+          ? (supply.current_quantity / referenceQuantity) * 100
+          : 100;
+
         let status: 'ok' | 'low' | 'critical' = 'ok';
 
         if (percentage < 50) {
@@ -74,6 +83,7 @@ export default function InsumosPage() {
           current_quantity: supply.current_quantity,
           unit: supply.unit,
           min_threshold: supply.min_threshold,
+          optimal_quantity: supply.optimal_quantity,
           status
         };
       });
