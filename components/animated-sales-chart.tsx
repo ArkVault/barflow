@@ -106,32 +106,54 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                </CardHeader>
                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
                     {/* Chart */}
-                    <div className="relative h-32 md:h-40">
-                         <svg className="w-full h-full" viewBox="0 0 400 140" preserveAspectRatio="none">
+                    <div className="relative h-48 md:h-56">
+                         <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
                               {/* Grid lines */}
-                              {[0, 1, 2, 3].map((i) => (
+                              {[0, 1, 2, 3, 4].map((i) => (
                                    <line
                                         key={i}
                                         x1="0"
-                                        y1={i * 35}
+                                        y1={i * 50}
                                         x2="400"
-                                        y2={i * 35}
+                                        y2={i * 50}
                                         stroke="currentColor"
                                         strokeWidth="0.5"
                                         className="text-muted-foreground/20"
                                    />
                               ))}
 
-                              {/* Line chart */}
+                              {/* Area fill under line */}
+                              <defs>
+                                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#22c55e" stopOpacity="0.2" />
+                                        <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+                                   </linearGradient>
+                              </defs>
+
+                              {/* Area polygon */}
+                              <polygon
+                                   points={`0,200 ${data.map((d, i) => {
+                                        const x = (i / (data.length - 1)) * 400;
+                                        const y = 200 - (d.value / maxValue) * 180;
+                                        return `${x},${y}`;
+                                   }).join(' ')} 400,200`}
+                                   fill="url(#salesGradient)"
+                                   opacity={animated ? 1 : 0}
+                                   style={{
+                                        transition: 'opacity 0.8s ease-in-out'
+                                   }}
+                              />
+
+                              {/* Green line chart */}
                               <polyline
                                    points={data.map((d, i) => {
                                         const x = (i / (data.length - 1)) * 400;
-                                        const y = 140 - (d.value / maxValue) * 120;
+                                        const y = 200 - (d.value / maxValue) * 180;
                                         return `${x},${y}`;
                                    }).join(' ')}
                                    fill="none"
-                                   stroke="hsl(var(--primary))"
-                                   strokeWidth="2.5"
+                                   stroke="#22c55e"
+                                   strokeWidth="3"
                                    strokeLinecap="round"
                                    strokeLinejoin="round"
                                    strokeDasharray={animated ? "0" : "1000"}
@@ -140,30 +162,10 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                                         transition: 'stroke-dashoffset 1.5s ease-in-out'
                                    }}
                               />
-
-                              {/* Points */}
-                              {data.map((d, i) => {
-                                   const x = (i / (data.length - 1)) * 400;
-                                   const y = 140 - (d.value / maxValue) * 120;
-                                   return (
-                                        <circle
-                                             key={i}
-                                             cx={x}
-                                             cy={y}
-                                             r="3"
-                                             fill="hsl(var(--primary))"
-                                             className="transition-opacity duration-500"
-                                             style={{
-                                                  opacity: animated ? 1 : 0,
-                                                  transitionDelay: `${i * 150}ms`
-                                             }}
-                                        />
-                                   );
-                              })}
                          </svg>
 
                          {/* Labels */}
-                         <div className="flex justify-between mt-1">
+                         <div className="flex justify-between mt-2">
                               {data.map((d, i) => (
                                    <span key={i} className="text-[9px] md:text-[10px] text-muted-foreground">
                                         {d.label}
