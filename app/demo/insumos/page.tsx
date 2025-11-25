@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Loader2, Trash2, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { EditSupplyDialog } from "@/components/edit-supply-dialog"
+import { calculateStockStatus } from "@/lib/stock-utils"
 
 interface Supply {
   id: string;
@@ -28,23 +29,23 @@ interface Supply {
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
 export default function InsumosPage() {
-  const { t } = useLanguage();
-  const { establishmentId, loading: authLoading } = useAuth();
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const { t, translateCategory } = useLanguage();
+  const { establishmentId } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
-  const [deletingSupply, setDeletingSupply] = useState<Supply | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && establishmentId) {
+    if (establishmentId) {
       fetchSupplies();
     }
-  }, [establishmentId, authLoading]);
+  }, [establishmentId]);
 
   const fetchSupplies = async () => {
+    if (!establishmentId) return;
+
     try {
       setLoading(true);
       const supabase = createClient();
@@ -57,36 +58,17 @@ export default function InsumosPage() {
 
       if (error) throw error;
 
-      // Calculate status for each supply
-      const suppliesWithStatus = (data || []).map(supply => {
-        // Use optimal_quantity as reference if available, otherwise use min_threshold
-        const referenceQuantity = supply.optimal_quantity && supply.optimal_quantity > 0
-          ? supply.optimal_quantity
-          : supply.min_threshold;
-
-        const percentage = referenceQuantity > 0
-          ? (supply.current_quantity / referenceQuantity) * 100
-          : 100;
-
-        let status: 'ok' | 'low' | 'critical' = 'ok';
-
-        if (percentage < 50) {
-          status = 'critical';
-        } else if (percentage < 100) {
-          status = 'low';
-        }
-
-        return {
-          id: supply.id,
-          name: supply.name,
-          category: supply.category || 'Otros',
-          current_quantity: supply.current_quantity,
-          unit: supply.unit,
-          min_threshold: supply.min_threshold,
-          optimal_quantity: supply.optimal_quantity,
-          status
-        };
-      });
+      // Calculate status for each supply using shared utility
+      const suppliesWithStatus = (data || []).map(supply => ({
+        id: supply.id,
+        name: supply.name,
+        category: supply.category || 'Otros',
+        current_quantity: supply.current_quantity,
+        unit: supply.unit,
+        min_threshold: supply.min_threshold,
+        optimal_quantity: supply.optimal_quantity,
+        status: calculateStockStatus(supply)
+      }));
 
       setSupplies(suppliesWithStatus);
     } catch (error: any) {

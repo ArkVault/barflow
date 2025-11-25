@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { calculateStockStatus } from "@/lib/stock-utils";
 
 export default function DemoPage() {
   const router = useRouter();
@@ -54,23 +55,15 @@ export default function DemoPage() {
 
       setTotalSupplies(data.length);
 
-      // Calculate critical and low supplies using optimal_quantity as reference
+      // Calculate critical and low supplies using shared utility (100% consistent with Insumos page)
       let critical = 0;
       let low = 0;
 
       data.forEach(supply => {
-        // Use optimal_quantity as reference if available, otherwise use min_threshold
-        const referenceQuantity = supply.optimal_quantity && supply.optimal_quantity > 0
-          ? supply.optimal_quantity
-          : supply.min_threshold;
-
-        const percentage = referenceQuantity > 0
-          ? (supply.current_quantity / referenceQuantity) * 100
-          : 100;
-
-        if (percentage < 50) {
+        const status = calculateStockStatus(supply);
+        if (status === 'critical') {
           critical++;
-        } else if (percentage < 100) {
+        } else if (status === 'low') {
           low++;
         }
       });
