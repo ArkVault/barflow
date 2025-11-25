@@ -165,13 +165,14 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <main className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
-            <div className="mb-8">
-              <div className="flex items-start justify-between">
+          <main className="container mx-auto px-3 md:px-6 py-4 md:py-6 ml-0 md:ml-20 lg:ml-72">
+            {/* Header - Compact */}
+            <div className="mb-4 md:mb-6">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
-                  <p className="text-muted-foreground">
-                    Vista general de tu inventario y operaciones
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    Vista general de tu inventario
                   </p>
                 </div>
 
@@ -181,7 +182,7 @@ export default function DemoPage() {
                     variant={planPeriod === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('week')}
-                    className="neumorphic-hover"
+                    className="neumorphic-hover text-xs md:text-sm"
                   >
                     📅 Semana
                   </Button>
@@ -189,7 +190,7 @@ export default function DemoPage() {
                     variant={planPeriod === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('month')}
-                    className="neumorphic-hover"
+                    className="neumorphic-hover text-xs md:text-sm"
                   >
                     📆 Mes
                   </Button>
@@ -197,18 +198,18 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Stats Grid - Compact */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {/* Stats Grid - Compact & Responsive */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 md:mb-6">
               <Card
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
                 onClick={() => setStatusFilter('all')}
               >
-                <CardHeader className="pb-2">
-                  <CardDescription className="text-xs">{t('totalSupplies')}</CardDescription>
-                  <CardTitle className="text-3xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
+                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardDescription className="text-[10px] md:text-xs">{t('totalSupplies')}</CardDescription>
+                  <CardTitle className="text-2xl md:text-3xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">Todos</p>
+                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+                  <p className="text-[10px] md:text-xs text-muted-foreground">Todos</p>
                 </CardContent>
               </Card>
 
@@ -216,12 +217,12 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-red-500 ${statusFilter === 'critical' ? 'ring-2 ring-red-500' : ''}`}
                 onClick={() => setStatusFilter('critical')}
               >
-                <CardHeader className="pb-2">
-                  <CardDescription className="text-xs">🔴 Crítico</CardDescription>
-                  <CardTitle className="text-3xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
+                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardDescription className="text-[10px] md:text-xs">🔴 Crítico</CardDescription>
+                  <CardTitle className="text-2xl md:text-3xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">0-30%</p>
+                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+                  <p className="text-[10px] md:text-xs text-muted-foreground">0-30%</p>
                 </CardContent>
               </Card>
 
@@ -229,12 +230,12 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-500 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''}`}
                 onClick={() => setStatusFilter('low')}
               >
-                <CardHeader className="pb-2">
-                  <CardDescription className="text-xs">🟡 Bajo</CardDescription>
-                  <CardTitle className="text-3xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
+                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardDescription className="text-[10px] md:text-xs">🟡 Bajo</CardDescription>
+                  <CardTitle className="text-2xl md:text-3xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">31-50%</p>
+                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+                  <p className="text-[10px] md:text-xs text-muted-foreground">31-50%</p>
                 </CardContent>
               </Card>
 
@@ -242,19 +243,19 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-green-500 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''}`}
                 onClick={() => setStatusFilter('ok')}
               >
-                <CardHeader className="pb-2">
-                  <CardDescription className="text-xs">🟢 Bien</CardDescription>
-                  <CardTitle className="text-3xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
+                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardDescription className="text-[10px] md:text-xs">🟢 Bien</CardDescription>
+                  <CardTitle className="text-2xl md:text-3xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">51-100%</p>
+                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+                  <p className="text-[10px] md:text-xs text-muted-foreground">51-100%</p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Info Text */}
-            <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
-              <p className="text-sm text-muted-foreground">
+            {/* Info Text - Compact */}
+            <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg bg-muted/50 border border-border">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 💡 <strong>Aquí mostramos los insumos necesarios</strong> según el filtro seleccionado.
                 Para ver y editar el inventario completo, ve a la pestaña{' '}
                 <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
