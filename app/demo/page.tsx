@@ -214,9 +214,10 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Main Content Grid - Neon Minimalist Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-              {/* 1. INSUMOS - Minimalist with Neon Donut Chart */}
+            {/* Main Content Grid - Reorganized Layout */}
+            {/* Top Row: Inventario + Productos (2 columns) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              {/* 1. INVENTARIO - Minimalist with Neon Donut Chart */}
               <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
                 <CardHeader className="pb-2 px-4 pt-4">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Inventario</CardTitle>
@@ -233,21 +234,21 @@ export default function DemoPage() {
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)' }} />
-                        <span className="text-muted-foreground">Críticos</span>
+                        <span className="text-muted-foreground">Críticos (0-30%)</span>
                       </div>
                       <span className="font-bold">{criticalSupplies}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-amber-500" style={{ boxShadow: '0 0 6px rgba(245, 158, 11, 0.8)' }} />
-                        <span className="text-muted-foreground">Bajos</span>
+                        <span className="text-muted-foreground">Bajos (31-50%)</span>
                       </div>
                       <span className="font-bold">{lowSupplies}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500" style={{ boxShadow: '0 0 6px rgba(34, 197, 94, 0.8)' }} />
-                        <span className="text-muted-foreground">Óptimos</span>
+                        <span className="text-muted-foreground">Óptimos (51-100%)</span>
                       </div>
                       <span className="font-bold">{totalSupplies - criticalSupplies - lowSupplies}</span>
                     </div>
@@ -285,19 +286,18 @@ export default function DemoPage() {
                   </Link>
                 </CardContent>
               </Card>
-
-              {/* 3. PROYECCIONES - Summary */}
-              <ProjectionsSummary />
             </div>
 
-            {/* Bottom Row: Ventas (Centered, 2/3 width) */}
-            <div className="mb-3 flex justify-center">
-              <div className="w-full md:w-2/3">
-                <AnimatedSalesChart
-                  period={salesPeriod}
-                  onPeriodChange={setSalesPeriod}
-                />
-              </div>
+            {/* Bottom Row: Ventas + Proyecciones (2 columns) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              {/* Ventas */}
+              <AnimatedSalesChart
+                period={salesPeriod}
+                onPeriodChange={setSalesPeriod}
+              />
+
+              {/* Proyecciones */}
+              <ProjectionsSummary />
             </div>
 
             {/* Info Text */}
