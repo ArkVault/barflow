@@ -54,12 +54,20 @@ export default function DemoPage() {
 
       setTotalSupplies(data.length);
 
-      // Calculate critical and low supplies
+      // Calculate critical and low supplies using optimal_quantity as reference
       let critical = 0;
       let low = 0;
 
       data.forEach(supply => {
-        const percentage = (supply.current_quantity / supply.min_threshold) * 100;
+        // Use optimal_quantity as reference if available, otherwise use min_threshold
+        const referenceQuantity = supply.optimal_quantity && supply.optimal_quantity > 0
+          ? supply.optimal_quantity
+          : supply.min_threshold;
+
+        const percentage = referenceQuantity > 0
+          ? (supply.current_quantity / referenceQuantity) * 100
+          : 100;
+
         if (percentage < 50) {
           critical++;
         } else if (percentage < 100) {
