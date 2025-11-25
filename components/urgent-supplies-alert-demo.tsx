@@ -76,7 +76,7 @@ export function UrgentSuppliesAlertDemo() {
   useEffect(() => {
     // Get user's plan from localStorage
     const userPlan = getUserPlan();
-    
+
     if (userPlan) {
       // Convert plan to supplies format
       const supplies = convertPlanToSupplies(userPlan);
@@ -89,7 +89,7 @@ export function UrgentSuppliesAlertDemo() {
 
   const urgentSupplies = useMemo(() => {
     if (planSupplies.length === 0) return [];
-    
+
     // Filter by view period (día/semana/mes)
     return getSuppliesByViewPeriod(planSupplies, period as UrgencyPeriod);
   }, [planSupplies, period]);
@@ -113,7 +113,7 @@ export function UrgentSuppliesAlertDemo() {
     } else if (filterActive === 'optimal') {
       return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
     }
-    
+
     // Si no hay filtro, usar el nivel real del insumo
     if (level === 'critical') {
       return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
@@ -141,9 +141,8 @@ export function UrgentSuppliesAlertDemo() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('critical')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'critical' ? 'bg-destructive text-destructive-foreground' : 'hover:bg-destructive/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'critical' ? 'bg-destructive text-destructive-foreground' : 'hover:bg-destructive/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-destructive" />
                 <span>Crítico</span>
@@ -152,9 +151,8 @@ export function UrgentSuppliesAlertDemo() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('warning')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'warning' ? 'bg-amber-500 text-white' : 'hover:bg-amber-500/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'warning' ? 'bg-amber-500 text-white' : 'hover:bg-amber-500/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
                 <span>Bajo</span>
@@ -163,9 +161,8 @@ export function UrgentSuppliesAlertDemo() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('optimal')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'optimal' ? 'bg-emerald-500 text-white' : 'hover:bg-emerald-500/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'optimal' ? 'bg-emerald-500 text-white' : 'hover:bg-emerald-500/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span>Bien</span>
@@ -174,9 +171,8 @@ export function UrgentSuppliesAlertDemo() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('all')}
-                className={`px-2 py-1 rounded-full ${
-                  statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
-                }`}
+                className={`px-2 py-1 rounded-full ${statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
+                  }`}
               >
                 Ver todo
               </button>
@@ -200,8 +196,8 @@ export function UrgentSuppliesAlertDemo() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-center text-xs text-muted-foreground">
-                    <SemiCircleGauge 
-                      current={supply.current_quantity} 
+                    <SemiCircleGauge
+                      current={supply.current_quantity}
                       max={supply.min_threshold}
                     />
                     <span className="mt-1">
@@ -211,7 +207,7 @@ export function UrgentSuppliesAlertDemo() {
                   {getUrgencyBadge(supply.urgencyLevel, supply.daysUntilDepleted, statusFilter)}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
                 <div>
                   <span className="text-muted-foreground">Stock actual:</span>
