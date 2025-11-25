@@ -162,45 +162,53 @@ export default function DemoPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-3">
-                  <CardDescription>{t('totalSupplies')}</CardDescription>
-                  <CardTitle className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Insumos registrados</p>
-                </CardContent>
-              </Card>
+              <Link href="/demo/insumos">
+                <Card className="neumorphic border-0 cursor-pointer transition-all hover:scale-105">
+                  <CardHeader className="pb-3">
+                    <CardDescription>{t('totalSupplies')}</CardDescription>
+                    <CardTitle className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Todos los insumos</p>
+                  </CardContent>
+                </Card>
+              </Link>
 
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock Crítico</CardDescription>
-                  <CardTitle className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Menos del 50%</p>
-                </CardContent>
-              </Card>
+              <Link href="/demo/insumos">
+                <Card className="neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-red-500">
+                  <CardHeader className="pb-3">
+                    <CardDescription>Stock Crítico</CardDescription>
+                    <CardTitle className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">0-30% del óptimo</p>
+                  </CardContent>
+                </Card>
+              </Link>
 
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock Bajo</CardDescription>
-                  <CardTitle className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Entre 50-100%</p>
-                </CardContent>
-              </Card>
+              <Link href="/demo/insumos">
+                <Card className="neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-500">
+                  <CardHeader className="pb-3">
+                    <CardDescription>Stock Bajo</CardDescription>
+                    <CardTitle className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">31-50% del óptimo</p>
+                  </CardContent>
+                </Card>
+              </Link>
 
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock OK</CardDescription>
-                  <CardTitle className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">Nivel óptimo</p>
-                </CardContent>
-              </Card>
+              <Link href="/demo/insumos">
+                <Card className="neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-green-500">
+                  <CardHeader className="pb-3">
+                    <CardDescription>Stock OK</CardDescription>
+                    <CardTitle className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">51-100% del óptimo</p>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
 
             {/* Period Selector and Traffic Light */}

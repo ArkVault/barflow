@@ -29,7 +29,7 @@ interface Supply {
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
 export default function InsumosPage() {
-  const { t, translateCategory } = useLanguage();
+  const { t } = useLanguage();
   const { establishmentId } = useAuth();
   const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
   const [supplies, setSupplies] = useState<Supply[]>([]);
@@ -133,7 +133,7 @@ export default function InsumosPage() {
     ? supplies
     : supplies.filter(s => s.status === statusFilter);
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-svh bg-background flex items-center justify-center">
         <DemoSidebar />
