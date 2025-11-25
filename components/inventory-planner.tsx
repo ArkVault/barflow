@@ -143,9 +143,14 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
     <div className="min-h-screen bg-background flex items-center justify-center p-6 ml-0 md:ml-20 lg:ml-72">
       <Card className="w-full max-w-5xl neumorphic border-0">
         <CardHeader>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-start justify-between mb-6">
             <div>
-              <CardTitle className="text-3xl mb-2">📋 {t('inventoryPlanner')}</CardTitle>
+              <CardTitle className="text-3xl font-bold mb-2">
+                {supplies.length > 0 && supplies.some(s => s.selected)
+                  ? `Plan ${period === 'month' ? 'Mensual' : 'Semanal'} Actual`
+                  : t('inventoryPlanner')
+                }
+              </CardTitle>
               <CardDescription className="text-base">
                 {t('configureInventory')}
               </CardDescription>

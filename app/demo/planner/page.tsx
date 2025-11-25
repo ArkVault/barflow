@@ -47,8 +47,8 @@ export default function PlannerPage() {
         }
       }
 
-      // Redirect to demo dashboard
-      router.push("/demo");
+      // Redirect to Insumos page
+      router.push("/demo/insumos");
 
     } catch (error) {
       console.error('Error saving plan:', error);
@@ -59,7 +59,7 @@ export default function PlannerPage() {
       }
 
       toast.error('Error al guardar en la base de datos. Se guardó localmente.');
-      router.push("/demo");
+      router.push("/demo/insumos");
     } finally {
       setSaving(false);
     }

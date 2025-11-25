@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar";
-import { UrgentSuppliesAlertDemo } from "@/components/urgent-supplies-alert-demo";
-import { StockTrafficLightDemo } from "@/components/stock-traffic-light-demo";
 import { PeriodProvider } from "@/contexts/period-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -176,24 +174,41 @@ export default function DemoPage() {
                     Vista general de tu inventario y operaciones
                   </p>
                 </div>
-                <Badge variant="outline" className="text-sm px-3 py-1">
-                  Plan: {planPeriod === 'week' ? `📅 ${t('week')}` : `📆 ${t('month')}`}
-                </Badge>
+
+                {/* Period Selector */}
+                <div className="flex gap-2">
+                  <Button
+                    variant={planPeriod === 'week' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPlanPeriod('week')}
+                    className="neumorphic-hover"
+                  >
+                    📅 Semana
+                  </Button>
+                  <Button
+                    variant={planPeriod === 'month' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPlanPeriod('month')}
+                    className="neumorphic-hover"
+                  >
+                    📆 Mes
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {/* Stats Grid - Compact */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <Card
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
                 onClick={() => setStatusFilter('all')}
               >
-                <CardHeader className="pb-3">
-                  <CardDescription>{t('totalSupplies')}</CardDescription>
-                  <CardTitle className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-xs">{t('totalSupplies')}</CardDescription>
+                  <CardTitle className="text-3xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">Todos los insumos</p>
+                  <p className="text-xs text-muted-foreground">Todos</p>
                 </CardContent>
               </Card>
 
@@ -201,12 +216,12 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-red-500 ${statusFilter === 'critical' ? 'ring-2 ring-red-500' : ''}`}
                 onClick={() => setStatusFilter('critical')}
               >
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock Crítico</CardDescription>
-                  <CardTitle className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-xs">🔴 Crítico</CardDescription>
+                  <CardTitle className="text-3xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">0-30% del óptimo</p>
+                  <p className="text-xs text-muted-foreground">0-30%</p>
                 </CardContent>
               </Card>
 
@@ -214,12 +229,12 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-500 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''}`}
                 onClick={() => setStatusFilter('low')}
               >
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock Bajo</CardDescription>
-                  <CardTitle className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-xs">🟡 Bajo</CardDescription>
+                  <CardTitle className="text-3xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">31-50% del óptimo</p>
+                  <p className="text-xs text-muted-foreground">31-50%</p>
                 </CardContent>
               </Card>
 
@@ -227,12 +242,12 @@ export default function DemoPage() {
                 className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-green-500 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''}`}
                 onClick={() => setStatusFilter('ok')}
               >
-                <CardHeader className="pb-3">
-                  <CardDescription>Stock OK</CardDescription>
-                  <CardTitle className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-xs">🟢 Bien</CardDescription>
+                  <CardTitle className="text-3xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">51-100% del óptimo</p>
+                  <p className="text-xs text-muted-foreground">51-100%</p>
                 </CardContent>
               </Card>
             </div>
@@ -261,35 +276,67 @@ export default function DemoPage() {
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {supplies.filter(s => s.status === statusFilter).map(supply => (
-                          <div key={supply.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/50">
-                            <div className="flex-1">
-                              <p className="font-medium">{supply.name}</p>
-                              <p className="text-sm text-muted-foreground">{supply.category}</p>
+                        {supplies.filter(s => s.status === statusFilter).map(supply => {
+                          const referenceQty = supply.optimal_quantity && supply.optimal_quantity > 0
+                            ? supply.optimal_quantity
+                            : supply.min_threshold;
+                          const percentage = referenceQty > 0
+                            ? Math.min((supply.current_quantity / referenceQty) * 100, 100)
+                            : 100;
+
+                          // Determine color based on status
+                          const getColor = () => {
+                            if (percentage <= 30) return '#ef4444'; // red-500
+                            if (percentage <= 50) return '#f59e0b'; // amber-500
+                            return '#22c55e'; // green-500
+                          };
+
+                          return (
+                            <div key={supply.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                              {/* Half Circle Indicator */}
+                              <div className="relative w-12 h-6 flex items-end justify-center">
+                                <svg width="48" height="24" viewBox="0 0 48 24" className="overflow-visible">
+                                  {/* Background half circle */}
+                                  <path
+                                    d="M 4 24 A 20 20 0 0 1 44 24"
+                                    fill="none"
+                                    stroke="#e5e7eb"
+                                    strokeWidth="4"
+                                  />
+                                  {/* Filled half circle based on percentage */}
+                                  <path
+                                    d="M 4 24 A 20 20 0 0 1 44 24"
+                                    fill="none"
+                                    stroke={getColor()}
+                                    strokeWidth="4"
+                                    strokeDasharray={`${(percentage / 100) * 62.83} 62.83`}
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                <span className="absolute text-[10px] font-bold" style={{ bottom: '-2px', color: getColor() }}>
+                                  {Math.round(percentage)}%
+                                </span>
+                              </div>
+
+                              <div className="flex-1">
+                                <p className="font-medium">{supply.name}</p>
+                                <p className="text-sm text-muted-foreground">{supply.category}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold">{supply.current_quantity} {supply.unit}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  Óptimo: {supply.optimal_quantity || supply.min_threshold} {supply.unit}
+                                </p>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold">{supply.current_quantity} {supply.unit}</p>
-                              <p className="text-xs text-muted-foreground">
-                                Óptimo: {supply.optimal_quantity || supply.min_threshold} {supply.unit}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </div>
             )}
-
-            {/* Period Selector and Traffic Light */}
-            <div className="mb-6">
-              <StockTrafficLightDemo />
-            </div>
-
-            <div className="max-w-4xl">
-              <UrgentSuppliesAlertDemo />
-            </div>
           </main>
         </div>
       </div>
