@@ -178,24 +178,24 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <main className="container mx-auto px-3 md:px-6 py-4 md:py-6 ml-0 md:ml-20 lg:ml-72">
-            {/* Header - Compact */}
-            <div className="mb-4 md:mb-6">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+          <main className="container mx-auto px-2 md:px-4 py-2 md:py-4 ml-0 md:ml-20 lg:ml-72 max-h-screen overflow-hidden">
+            {/* Header - Ultra Compact */}
+            <div className="mb-2 md:mb-3">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
                 <div>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Vista general de tu inventario
+                  <h2 className="text-xl md:text-2xl font-bold mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
+                  <p className="text-[10px] md:text-xs text-muted-foreground">
+                    Vista general
                   </p>
                 </div>
 
                 {/* Period Selector */}
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant={planPeriod === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('week')}
-                    className="neumorphic-hover text-xs md:text-sm"
+                    className="text-[10px] h-6 px-2"
                   >
                     📅 Semana
                   </Button>
@@ -203,7 +203,7 @@ export default function DemoPage() {
                     variant={planPeriod === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('month')}
-                    className="neumorphic-hover text-xs md:text-sm"
+                    className="text-[10px] h-6 px-2"
                   >
                     📆 Mes
                   </Button>
@@ -211,27 +211,27 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Main Content Grid - New Layout */}
-            {/* Top Row: Insumos + Productos (Equal Size) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-              {/* 1. INSUMOS - Compact Summary */}
+            {/* Main Content Grid - Ultra Compact */}
+            {/* Top Row: Insumos + Productos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 mb-2 md:mb-3">
+              {/* 1. INSUMOS */}
               <Card className="neumorphic border-0">
-                <CardHeader className="pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base md:text-lg font-bold">📦 Insumos</CardTitle>
-                    <CardDescription className="text-[10px] md:text-xs">
+                    <CardTitle className="text-sm md:text-base font-bold">📦 Insumos</CardTitle>
+                    <CardDescription className="text-[9px] md:text-[10px]">
                       {planPeriod === 'week' ? 'Semana' : 'Mes'}
                     </CardDescription>
                   </div>
                 </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 md:pb-4 space-y-2">
-                  {/* Period Toggle - Compact */}
+                <CardContent className="px-2 md:px-3 pb-2 md:pb-3 space-y-1">
+                  {/* Period Toggle */}
                   <div className="flex gap-1">
                     <Button
                       variant={planPeriod === 'week' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setPlanPeriod('week')}
-                      className="text-[10px] md:text-xs flex-1 h-6"
+                      className="text-[9px] flex-1 h-5 px-1"
                     >
                       📅
                     </Button>
@@ -239,74 +239,74 @@ export default function DemoPage() {
                       variant={planPeriod === 'month' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setPlanPeriod('month')}
-                      className="text-[10px] md:text-xs flex-1 h-6"
+                      className="text-[9px] flex-1 h-5 px-1"
                     >
                       📆
                     </Button>
                   </div>
 
-                  {/* Summary Stats - Compact */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between p-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm">🔴</span>
-                        <span className="text-xs font-medium">Críticos</span>
+                  {/* Summary Stats */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between p-1 rounded bg-red-500/10 border border-red-500/20">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">🔴</span>
+                        <span className="text-[10px] font-medium">Críticos</span>
                       </div>
-                      <span className="text-lg md:text-xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                      <span className="text-base md:text-lg font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                         {criticalSupplies}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm">🟡</span>
-                        <span className="text-xs font-medium">Bajos</span>
+                    <div className="flex items-center justify-between p-1 rounded bg-amber-500/10 border border-amber-500/20">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">🟡</span>
+                        <span className="text-[10px] font-medium">Bajos</span>
                       </div>
-                      <span className="text-lg md:text-xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                      <span className="text-base md:text-lg font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                         {lowSupplies}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm">🟢</span>
-                        <span className="text-xs font-medium">Óptimos</span>
+                    <div className="flex items-center justify-between p-1 rounded bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs">🟢</span>
+                        <span className="text-[10px] font-medium">Óptimos</span>
                       </div>
-                      <span className="text-lg md:text-xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                      <span className="text-base md:text-lg font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                         {totalSupplies - criticalSupplies - lowSupplies}
                       </span>
                     </div>
                   </div>
 
-                  {/* Link to full inventory */}
+                  {/* Link */}
                   <Link href="/demo/insumos">
-                    <Button variant="outline" size="sm" className="w-full mt-2 text-xs h-7">
+                    <Button variant="outline" size="sm" className="w-full mt-1 text-[10px] h-6">
                       Ver inventario →
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
 
-              {/* 2. PRODUCTOS - Simple Count */}
+              {/* 2. PRODUCTOS */}
               <Card className="neumorphic border-0">
-                <CardHeader className="pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                  <CardTitle className="text-base md:text-lg font-bold">🍽️ Productos</CardTitle>
-                  <CardDescription className="text-[10px] md:text-xs">
+                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
+                  <CardTitle className="text-sm md:text-base font-bold">🍽️ Productos</CardTitle>
+                  <CardDescription className="text-[9px] md:text-[10px]">
                     Menú actual
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
-                  <div className="flex flex-col items-center justify-center py-4 md:py-6">
-                    <p className="text-4xl md:text-5xl font-black text-primary mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
+                  <div className="flex flex-col items-center justify-center py-3 md:py-4">
+                    <p className="text-3xl md:text-4xl font-black text-primary mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                       {totalProducts}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] text-muted-foreground">
                       Productos en menú
                     </p>
                   </div>
 
                   <Link href="/demo/productos">
-                    <Button variant="outline" size="sm" className="w-full text-xs h-7">
+                    <Button variant="outline" size="sm" className="w-full text-[10px] h-6">
                       Ver productos →
                     </Button>
                   </Link>
@@ -314,19 +314,19 @@ export default function DemoPage() {
               </Card>
             </div>
 
-            {/* Bottom Row: Ventas (Full Width) */}
-            <div className="mb-3 md:mb-4">
+            {/* Bottom Row: Ventas */}
+            <div className="mb-2 md:mb-3">
               <AnimatedSalesChart
                 period={salesPeriod}
                 onPeriodChange={setSalesPeriod}
               />
             </div>
 
-            {/* Info Text */}
-            <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-lg bg-muted/50 border border-border">
-              <p className="text-xs md:text-sm text-muted-foreground">
-                💡 <strong>Panel de Control</strong> - Resumen inteligente de tu negocio.
-                Para gestionar inventario completo, ve a{' '}
+            {/* Info Text - Ultra Compact */}
+            <div className="p-2 rounded-lg bg-muted/50 border border-border">
+              <p className="text-[9px] md:text-[10px] text-muted-foreground">
+                💡 <strong>Panel de Control</strong> - Resumen de tu negocio.
+                Para gestionar inventario, ve a{' '}
                 <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
                   Insumos
                 </Link>.

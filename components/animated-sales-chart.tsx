@@ -58,21 +58,21 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
 
      return (
           <Card className="neumorphic border-0">
-               <CardHeader className="pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                    <div className="flex items-start justify-between mb-2">
+               <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
+                    <div className="flex items-start justify-between mb-1">
                          <div>
-                              <CardTitle className="text-lg md:text-xl font-bold">📊 Ventas</CardTitle>
-                              <CardDescription className="text-[10px] md:text-xs">
+                              <CardTitle className="text-sm md:text-base font-bold">📊 Ventas</CardTitle>
+                              <CardDescription className="text-[9px] md:text-[10px]">
                                    {period === 'day' && 'Hoy'}
                                    {period === 'week' && 'Esta semana'}
                                    {period === 'month' && 'Este mes'}
                               </CardDescription>
                          </div>
                          <div className="text-right">
-                              <p className="text-xl md:text-2xl font-black text-primary" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                              <p className="text-base md:text-lg font-black text-primary" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                    ${total.toLocaleString()}
                               </p>
-                              <p className="text-[10px] text-muted-foreground">Total</p>
+                              <p className="text-[9px] text-muted-foreground">Total</p>
                          </div>
                     </div>
 
@@ -82,7 +82,7 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                               variant={period === 'day' ? 'default' : 'outline'}
                               size="sm"
                               onClick={() => onPeriodChange('day')}
-                              className="text-[10px] md:text-xs flex-1 h-7"
+                              className="text-[9px] flex-1 h-5 px-1"
                          >
                               Día
                          </Button>
@@ -90,7 +90,7 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                               variant={period === 'week' ? 'default' : 'outline'}
                               size="sm"
                               onClick={() => onPeriodChange('week')}
-                              className="text-[10px] md:text-xs flex-1 h-7"
+                              className="text-[9px] flex-1 h-5 px-1"
                          >
                               Semana
                          </Button>
@@ -98,24 +98,24 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                               variant={period === 'month' ? 'default' : 'outline'}
                               size="sm"
                               onClick={() => onPeriodChange('month')}
-                              className="text-[10px] md:text-xs flex-1 h-7"
+                              className="text-[9px] flex-1 h-5 px-1"
                          >
                               Mes
                          </Button>
                     </div>
                </CardHeader>
-               <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+               <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
                     {/* Chart */}
-                    <div className="relative h-48 md:h-56">
-                         <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
+                    <div className="relative h-32 md:h-40">
+                         <svg className="w-full h-full" viewBox="0 0 400 160" preserveAspectRatio="none">
                               {/* Grid lines */}
                               {[0, 1, 2, 3, 4].map((i) => (
                                    <line
                                         key={i}
                                         x1="0"
-                                        y1={i * 50}
+                                        y1={i * 40}
                                         x2="400"
-                                        y2={i * 50}
+                                        y2={i * 40}
                                         stroke="currentColor"
                                         strokeWidth="0.5"
                                         className="text-muted-foreground/20"
@@ -132,11 +132,11 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
 
                               {/* Area polygon */}
                               <polygon
-                                   points={`0,200 ${data.map((d, i) => {
+                                   points={`0,160 ${data.map((d, i) => {
                                         const x = (i / (data.length - 1)) * 400;
-                                        const y = 200 - (d.value / maxValue) * 180;
+                                        const y = 160 - (d.value / maxValue) * 140;
                                         return `${x},${y}`;
-                                   }).join(' ')} 400,200`}
+                                   }).join(' ')} 400,160`}
                                    fill="url(#salesGradient)"
                                    opacity={animated ? 1 : 0}
                                    style={{
@@ -148,7 +148,7 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                               <polyline
                                    points={data.map((d, i) => {
                                         const x = (i / (data.length - 1)) * 400;
-                                        const y = 200 - (d.value / maxValue) * 180;
+                                        const y = 160 - (d.value / maxValue) * 140;
                                         return `${x},${y}`;
                                    }).join(' ')}
                                    fill="none"
@@ -165,9 +165,9 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                          </svg>
 
                          {/* Labels */}
-                         <div className="flex justify-between mt-2">
+                         <div className="flex justify-between mt-1">
                               {data.map((d, i) => (
-                                   <span key={i} className="text-[9px] md:text-[10px] text-muted-foreground">
+                                   <span key={i} className="text-[8px] md:text-[9px] text-muted-foreground">
                                         {d.label}
                                    </span>
                               ))}
