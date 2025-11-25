@@ -208,9 +208,9 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Plus className="h-8 w-8 text-primary" />
                       </div>
-                      <h4 className="text-lg font-semibold mb-2">Introducir Manualmente</h4>
+                      <h4 className="text-lg font-semibold mb-2">Introducir Manualmente o Editar Plan Actual</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Selecciona items de nuestro catálogo predefinido o agrega insumos personalizados uno por uno
+                        Selecciona items de nuestro catálogo predefinido, edita tu plan existente o agrega insumos personalizados
                       </p>
                       <div className="flex items-center text-sm text-primary font-medium">
                         <span>Continuar</span>

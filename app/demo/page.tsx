@@ -252,6 +252,17 @@ export default function DemoPage() {
               </Card>
             </div>
 
+            {/* Info Text */}
+            <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
+              <p className="text-sm text-muted-foreground">
+                💡 <strong>Aquí mostramos los insumos necesarios</strong> según el filtro seleccionado.
+                Para ver y editar el inventario completo, ve a la pestaña{' '}
+                <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
+                  Insumos
+                </Link>.
+              </p>
+            </div>
+
             {/* Filtered Supplies List */}
             {statusFilter !== 'all' && (
               <div className="mb-8">
