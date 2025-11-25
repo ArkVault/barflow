@@ -244,7 +244,7 @@ export default function InsumosPage() {
                   <TableHead>{t('name')}</TableHead>
                   <TableHead>{t('category')}</TableHead>
                   <TableHead>{t('quantity')}</TableHead>
-                  <TableHead>{t('minimum')}</TableHead>
+                  <TableHead>{t('optimal')}</TableHead>
                   <TableHead>{t('status')}</TableHead>
                   <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
@@ -255,7 +255,7 @@ export default function InsumosPage() {
                     <TableCell className="font-medium">{supply.name}</TableCell>
                     <TableCell>{translateCategory(supply.category)}</TableCell>
                     <TableCell>{supply.current_quantity} {supply.unit}</TableCell>
-                    <TableCell>{supply.min_threshold} {supply.unit}</TableCell>
+                    <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.unit}</TableCell>
                     <TableCell>
                       {supply.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
                       {supply.status === 'low' && <Badge className="bg-amber-600">Stock Bajo</Badge>}
