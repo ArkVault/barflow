@@ -19,6 +19,9 @@ import { calculateStockStatus } from "@/lib/stock-utils";
 
 import { AnimatedSalesChart } from "@/components/animated-sales-chart";
 
+import { NeonDonutChart } from "@/components/neon-donut-chart";
+import { ProjectionsSummary } from "@/components/projections-summary";
+
 interface Supply {
   id: string;
   name: string;
@@ -211,98 +214,68 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Main Content Grid - Balanced Layout */}
-            {/* Top Row: Insumos + Productos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              {/* 1. INSUMOS */}
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-2 px-3 md:px-4 pt-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base md:text-lg font-bold">📦 Insumos</CardTitle>
-                    <CardDescription className="text-xs">
-                      {planPeriod === 'week' ? 'Semana' : 'Mes'}
-                    </CardDescription>
-                  </div>
+            {/* Main Content Grid - Neon Minimalist Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+              {/* 1. INSUMOS - Minimalist with Neon Donut Chart */}
+              <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Inventario</CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 space-y-2">
-                  {/* Period Toggle */}
-                  <div className="flex gap-1">
-                    <Button
-                      variant={planPeriod === 'week' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPlanPeriod('week')}
-                      className="text-xs flex-1 h-6"
-                    >
-                      📅
-                    </Button>
-                    <Button
-                      variant={planPeriod === 'month' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPlanPeriod('month')}
-                      className="text-xs flex-1 h-6"
-                    >
-                      📆
-                    </Button>
-                  </div>
+                <CardContent className="px-4 pb-4">
+                  <NeonDonutChart
+                    critical={criticalSupplies}
+                    low={lowSupplies}
+                    optimal={totalSupplies - criticalSupplies - lowSupplies}
+                  />
 
-                  {/* Summary Stats */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                  {/* Stats below chart */}
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">🔴</span>
-                        <span className="text-xs font-medium">Críticos</span>
+                        <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)' }} />
+                        <span className="text-muted-foreground">Críticos</span>
                       </div>
-                      <span className="text-xl md:text-2xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                        {criticalSupplies}
-                      </span>
+                      <span className="font-bold">{criticalSupplies}</span>
                     </div>
-
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">🟡</span>
-                        <span className="text-xs font-medium">Bajos</span>
+                        <div className="w-2 h-2 rounded-full bg-amber-500" style={{ boxShadow: '0 0 6px rgba(245, 158, 11, 0.8)' }} />
+                        <span className="text-muted-foreground">Bajos</span>
                       </div>
-                      <span className="text-xl md:text-2xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                        {lowSupplies}
-                      </span>
+                      <span className="font-bold">{lowSupplies}</span>
                     </div>
-
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                    <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">🟢</span>
-                        <span className="text-xs font-medium">Óptimos</span>
+                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ boxShadow: '0 0 6px rgba(34, 197, 94, 0.8)' }} />
+                        <span className="text-muted-foreground">Óptimos</span>
                       </div>
-                      <span className="text-xl md:text-2xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                        {totalSupplies - criticalSupplies - lowSupplies}
-                      </span>
+                      <span className="font-bold">{totalSupplies - criticalSupplies - lowSupplies}</span>
                     </div>
                   </div>
 
-                  {/* Link */}
                   <Link href="/demo/insumos">
-                    <Button variant="outline" size="sm" className="w-full mt-2 text-xs h-7">
+                    <Button variant="outline" size="sm" className="w-full mt-3 text-xs h-7">
                       Ver inventario →
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
 
-              {/* 2. PRODUCTOS */}
-              <Card className="neumorphic border-0">
-                <CardHeader className="pb-2 px-3 md:px-4 pt-3">
-                  <CardTitle className="text-base md:text-lg font-bold">🍽️ Productos</CardTitle>
-                  <CardDescription className="text-xs">
-                    Menú actual
-                  </CardDescription>
+              {/* 2. PRODUCTOS - Large Number Display */}
+              <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Productos</CardTitle>
+                  <CardDescription className="text-xs">Menú actual</CardDescription>
                 </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3">
-                  <div className="flex flex-col items-center justify-center py-4 md:py-6">
-                    <p className="text-4xl md:text-5xl font-black text-primary mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                <CardContent className="px-4 pb-4">
+                  <div className="flex flex-col items-center justify-center py-6">
+                    <p className="text-6xl md:text-7xl font-black text-primary mb-2" style={{
+                      fontFamily: 'Satoshi, sans-serif',
+                      textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
+                    }}>
                       {totalProducts}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Productos en menú
-                    </p>
+                    <p className="text-xs text-muted-foreground">en menú</p>
                   </div>
 
                   <Link href="/demo/productos">
@@ -312,9 +285,12 @@ export default function DemoPage() {
                   </Link>
                 </CardContent>
               </Card>
+
+              {/* 3. PROYECCIONES - Summary */}
+              <ProjectionsSummary />
             </div>
 
-            {/* Bottom Row: Ventas (2/3 width, centered) */}
+            {/* Bottom Row: Ventas (Centered, 2/3 width) */}
             <div className="mb-3 flex justify-center">
               <div className="w-full md:w-2/3">
                 <AnimatedSalesChart
