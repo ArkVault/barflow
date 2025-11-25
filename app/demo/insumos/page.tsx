@@ -14,6 +14,7 @@ import { Loader2, Trash2, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { EditSupplyDialog } from "@/components/edit-supply-dialog"
 import { calculateStockStatus } from "@/lib/stock-utils"
+import { StockHalfCircle } from "@/components/stock-half-circle";
 
 interface Supply {
   id: string;
@@ -239,9 +240,14 @@ export default function InsumosPage() {
                     <TableCell>{supply.current_quantity} {supply.unit}</TableCell>
                     <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.unit}</TableCell>
                     <TableCell>
-                      {supply.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
-                      {supply.status === 'low' && <Badge className="bg-amber-600">Stock Bajo</Badge>}
-                      {supply.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
+                      <StockHalfCircle
+                        percentage={
+                          supply.optimal_quantity
+                            ? (supply.current_quantity / supply.optimal_quantity) * 100
+                            : (supply.current_quantity / supply.min_threshold) * 100
+                        }
+                        status={supply.status}
+                      />
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
