@@ -148,7 +148,7 @@ export default function DemoPage() {
             <div className="mb-8">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">{t('dashboardDemo')}</h2>
+                  <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
                   <p className="text-muted-foreground">
                     Vista general de tu inventario y operaciones
                   </p>

@@ -43,6 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=satoshi@700,900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         <AuthProvider>
           {children}

@@ -22,11 +22,11 @@ interface Product {
 }
 
 const initialProducts: Product[] = [
-  { 
-    id: 1, 
-    name: 'Mojito Clásico', 
-    category: 'Cócteles', 
-    price: 8.50, 
+  {
+    id: 1,
+    name: 'Mojito Clásico',
+    category: 'Cócteles',
+    price: 8.50,
     ingredients: [
       { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
       { name: 'Hierbabuena', quantity: 10, unit: 'hojas' },
@@ -37,11 +37,11 @@ const initialProducts: Product[] = [
     active: true,
     description: 'Refrescante cóctel cubano con hierbabuena y ron'
   },
-  { 
-    id: 2, 
-    name: 'Margarita', 
-    category: 'Cócteles', 
-    price: 9.00, 
+  {
+    id: 2,
+    name: 'Margarita',
+    category: 'Cócteles',
+    price: 9.00,
     ingredients: [
       { name: 'Tequila', quantity: 50, unit: 'ml' },
       { name: 'Triple Sec', quantity: 25, unit: 'ml' },
@@ -51,11 +51,11 @@ const initialProducts: Product[] = [
     active: true,
     description: 'Clásico cóctel mexicano con tequila y limón'
   },
-  { 
-    id: 3, 
-    name: 'Piña Colada', 
-    category: 'Cócteles', 
-    price: 10.00, 
+  {
+    id: 3,
+    name: 'Piña Colada',
+    category: 'Cócteles',
+    price: 10.00,
     ingredients: [
       { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
       { name: 'Crema de Coco', quantity: 30, unit: 'ml' },
@@ -67,11 +67,11 @@ const initialProducts: Product[] = [
     active: true,
     description: 'Tropical y cremoso cóctel caribeño'
   },
-  { 
-    id: 4, 
-    name: 'Cuba Libre', 
-    category: 'Cócteles', 
-    price: 7.50, 
+  {
+    id: 4,
+    name: 'Cuba Libre',
+    category: 'Cócteles',
+    price: 7.50,
     ingredients: [
       { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
       { name: 'Coca Cola', quantity: 120, unit: 'ml' },
@@ -80,22 +80,22 @@ const initialProducts: Product[] = [
     active: true,
     description: 'Simple y delicioso, ron con cola y limón'
   },
-  { 
-    id: 5, 
-    name: 'Cerveza Corona', 
-    category: 'Cervezas', 
-    price: 5.00, 
+  {
+    id: 5,
+    name: 'Cerveza Corona',
+    category: 'Cervezas',
+    price: 5.00,
     ingredients: [
       { name: 'Cerveza Corona', quantity: 355, unit: 'ml' }
     ],
     active: true,
     description: 'Cerveza mexicana premium'
   },
-  { 
-    id: 6, 
-    name: 'Tequila Shot', 
-    category: 'Shots', 
-    price: 6.00, 
+  {
+    id: 6,
+    name: 'Tequila Shot',
+    category: 'Shots',
+    price: 6.00,
     ingredients: [
       { name: 'Tequila', quantity: 45, unit: 'ml' },
       { name: 'Sal', quantity: 1, unit: 'pizca' }
@@ -107,7 +107,7 @@ const initialProducts: Product[] = [
 
 export default function ProductosPage() {
   const { t } = useLanguage();
-  
+
   // Helper function to translate category
   const translateCategory = (category: string) => {
     const categoryMap: Record<string, string> = {
@@ -216,14 +216,14 @@ export default function ProductosPage() {
       <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold mb-2">{t('productManagement')}</h2>
+            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
             <p className="text-muted-foreground">{t('menuRecipes')}</p>
           </div>
         </div>
 
         {/* Botón Diseñar Menú */}
         <div className="mb-8">
-          <Button 
+          <Button
             className="neumorphic-hover border-0 h-14 px-8 text-lg"
             size="lg"
             onClick={() => setIsAddingProduct(true)}
@@ -250,27 +250,27 @@ export default function ProductosPage() {
                     <span className="text-sm text-muted-foreground">{product.ingredients.length} {t('ingredientsCount')}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="neumorphic-hover border-0" 
+                    <Button
+                      variant="outline"
+                      className="neumorphic-hover border-0"
                       size="sm"
                       onClick={() => handleViewRecipe(product.id)}
                       title="Ver receta"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="neumorphic-hover border-0" 
+                    <Button
+                      variant="outline"
+                      className="neumorphic-hover border-0"
                       size="sm"
                       onClick={() => handleEdit(product.id)}
                       title="Editar producto"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="neumorphic-hover border-0 hover:bg-destructive/10 hover:text-destructive" 
+                    <Button
+                      variant="outline"
+                      className="neumorphic-hover border-0 hover:bg-destructive/10 hover:text-destructive"
                       size="sm"
                       onClick={() => handleDelete(product.id)}
                       title="Eliminar producto"
@@ -443,8 +443,8 @@ export default function ProductosPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button 
-                    onClick={handleAddProduct} 
+                  <Button
+                    onClick={handleAddProduct}
                     className="flex-1"
                     disabled={!newProduct.name || !newProduct.category || newProduct.price <= 0}
                   >

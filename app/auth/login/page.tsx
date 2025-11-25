@@ -183,7 +183,7 @@ export default function LoginPage() {
         {/* Auth Card */}
         <Card className="neumorphic border-0 backdrop-blur-xl bg-white/95 shadow-2xl">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-gray-900">
+            <CardTitle className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Satoshi, sans-serif' }}>
               {isSignUp ? "Crear cuenta" : "Iniciar sesión"}
             </CardTitle>
             <CardDescription className="text-gray-600">

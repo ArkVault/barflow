@@ -172,7 +172,7 @@ export default function InsumosPage() {
       <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold mb-2">{t('supplyManagement')}</h2>
+            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('supplyManagement')}</h2>
             <p className="text-muted-foreground">{t('inventoryControl')}</p>
           </div>
           <Link href="/demo/planner">
@@ -187,7 +187,7 @@ export default function InsumosPage() {
             onClick={() => setStatusFilter(statusFilter === 'critical' ? 'all' : 'critical')}
           >
             <div className="text-sm text-muted-foreground mb-1">{t('criticalStock')}</div>
-            <div className="text-3xl font-bold text-red-600">{criticalCount}</div>
+            <div className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalCount}</div>
           </Card>
           <Card
             className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''
@@ -195,7 +195,7 @@ export default function InsumosPage() {
             onClick={() => setStatusFilter(statusFilter === 'low' ? 'all' : 'low')}
           >
             <div className="text-sm text-muted-foreground mb-1">{t('lowStock')}</div>
-            <div className="text-3xl font-bold text-amber-600">{lowCount}</div>
+            <div className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowCount}</div>
           </Card>
           <Card
             className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''
@@ -203,7 +203,7 @@ export default function InsumosPage() {
             onClick={() => setStatusFilter(statusFilter === 'ok' ? 'all' : 'ok')}
           >
             <div className="text-sm text-muted-foreground mb-1">{t('goodStock')}</div>
-            <div className="text-3xl font-bold text-green-600">{okCount}</div>
+            <div className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{okCount}</div>
           </Card>
           <Card
             className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''
@@ -211,7 +211,7 @@ export default function InsumosPage() {
             onClick={() => setStatusFilter('all')}
           >
             <div className="text-sm text-muted-foreground mb-1">{t('allSupplies')}</div>
-            <div className="text-3xl font-bold">{supplies.length}</div>
+            <div className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{supplies.length}</div>
           </Card>
         </div>
 

@@ -5,6 +5,7 @@
 
 /* Neumorphism design tokens for elegant bar inventory system */
 :root {
+  --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   /* Soft, sophisticated color palette */
   --background: oklch(0.96 0.005 280);
   /* Soft grey-blue */

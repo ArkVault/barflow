@@ -32,7 +32,7 @@ const projections = {
 
 export default function ProyeccionesPage() {
   const { t } = useLanguage();
-  
+
   return (
     <div className="min-h-svh bg-background">
       <DemoSidebar />
@@ -52,7 +52,7 @@ export default function ProyeccionesPage() {
       <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-bold mb-2">{t('smartProjections')}</h2>
+            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('smartProjections')}</h2>
             <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
           </div>
           <Button className="neumorphic-hover border-0">🔄 {t('updateProjections')}</Button>
