@@ -164,7 +164,7 @@ export default function DemoPage() {
               <Card className="neumorphic border-0">
                 <CardHeader className="pb-3">
                   <CardDescription>{t('totalSupplies')}</CardDescription>
-                  <CardTitle className="text-3xl">{totalSupplies}</CardTitle>
+                  <CardTitle className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">Insumos registrados</p>
@@ -174,7 +174,7 @@ export default function DemoPage() {
               <Card className="neumorphic border-0">
                 <CardHeader className="pb-3">
                   <CardDescription>Stock Crítico</CardDescription>
-                  <CardTitle className="text-3xl text-red-600">{criticalSupplies}</CardTitle>
+                  <CardTitle className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">Menos del 50%</p>
@@ -184,7 +184,7 @@ export default function DemoPage() {
               <Card className="neumorphic border-0">
                 <CardHeader className="pb-3">
                   <CardDescription>Stock Bajo</CardDescription>
-                  <CardTitle className="text-3xl text-amber-600">{lowSupplies}</CardTitle>
+                  <CardTitle className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">Entre 50-100%</p>
@@ -194,7 +194,7 @@ export default function DemoPage() {
               <Card className="neumorphic border-0">
                 <CardHeader className="pb-3">
                   <CardDescription>Stock OK</CardDescription>
-                  <CardTitle className="text-3xl text-green-600">{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
+                  <CardTitle className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">Nivel óptimo</p>
