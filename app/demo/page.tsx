@@ -17,6 +17,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateStockStatus } from "@/lib/stock-utils";
 
+import { AnimatedSalesChart } from "@/components/animated-sales-chart";
+
 interface Supply {
   id: string;
   name: string;
@@ -37,8 +39,9 @@ export default function DemoPage() {
   const [totalSupplies, setTotalSupplies] = useState(0);
   const [criticalSupplies, setCriticalSupplies] = useState(0);
   const [lowSupplies, setLowSupplies] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [planPeriod, setPlanPeriod] = useState<'week' | 'month'>('week');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
+  const [salesPeriod, setSalesPeriod] = useState<'day' | 'week' | 'month'>('week');
 
   useEffect(() => {
     if (!authLoading && establishmentId) {
@@ -51,16 +54,16 @@ export default function DemoPage() {
       setLoading(true);
       const supabase = createClient();
 
-      const { data, error } = await supabase
+      // Load supplies
+      const { data: suppliesData, error: suppliesError } = await supabase
         .from('supplies')
         .select('*')
         .eq('establishment_id', establishmentId)
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (suppliesError) throw suppliesError;
 
-      if (!data || data.length === 0) {
-        // No supplies yet, redirect to planner
+      if (!suppliesData || suppliesData.length === 0) {
         router.push("/demo/planner");
         return;
       }
@@ -69,7 +72,7 @@ export default function DemoPage() {
       let critical = 0;
       let low = 0;
 
-      const suppliesWithStatus = data.map(supply => {
+      const suppliesWithStatus = suppliesData.map(supply => {
         const status = calculateStockStatus(supply);
         if (status === 'critical') critical++;
         else if (status === 'low') low++;
@@ -87,9 +90,19 @@ export default function DemoPage() {
       });
 
       setSupplies(suppliesWithStatus);
-      setTotalSupplies(data.length);
+      setTotalSupplies(suppliesData.length);
       setCriticalSupplies(critical);
       setLowSupplies(low);
+
+      // Load products count
+      const { count: productsCount, error: productsError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('establishment_id', establishmentId);
+
+      if (!productsError) {
+        setTotalProducts(productsCount || 0);
+      }
 
     } catch (error: any) {
       console.error('Error loading dashboard:', error);
@@ -198,157 +211,124 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Stats Grid - Compact & Responsive */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 md:mb-6">
-              <Card
-                className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => setStatusFilter('all')}
-              >
-                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                  <CardDescription className="text-[10px] md:text-xs">{t('totalSupplies')}</CardDescription>
-                  <CardTitle className="text-2xl md:text-3xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies}</CardTitle>
+            {/* Main Content Grid - 3 Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
+              {/* 1. INSUMOS - Intelligent Summary */}
+              <Card className="neumorphic border-0 lg:col-span-1">
+                <CardHeader className="pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardTitle className="text-lg md:text-xl font-bold">📦 Insumos</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs">
+                    Necesarios para {planPeriod === 'week' ? 'esta semana' : 'este mes'}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
-                  <p className="text-[10px] md:text-xs text-muted-foreground">Todos</p>
+                <CardContent className="px-3 md:px-4 pb-3 md:pb-4 space-y-2">
+                  {/* Period Toggle */}
+                  <div className="flex gap-1 mb-3">
+                    <Button
+                      variant={planPeriod === 'week' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPlanPeriod('week')}
+                      className="text-[10px] md:text-xs flex-1 h-7"
+                    >
+                      📅 Semana
+                    </Button>
+                    <Button
+                      variant={planPeriod === 'month' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPlanPeriod('month')}
+                      className="text-[10px] md:text-xs flex-1 h-7"
+                    >
+                      📆 Mes
+                    </Button>
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🔴</span>
+                        <span className="text-xs md:text-sm font-medium">Críticos</span>
+                      </div>
+                      <span className="text-xl md:text-2xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                        {criticalSupplies}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🟡</span>
+                        <span className="text-xs md:text-sm font-medium">Bajos</span>
+                      </div>
+                      <span className="text-xl md:text-2xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                        {lowSupplies}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🟢</span>
+                        <span className="text-xs md:text-sm font-medium">Óptimos</span>
+                      </div>
+                      <span className="text-xl md:text-2xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                        {totalSupplies - criticalSupplies - lowSupplies}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Link to full inventory */}
+                  <Link href="/demo/insumos">
+                    <Button variant="outline" size="sm" className="w-full mt-3 text-xs">
+                      Ver inventario completo →
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
-              <Card
-                className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-red-500 ${statusFilter === 'critical' ? 'ring-2 ring-red-500' : ''}`}
-                onClick={() => setStatusFilter('critical')}
-              >
-                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                  <CardDescription className="text-[10px] md:text-xs">🔴 Crítico</CardDescription>
-                  <CardTitle className="text-2xl md:text-3xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalSupplies}</CardTitle>
+              {/* 2. PRODUCTOS - Simple Count */}
+              <Card className="neumorphic border-0 lg:col-span-1">
+                <CardHeader className="pb-2 px-3 md:px-4 pt-3 md:pt-4">
+                  <CardTitle className="text-lg md:text-xl font-bold">🍽️ Productos</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs">
+                    Menú actual
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
-                  <p className="text-[10px] md:text-xs text-muted-foreground">0-30%</p>
+                  <div className="flex flex-col items-center justify-center py-6 md:py-8">
+                    <p className="text-5xl md:text-6xl font-black text-primary mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                      {totalProducts}
+                    </p>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Productos en menú
+                    </p>
+                  </div>
+
+                  <Link href="/demo/productos">
+                    <Button variant="outline" size="sm" className="w-full text-xs">
+                      Ver productos →
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
-              <Card
-                className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-amber-500 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''}`}
-                onClick={() => setStatusFilter('low')}
-              >
-                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                  <CardDescription className="text-[10px] md:text-xs">🟡 Bajo</CardDescription>
-                  <CardTitle className="text-2xl md:text-3xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
-                  <p className="text-[10px] md:text-xs text-muted-foreground">31-50%</p>
-                </CardContent>
-              </Card>
-
-              <Card
-                className={`neumorphic border-0 cursor-pointer transition-all hover:scale-105 hover:ring-2 hover:ring-green-500 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''}`}
-                onClick={() => setStatusFilter('ok')}
-              >
-                <CardHeader className="pb-1 md:pb-2 px-3 md:px-4 pt-3 md:pt-4">
-                  <CardDescription className="text-[10px] md:text-xs">🟢 Bien</CardDescription>
-                  <CardTitle className="text-2xl md:text-3xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{totalSupplies - criticalSupplies - lowSupplies}</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
-                  <p className="text-[10px] md:text-xs text-muted-foreground">51-100%</p>
-                </CardContent>
-              </Card>
+              {/* 3. VENTAS - Animated Chart */}
+              <div className="lg:col-span-1">
+                <AnimatedSalesChart
+                  period={salesPeriod}
+                  onPeriodChange={setSalesPeriod}
+                />
+              </div>
             </div>
 
-            {/* Info Text - Compact */}
-            <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg bg-muted/50 border border-border">
+            {/* Info Text */}
+            <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-lg bg-muted/50 border border-border">
               <p className="text-xs md:text-sm text-muted-foreground">
-                💡 <strong>Aquí mostramos los insumos necesarios</strong> según el filtro seleccionado.
-                Para ver y editar el inventario completo, ve a la pestaña{' '}
+                💡 <strong>Panel de Control</strong> - Resumen inteligente de tu negocio.
+                Para gestionar inventario completo, ve a{' '}
                 <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
                   Insumos
                 </Link>.
               </p>
             </div>
-
-            {/* Filtered Supplies List */}
-            {statusFilter !== 'all' && (
-              <div className="mb-8">
-                <Card className="neumorphic border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      Insumos necesarios
-                      <Badge variant={statusFilter === 'critical' ? 'destructive' : statusFilter === 'low' ? 'default' : 'secondary'}>
-                        {statusFilter === 'critical' ? 'Críticos' : statusFilter === 'low' ? 'Bajos' : 'OK'}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>
-                      {statusFilter === 'critical' && 'Requieren atención inmediata (0-30% del óptimo)'}
-                      {statusFilter === 'low' && 'Necesitan reabastecimiento pronto (31-50% del óptimo)'}
-                      {statusFilter === 'ok' && 'Stock en nivel saludable (51-100% del óptimo)'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {supplies.filter(s => s.status === statusFilter).length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
-                        No hay insumos en esta categoría
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {supplies.filter(s => s.status === statusFilter).map(supply => {
-                          const referenceQty = supply.optimal_quantity && supply.optimal_quantity > 0
-                            ? supply.optimal_quantity
-                            : supply.min_threshold;
-                          const percentage = referenceQty > 0
-                            ? Math.min((supply.current_quantity / referenceQty) * 100, 100)
-                            : 100;
-
-                          // Determine color based on status
-                          const getColor = () => {
-                            if (percentage <= 30) return '#ef4444'; // red-500
-                            if (percentage <= 50) return '#f59e0b'; // amber-500
-                            return '#22c55e'; // green-500
-                          };
-
-                          return (
-                            <div key={supply.id} className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
-                              {/* Half Circle Indicator */}
-                              <div className="relative w-12 h-6 flex items-end justify-center">
-                                <svg width="48" height="24" viewBox="0 0 48 24" className="overflow-visible">
-                                  {/* Background half circle */}
-                                  <path
-                                    d="M 4 24 A 20 20 0 0 1 44 24"
-                                    fill="none"
-                                    stroke="#e5e7eb"
-                                    strokeWidth="4"
-                                  />
-                                  {/* Filled half circle based on percentage */}
-                                  <path
-                                    d="M 4 24 A 20 20 0 0 1 44 24"
-                                    fill="none"
-                                    stroke={getColor()}
-                                    strokeWidth="4"
-                                    strokeDasharray={`${(percentage / 100) * 62.83} 62.83`}
-                                    strokeLinecap="round"
-                                  />
-                                </svg>
-                                <span className="absolute text-[10px] font-bold" style={{ bottom: '-2px', color: getColor() }}>
-                                  {Math.round(percentage)}%
-                                </span>
-                              </div>
-
-                              <div className="flex-1">
-                                <p className="font-medium">{supply.name}</p>
-                                <p className="text-sm text-muted-foreground">{supply.category}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold">{supply.current_quantity} {supply.unit}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  Óptimo: {supply.optimal_quantity || supply.min_threshold} {supply.unit}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </main>
         </div>
       </div>
