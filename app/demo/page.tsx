@@ -181,24 +181,24 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <main className="container mx-auto px-3 md:px-4 py-3 md:py-4 ml-0 md:ml-20 lg:ml-72 max-h-screen overflow-hidden">
-            {/* Header - Balanced */}
-            <div className="mb-3 md:mb-4">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
+          <main className="container mx-auto px-2 md:px-3 py-2 md:py-3 ml-0 md:ml-20 lg:ml-72 max-h-screen overflow-y-auto">
+            {/* Header - Compact */}
+            <div className="mb-2 md:mb-3">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">
+                  <h2 className="text-xl md:text-2xl font-bold mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
+                  <p className="text-[10px] md:text-xs text-muted-foreground">
                     Vista general de tu negocio
                   </p>
                 </div>
 
                 {/* Period Selector */}
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant={planPeriod === 'week' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('week')}
-                    className="text-xs h-7 px-3"
+                    className="text-[10px] h-6 px-2"
                   >
                     📅 Semana
                   </Button>
@@ -206,7 +206,7 @@ export default function DemoPage() {
                     variant={planPeriod === 'month' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlanPeriod('month')}
-                    className="text-xs h-7 px-3"
+                    className="text-[10px] h-6 px-2"
                   >
                     📆 Mes
                   </Button>
@@ -214,48 +214,23 @@ export default function DemoPage() {
               </div>
             </div>
 
-            {/* Main Content Grid - Reorganized Layout */}
+            {/* Main Content Grid - Compact Layout */}
             {/* Top Row: Inventario + Productos (2 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              {/* 1. INVENTARIO - Minimalist with Neon Donut Chart */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+              {/* 1. INVENTARIO - Mosaic Plot */}
               <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                <CardHeader className="pb-2 px-4 pt-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Inventario</CardTitle>
+                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
+                  <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Inventario</CardTitle>
                 </CardHeader>
-                <CardContent className="px-4 pb-4">
+                <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
                   <NeonDonutChart
                     critical={criticalSupplies}
                     low={lowSupplies}
                     optimal={totalSupplies - criticalSupplies - lowSupplies}
                   />
 
-                  {/* Stats below chart */}
-                  <div className="mt-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500" style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.8)' }} />
-                        <span className="text-muted-foreground">Críticos (0-30%)</span>
-                      </div>
-                      <span className="font-bold">{criticalSupplies}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500" style={{ boxShadow: '0 0 6px rgba(245, 158, 11, 0.8)' }} />
-                        <span className="text-muted-foreground">Bajos (31-50%)</span>
-                      </div>
-                      <span className="font-bold">{lowSupplies}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" style={{ boxShadow: '0 0 6px rgba(34, 197, 94, 0.8)' }} />
-                        <span className="text-muted-foreground">Óptimos (51-100%)</span>
-                      </div>
-                      <span className="font-bold">{totalSupplies - criticalSupplies - lowSupplies}</span>
-                    </div>
-                  </div>
-
                   <Link href="/demo/insumos">
-                    <Button variant="outline" size="sm" className="w-full mt-3 text-xs h-7">
+                    <Button variant="outline" size="sm" className="w-full mt-2 text-[10px] h-6">
                       Ver inventario →
                     </Button>
                   </Link>
@@ -264,23 +239,23 @@ export default function DemoPage() {
 
               {/* 2. PRODUCTOS - Large Number Display */}
               <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                <CardHeader className="pb-2 px-4 pt-4">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Productos</CardTitle>
-                  <CardDescription className="text-xs">Menú actual</CardDescription>
+                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
+                  <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Productos</CardTitle>
+                  <CardDescription className="text-[10px]">Menú actual</CardDescription>
                 </CardHeader>
-                <CardContent className="px-4 pb-4">
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <p className="text-6xl md:text-7xl font-black text-primary mb-2" style={{
+                <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
+                  <div className="flex flex-col items-center justify-center py-4 md:py-6">
+                    <p className="text-5xl md:text-6xl font-black text-primary mb-1" style={{
                       fontFamily: 'Satoshi, sans-serif',
                       textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
                     }}>
                       {totalProducts}
                     </p>
-                    <p className="text-xs text-muted-foreground">en menú</p>
+                    <p className="text-[10px] text-muted-foreground">en menú</p>
                   </div>
 
                   <Link href="/demo/productos">
-                    <Button variant="outline" size="sm" className="w-full text-xs h-7">
+                    <Button variant="outline" size="sm" className="w-full text-[10px] h-6">
                       Ver productos →
                     </Button>
                   </Link>
@@ -289,7 +264,7 @@ export default function DemoPage() {
             </div>
 
             {/* Bottom Row: Ventas + Proyecciones (2 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
               {/* Ventas */}
               <AnimatedSalesChart
                 period={salesPeriod}
@@ -300,9 +275,9 @@ export default function DemoPage() {
               <ProjectionsSummary />
             </div>
 
-            {/* Info Text */}
-            <div className="p-2 rounded-lg bg-muted/50 border border-border">
-              <p className="text-xs text-muted-foreground">
+            {/* Info Text - Compact */}
+            <div className="p-1.5 rounded-lg bg-muted/50 border border-border">
+              <p className="text-[9px] md:text-[10px] text-muted-foreground">
                 💡 <strong>Panel de Control</strong> - Resumen de tu negocio.
                 Para gestionar inventario, ve a{' '}
                 <Link href="/demo/insumos" className="text-primary hover:underline font-medium">

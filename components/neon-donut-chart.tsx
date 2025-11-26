@@ -9,126 +9,165 @@ interface NeonDonutChartProps {
 export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) {
      const total = critical + low + optimal;
 
-     // Calculate percentages
+     // Calculate percentages for sizing
      const criticalPercent = total > 0 ? (critical / total) * 100 : 0;
      const lowPercent = total > 0 ? (low / total) * 100 : 0;
      const optimalPercent = total > 0 ? (optimal / total) * 100 : 0;
 
-     // Calculate stroke dash arrays for donut segments
-     const radius = 50; // Increased from 40
-     const circumference = 2 * Math.PI * radius;
+     // Mosaic plot dimensions
+     const width = 280;
+     const height = 180;
+     const barHeight = 140;
+     const startY = 20;
 
-     const criticalDash = (criticalPercent / 100) * circumference;
-     const lowDash = (lowPercent / 100) * circumference;
-     const optimalDash = (optimalPercent / 100) * circumference;
+     // Calculate bar widths based on percentages
+     const criticalWidth = (criticalPercent / 100) * width;
+     const lowWidth = (lowPercent / 100) * width;
+     const optimalWidth = (optimalPercent / 100) * width;
 
      return (
-          <div className="relative w-full h-40 flex items-center justify-center">
-               <svg width="160" height="160" viewBox="0 0 160 160" className="transform -rotate-90">
-                    {/* Background circle */}
-                    <circle
-                         cx="80"
-                         cy="80"
-                         r={radius}
-                         fill="none"
-                         stroke="rgba(255,255,255,0.05)"
-                         strokeWidth="16"
-                    />
-
-                    {/* Critical segment (red) with gradient */}
-                    {criticalPercent > 0 && (
-                         <circle
-                              cx="80"
-                              cy="80"
-                              r={radius}
-                              fill="none"
-                              stroke="url(#criticalGradient)"
-                              strokeWidth="16"
-                              strokeDasharray={`${criticalDash} ${circumference}`}
-                              strokeLinecap="round"
-                              style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.6))'
-                              }}
-                         />
+          <div className="relative w-full flex flex-col items-center">
+               {/* Mosaic Plot */}
+               <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="mb-4">
+                    {/* Critical bar (red) */}
+                    {critical > 0 && (
+                         <g>
+                              <rect
+                                   x="0"
+                                   y={startY}
+                                   width={criticalWidth}
+                                   height={barHeight}
+                                   fill="url(#criticalMosaicGradient)"
+                                   style={{
+                                        filter: 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.6))'
+                                   }}
+                              />
+                              {/* Quantity label */}
+                              {criticalWidth > 30 && (
+                                   <text
+                                        x={criticalWidth / 2}
+                                        y={startY + barHeight / 2}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                        className="fill-white font-black text-2xl"
+                                        style={{ fontFamily: 'Satoshi, sans-serif' }}
+                                   >
+                                        {critical}
+                                   </text>
+                              )}
+                         </g>
                     )}
 
-                    {/* Low segment (amber) with gradient */}
-                    {lowPercent > 0 && (
-                         <circle
-                              cx="80"
-                              cy="80"
-                              r={radius}
-                              fill="none"
-                              stroke="url(#lowGradient)"
-                              strokeWidth="16"
-                              strokeDasharray={`${lowDash} ${circumference}`}
-                              strokeDashoffset={-criticalDash}
-                              strokeLinecap="round"
-                              style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.6))'
-                              }}
-                         />
+                    {/* Low bar (amber) */}
+                    {low > 0 && (
+                         <g>
+                              <rect
+                                   x={criticalWidth}
+                                   y={startY}
+                                   width={lowWidth}
+                                   height={barHeight}
+                                   fill="url(#lowMosaicGradient)"
+                                   style={{
+                                        filter: 'drop-shadow(0 0 12px rgba(245, 158, 11, 0.6))'
+                                   }}
+                              />
+                              {/* Quantity label */}
+                              {lowWidth > 30 && (
+                                   <text
+                                        x={criticalWidth + lowWidth / 2}
+                                        y={startY + barHeight / 2}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                        className="fill-white font-black text-2xl"
+                                        style={{ fontFamily: 'Satoshi, sans-serif' }}
+                                   >
+                                        {low}
+                                   </text>
+                              )}
+                         </g>
                     )}
 
-                    {/* Optimal segment (green) with gradient */}
-                    {optimalPercent > 0 && (
-                         <circle
-                              cx="80"
-                              cy="80"
-                              r={radius}
-                              fill="none"
-                              stroke="url(#optimalGradient)"
-                              strokeWidth="16"
-                              strokeDasharray={`${optimalDash} ${circumference}`}
-                              strokeDashoffset={-(criticalDash + lowDash)}
-                              strokeLinecap="round"
-                              style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(34, 197, 94, 0.6))'
-                              }}
-                         />
+                    {/* Optimal bar (green) */}
+                    {optimal > 0 && (
+                         <g>
+                              <rect
+                                   x={criticalWidth + lowWidth}
+                                   y={startY}
+                                   width={optimalWidth}
+                                   height={barHeight}
+                                   fill="url(#optimalMosaicGradient)"
+                                   style={{
+                                        filter: 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.6))'
+                                   }}
+                              />
+                              {/* Quantity label */}
+                              {optimalWidth > 30 && (
+                                   <text
+                                        x={criticalWidth + lowWidth + optimalWidth / 2}
+                                        y={startY + barHeight / 2}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                        className="fill-white font-black text-2xl"
+                                        style={{ fontFamily: 'Satoshi, sans-serif' }}
+                                   >
+                                        {optimal}
+                                   </text>
+                              )}
+                         </g>
                     )}
 
-                    {/* Gradients with subtle depth */}
+                    {/* Gradients with neon effect */}
                     <defs>
-                         <linearGradient id="criticalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#f87171" />
-                              <stop offset="50%" stopColor="#ef4444" />
-                              <stop offset="100%" stopColor="#dc2626" />
+                         <linearGradient id="criticalMosaicGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#f87171" stopOpacity="0.9" />
+                              <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
+                              <stop offset="100%" stopColor="#dc2626" stopOpacity="0.9" />
                          </linearGradient>
-                         <linearGradient id="lowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#fbbf24" />
-                              <stop offset="50%" stopColor="#f59e0b" />
-                              <stop offset="100%" stopColor="#d97706" />
+                         <linearGradient id="lowMosaicGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.9" />
+                              <stop offset="50%" stopColor="#f59e0b" stopOpacity="1" />
+                              <stop offset="100%" stopColor="#d97706" stopOpacity="0.9" />
                          </linearGradient>
-                         <linearGradient id="optimalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#4ade80" />
-                              <stop offset="50%" stopColor="#22c55e" />
-                              <stop offset="100%" stopColor="#16a34a" />
+                         <linearGradient id="optimalMosaicGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#4ade80" stopOpacity="0.9" />
+                              <stop offset="50%" stopColor="#22c55e" stopOpacity="1" />
+                              <stop offset="100%" stopColor="#16a34a" stopOpacity="0.9" />
                          </linearGradient>
                     </defs>
                </svg>
 
-               {/* Center text with total and percentages */}
-               <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                         <p className="text-3xl font-black mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{total}</p>
-                         <p className="text-[10px] text-muted-foreground">Insumos</p>
-
-                         {/* Show percentages if there are items */}
-                         {total > 0 && (
-                              <div className="mt-2 space-y-0.5">
-                                   {criticalPercent > 0 && (
-                                        <p className="text-[9px] text-red-500 font-bold">{criticalPercent.toFixed(0)}%</p>
-                                   )}
-                                   {lowPercent > 0 && (
-                                        <p className="text-[9px] text-amber-500 font-bold">{lowPercent.toFixed(0)}%</p>
-                                   )}
-                                   {optimalPercent > 0 && (
-                                        <p className="text-[9px] text-green-500 font-bold">{optimalPercent.toFixed(0)}%</p>
-                                   )}
+               {/* Legend with percentages */}
+               <div className="w-full space-y-1.5">
+                    {critical > 0 && (
+                         <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                   <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-red-400 to-red-600"
+                                        style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.6)' }} />
+                                   <span className="text-muted-foreground">Críticos</span>
                               </div>
-                         )}
-                    </div>
+                              <span className="font-bold text-red-500">{criticalPercent.toFixed(1)}%</span>
+                         </div>
+                    )}
+                    {low > 0 && (
+                         <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                   <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-amber-400 to-amber-600"
+                                        style={{ boxShadow: '0 0 6px rgba(245, 158, 11, 0.6)' }} />
+                                   <span className="text-muted-foreground">Bajos</span>
+                              </div>
+                              <span className="font-bold text-amber-500">{lowPercent.toFixed(1)}%</span>
+                         </div>
+                    )}
+                    {optimal > 0 && (
+                         <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2">
+                                   <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-green-400 to-green-600"
+                                        style={{ boxShadow: '0 0 6px rgba(34, 197, 94, 0.6)' }} />
+                                   <span className="text-muted-foreground">Óptimos</span>
+                              </div>
+                              <span className="font-bold text-green-500">{optimalPercent.toFixed(1)}%</span>
+                         </div>
+                    )}
                </div>
           </div>
      );
