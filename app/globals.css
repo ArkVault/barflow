@@ -315,24 +315,81 @@
   }
 }
 
-/* Sky Blue Gradient Button (Clean & Rounded) */
-button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
-.btn-sky-gradient {
-  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%) !important;
-  color: white !important;
-  border: none;
-  outline: none !important;
-  /* Optional: Add a subtle shadow instead of the border glow */
-  box-shadow: 0 4px 6px -1px rgba(74, 144, 226, 0.3), 0 2px 4px -1px rgba(74, 144, 226, 0.15);
-  transition: all 0.3s ease;
+/* Sky Blue Gradient Button with Subtle Contour Glow */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
+/* Apply sky blue gradient to primary buttons (excluding sidebar and outline/ghost variants) */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
+.btn-sky-gradient {
+  background: transparent !important;
+  /* Make main bg transparent so pseudo-elements show */
+  color: white !important;
+  position: relative;
+  overflow: visible;
+  /* Allow glow to spill out */
+  border: none !important;
+  /* Remove any default borders */
+  box-shadow: none !important;
+  /* Remove initial shadows */
+  z-index: 1;
+  /* Ensure text sits on top */
+}
+
+/* Remove neumorphic hover effects (shadows/movement) for these buttons */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *):hover,
 .btn-sky-gradient:hover {
-  box-shadow: 0 10px 15px -3px rgba(74, 144, 226, 0.4), 0 4px 6px -2px rgba(74, 144, 226, 0.2);
-  transform: translateY(-1px);
-  filter: brightness(1.05);
-  /* Slight brightness increase on hover */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Subtle glowing line contour */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::before,
+.btn-sky-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  /* Glow extends slightly outside */
+  border-radius: inherit;
+  /* Follows button shape exactly */
+  padding: 2px;
+  /* Width of the glow line */
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(135, 206, 235, 0.0) 20%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(135, 206, 235, 0.0) 80%,
+      transparent 100%);
+  background-size: 200% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 1;
+  animation: border-flow 3s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+  /* Behind the text */
+}
+
+/* Solid background for the button */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::after,
+.btn-sky-gradient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
+  border-radius: inherit;
+  z-index: -2;
+  /* Behind the glow border */
 }
 
 /* Restore original neumorphic hover for sidebar buttons */
