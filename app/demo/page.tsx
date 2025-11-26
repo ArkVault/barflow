@@ -43,6 +43,8 @@ export default function DemoPage() {
   const [criticalSupplies, setCriticalSupplies] = useState(0);
   const [lowSupplies, setLowSupplies] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [menuName, setMenuName] = useState("Menú Actual");
+  const [menuLastModified, setMenuLastModified] = useState("Nunca");
   const [planPeriod, setPlanPeriod] = useState<'week' | 'month'>('week');
   const [salesPeriod, setSalesPeriod] = useState<'day' | 'week' | 'month'>('week');
 
@@ -97,14 +99,57 @@ export default function DemoPage() {
       setCriticalSupplies(critical);
       setLowSupplies(low);
 
-      // Load products count
-      const { count: productsCount, error: productsError } = await supabase
+      // Load products count and last modified
+      const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('establishment_id', establishmentId);
+        .select('id, updated_at')
+        .eq('establishment_id', establishmentId)
+        .order('updated_at', { ascending: false });
 
-      if (!productsError) {
-        setTotalProducts(productsCount || 0);
+      if (!productsError && productsData) {
+        setTotalProducts(productsData.length);
+
+        // Calculate last modified
+        if (productsData.length > 0 && productsData[0].updated_at) {
+          const lastModified = new Date(productsData[0].updated_at);
+          const now = new Date();
+          const diffTime = Math.abs(now.getTime() - lastModified.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 0) {
+            setMenuLastModified("Hoy");
+          } else if (diffDays === 1) {
+            setMenuLastModified("Ayer");
+          } else if (diffDays < 7) {
+            setMenuLastModified(`Hace ${diffDays} días`);
+          } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            setMenuLastModified(`Hace ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`);
+          } else {
+            const months = Math.floor(diffDays / 30);
+            setMenuLastModified(`Hace ${months} ${months === 1 ? 'mes' : 'meses'}`);
+          }
+        }
+      }
+
+      // Load menu name from establishment settings (if exists)
+      const { data: settingsData } = await supabase
+        .from('establishments')
+        .select('menu_name')
+        .eq('id', establishmentId)
+        .single();
+
+      if (settingsData?.menu_name) {
+        setMenuName(settingsData.menu_name);
+      } else {
+        // Default menu name based on current season
+        const month = new Date().getMonth();
+        let season = "Primavera";
+        if (month >= 2 && month <= 4) season = "Primavera";
+        else if (month >= 5 && month <= 7) season = "Verano";
+        else if (month >= 8 && month <= 10) season = "Otoño";
+        else season = "Invierno";
+        setMenuName(`${season} ${new Date().getFullYear()}`);
       }
 
     } catch (error: any) {
@@ -258,11 +303,11 @@ export default function DemoPage() {
                       <div className="w-full space-y-1.5 mb-3">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground">Temporada:</span>
-                          <span className="font-medium">Primavera 2024</span>
+                          <span className="font-medium">{menuName}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground">Última modificación:</span>
-                          <span className="font-medium">Hace 2 días</span>
+                          <span className="font-medium">{menuLastModified}</span>
                         </div>
                       </div>
                     </div>

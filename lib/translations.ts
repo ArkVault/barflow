@@ -51,7 +51,7 @@ export const translations = {
     // Products
     productManagement: "Gestión de Productos",
     menuRecipes: "Menú y recetas de bebidas",
-    designMenu: "Diseñar Menú",
+    designMenu: "Agregar Producto",
     addProduct: "Añadir Producto",
     viewRecipe: "Ver Receta",
     ingredients: "Ingredientes",
@@ -177,7 +177,7 @@ export const translations = {
     // Products
     productManagement: "Product Management",
     menuRecipes: "Menu and drink recipes",
-    designMenu: "Design Menu",
+    designMenu: "Add Product",
     addProduct: "Add Product",
     viewRecipe: "View Recipe",
     ingredients: "Ingredients",
