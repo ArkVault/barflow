@@ -321,8 +321,12 @@
     background-position: 0% 50%;
   }
 
-  100% {
+  50% {
     background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -339,7 +343,14 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
   /* Prevent browser focus square outline */
 }
 
-/* Subtle glowing line contour (The Glow) */
+/* Remove neumorphic hover effects (shadows/movement) for these buttons */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *):hover,
+.btn-sky-gradient:hover {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Subtle glowing line contour (The Glow) - ONLY ON HOVER */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::before,
 .btn-sky-gradient::before {
   content: '';
@@ -355,8 +366,8 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
       rgba(135, 206, 235, 0.0) 80%,
       transparent 100%);
   background-size: 200% 100%;
-  opacity: 1;
-  animation: border-flow 4s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: -2;
   /* Placed BEHIND the button background */
@@ -364,17 +375,23 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
   /* Subtle definition */
 }
 
-/* Solid background for the button (Covers the center of the glow) */
+/* Activate animation on hover */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *):hover::before,
+.btn-sky-gradient:hover::before {
+  opacity: 1;
+  animation: border-flow 3s ease-in-out infinite;
+}
+
+/* Solid background for the button */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::after,
 .btn-sky-gradient::after {
   content: '';
   position: absolute;
   inset: 0;
-  /* Matches button size exactly */
   background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
   border-radius: inherit;
-  z-index: -1;
-  /* Placed ABOVE the glow but BELOW text */
+  z-index: -2;
+  /* Behind the glow border */
 }
 
 /* Restore original neumorphic hover for sidebar buttons */
