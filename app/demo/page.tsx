@@ -33,6 +33,11 @@ interface Supply {
   status: 'ok' | 'low' | 'critical';
 }
 
+interface TopProduct {
+  product_name: string;
+  total_sales: number;
+}
+
 export default function DemoPage() {
   const router = useRouter();
   const { t } = useLanguage();
@@ -45,6 +50,7 @@ export default function DemoPage() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [menuName, setMenuName] = useState("Menú Actual");
   const [menuLastModified, setMenuLastModified] = useState("Nunca");
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [planPeriod, setPlanPeriod] = useState<'week' | 'month'>('week');
   const [salesPeriod, setSalesPeriod] = useState<'day' | 'week' | 'month'>('week');
 
@@ -152,6 +158,38 @@ export default function DemoPage() {
         setMenuName(`${season} ${new Date().getFullYear()}`);
       }
 
+      // Load top 5 selling products from the last week
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      const { data: salesData, error: salesError } = await supabase
+        .from('sales')
+        .select('product_id, quantity, products(name)')
+        .eq('establishment_id', establishmentId)
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      if (!salesError && salesData) {
+        // Aggregate sales by product
+        const salesByProduct = salesData.reduce((acc: Record<string, { name: string; total: number }>, sale: any) => {
+          if (sale.products && sale.products.name) {
+            const productName = sale.products.name;
+            if (!acc[productName]) {
+              acc[productName] = { name: productName, total: 0 };
+            }
+            acc[productName].total += sale.quantity || 1;
+          }
+          return acc;
+        }, {});
+
+        // Convert to array and sort by total sales
+        const topProductsArray = Object.values(salesByProduct)
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 5)
+          .map(p => ({ product_name: p.name, total_sales: p.total }));
+
+        setTopProducts(topProductsArray);
+      }
+
     } catch (error: any) {
       console.error('Error loading dashboard:', error);
       toast.error('Error al cargar datos: ' + error.message);
@@ -159,6 +197,7 @@ export default function DemoPage() {
       setLoading(false);
     }
   };
+
 
   const handleReconfigure = async () => {
     if (confirm('¿Reconfigurar el plan eliminará todo tu inventario actual. ¿Continuar?')) {
@@ -308,6 +347,24 @@ export default function DemoPage() {
                           <span className="font-medium">{menuLastModified}</span>
                         </div>
                       </div>
+
+                      {/* Top 5 Selling Products */}
+                      {topProducts.length > 0 && (
+                        <div className="w-full mt-2 mb-3">
+                          <p className="text-xs font-semibold text-muted-foreground mb-2">Top 5 esta semana:</p>
+                          <div className="space-y-1.5">
+                            {topProducts.map((product, index) => (
+                              <div key={index} className="flex items-center justify-between text-xs bg-muted/30 rounded-md px-2 py-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-primary text-[10px]">#{index + 1}</span>
+                                  <span className="font-medium truncate max-w-[120px]">{product.product_name}</span>
+                                </div>
+                                <span className="text-muted-foreground text-[10px]">{product.total_sales} vendidos</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <Link href="/demo/productos">
