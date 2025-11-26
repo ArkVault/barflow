@@ -213,24 +213,26 @@ export default function ProductosPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
-            <p className="text-muted-foreground">{t('menuRecipes')}</p>
+      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
+              <p className="text-muted-foreground">{t('menuRecipes')}</p>
+            </div>
           </div>
-        </div>
 
-        {/* Botón Diseñar Menú */}
-        <div className="mb-8">
-          <Button
-            className="neumorphic-hover border-0 h-14 px-8 text-lg"
-            size="lg"
-            onClick={() => setIsAddingProduct(true)}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            {t('designMenu')}
-          </Button>
+          {/* Botón Diseñar Menú */}
+          <div className="mb-8">
+            <Button
+              className="neumorphic-hover border-0 h-14 px-8 text-lg"
+              size="lg"
+              onClick={() => setIsAddingProduct(true)}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              {t('designMenu')}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -566,5 +568,7 @@ export default function ProductosPage() {
         </div>
       )}
     </div>
+  </div>
+</div>
   )
 }

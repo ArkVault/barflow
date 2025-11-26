@@ -314,3 +314,56 @@
         oklch(0.75 0.18 60));
   }
 }
+/* Sky Blue Gradient Button with Animated Border Light */
+@keyframes border-light {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Apply sky blue gradient to all primary buttons */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]) {
+  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%) !important;
+  color: white !important;
+  position: relative;
+  overflow: visible;
+}
+
+/* Animated border light effect on hover */
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"])::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(135, 206, 235, 0.8) 10%,
+    rgba(74, 144, 226, 1) 25%,
+    rgba(90, 185, 234, 1) 50%,
+    rgba(74, 144, 226, 1) 75%,
+    rgba(135, 206, 235, 0.8) 90%,
+    transparent 100%
+  );
+  border-radius: inherit;
+  animation: border-light 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):hover::before {
+  opacity: 1;
+}
+
+button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"])::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
+  border-radius: inherit;
+  z-index: -1;
+}
