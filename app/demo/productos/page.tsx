@@ -569,6 +569,5 @@ export default function ProductosPage() {
       )}
     </div>
   </div>
-</div>
   )
 }
