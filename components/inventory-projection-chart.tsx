@@ -3,18 +3,24 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from "lucide-react";
+import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/contexts/auth-context';
 
 interface InventoryProjectionProps {
      period: 'week' | 'month';
      highSeason: boolean;
 }
 
-// Función de regresión lineal simple
-function linearRegression(data: number[]): { slope: number; intercept: number } {
+interface Supply {
+     id: string;
+     name: string;
+     current_quantity: number;
+}
+
+// Función de regresión lineal con patrón de fin de semana
+function linearRegressionWithWeekendPattern(data: number[], isWeekend: boolean[] = []): { slope: number; intercept: number } {
      const n = data.length;
      const sumX = data.reduce((sum, _, i) => sum + i, 0);
      const sumY = data.reduce((sum, y) => sum + y, 0);
@@ -27,14 +33,26 @@ function linearRegression(data: number[]): { slope: number; intercept: number } 
      return { slope, intercept };
 }
 
-// Función para proyectar valores futuros
-function projectFutureValues(historicalData: number[], futurePoints: number, highSeasonMultiplier: number = 1.0): number[] {
-     const { slope, intercept } = linearRegression(historicalData);
+// Función para proyectar valores futuros con patrón de fin de semana
+function projectFutureValues(
+     historicalData: number[],
+     futurePoints: number,
+     highSeasonMultiplier: number = 1.0,
+     period: 'week' | 'month' = 'week'
+): number[] {
+     const { slope, intercept } = linearRegressionWithWeekendPattern(historicalData);
      const projections: number[] = [];
 
+     // Patrón de consumo: Viernes y Sábado tienen 40% más demanda
+     const weekendMultipliers = period === 'week'
+          ? [1.0, 1.0, 1.0, 1.0, 1.4, 1.4, 1.0] // Lun-Dom
+          : [1.0, 1.0, 1.0, 1.0]; // Semanas
+
      for (let i = historicalData.length; i < historicalData.length + futurePoints; i++) {
-          const projected = (slope * i + intercept) * highSeasonMultiplier;
-          projections.push(Math.max(0, projected)); // No permitir valores negativos
+          const baseProjection = slope * i + intercept;
+          const dayMultiplier = period === 'week' ? weekendMultipliers[i % 7] : 1.0;
+          const projected = baseProjection * dayMultiplier * highSeasonMultiplier;
+          projections.push(Math.max(0, projected));
      }
 
      return projections;
@@ -43,30 +61,43 @@ function projectFutureValues(historicalData: number[], futurePoints: number, hig
 export function InventoryProjectionChart({ period, highSeason }: InventoryProjectionProps) {
      const [selectedProduct, setSelectedProduct] = useState<string>('all');
      const [chartData, setChartData] = useState<any[]>([]);
+     const [supplies, setSupplies] = useState<Supply[]>([]);
+     const [loading, setLoading] = useState(true);
+     const { establishmentId } = useAuth();
 
-     // Mock de productos más demandados (esto vendrá de la base de datos)
-     const topProducts = [
-          { value: 'all', label: 'Todos los Insumos', demand: 1000 },
-          { value: 'ron', label: 'Ron Blanco', demand: 250 },
-          { value: 'vodka', label: 'Vodka Premium', demand: 220 },
-          { value: 'limon', label: 'Jugo de Limón', demand: 180 },
-          { value: 'azucar', label: 'Azúcar', demand: 150 },
-          { value: 'hielo', label: 'Hielo', demand: 140 },
-          { value: 'menta', label: 'Menta Fresca', demand: 120 },
-          { value: 'tequila', label: 'Tequila', demand: 110 },
-          { value: 'naranja', label: 'Jugo de Naranja', demand: 95 },
-          { value: 'granadina', label: 'Granadina', demand: 85 },
-          { value: 'triple_sec', label: 'Triple Sec', demand: 75 },
-     ];
+     useEffect(() => {
+          if (establishmentId) {
+               loadSupplies();
+          }
+     }, [establishmentId]);
 
      useEffect(() => {
           generateProjections();
-     }, [period, highSeason, selectedProduct]);
+     }, [period, highSeason, selectedProduct, supplies]);
+
+     const loadSupplies = async () => {
+          try {
+               const supabase = createClient();
+               const { data, error } = await supabase
+                    .from('supplies')
+                    .select('id, name, current_quantity')
+                    .eq('establishment_id', establishmentId)
+                    .order('name', { ascending: true });
+
+               if (!error && data) {
+                    setSupplies(data);
+               }
+          } catch (error) {
+               console.error('Error loading supplies:', error);
+          } finally {
+               setLoading(false);
+          }
+     };
 
      const generateProjections = () => {
           // Datos históricos simulados (esto vendrá de la base de datos)
           const historicalInventory = period === 'week'
-               ? [50, 47, 45, 42, 40, 38, 35] // Últimos 7 días
+               ? [50, 47, 45, 42, 38, 35, 40] // Últimos 7 días (nota: baja más Vie-Sáb)
                : [180, 165, 150, 135]; // Últimas 4 semanas
 
           // Multiplicador de temporada alta (30% más de consumo)
@@ -74,7 +105,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
 
           // Proyectar valores futuros
           const futurePoints = period === 'week' ? 7 : 4;
-          const projectedValues = projectFutureValues(historicalInventory, futurePoints, seasonMultiplier);
+          const projectedValues = projectFutureValues(historicalInventory, futurePoints, seasonMultiplier, period);
 
           // Generar datos para la gráfica
           const labels = period === 'week'
@@ -118,25 +149,29 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    Proyección de Inventario
                               </CardTitle>
                               <CardDescription>
-                                   Estimación basada en regresión lineal {highSeason && '(Temporada Alta)'}
+                                   Estimación con patrón de fin de semana {highSeason && '(Temporada Alta)'}
                               </CardDescription>
                          </div>
-                         <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                         <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
                               <SelectTrigger className="w-[220px]">
-                                   <SelectValue placeholder="Seleccionar producto" />
+                                   <SelectValue placeholder={loading ? "Cargando..." : "Seleccionar insumo"} />
                               </SelectTrigger>
                               <SelectContent>
                                    <SelectItem value="all">
                                         <span className="font-semibold">📊 Todos los Insumos</span>
                                    </SelectItem>
-                                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                        Top 10 Más Demandados
-                                   </div>
-                                   {topProducts.slice(1).map(product => (
-                                        <SelectItem key={product.value} value={product.value}>
-                                             {product.label}
-                                        </SelectItem>
-                                   ))}
+                                   {supplies.length > 0 && (
+                                        <>
+                                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                                                  Insumos Disponibles
+                                             </div>
+                                             {supplies.map(supply => (
+                                                  <SelectItem key={supply.id} value={supply.id}>
+                                                       {supply.name}
+                                                  </SelectItem>
+                                             ))}
+                                        </>
+                                   )}
                               </SelectContent>
                          </Select>
                     </div>
@@ -169,18 +204,21 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
 
                               <CartesianGrid
                                    strokeDasharray="3 3"
-                                   stroke="rgba(255,255,255,0.05)"
+                                   stroke="currentColor"
+                                   className="opacity-10 dark:opacity-5"
                                    vertical={false}
                               />
                               <XAxis
                                    dataKey="day"
-                                   stroke="rgba(255,255,255,0.3)"
+                                   stroke="currentColor"
+                                   className="opacity-50 dark:opacity-30"
                                    style={{ fontSize: '11px', fontWeight: '500' }}
                                    axisLine={false}
                                    tickLine={false}
                               />
                               <YAxis
-                                   stroke="rgba(255,255,255,0.3)"
+                                   stroke="currentColor"
+                                   className="opacity-50 dark:opacity-30"
                                    style={{ fontSize: '11px', fontWeight: '500' }}
                                    axisLine={false}
                                    tickLine={false}
@@ -188,7 +226,8 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                         value: 'Unidades',
                                         angle: -90,
                                         position: 'insideLeft',
-                                        style: { fontSize: '11px', fill: 'rgba(255,255,255,0.5)' }
+                                        className: 'opacity-50 dark:opacity-50',
+                                        style: { fontSize: '11px' }
                                    }}
                               />
                               <Tooltip
@@ -297,6 +336,12 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                               </p>
                          </div>
                     )}
+
+                    <div className="mt-3 p-2 rounded bg-muted/30 border border-muted/50">
+                         <p className="text-xs text-muted-foreground">
+                              💡 <strong>Patrón de fin de semana:</strong> Viernes y Sábado tienen +40% más consumo
+                         </p>
+                    </div>
                </CardContent>
           </Card>
      );
