@@ -14,11 +14,11 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
      const lowPercent = total > 0 ? (low / total) * 100 : 0;
      const optimalPercent = total > 0 ? (optimal / total) * 100 : 0;
 
-     // Half donut chart (semicircle)
-     const radius = 60;
-     const strokeWidth = 20;
-     const centerX = 100;
-     const centerY = 100;
+     // Half donut chart (semicircle) - BIGGER SIZE
+     const radius = 80; // Increased from 60
+     const strokeWidth = 24; // Increased from 20
+     const centerX = 130; // Adjusted for bigger size
+     const centerY = 130; // Adjusted for bigger size
 
      // Calculate arc lengths for half circle (180 degrees)
      const circumference = Math.PI * radius; // Half circle
@@ -29,8 +29,8 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
 
      return (
           <div className="relative w-full flex flex-col items-center">
-               {/* Half Donut Chart */}
-               <svg width="200" height="120" viewBox="0 0 200 120" className="mb-3">
+               {/* Half Donut Chart - BIGGER */}
+               <svg width="260" height="150" viewBox="0 0 260 150" className="mb-3">
                     {/* Background arc */}
                     <path
                          d={`M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 0 1 ${centerX + radius} ${centerY}`}

@@ -181,111 +181,113 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <main className="mx-auto px-2 md:px-3 py-2 md:py-3 ml-0 md:ml-20 lg:ml-72 max-w-[calc(100vw-288px-2rem)] max-h-screen overflow-y-auto">
-            {/* Header - Compact */}
-            <div className="mb-2 md:mb-3">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
-                  <p className="text-[10px] md:text-xs text-muted-foreground">
-                    Vista general de tu negocio
-                  </p>
-                </div>
-
-                {/* Period Selector */}
-                <div className="flex gap-1">
-                  <Button
-                    variant={planPeriod === 'week' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPlanPeriod('week')}
-                    className="text-[10px] h-6 px-2"
-                  >
-                    📅 Semana
-                  </Button>
-                  <Button
-                    variant={planPeriod === 'month' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setPlanPeriod('month')}
-                    className="text-[10px] h-6 px-2"
-                  >
-                    📆 Mes
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Main Content Grid - Compact Layout */}
-            {/* Top Row: Inventario + Productos (2 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-              {/* 1. INVENTARIO - Half Donut Chart */}
-              <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
-                  <CardTitle className="text-xs md:text-sm font-bold">Inventario</CardTitle>
-                </CardHeader>
-                <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
-                  <NeonDonutChart
-                    critical={criticalSupplies}
-                    low={lowSupplies}
-                    optimal={totalSupplies - criticalSupplies - lowSupplies}
-                  />
-
-                  <Link href="/demo/insumos">
-                    <Button variant="outline" size="sm" className="w-full mt-2 text-[10px] h-6">
-                      Ver inventario →
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* 2. PRODUCTOS - Large Number Display */}
-              <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
-                  <CardTitle className="text-xs md:text-sm font-bold">Productos</CardTitle>
-                  <CardDescription className="text-[10px]">Menú actual</CardDescription>
-                </CardHeader>
-                <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
-                  <div className="flex flex-col items-center justify-center py-3 md:py-4">
-                    <p className="text-4xl md:text-5xl font-black text-primary mb-1" style={{
-                      fontFamily: 'Satoshi, sans-serif',
-                      textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
-                    }}>
-                      {totalProducts}
+          <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+            <div className="max-w-5xl mx-auto">
+              {/* Header - Compact */}
+              <div className="mb-4">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      Vista general de tu negocio
                     </p>
-                    <p className="text-[10px] text-muted-foreground">en menú</p>
                   </div>
 
-                  <Link href="/demo/productos">
-                    <Button variant="outline" size="sm" className="w-full text-[10px] h-6">
-                      Ver productos →
+                  {/* Period Selector */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={planPeriod === 'week' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPlanPeriod('week')}
+                      className="text-xs h-7 px-3"
+                    >
+                      Semana
                     </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
+                    <Button
+                      variant={planPeriod === 'month' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPlanPeriod('month')}
+                      className="text-xs h-7 px-3"
+                    >
+                      Mes
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
-            {/* Bottom Row: Ventas + Proyecciones (2 columns) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-              {/* Ventas */}
-              <AnimatedSalesChart
-                period={salesPeriod}
-                onPeriodChange={setSalesPeriod}
-              />
+              {/* Main Content Grid */}
+              {/* Top Row: Inventario + Productos (2 columns) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* 1. INVENTARIO - Half Donut Chart */}
+                <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
+                  <CardHeader className="pb-2 px-4 pt-4">
+                    <CardTitle className="text-sm md:text-base font-bold">Inventario</CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <NeonDonutChart
+                      critical={criticalSupplies}
+                      low={lowSupplies}
+                      optimal={totalSupplies - criticalSupplies - lowSupplies}
+                    />
 
-              {/* Proyecciones */}
-              <ProjectionsSummary />
-            </div>
+                    <Link href="/demo/insumos">
+                      <Button variant="outline" size="sm" className="w-full mt-3 text-xs h-7">
+                        Ver inventario →
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
 
-            {/* Info Text - Compact */}
-            <div className="p-1.5 rounded-lg bg-muted/50 border border-border">
-              <p className="text-[9px] md:text-[10px] text-muted-foreground">
-                <strong>Panel de Control</strong> - Resumen de tu negocio.
-                Para gestionar inventario, ve a{' '}
-                <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
-                  Insumos
-                </Link>.
-              </p>
+                {/* 2. PRODUCTOS - Large Number Display */}
+                <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
+                  <CardHeader className="pb-2 px-4 pt-4">
+                    <CardTitle className="text-sm md:text-base font-bold">Productos</CardTitle>
+                    <CardDescription className="text-xs">Menú actual</CardDescription>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <p className="text-5xl md:text-6xl font-black text-primary mb-2" style={{
+                        fontFamily: 'Satoshi, sans-serif',
+                        textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
+                      }}>
+                        {totalProducts}
+                      </p>
+                      <p className="text-xs text-muted-foreground">en menú</p>
+                    </div>
+
+                    <Link href="/demo/productos">
+                      <Button variant="outline" size="sm" className="w-full text-xs h-7">
+                        Ver productos →
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Bottom Row: Ventas + Proyecciones (2 columns) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Ventas */}
+                <AnimatedSalesChart
+                  period={salesPeriod}
+                  onPeriodChange={setSalesPeriod}
+                />
+
+                {/* Proyecciones */}
+                <ProjectionsSummary />
+              </div>
+
+              {/* Info Text */}
+              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Panel de Control</strong> - Resumen de tu negocio.
+                  Para gestionar inventario, ve a{' '}
+                  <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
+                    Insumos
+                  </Link>.
+                </p>
+              </div>
             </div>
-          </main>
+          </div>
         </div>
       </div>
     </PeriodProvider>
