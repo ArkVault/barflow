@@ -269,7 +269,7 @@
 
   .btn-glow-wrapper:hover::after,
   .btn-glow-wrapper:focus-within::after {
-    opacity: 1;
+    opacity: 0;
     animation: glow-sweep 3s ease infinite;
   }
 
@@ -330,37 +330,24 @@
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
 .btn-sky-gradient {
   background: transparent !important;
-  /* Make main bg transparent so pseudo-elements show */
   color: white !important;
   position: relative;
   overflow: visible;
-  /* Allow glow to spill out */
-  border: none !important;
-  /* Remove any default borders */
-  box-shadow: none !important;
-  /* Remove initial shadows */
+  border: none;
   z-index: 1;
-  /* Ensure text sits on top */
+  outline: none !important;
+  /* Prevent browser focus square outline */
 }
 
-/* Remove neumorphic hover effects (shadows/movement) for these buttons */
-button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *):hover,
-.btn-sky-gradient:hover {
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-/* Subtle glowing line contour */
+/* Subtle glowing line contour (The Glow) */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::before,
 .btn-sky-gradient::before {
   content: '';
   position: absolute;
   inset: -2px;
-  /* Glow extends slightly outside */
+  /* Glow extends 2px outside */
   border-radius: inherit;
-  /* Follows button shape exactly */
-  padding: 2px;
-  /* Width of the glow line */
+  /* Inherits exact button curvature */
   background: linear-gradient(90deg,
       transparent 0%,
       rgba(135, 206, 235, 0.0) 20%,
@@ -368,28 +355,26 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
       rgba(135, 206, 235, 0.0) 80%,
       transparent 100%);
   background-size: 200% 100%;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
   opacity: 1;
   animation: border-flow 3s linear infinite;
   pointer-events: none;
-  z-index: -1;
-  /* Behind the text */
+  z-index: -2;
+  /* Placed BEHIND the button background */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  /* Subtle definition */
 }
 
-/* Solid background for the button */
+/* Solid background for the button (Covers the center of the glow) */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::after,
 .btn-sky-gradient::after {
   content: '';
   position: absolute;
   inset: 0;
+  /* Matches button size exactly */
   background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
   border-radius: inherit;
-  z-index: -2;
-  /* Behind the glow border */
+  z-index: -1;
+  /* Placed ABOVE the glow but BELOW text */
 }
 
 /* Restore original neumorphic hover for sidebar buttons */
