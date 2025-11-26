@@ -245,14 +245,26 @@ export default function DemoPage() {
                     <CardDescription className="text-xs">Menú actual</CardDescription>
                   </CardHeader>
                   <CardContent className="px-4 pb-4">
-                    <div className="flex flex-col items-center justify-center py-6">
+                    <div className="flex flex-col items-center justify-center py-4">
                       <p className="text-5xl md:text-6xl font-black text-primary mb-2" style={{
                         fontFamily: 'Satoshi, sans-serif',
                         textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
                       }}>
                         {totalProducts}
                       </p>
-                      <p className="text-xs text-muted-foreground">en menú</p>
+                      <p className="text-xs text-muted-foreground mb-3">en menú</p>
+
+                      {/* Menu metadata */}
+                      <div className="w-full space-y-1.5 mb-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Temporada:</span>
+                          <span className="font-medium">Primavera 2024</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Última modificación:</span>
+                          <span className="font-medium">Hace 2 días</span>
+                        </div>
+                      </div>
                     </div>
 
                     <Link href="/demo/productos">

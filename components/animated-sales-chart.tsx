@@ -61,7 +61,7 @@ export function AnimatedSalesChart({ period, onPeriodChange }: AnimatedSalesChar
                <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
                     <div className="flex items-start justify-between mb-1">
                          <div>
-                              <CardTitle className="text-sm md:text-base font-bold">📊 Ventas</CardTitle>
+                              <CardTitle className="text-sm md:text-base font-bold">Ventas</CardTitle>
                               <CardDescription className="text-[9px] md:text-[10px]">
                                    {period === 'day' && 'Hoy'}
                                    {period === 'week' && 'Esta semana'}

@@ -11,14 +11,14 @@ export function ProjectionsSummary() {
      ];
 
      return (
-          <Card className="neumorphic border-0 bg-black/40">
-               <CardHeader className="pb-2 px-3 md:px-4 pt-3">
-                    <CardTitle className="text-base md:text-lg font-bold text-white">📈 Proyecciones</CardTitle>
-                    <CardDescription className="text-xs text-gray-400">
+          <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
+               <CardHeader className="pb-2 px-4 pt-4">
+                    <CardTitle className="text-sm md:text-base font-bold">Proyecciones</CardTitle>
+                    <CardDescription className="text-xs">
                          Próximos agotamientos
                     </CardDescription>
                </CardHeader>
-               <CardContent className="px-3 md:px-4 pb-3">
+               <CardContent className="px-4 pb-4">
                     {/* Mini neon chart */}
                     <div className="relative h-24 mb-3">
                          <svg width="100%" height="100%" viewBox="0 0 200 80" preserveAspectRatio="none">
@@ -30,8 +30,9 @@ export function ProjectionsSummary() {
                                         y1={i * 20}
                                         x2="200"
                                         y2={i * 20}
-                                        stroke="rgba(255,255,255,0.05)"
+                                        stroke="currentColor"
                                         strokeWidth="0.5"
+                                        className="text-muted-foreground/20"
                                    />
                               ))}
 
@@ -72,12 +73,12 @@ export function ProjectionsSummary() {
                     <div className="space-y-2">
                          {projections.map((item, i) => (
                               <div key={i} className="flex items-center justify-between text-xs">
-                                   <span className="text-gray-300">{item.name}</span>
+                                   <span className="text-foreground">{item.name}</span>
                                    <div className="flex items-center gap-2">
-                                        <span className="text-gray-400">{item.daysLeft}d</span>
+                                        <span className="text-muted-foreground">{item.daysLeft}d</span>
                                         <div className={`w-1.5 h-1.5 rounded-full ${item.trend === 'down' ? 'bg-red-500' :
-                                                  item.trend === 'stable' ? 'bg-amber-500' :
-                                                       'bg-green-500'
+                                             item.trend === 'stable' ? 'bg-amber-500' :
+                                                  'bg-green-500'
                                              }`} style={{
                                                   boxShadow: item.trend === 'down' ? '0 0 4px rgba(239, 68, 68, 0.8)' :
                                                        item.trend === 'stable' ? '0 0 4px rgba(245, 158, 11, 0.8)' :
