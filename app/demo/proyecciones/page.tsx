@@ -3,17 +3,21 @@
 import { useState } from 'react';
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { DemoSidebar } from "@/components/demo-sidebar"
 import { useLanguage } from "@/hooks/use-language"
 import { InventoryProjectionChart } from "@/components/inventory-projection-chart"
 import { SalesProjectionChart } from "@/components/sales-projection-chart"
 import { OrderSuggestionsTable } from "@/components/order-suggestions-table"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, Flame } from "lucide-react"
 
 export default function ProyeccionesPage() {
   const { t } = useLanguage();
   const [period, setPeriod] = useState<'week' | 'month'>('week');
+  const [highSeason, setHighSeason] = useState(false);
 
   const handleRefresh = () => {
     // TODO: Implementar lógica de actualización de proyecciones
@@ -39,34 +43,65 @@ export default function ProyeccionesPage() {
       <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <div>
               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                 {t('smartProjections')}
               </h2>
               <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
             </div>
-            <Button
-              className="neumorphic-hover border-0"
-              onClick={handleRefresh}
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              {t('updateProjections')}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                className="neumorphic-hover border-0"
+                onClick={handleRefresh}
+                size="sm"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {t('updateProjections')}
+              </Button>
+            </div>
           </div>
 
-          {/* Period Selector */}
-          <Tabs value={period} onValueChange={(value) => setPeriod(value as 'week' | 'month')} className="w-full mb-6">
-            <TabsList className="neumorphic border-0">
-              <TabsTrigger value="week">{t('week')}</TabsTrigger>
-              <TabsTrigger value="month">{t('month')}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Controls Section */}
+          <Card className="neumorphic border-0 mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                {/* Period Selector */}
+                <div className="flex items-center gap-3">
+                  <Label className="text-sm font-medium">Temporalidad:</Label>
+                  <Tabs value={period} onValueChange={(value) => setPeriod(value as 'week' | 'month')}>
+                    <TabsList className="neumorphic border-0">
+                      <TabsTrigger value="week">{t('week')}</TabsTrigger>
+                      <TabsTrigger value="month">{t('month')}</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                {/* High Season Toggle */}
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <Flame className={`w-5 h-5 ${highSeason ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                  <div className="flex flex-col">
+                    <Label htmlFor="high-season" className="text-sm font-medium cursor-pointer">
+                      Temporada Alta
+                    </Label>
+                    <span className="text-xs text-muted-foreground">
+                      {highSeason ? 'Demanda aumentada (+30-40%)' : 'Demanda normal'}
+                    </span>
+                  </div>
+                  <Switch
+                    id="high-season"
+                    checked={highSeason}
+                    onCheckedChange={setHighSeason}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Charts Section */}
           <div className="space-y-6 mb-8">
-            <InventoryProjectionChart period={period} />
-            <SalesProjectionChart period={period} />
+            <InventoryProjectionChart period={period} highSeason={highSeason} />
+            <SalesProjectionChart period={period} highSeason={highSeason} />
           </div>
 
           {/* Order Suggestions Table */}
@@ -76,9 +111,13 @@ export default function ProyeccionesPage() {
 
           {/* Info Card */}
           <div className="mt-6 p-4 rounded-lg bg-muted/30 border border-muted">
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>📊 Metodología:</strong> Las proyecciones utilizan <strong>regresión lineal</strong> sobre datos históricos
+              para estimar tendencias futuras de inventario y ventas.
+            </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Nota:</strong> Las proyecciones se calculan automáticamente basándose en el historial de ventas
-              y consumo de inventario. Los pedidos sugeridos se actualizan diariamente para optimizar tu stock.
+              <strong>🔥 Temporada Alta:</strong> Activa este modo durante períodos de alta demanda (festividades, eventos especiales)
+              para ajustar las proyecciones automáticamente. Los pedidos sugeridos se actualizan en tiempo real.
             </p>
           </div>
         </div>
