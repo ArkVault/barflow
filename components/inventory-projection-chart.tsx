@@ -142,74 +142,156 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                     </div>
                </CardHeader>
                <CardContent>
-                    <ResponsiveContainer width="100%" height={320}>
+                    <ResponsiveContainer width="100%" height={340}>
                          <LineChart data={chartData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                              <defs>
+                                   {/* Gradiente para línea de inventario real */}
+                                   <linearGradient id="actualGradient" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#4A90E2" stopOpacity={1} />
+                                        <stop offset="50%" stopColor="#5AB9EA" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#87CEEB" stopOpacity={1} />
+                                   </linearGradient>
+
+                                   {/* Gradiente para línea proyectada */}
+                                   <linearGradient id="projectedGradient" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#87CEEB" stopOpacity={0.9} />
+                                        <stop offset="50%" stopColor="#B0E0E6" stopOpacity={0.9} />
+                                        <stop offset="100%" stopColor="#E0F4FF" stopOpacity={0.9} />
+                                   </linearGradient>
+
+                                   {/* Gradiente para línea crítica */}
+                                   <linearGradient id="criticalGradient" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                                        <stop offset="50%" stopColor="#f87171" stopOpacity={0.8} />
+                                        <stop offset="100%" stopColor="#fca5a5" stopOpacity={0.8} />
+                                   </linearGradient>
+                              </defs>
+
+                              <CartesianGrid
+                                   strokeDasharray="3 3"
+                                   stroke="rgba(255,255,255,0.05)"
+                                   vertical={false}
+                              />
                               <XAxis
                                    dataKey="day"
-                                   stroke="rgba(255,255,255,0.5)"
-                                   style={{ fontSize: '12px' }}
+                                   stroke="rgba(255,255,255,0.3)"
+                                   style={{ fontSize: '11px', fontWeight: '500' }}
+                                   axisLine={false}
+                                   tickLine={false}
                               />
                               <YAxis
-                                   stroke="rgba(255,255,255,0.5)"
-                                   style={{ fontSize: '12px' }}
-                                   label={{ value: 'Unidades', angle: -90, position: 'insideLeft', style: { fontSize: '12px' } }}
+                                   stroke="rgba(255,255,255,0.3)"
+                                   style={{ fontSize: '11px', fontWeight: '500' }}
+                                   axisLine={false}
+                                   tickLine={false}
+                                   label={{
+                                        value: 'Unidades',
+                                        angle: -90,
+                                        position: 'insideLeft',
+                                        style: { fontSize: '11px', fill: 'rgba(255,255,255,0.5)' }
+                                   }}
                               />
                               <Tooltip
                                    contentStyle={{
-                                        backgroundColor: 'rgba(0,0,0,0.8)',
-                                        border: '1px solid rgba(255,255,255,0.2)',
-                                        borderRadius: '8px'
+                                        backgroundColor: 'rgba(0,0,0,0.9)',
+                                        border: '1px solid rgba(135, 206, 235, 0.3)',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 0 20px rgba(135, 206, 235, 0.2)'
                                    }}
                                    formatter={(value: any) => [value ? `${value} unidades` : 'N/A', '']}
+                                   labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}
                               />
-                              <Legend />
+                              <Legend
+                                   wrapperStyle={{ paddingTop: '20px' }}
+                                   iconType="circle"
+                              />
+
+                              {/* Línea de inventario real con efecto neon */}
                               <Line
                                    type="monotone"
                                    dataKey="actual"
-                                   stroke="#4A90E2"
-                                   strokeWidth={3}
+                                   stroke="url(#actualGradient)"
+                                   strokeWidth={4}
                                    name="Inventario Real"
-                                   dot={{ fill: '#4A90E2', r: 5 }}
+                                   dot={{
+                                        fill: '#4A90E2',
+                                        r: 6,
+                                        strokeWidth: 2,
+                                        stroke: '#fff',
+                                        filter: 'drop-shadow(0 0 8px rgba(74, 144, 226, 0.8))'
+                                   }}
+                                   activeDot={{
+                                        r: 8,
+                                        fill: '#4A90E2',
+                                        stroke: '#fff',
+                                        strokeWidth: 2,
+                                        filter: 'drop-shadow(0 0 12px rgba(74, 144, 226, 1))'
+                                   }}
                                    connectNulls={false}
+                                   filter="drop-shadow(0 0 8px rgba(74, 144, 226, 0.6))"
                               />
+
+                              {/* Línea proyectada con efecto neon */}
                               <Line
                                    type="monotone"
                                    dataKey="proyectado"
-                                   stroke="#87CEEB"
-                                   strokeWidth={3}
+                                   stroke="url(#projectedGradient)"
+                                   strokeWidth={4}
                                    strokeDasharray="8 4"
                                    name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
-                                   dot={{ fill: '#87CEEB', r: 5 }}
+                                   dot={{
+                                        fill: '#87CEEB',
+                                        r: 6,
+                                        strokeWidth: 2,
+                                        stroke: '#fff',
+                                        filter: 'drop-shadow(0 0 8px rgba(135, 206, 235, 0.8))'
+                                   }}
+                                   activeDot={{
+                                        r: 8,
+                                        fill: '#87CEEB',
+                                        stroke: '#fff',
+                                        strokeWidth: 2,
+                                        filter: 'drop-shadow(0 0 12px rgba(135, 206, 235, 1))'
+                                   }}
                                    connectNulls={false}
+                                   filter="drop-shadow(0 0 8px rgba(135, 206, 235, 0.6))"
                               />
+
+                              {/* Línea crítica con efecto neon sutil */}
                               <Line
                                    type="monotone"
                                    dataKey="minimo"
-                                   stroke="#ef4444"
+                                   stroke="url(#criticalGradient)"
                                    strokeWidth={2}
-                                   strokeDasharray="3 3"
+                                   strokeDasharray="4 4"
                                    name="Nivel Crítico"
                                    dot={false}
+                                   filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.4))"
                               />
                          </LineChart>
                     </ResponsiveContainer>
-                    <div className="mt-4 grid grid-cols-3 gap-4 text-xs">
+
+                    <div className="mt-6 grid grid-cols-3 gap-4 text-xs">
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#4A90E2]"></div>
-                              <span className="text-muted-foreground">Inventario Real</span>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#4A90E2] to-[#87CEEB]"
+                                   style={{ boxShadow: '0 0 8px rgba(74, 144, 226, 0.6)' }}></div>
+                              <span className="text-muted-foreground font-medium">Inventario Real</span>
                          </div>
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-[#87CEEB]"></div>
-                              <span className="text-muted-foreground">Proyección (Regresión)</span>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#87CEEB] to-[#E0F4FF]"
+                                   style={{ boxShadow: '0 0 8px rgba(135, 206, 235, 0.6)' }}></div>
+                              <span className="text-muted-foreground font-medium">Proyección</span>
                          </div>
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                              <span className="text-muted-foreground">Nivel Crítico</span>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 to-red-300"
+                                   style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.4)' }}></div>
+                              <span className="text-muted-foreground font-medium">Nivel Crítico</span>
                          </div>
                     </div>
+
                     {highSeason && (
-                         <div className="mt-3 p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                         <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
+                              style={{ boxShadow: '0 0 12px rgba(245, 158, 11, 0.1)' }}>
                               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                                    ⚠️ Temporada Alta: Proyección ajustada con +30% de demanda
                               </p>
