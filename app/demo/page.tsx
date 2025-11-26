@@ -208,14 +208,12 @@ export default function DemoPage() {
               </Link>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
                   className="neumorphic-hover border-0"
                   onClick={handleReconfigure}
                 >
                   ⚙️ {t('reconfigurePlan')}
                 </Button>
                 <Button
-                  variant="outline"
                   className="neumorphic-hover border-0"
                   onClick={() => signOut()}
                 >
