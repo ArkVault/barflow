@@ -217,10 +217,10 @@ export default function DemoPage() {
             {/* Main Content Grid - Compact Layout */}
             {/* Top Row: Inventario + Productos (2 columns) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-              {/* 1. INVENTARIO - Mosaic Plot */}
+              {/* 1. INVENTARIO - Half Donut Chart */}
               <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
                 <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
-                  <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Inventario</CardTitle>
+                  <CardTitle className="text-xs md:text-sm font-bold">Inventario</CardTitle>
                 </CardHeader>
                 <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
                   <NeonDonutChart
@@ -240,12 +240,12 @@ export default function DemoPage() {
               {/* 2. PRODUCTOS - Large Number Display */}
               <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
                 <CardHeader className="pb-1 px-2 md:px-3 pt-2 md:pt-3">
-                  <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Productos</CardTitle>
+                  <CardTitle className="text-xs md:text-sm font-bold">Productos</CardTitle>
                   <CardDescription className="text-[10px]">Menú actual</CardDescription>
                 </CardHeader>
                 <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
-                  <div className="flex flex-col items-center justify-center py-4 md:py-6">
-                    <p className="text-5xl md:text-6xl font-black text-primary mb-1" style={{
+                  <div className="flex flex-col items-center justify-center py-4 md:py-5">
+                    <p className="text-4xl md:text-5xl font-black text-primary mb-1" style={{
                       fontFamily: 'Satoshi, sans-serif',
                       textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
                     }}>
@@ -278,7 +278,7 @@ export default function DemoPage() {
             {/* Info Text - Compact */}
             <div className="p-1.5 rounded-lg bg-muted/50 border border-border">
               <p className="text-[9px] md:text-[10px] text-muted-foreground">
-                💡 <strong>Panel de Control</strong> - Resumen de tu negocio.
+                <strong>Panel de Control</strong> - Resumen de tu negocio.
                 Para gestionar inventario, ve a{' '}
                 <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
                   Insumos
