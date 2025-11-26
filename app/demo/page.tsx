@@ -208,13 +208,15 @@ export default function DemoPage() {
               </Link>
               <div className="flex items-center gap-2">
                 <Button
-                  className="neumorphic-hover border-0 rounded-full"
+                  variant="outline"
+                  className="border-0 hover:bg-accent/50"
                   onClick={handleReconfigure}
                 >
                   ⚙️ {t('reconfigurePlan')}
                 </Button>
                 <Button
-                  className="neumorphic-hover border-0 rounded-full"
+                  variant="outline"
+                  className="border-0 hover:bg-accent/50"
                   onClick={() => signOut()}
                 >
                   Cerrar Sesión
