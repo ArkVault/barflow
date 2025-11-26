@@ -257,7 +257,7 @@ export default function ProductosPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="ghost"
-                        className="neumorphic border-0 bg-background/50 hover:bg-background/80"
+                        className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -270,7 +270,7 @@ export default function ProductosPage() {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="neumorphic border-0 bg-background/50 hover:bg-destructive/10 hover:text-destructive"
+                        className="neumorphic border-0 bg-background/50 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-0 focus-visible:ring-0"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
