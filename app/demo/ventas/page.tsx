@@ -8,12 +8,12 @@ import { DemoSidebar } from "@/components/demo-sidebar"
 import { useLanguage } from "@/hooks/use-language"
 
 const sales = [
-  { id: 1, time: '18:45', product: 'Mojito Clásico', quantity: 2, total: 17.00 },
-  { id: 2, time: '18:52', product: 'Margarita', quantity: 1, total: 9.00 },
-  { id: 3, time: '19:10', product: 'Cerveza Corona', quantity: 4, total: 20.00 },
-  { id: 4, time: '19:25', product: 'Piña Colada', quantity: 2, total: 20.00 },
-  { id: 5, time: '19:40', product: 'Cuba Libre', quantity: 3, total: 22.50 },
-  { id: 6, time: '20:05', product: 'Tequila Shot', quantity: 6, total: 36.00 },
+  { id: 1, date: '2024-11-25', time: '18:45', product: 'Mojito Clásico', unitPrice: 8.50, quantity: 2, total: 17.00 },
+  { id: 2, date: '2024-11-25', time: '18:52', product: 'Margarita', unitPrice: 9.00, quantity: 1, total: 9.00 },
+  { id: 3, date: '2024-11-25', time: '19:10', product: 'Cerveza Corona', unitPrice: 5.00, quantity: 4, total: 20.00 },
+  { id: 4, date: '2024-11-25', time: '19:25', product: 'Piña Colada', unitPrice: 10.00, quantity: 2, total: 20.00 },
+  { id: 5, date: '2024-11-25', time: '19:40', product: 'Cuba Libre', unitPrice: 7.50, quantity: 3, total: 22.50 },
+  { id: 6, date: '2024-11-25', time: '20:05', product: 'Tequila Shot', unitPrice: 6.00, quantity: 6, total: 36.00 },
 ]
 
 export default function VentasPage() {
@@ -68,8 +68,10 @@ export default function VentasPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Fecha</TableHead>
                   <TableHead>{t('time')}</TableHead>
                   <TableHead>{t('product')}</TableHead>
+                  <TableHead>Precio Unitario</TableHead>
                   <TableHead>{t('quantity')}</TableHead>
                   <TableHead className="text-right">{t('total')}</TableHead>
                 </TableRow>
@@ -77,8 +79,10 @@ export default function VentasPage() {
               <TableBody>
                 {sales.map((sale) => (
                   <TableRow key={sale.id}>
+                    <TableCell>{new Date(sale.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</TableCell>
                     <TableCell>{sale.time}</TableCell>
                     <TableCell className="font-medium">{sale.product}</TableCell>
+                    <TableCell>${sale.unitPrice.toFixed(2)}</TableCell>
                     <TableCell>{sale.quantity}x</TableCell>
                     <TableCell className="text-right font-bold">${sale.total.toFixed(2)}</TableCell>
                   </TableRow>
