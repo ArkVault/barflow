@@ -35,62 +35,64 @@ export default function VentasPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('salesAccounting')}</h2>
-            <p className="text-muted-foreground">{t('transactionLog')}</p>
+      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('salesAccounting')}</h2>
+              <p className="text-muted-foreground">{t('transactionLog')}</p>
+            </div>
+            <Button className="neumorphic-hover border-0">+ {t('registerSale')}</Button>
           </div>
-          <Button className="neumorphic-hover border-0">+ {t('registerSale')}</Button>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="neumorphic border-0 p-6">
-            <div className="text-sm text-muted-foreground mb-1">Ventas Hoy</div>
-            <div className="text-3xl font-bold text-green-600">$4,250</div>
-            <div className="text-xs text-muted-foreground mt-1">+15% vs ayer</div>
-          </Card>
-          <Card className="neumorphic border-0 p-6">
-            <div className="text-sm text-muted-foreground mb-1">Transacciones</div>
-            <div className="text-3xl font-bold">87</div>
-            <div className="text-xs text-muted-foreground mt-1">Hoy</div>
-          </Card>
-          <Card className="neumorphic border-0 p-6">
-            <div className="text-sm text-muted-foreground mb-1">Ticket Promedio</div>
-            <div className="text-3xl font-bold">$48.85</div>
-            <div className="text-xs text-muted-foreground mt-1">+8% vs ayer</div>
-          </Card>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="neumorphic border-0 p-6">
+              <div className="text-sm text-muted-foreground mb-1">Ventas Hoy</div>
+              <div className="text-3xl font-bold text-green-600">$4,250</div>
+              <div className="text-xs text-muted-foreground mt-1">+15% vs ayer</div>
+            </Card>
+            <Card className="neumorphic border-0 p-6">
+              <div className="text-sm text-muted-foreground mb-1">Transacciones</div>
+              <div className="text-3xl font-bold">87</div>
+              <div className="text-xs text-muted-foreground mt-1">Hoy</div>
+            </Card>
+            <Card className="neumorphic border-0 p-6">
+              <div className="text-sm text-muted-foreground mb-1">Ticket Promedio</div>
+              <div className="text-3xl font-bold">$48.85</div>
+              <div className="text-xs text-muted-foreground mt-1">+8% vs ayer</div>
+            </Card>
+          </div>
 
-        <Card className="neumorphic border-0 mb-6">
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-4">{t('recentTransactions')}</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>{t('time')}</TableHead>
-                  <TableHead>{t('product')}</TableHead>
-                  <TableHead>Precio Unitario</TableHead>
-                  <TableHead>{t('quantity')}</TableHead>
-                  <TableHead className="text-right">{t('total')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sales.map((sale) => (
-                  <TableRow key={sale.id}>
-                    <TableCell>{new Date(sale.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</TableCell>
-                    <TableCell>{sale.time}</TableCell>
-                    <TableCell className="font-medium">{sale.product}</TableCell>
-                    <TableCell>${sale.unitPrice.toFixed(2)}</TableCell>
-                    <TableCell>{sale.quantity}x</TableCell>
-                    <TableCell className="text-right font-bold">${sale.total.toFixed(2)}</TableCell>
+          <Card className="neumorphic border-0 mb-6">
+            <div className="p-6">
+              <h3 className="text-xl font-bold mb-4">{t('recentTransactions')}</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>{t('time')}</TableHead>
+                    <TableHead>{t('product')}</TableHead>
+                    <TableHead>Precio Unitario</TableHead>
+                    <TableHead>{t('quantity')}</TableHead>
+                    <TableHead className="text-right">{t('total')}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {sales.map((sale) => (
+                    <TableRow key={sale.id}>
+                      <TableCell>{new Date(sale.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</TableCell>
+                      <TableCell>{sale.time}</TableCell>
+                      <TableCell className="font-medium">{sale.product}</TableCell>
+                      <TableCell>${sale.unitPrice.toFixed(2)}</TableCell>
+                      <TableCell>{sale.quantity}x</TableCell>
+                      <TableCell className="text-right font-bold">${sale.total.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   )

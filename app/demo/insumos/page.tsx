@@ -162,127 +162,129 @@ export default function InsumosPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('supplyManagement')}</h2>
-            <p className="text-muted-foreground">{t('inventoryControl')}</p>
-          </div>
-          <Link href="/demo/planner">
-            <Button className="neumorphic-hover border-0">+ {t('addSupply')}</Button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card
-            className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'critical' ? 'ring-2 ring-destructive' : ''
-              }`}
-            onClick={() => setStatusFilter(statusFilter === 'critical' ? 'all' : 'critical')}
-          >
-            <div className="text-sm text-muted-foreground mb-1">{t('criticalStock')}</div>
-            <div className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalCount}</div>
-          </Card>
-          <Card
-            className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''
-              }`}
-            onClick={() => setStatusFilter(statusFilter === 'low' ? 'all' : 'low')}
-          >
-            <div className="text-sm text-muted-foreground mb-1">{t('lowStock')}</div>
-            <div className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowCount}</div>
-          </Card>
-          <Card
-            className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''
-              }`}
-            onClick={() => setStatusFilter(statusFilter === 'ok' ? 'all' : 'ok')}
-          >
-            <div className="text-sm text-muted-foreground mb-1">{t('goodStock')}</div>
-            <div className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{okCount}</div>
-          </Card>
-          <Card
-            className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''
-              }`}
-            onClick={() => setStatusFilter('all')}
-          >
-            <div className="text-sm text-muted-foreground mb-1">{t('allSupplies')}</div>
-            <div className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{supplies.length}</div>
-          </Card>
-        </div>
-
-        {supplies.length === 0 ? (
-          <Card className="neumorphic border-0 p-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              No tienes insumos registrados aún.
-            </p>
+      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('supplyManagement')}</h2>
+              <p className="text-muted-foreground">{t('inventoryControl')}</p>
+            </div>
             <Link href="/demo/planner">
-              <Button>
-                Ir al Planner para agregar insumos
-              </Button>
+              <Button className="neumorphic-hover border-0">+ {t('addSupply')}</Button>
             </Link>
-          </Card>
-        ) : (
-          <Card className="neumorphic border-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('name')}</TableHead>
-                  <TableHead>{t('category')}</TableHead>
-                  <TableHead>{t('quantity')}</TableHead>
-                  <TableHead>{t('optimal')}</TableHead>
-                  <TableHead>{t('status')}</TableHead>
-                  <TableHead className="text-right">{t('actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSupplies.map((supply) => (
-                  <TableRow key={supply.id}>
-                    <TableCell className="font-medium">{supply.name}</TableCell>
-                    <TableCell>{translateCategory(supply.category)}</TableCell>
-                    <TableCell>{supply.current_quantity} {supply.unit}</TableCell>
-                    <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.unit}</TableCell>
-                    <TableCell>
-                      <StockHalfCircle
-                        percentage={
-                          supply.optimal_quantity
-                            ? (supply.current_quantity / supply.optimal_quantity) * 100
-                            : (supply.current_quantity / supply.min_threshold) * 100
-                        }
-                        status={supply.status}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(supply)}
-                        className="mr-2"
-                      >
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(supply)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Eliminar
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        )}
+          </div>
 
-        {/* Edit Dialog */}
-        <EditSupplyDialog
-          supply={editingSupply}
-          open={showEditDialog}
-          onOpenChange={setShowEditDialog}
-          onSuccess={handleEditSuccess}
-        />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card
+              className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'critical' ? 'ring-2 ring-destructive' : ''
+                }`}
+              onClick={() => setStatusFilter(statusFilter === 'critical' ? 'all' : 'critical')}
+            >
+              <div className="text-sm text-muted-foreground mb-1">{t('criticalStock')}</div>
+              <div className="text-5xl font-black text-red-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{criticalCount}</div>
+            </Card>
+            <Card
+              className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'low' ? 'ring-2 ring-amber-500' : ''
+                }`}
+              onClick={() => setStatusFilter(statusFilter === 'low' ? 'all' : 'low')}
+            >
+              <div className="text-sm text-muted-foreground mb-1">{t('lowStock')}</div>
+              <div className="text-5xl font-black text-amber-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{lowCount}</div>
+            </Card>
+            <Card
+              className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'ok' ? 'ring-2 ring-green-500' : ''
+                }`}
+              onClick={() => setStatusFilter(statusFilter === 'ok' ? 'all' : 'ok')}
+            >
+              <div className="text-sm text-muted-foreground mb-1">{t('goodStock')}</div>
+              <div className="text-5xl font-black text-green-600" style={{ fontFamily: 'Satoshi, sans-serif' }}>{okCount}</div>
+            </Card>
+            <Card
+              className={`neumorphic border-0 p-6 cursor-pointer transition-all hover:scale-105 ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''
+                }`}
+              onClick={() => setStatusFilter('all')}
+            >
+              <div className="text-sm text-muted-foreground mb-1">{t('allSupplies')}</div>
+              <div className="text-5xl font-black" style={{ fontFamily: 'Satoshi, sans-serif' }}>{supplies.length}</div>
+            </Card>
+          </div>
+
+          {supplies.length === 0 ? (
+            <Card className="neumorphic border-0 p-12 text-center">
+              <p className="text-muted-foreground mb-4">
+                No tienes insumos registrados aún.
+              </p>
+              <Link href="/demo/planner">
+                <Button>
+                  Ir al Planner para agregar insumos
+                </Button>
+              </Link>
+            </Card>
+          ) : (
+            <Card className="neumorphic border-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('name')}</TableHead>
+                    <TableHead>{t('category')}</TableHead>
+                    <TableHead>{t('quantity')}</TableHead>
+                    <TableHead>{t('optimal')}</TableHead>
+                    <TableHead>{t('status')}</TableHead>
+                    <TableHead className="text-right">{t('actions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSupplies.map((supply) => (
+                    <TableRow key={supply.id}>
+                      <TableCell className="font-medium">{supply.name}</TableCell>
+                      <TableCell>{translateCategory(supply.category)}</TableCell>
+                      <TableCell>{supply.current_quantity} {supply.unit}</TableCell>
+                      <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.unit}</TableCell>
+                      <TableCell>
+                        <StockHalfCircle
+                          percentage={
+                            supply.optimal_quantity
+                              ? (supply.current_quantity / supply.optimal_quantity) * 100
+                              : (supply.current_quantity / supply.min_threshold) * 100
+                          }
+                          status={supply.status}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(supply)}
+                          className="mr-2"
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(supply)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+
+          {/* Edit Dialog */}
+          <EditSupplyDialog
+            supply={editingSupply}
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            onSuccess={handleEditSuccess}
+          />
+        </div>
       </div>
     </div>
   )

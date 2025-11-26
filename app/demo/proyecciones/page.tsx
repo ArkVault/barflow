@@ -49,125 +49,127 @@ export default function ProyeccionesPage() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-6 py-8 ml-0 md:ml-20 lg:ml-72">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('smartProjections')}</h2>
-            <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
+      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('smartProjections')}</h2>
+              <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
+            </div>
+            <Button className="neumorphic-hover border-0">🔄 {t('updateProjections')}</Button>
           </div>
-          <Button className="neumorphic-hover border-0">🔄 {t('updateProjections')}</Button>
+
+          <Tabs defaultValue="day" className="w-full">
+            <TabsList className="neumorphic border-0 mb-6">
+              <TabsTrigger value="day">{t('day')}</TabsTrigger>
+              <TabsTrigger value="week">{t('week')}</TabsTrigger>
+              <TabsTrigger value="month">{t('month')}</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="day" className="space-y-4">
+              <Card className="neumorphic border-0 mb-6">
+                <CardHeader>
+                  <CardTitle>Proyección Diaria</CardTitle>
+                  <CardDescription>Consumo estimado para las próximas 24 horas</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <div className="grid gap-4">
+                {projections.day.map((item, index) => (
+                  <Card key={index} className="neumorphic border-0">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg">{item.supply}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Stock actual: {item.current} L • Necesitas: {item.needed} L
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {item.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
+                          {item.status === 'low' && <Badge className="bg-amber-600">Atención</Badge>}
+                          {item.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
+                        </div>
+                      </div>
+                      <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Duración estimada: {item.days.toFixed(1)} días
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="week" className="space-y-4">
+              <Card className="neumorphic border-0 mb-6">
+                <CardHeader>
+                  <CardTitle>Proyección Semanal</CardTitle>
+                  <CardDescription>Consumo estimado para los próximos 7 días</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <div className="grid gap-4">
+                {projections.week.map((item, index) => (
+                  <Card key={index} className="neumorphic border-0">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg">{item.supply}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Stock actual: {item.current} L • Necesitas: {item.needed} L
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {item.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
+                          {item.status === 'low' && <Badge className="bg-amber-600">Atención</Badge>}
+                          {item.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
+                        </div>
+                      </div>
+                      <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        ⚠️ Necesitas comprar {(item.needed - item.current).toFixed(1)} L más
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="month" className="space-y-4">
+              <Card className="neumorphic border-0 mb-6">
+                <CardHeader>
+                  <CardTitle>Proyección Mensual</CardTitle>
+                  <CardDescription>Consumo estimado para los próximos 30 días</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <div className="grid gap-4">
+                {projections.month.map((item, index) => (
+                  <Card key={index} className="neumorphic border-0">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg">{item.supply}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Stock actual: {item.current} L • Necesitas: {item.needed} L
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="destructive">Crítico</Badge>
+                        </div>
+                      </div>
+                      <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        🛒 Necesitas comprar {(item.needed - item.current).toFixed(1)} L más
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
-
-        <Tabs defaultValue="day" className="w-full">
-          <TabsList className="neumorphic border-0 mb-6">
-            <TabsTrigger value="day">{t('day')}</TabsTrigger>
-            <TabsTrigger value="week">{t('week')}</TabsTrigger>
-            <TabsTrigger value="month">{t('month')}</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="day" className="space-y-4">
-            <Card className="neumorphic border-0 mb-6">
-              <CardHeader>
-                <CardTitle>Proyección Diaria</CardTitle>
-                <CardDescription>Consumo estimado para las próximas 24 horas</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <div className="grid gap-4">
-              {projections.day.map((item, index) => (
-                <Card key={index} className="neumorphic border-0">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-bold text-lg">{item.supply}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Stock actual: {item.current} L • Necesitas: {item.needed} L
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        {item.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
-                        {item.status === 'low' && <Badge className="bg-amber-600">Atención</Badge>}
-                        {item.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
-                      </div>
-                    </div>
-                    <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Duración estimada: {item.days.toFixed(1)} días
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="week" className="space-y-4">
-            <Card className="neumorphic border-0 mb-6">
-              <CardHeader>
-                <CardTitle>Proyección Semanal</CardTitle>
-                <CardDescription>Consumo estimado para los próximos 7 días</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <div className="grid gap-4">
-              {projections.week.map((item, index) => (
-                <Card key={index} className="neumorphic border-0">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-bold text-lg">{item.supply}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Stock actual: {item.current} L • Necesitas: {item.needed} L
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        {item.status === 'ok' && <Badge className="bg-green-600">Bien</Badge>}
-                        {item.status === 'low' && <Badge className="bg-amber-600">Atención</Badge>}
-                        {item.status === 'critical' && <Badge variant="destructive">Crítico</Badge>}
-                      </div>
-                    </div>
-                    <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      ⚠️ Necesitas comprar {(item.needed - item.current).toFixed(1)} L más
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="month" className="space-y-4">
-            <Card className="neumorphic border-0 mb-6">
-              <CardHeader>
-                <CardTitle>Proyección Mensual</CardTitle>
-                <CardDescription>Consumo estimado para los próximos 30 días</CardDescription>
-              </CardHeader>
-            </Card>
-
-            <div className="grid gap-4">
-              {projections.month.map((item, index) => (
-                <Card key={index} className="neumorphic border-0">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-bold text-lg">{item.supply}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Stock actual: {item.current} L • Necesitas: {item.needed} L
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="destructive">Crítico</Badge>
-                      </div>
-                    </div>
-                    <Progress value={(item.current / (item.current + item.needed)) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      🛒 Necesitas comprar {(item.needed - item.current).toFixed(1)} L más
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   )
