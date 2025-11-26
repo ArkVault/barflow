@@ -181,7 +181,7 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <main className="container mx-auto px-2 md:px-3 py-2 md:py-3 ml-0 md:ml-20 lg:ml-72 max-h-screen overflow-y-auto">
+          <main className="mx-auto px-2 md:px-3 py-2 md:py-3 ml-0 md:ml-20 lg:ml-72 max-w-[calc(100vw-288px-2rem)] max-h-screen overflow-y-auto">
             {/* Header - Compact */}
             <div className="mb-2 md:mb-3">
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2">
@@ -244,7 +244,7 @@ export default function DemoPage() {
                   <CardDescription className="text-[10px]">Menú actual</CardDescription>
                 </CardHeader>
                 <CardContent className="px-2 md:px-3 pb-2 md:pb-3">
-                  <div className="flex flex-col items-center justify-center py-4 md:py-5">
+                  <div className="flex flex-col items-center justify-center py-3 md:py-4">
                     <p className="text-4xl md:text-5xl font-black text-primary mb-1" style={{
                       fontFamily: 'Satoshi, sans-serif',
                       textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
