@@ -329,11 +329,15 @@
 /* Apply sky blue gradient to primary buttons (excluding sidebar and outline/ghost variants) */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
 .btn-sky-gradient {
-  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%) !important;
+  background: transparent !important;
+  /* Make main bg transparent so pseudo-elements show */
   color: white !important;
   position: relative;
   overflow: visible;
+  /* Allow glow to spill out */
   border: none;
+  z-index: 1;
+  /* Ensure text sits on top */
 }
 
 /* Subtle glowing line contour */
@@ -342,14 +346,15 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
   content: '';
   position: absolute;
   inset: -2px;
-  /* Thin line outside */
+  /* Glow extends slightly outside */
   border-radius: inherit;
+  /* Follows button shape exactly */
   padding: 2px;
-  /* Width of the border */
+  /* Width of the glow line */
   background: linear-gradient(90deg,
       transparent 0%,
       rgba(135, 206, 235, 0.0) 20%,
-      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0.9) 50%,
       rgba(135, 206, 235, 0.0) 80%,
       transparent 100%);
   background-size: 200% 100%;
@@ -358,13 +363,14 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.8;
+  opacity: 1;
   animation: border-flow 3s linear infinite;
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
+  /* Behind the text */
 }
 
-/* Ensure background stays solid */
+/* Solid background for the button */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *)::after,
 .btn-sky-gradient::after {
   content: '';
@@ -372,10 +378,11 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
   inset: 0;
   background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
   border-radius: inherit;
-  z-index: 0;
+  z-index: -2;
+  /* Behind the glow border */
 }
 
 /* Restore original neumorphic hover for sidebar buttons */
 aside button[class*="neumorphic-hover"] {
-  /* Original styles are preserved by not applying the overrides above */
+  /* Original styles are preserved */
 }
