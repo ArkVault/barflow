@@ -355,80 +355,114 @@ export default function InsumosPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('name')}</TableHead>
+                    <TableHead>Nombre</TableHead>
                     <TableHead>Marca</TableHead>
                     <TableHead>{t('category')}</TableHead>
-                    <TableHead>Contenido</TableHead>
-                    <TableHead>{t('quantity')}</TableHead>
-                    <TableHead>{t('optimal')}</TableHead>
+                    <TableHead>Contenido x Unidad</TableHead>
+                    <TableHead>Unidades</TableHead>
+                    <TableHead>Cantidad Total</TableHead>
+                    <TableHead>Óptimo</TableHead>
                     <TableHead>{t('status')}</TableHead>
                     <TableHead className="text-right">{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSupplies.map((supply) => (
-                    <TableRow key={supply.id}>
-                      <TableCell className="font-medium">{supply.name}</TableCell>
-                      <TableCell>
-                        {supply.brand ? (
-                          <span className="text-sm text-muted-foreground">{supply.brand}</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">Sin marca</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{translateCategory(supply.category)}</TableCell>
-                      <TableCell>
-                        {supply.content_per_unit && supply.content_unit ? (
-                          <span className="text-sm">
-                            {supply.content_per_unit}{supply.content_unit}
+                  {filteredSupplies.map((supply) => {
+                    // Calculate number of units (bottles/items) from total quantity
+                    const units = supply.content_per_unit && supply.content_per_unit > 0
+                      ? Math.floor(supply.current_quantity / supply.content_per_unit)
+                      : supply.current_quantity;
+
+                    const optimalUnits = supply.content_per_unit && supply.content_per_unit > 0 && supply.optimal_quantity
+                      ? Math.floor(supply.optimal_quantity / supply.content_per_unit)
+                      : supply.optimal_quantity;
+
+                    return (
+                      <TableRow key={supply.id}>
+                        <TableCell className="font-medium">{supply.name}</TableCell>
+                        <TableCell>
+                          {supply.brand ? (
+                            <span className="text-sm">{supply.brand}</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{translateCategory(supply.category)}</TableCell>
+                        <TableCell>
+                          {supply.content_per_unit && supply.content_unit ? (
+                            <span className="text-sm font-medium">
+                              {supply.content_per_unit}{supply.content_unit}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-semibold">{units}</span>
+                          <span className="text-xs text-muted-foreground ml-1">
+                            {supply.content_per_unit ? 'uds' : supply.unit}
                           </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{supply.current_quantity} {supply.content_unit || supply.unit}</TableCell>
-                      <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.content_unit || supply.unit}</TableCell>
-                      <TableCell>
-                        <StockHalfCircle
-                          percentage={
-                            supply.optimal_quantity
-                              ? (supply.current_quantity / supply.optimal_quantity) * 100
-                              : (supply.current_quantity / supply.min_threshold) * 100
-                          }
-                          status={supply.status}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRestock(supply)}
-                          className="mr-2 text-primary hover:text-primary"
-                        >
-                          <ShoppingCart className="h-4 w-4 mr-1" />
-                          Abastecer
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(supply)}
-                          className="mr-2"
-                        >
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Editar
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(supply)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Eliminar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>
+                          {supply.current_quantity} {supply.content_unit || supply.unit}
+                        </TableCell>
+                        <TableCell>
+                          {supply.optimal_quantity ? (
+                            <>
+                              {supply.optimal_quantity} {supply.content_unit || supply.unit}
+                              {optimalUnits && supply.content_per_unit && (
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  ({optimalUnits} uds)
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <StockHalfCircle
+                            percentage={
+                              supply.optimal_quantity
+                                ? (supply.current_quantity / supply.optimal_quantity) * 100
+                                : (supply.current_quantity / supply.min_threshold) * 100
+                            }
+                            status={supply.status}
+
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRestock(supply)}
+                            className="mr-2 text-primary hover:text-primary"
+                          >
+                            <ShoppingCart className="h-4 w-4 mr-1" />
+                            Abastecer
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(supply)}
+                            className="mr-2"
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(supply)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Eliminar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </Card>
