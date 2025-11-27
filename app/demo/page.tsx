@@ -255,23 +255,27 @@ export default function DemoPage() {
                   </div>
 
                   {/* Period Selector */}
-                  <div className="flex gap-2">
-                    <Button
-                      variant={planPeriod === 'week' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPlanPeriod('week')}
-                      className="text-xs h-7 px-3"
+                  <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setPlanPeriod("week")}
+                      className={`px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${planPeriod === "week"
+                        ? "bg-background text-foreground shadow-sm font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
                     >
-                      Semana
-                    </Button>
-                    <Button
-                      variant={planPeriod === 'month' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPlanPeriod('month')}
-                      className="text-xs h-7 px-3"
+                      📅 Semana
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPlanPeriod("month")}
+                      className={`px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${planPeriod === "month"
+                        ? "bg-background text-foreground shadow-sm font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
                     >
-                      Mes
-                    </Button>
+                      📆 Mes
+                    </button>
                   </div>
                 </div>
               </div>
@@ -357,12 +361,12 @@ export default function DemoPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 {/* Ventas */}
                 <SalesChartSimple
-                  period="week"
+                  period={planPeriod === 'week' ? 'week' : 'month'}
                 />
 
                 {/* Proyecciones */}
                 <InventoryProjectionChart
-                  period="week"
+                  period={planPeriod}
                   highSeason={false}
                 />
               </div>
