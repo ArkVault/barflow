@@ -26,6 +26,9 @@ interface Supply {
   unit: string;
   min_threshold: number;
   optimal_quantity?: number;
+  content_per_unit?: number;
+  content_unit?: string;
+  brand?: string;
   status: 'ok' | 'low' | 'critical';
 }
 
@@ -93,6 +96,9 @@ export default function InsumosPage() {
         unit: supply.unit,
         min_threshold: supply.min_threshold,
         optimal_quantity: supply.optimal_quantity,
+        content_per_unit: supply.content_per_unit,
+        content_unit: supply.content_unit,
+        brand: supply.brand,
         status: calculateStockStatus(supply)
       }));
 
@@ -350,7 +356,9 @@ export default function InsumosPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t('name')}</TableHead>
+                    <TableHead>Marca</TableHead>
                     <TableHead>{t('category')}</TableHead>
+                    <TableHead>Contenido</TableHead>
                     <TableHead>{t('quantity')}</TableHead>
                     <TableHead>{t('optimal')}</TableHead>
                     <TableHead>{t('status')}</TableHead>
@@ -361,9 +369,25 @@ export default function InsumosPage() {
                   {filteredSupplies.map((supply) => (
                     <TableRow key={supply.id}>
                       <TableCell className="font-medium">{supply.name}</TableCell>
+                      <TableCell>
+                        {supply.brand ? (
+                          <span className="text-sm text-muted-foreground">{supply.brand}</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">Sin marca</span>
+                        )}
+                      </TableCell>
                       <TableCell>{translateCategory(supply.category)}</TableCell>
-                      <TableCell>{supply.current_quantity} {supply.unit}</TableCell>
-                      <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.unit}</TableCell>
+                      <TableCell>
+                        {supply.content_per_unit && supply.content_unit ? (
+                          <span className="text-sm">
+                            {supply.content_per_unit}{supply.content_unit}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{supply.current_quantity} {supply.content_unit || supply.unit}</TableCell>
+                      <TableCell>{supply.optimal_quantity || supply.min_threshold || 0} {supply.content_unit || supply.unit}</TableCell>
                       <TableCell>
                         <StockHalfCircle
                           percentage={
