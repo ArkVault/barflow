@@ -10,11 +10,13 @@ import { useState, useEffect } from "react"
 import { useLanguage } from "@/hooks/use-language"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import { Loader2, Trash2, Pencil } from "lucide-react"
+import { Loader2, Trash2, Pencil, ShoppingCart, Package } from "lucide-react"
 import { toast } from "sonner"
 import { EditSupplyDialog } from "@/components/edit-supply-dialog"
 import { calculateStockStatus } from "@/lib/stock-utils"
 import { StockHalfCircle } from "@/components/stock-half-circle";
+import { RestockSupplyDialog, type PurchaseItem } from "@/components/restock-supply-dialog";
+import { PurchaseListDialog } from "@/components/purchase-list-dialog";
 
 interface Supply {
   id: string;
@@ -37,6 +39,29 @@ export default function InsumosPage() {
   const [loading, setLoading] = useState(true);
   const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  // Purchase system state
+  const [restockingSupply, setRestockingSupply] = useState<Supply | null>(null);
+  const [showRestockDialog, setShowRestockDialog] = useState(false);
+  const [showPurchaseListDialog, setShowPurchaseListDialog] = useState(false);
+  const [purchaseList, setPurchaseList] = useState<PurchaseItem[]>([]);
+
+  // Load purchase list from localStorage on mount
+  useEffect(() => {
+    const savedList = localStorage.getItem('barflow_purchase_list');
+    if (savedList) {
+      try {
+        setPurchaseList(JSON.parse(savedList));
+      } catch (error) {
+        console.error('Error loading purchase list:', error);
+      }
+    }
+  }, []);
+
+  // Save purchase list to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('barflow_purchase_list', JSON.stringify(purchaseList));
+  }, [purchaseList]);
 
   useEffect(() => {
     if (establishmentId) {
@@ -112,6 +137,87 @@ export default function InsumosPage() {
     fetchSupplies(); // Reload list after edit
   };
 
+  // Purchase system handlers
+  const handleRestock = (supply: Supply) => {
+    setRestockingSupply(supply);
+    setShowRestockDialog(true);
+  };
+
+  const handleAddToCart = (item: PurchaseItem) => {
+    // Check if item already exists in cart
+    const existingIndex = purchaseList.findIndex(p => p.supplyId === item.supplyId);
+
+    if (existingIndex >= 0) {
+      // Update existing item quantity
+      const updated = [...purchaseList];
+      const existingItem = updated[existingIndex];
+
+      // If item is already ordered, don't allow update
+      if (existingItem.status === 'ordered') {
+        toast.warning(`${item.supplyName} ya está en estado "Pedido". Confirma la recepción primero.`);
+        return;
+      }
+
+      // Update the item
+      updated[existingIndex] = {
+        ...item,
+        status: 'pending' // Reset to pending when updating
+      };
+      setPurchaseList(updated);
+      toast.success(`${item.supplyName} actualizado en la lista de compras`);
+    } else {
+      // Add new item
+      setPurchaseList([...purchaseList, item]);
+      toast.success(`${item.supplyName} agregado a la lista de compras`);
+    }
+  };
+
+  const handleRemoveFromCart = (supplyId: string) => {
+    setPurchaseList(purchaseList.filter(item => item.supplyId !== supplyId));
+    toast.success("Item eliminado de la lista de compras");
+  };
+
+  const handleMarkAsOrdered = (supplyId: string) => {
+    setPurchaseList(purchaseList.map(item =>
+      item.supplyId === supplyId
+        ? { ...item, status: 'ordered' as const }
+        : item
+    ));
+  };
+
+  const handleConfirmReceived = async (supplyId: string, quantity: number) => {
+    try {
+      const supabase = createClient();
+
+      // Find the supply to update
+      const supply = supplies.find(s => s.id === supplyId);
+      if (!supply) {
+        toast.error("Insumo no encontrado");
+        return;
+      }
+
+      // Update the supply quantity in database
+      const newQuantity = supply.current_quantity + quantity;
+      const { error } = await supabase
+        .from('supplies')
+        .update({ current_quantity: newQuantity })
+        .eq('id', supplyId);
+
+      if (error) throw error;
+
+      // Remove from purchase list
+      setPurchaseList(purchaseList.filter(item => item.supplyId !== supplyId));
+
+      // Reload supplies
+      await fetchSupplies();
+
+      toast.success(`${supply.name} abastecido: +${quantity} ${supply.unit}`);
+    } catch (error: any) {
+      console.error('Error confirming receipt:', error);
+      toast.error('Error al confirmar recepción: ' + error.message);
+    }
+  };
+
   // Helper function to translate category
   const translateCategory = (category: string) => {
     const categoryMap: Record<string, string> = {
@@ -169,9 +275,27 @@ export default function InsumosPage() {
               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('supplyManagement')}</h2>
               <p className="text-muted-foreground">{t('inventoryControl')}</p>
             </div>
-            <Link href="/demo/planner">
-              <Button className="neumorphic-hover border-0">+ {t('addSupply')}</Button>
-            </Link>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPurchaseListDialog(true)}
+                className="neumorphic-hover border-0 relative"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Insumos a Comprar
+                {purchaseList.length > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="ml-2 px-1.5 py-0 h-5 min-w-[20px] rounded-full"
+                  >
+                    {purchaseList.length}
+                  </Badge>
+                )}
+              </Button>
+              <Link href="/demo/planner">
+                <Button className="neumorphic-hover border-0">+ {t('addSupply')}</Button>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -254,6 +378,15 @@ export default function InsumosPage() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleRestock(supply)}
+                          className="mr-2 text-primary hover:text-primary"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          Abastecer
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleEdit(supply)}
                           className="mr-2"
                         >
@@ -283,6 +416,24 @@ export default function InsumosPage() {
             open={showEditDialog}
             onOpenChange={setShowEditDialog}
             onSuccess={handleEditSuccess}
+          />
+
+          {/* Restock Dialog */}
+          <RestockSupplyDialog
+            supply={restockingSupply}
+            open={showRestockDialog}
+            onOpenChange={setShowRestockDialog}
+            onAddToCart={handleAddToCart}
+          />
+
+          {/* Purchase List Dialog */}
+          <PurchaseListDialog
+            open={showPurchaseListDialog}
+            onOpenChange={setShowPurchaseListDialog}
+            items={purchaseList}
+            onRemoveItem={handleRemoveFromCart}
+            onMarkAsOrdered={handleMarkAsOrdered}
+            onConfirmReceived={handleConfirmReceived}
           />
         </div>
       </div>
