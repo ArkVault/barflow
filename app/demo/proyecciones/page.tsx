@@ -9,9 +9,18 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { DemoSidebar } from "@/components/demo-sidebar"
 import { useLanguage } from "@/hooks/use-language"
-import { InventoryProjectionChart } from "@/components/inventory-projection-chart"
-import { SalesProjectionChart } from "@/components/sales-projection-chart"
+import dynamic from 'next/dynamic';
 import { OrderSuggestionsTable } from "@/components/order-suggestions-table"
+
+// Dynamic imports para optimizar carga
+const InventoryProjectionChart = dynamic(() => import("@/components/inventory-projection-chart").then(mod => mod.InventoryProjectionChart), {
+  loading: () => <div className="h-[340px] w-full animate-pulse bg-muted/20 rounded-lg" />,
+  ssr: false
+});
+const SalesProjectionChart = dynamic(() => import("@/components/sales-projection-chart").then(mod => mod.SalesProjectionChart), {
+  loading: () => <div className="h-[340px] w-full animate-pulse bg-muted/20 rounded-lg" />,
+  ssr: false
+});
 import { RefreshCw, Flame } from "lucide-react"
 
 export default function ProyeccionesPage() {
@@ -40,7 +49,7 @@ export default function ProyeccionesPage() {
         </div>
       </nav>
 
-      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+      <div className="min-h-screen bg-background p-4 ml-0 md:ml-20 lg:ml-72">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -69,12 +78,28 @@ export default function ProyeccionesPage() {
                 {/* Period Selector */}
                 <div className="flex items-center gap-3">
                   <Label className="text-sm font-medium">Temporalidad:</Label>
-                  <Tabs value={period} onValueChange={(value) => setPeriod(value as 'week' | 'month')}>
-                    <TabsList className="neumorphic border-0">
-                      <TabsTrigger value="week">{t('week')}</TabsTrigger>
-                      <TabsTrigger value="month">{t('month')}</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setPeriod("week")}
+                      className={`px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${period === "week"
+                        ? "bg-background text-foreground shadow-sm font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                      📅 {t('week')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPeriod("month")}
+                      className={`px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${period === "month"
+                        ? "bg-background text-foreground shadow-sm font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                        }`}
+                    >
+                      📆 {t('month')}
+                    </button>
+                  </div>
                 </div>
 
                 {/* High Season Toggle */}

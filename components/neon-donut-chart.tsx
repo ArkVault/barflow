@@ -14,11 +14,11 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
      const lowPercent = total > 0 ? (low / total) * 100 : 0;
      const optimalPercent = total > 0 ? (optimal / total) * 100 : 0;
 
-     // Half donut chart (semicircle) - BIGGER SIZE
-     const radius = 95; // Increased from 80
-     const strokeWidth = 28; // Increased from 24
-     const centerX = 150; // Adjusted for bigger size
-     const centerY = 150; // Adjusted for bigger size
+     // Half donut chart (semicircle) - COMPACT SIZE
+     const radius = 65; // Reduced from 95
+     const strokeWidth = 20; // Reduced from 28
+     const centerX = 100; // Adjusted for compact size
+     const centerY = 100; // Adjusted for compact size
 
      // Calculate arc lengths for half circle (180 degrees)
      const circumference = Math.PI * radius; // Half circle
@@ -29,8 +29,8 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
 
      return (
           <div className="relative w-full flex flex-col items-center">
-               {/* Half Donut Chart - BIGGER */}
-               <svg width="300" height="170" viewBox="0 0 300 170" className="mb-3">
+               {/* Half Donut Chart - COMPACT */}
+               <svg width="200" height="110" viewBox="0 0 200 110" className="mb-1">
                     {/* Background arc */}
                     <path
                          d={`M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 0 1 ${centerX + radius} ${centerY}`}
@@ -50,7 +50,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               strokeDasharray={`${criticalDash} ${circumference}`}
                               strokeLinecap="round"
                               style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.6))'
+                                   filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))'
                               }}
                          />
                     )}
@@ -66,7 +66,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               strokeDashoffset={-criticalDash}
                               strokeLinecap="round"
                               style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.6))'
+                                   filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))'
                               }}
                          />
                     )}
@@ -82,7 +82,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               strokeDashoffset={-(criticalDash + lowDash)}
                               strokeLinecap="round"
                               style={{
-                                   filter: 'drop-shadow(0 0 10px rgba(34, 197, 94, 0.6))'
+                                   filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))'
                               }}
                          />
                     )}
@@ -90,9 +90,9 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                     {/* Total in center */}
                     <text
                          x={centerX}
-                         y={centerY - 10}
+                         y={centerY - 5}
                          textAnchor="middle"
-                         className="fill-foreground font-black text-3xl"
+                         className="fill-foreground font-black text-2xl"
                          style={{ fontFamily: 'Satoshi, sans-serif' }}
                     >
                          {total}
@@ -101,7 +101,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                          x={centerX}
                          y={centerY + 10}
                          textAnchor="middle"
-                         className="fill-muted-foreground text-[10px]"
+                         className="fill-muted-foreground text-[9px]"
                     >
                          Insumos
                     </text>

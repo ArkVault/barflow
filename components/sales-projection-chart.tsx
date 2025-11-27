@@ -102,8 +102,8 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
           // Multiplicador de temporada alta (40% más de ventas)
           const seasonMultiplier = highSeason ? 1.4 : 1.0;
 
-          // Proyectar ventas futuras
-          const futurePoints = period === 'week' ? 7 : 4;
+          // Proyectar ventas futuras (mismo número de puntos para superposición)
+          const futurePoints = historicalSales.length;
           const projectedSales = projectFutureSales(historicalSales, futurePoints, seasonMultiplier, period);
 
           // Generar datos para la gráfica
@@ -113,20 +113,11 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
 
           const data = [];
 
-          // Datos históricos
+          // Superponer ventas reales y proyectadas en la misma temporalidad
           for (let i = 0; i < historicalSales.length; i++) {
                data.push({
                     day: labels[i],
                     ventas: historicalSales[i],
-                    proyectado: null
-               });
-          }
-
-          // Datos proyectados
-          for (let i = 0; i < futurePoints; i++) {
-               data.push({
-                    day: labels[historicalSales.length + i] || `+${i + 1}`,
-                    ventas: null,
                     proyectado: projectedSales[i]
                });
           }
@@ -144,7 +135,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    Proyección de Ventas
                               </CardTitle>
                               <CardDescription>
-                                   Estimación con patrón de fin de semana {highSeason && '(Temporada Alta)'}
+                                   Comparación superpuesta: Real (verde) vs Proyección (morado) {highSeason && '(Temporada Alta)'}
                               </CardDescription>
                          </div>
                          <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
@@ -158,13 +149,25 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    {products.length > 0 && (
                                         <>
                                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                                  Productos Disponibles
+                                                  🔥 Top 10 Más Vendidos
                                              </div>
-                                             {products.map(product => (
+                                             {products.slice(0, 10).map(product => (
                                                   <SelectItem key={product.id} value={product.id}>
                                                        {product.name}
                                                   </SelectItem>
                                              ))}
+                                             {products.length > 10 && (
+                                                  <>
+                                                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                                                            Otros Productos
+                                                       </div>
+                                                       {products.slice(10).map(product => (
+                                                            <SelectItem key={product.id} value={product.id}>
+                                                                 {product.name}
+                                                            </SelectItem>
+                                                       ))}
+                                                  </>
+                                             )}
                                         </>
                                    )}
                               </SelectContent>
@@ -224,10 +227,10 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                               />
                               <Bar
                                    dataKey="proyectado"
-                                   fill="#87CEEB"
+                                   fill="#9333EA"
                                    name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
                                    radius={[8, 8, 0, 0]}
-                                   opacity={0.8}
+                                   opacity={0.85}
                               />
                          </BarChart>
                     </ResponsiveContainer>
@@ -237,7 +240,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                               <span className="text-muted-foreground">Ventas Reales</span>
                          </div>
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded bg-[#87CEEB] opacity-80"></div>
+                              <div className="w-3 h-3 rounded bg-[#9333EA] opacity-85"></div>
                               <span className="text-muted-foreground">Proyección (Regresión)</span>
                          </div>
                     </div>

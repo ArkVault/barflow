@@ -103,8 +103,8 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
           // Multiplicador de temporada alta (30% más de consumo)
           const seasonMultiplier = highSeason ? 1.3 : 1.0;
 
-          // Proyectar valores futuros
-          const futurePoints = period === 'week' ? 7 : 4;
+          // Proyectar valores futuros (mismo número de puntos que históricos para superposición)
+          const futurePoints = historicalInventory.length;
           const projectedValues = projectFutureValues(historicalInventory, futurePoints, seasonMultiplier, period);
 
           // Generar datos para la gráfica
@@ -114,25 +114,14 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
 
           const data = [];
 
-          // Datos históricos
+          // Superponer datos reales y proyectados en la misma temporalidad
           for (let i = 0; i < historicalInventory.length; i++) {
                data.push({
                     day: labels[i],
                     actual: historicalInventory[i],
-                    proyectado: null,
-                    minimo: 30,
-                    isHistorical: true
-               });
-          }
-
-          // Datos proyectados
-          for (let i = 0; i < futurePoints; i++) {
-               data.push({
-                    day: labels[historicalInventory.length + i] || `+${i + 1}`,
-                    actual: null,
                     proyectado: Math.round(projectedValues[i]),
                     minimo: 30,
-                    isHistorical: false
+                    isHistorical: true
                });
           }
 
@@ -149,7 +138,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    Proyección de Inventario
                               </CardTitle>
                               <CardDescription>
-                                   Estimación con patrón de fin de semana {highSeason && '(Temporada Alta)'}
+                                   Comparación superpuesta: Real (azul) vs Proyección (morado) {highSeason && '(Temporada Alta)'}
                               </CardDescription>
                          </div>
                          <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
@@ -163,21 +152,33 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    {supplies.length > 0 && (
                                         <>
                                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                                  Insumos Disponibles
+                                                  🔥 Top 10 Más Demanda
                                              </div>
-                                             {supplies.map(supply => (
+                                             {supplies.slice(0, 10).map(supply => (
                                                   <SelectItem key={supply.id} value={supply.id}>
                                                        {supply.name}
                                                   </SelectItem>
                                              ))}
+                                             {supplies.length > 10 && (
+                                                  <>
+                                                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                                                            Otros Insumos
+                                                       </div>
+                                                       {supplies.slice(10).map(supply => (
+                                                            <SelectItem key={supply.id} value={supply.id}>
+                                                                 {supply.name}
+                                                            </SelectItem>
+                                                       ))}
+                                                  </>
+                                             )}
                                         </>
                                    )}
                               </SelectContent>
                          </Select>
                     </div>
                </CardHeader>
-               <CardContent>
-                    <ResponsiveContainer width="100%" height={340}>
+               <CardContent className="px-3 pb-2">
+                    <ResponsiveContainer width="100%" height={160}>
                          <LineChart data={chartData}>
                               <defs>
                                    {/* Gradiente para línea de inventario real */}
@@ -187,11 +188,11 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                         <stop offset="100%" stopColor="#87CEEB" stopOpacity={1} />
                                    </linearGradient>
 
-                                   {/* Gradiente para línea proyectada */}
+                                   {/* Gradiente para línea proyectada - MORADO */}
                                    <linearGradient id="projectedGradient" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="0%" stopColor="#87CEEB" stopOpacity={0.9} />
-                                        <stop offset="50%" stopColor="#B0E0E6" stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor="#E0F4FF" stopOpacity={0.9} />
+                                        <stop offset="0%" stopColor="#9333EA" stopOpacity={1} />
+                                        <stop offset="50%" stopColor="#A855F7" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#C084FC" stopOpacity={1} />
                                    </linearGradient>
 
                                    {/* Gradiente para línea crítica */}
@@ -270,7 +271,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    filter="drop-shadow(0 0 8px rgba(74, 144, 226, 0.6))"
                               />
 
-                              {/* Línea proyectada con efecto neon */}
+                              {/* Línea proyectada con efecto neon - MORADO */}
                               <Line
                                    type="monotone"
                                    dataKey="proyectado"
@@ -279,21 +280,21 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    strokeDasharray="8 4"
                                    name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
                                    dot={{
-                                        fill: '#87CEEB',
+                                        fill: '#9333EA',
                                         r: 6,
                                         strokeWidth: 2,
                                         stroke: '#fff',
-                                        filter: 'drop-shadow(0 0 8px rgba(135, 206, 235, 0.8))'
+                                        filter: 'drop-shadow(0 0 8px rgba(147, 51, 234, 0.8))'
                                    }}
                                    activeDot={{
                                         r: 8,
-                                        fill: '#87CEEB',
+                                        fill: '#9333EA',
                                         stroke: '#fff',
                                         strokeWidth: 2,
-                                        filter: 'drop-shadow(0 0 12px rgba(135, 206, 235, 1))'
+                                        filter: 'drop-shadow(0 0 12px rgba(147, 51, 234, 1))'
                                    }}
                                    connectNulls={false}
-                                   filter="drop-shadow(0 0 8px rgba(135, 206, 235, 0.6))"
+                                   filter="drop-shadow(0 0 8px rgba(147, 51, 234, 0.6))"
                               />
 
                               {/* Línea crítica con efecto neon sutil */}
@@ -317,8 +318,8 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                               <span className="text-muted-foreground font-medium">Inventario Real</span>
                          </div>
                          <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#87CEEB] to-[#E0F4FF]"
-                                   style={{ boxShadow: '0 0 8px rgba(135, 206, 235, 0.6)' }}></div>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#9333EA] to-[#C084FC]"
+                                   style={{ boxShadow: '0 0 8px rgba(147, 51, 234, 0.6)' }}></div>
                               <span className="text-muted-foreground font-medium">Proyección</span>
                          </div>
                          <div className="flex items-center gap-2">

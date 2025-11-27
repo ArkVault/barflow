@@ -17,10 +17,21 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { calculateStockStatus } from "@/lib/stock-utils";
 
-import { AnimatedSalesChart } from "@/components/animated-sales-chart";
+import dynamic from 'next/dynamic';
 
-import { NeonDonutChart } from "@/components/neon-donut-chart";
-import { ProjectionsSummary } from "@/components/projections-summary";
+// Dynamic imports para optimizar carga inicial (Code Splitting)
+const SalesChartSimple = dynamic(() => import("@/components/sales-chart-simple").then(mod => mod.SalesChartSimple), {
+  loading: () => <div className="h-[160px] w-full animate-pulse bg-muted/20 rounded-lg" />,
+  ssr: false
+});
+const InventoryProjectionChart = dynamic(() => import("@/components/inventory-projection-chart").then(mod => mod.InventoryProjectionChart), {
+  loading: () => <div className="h-[160px] w-full animate-pulse bg-muted/20 rounded-lg" />,
+  ssr: false
+});
+const NeonDonutChart = dynamic(() => import("@/components/neon-donut-chart").then(mod => mod.NeonDonutChart), {
+  loading: () => <div className="h-[120px] w-full animate-pulse bg-muted/20 rounded-full" />,
+  ssr: false
+});
 
 interface Supply {
   id: string;
@@ -65,39 +76,51 @@ export default function DemoPage() {
       setLoading(true);
       const supabase = createClient();
 
-      // Load supplies
-      const { data: suppliesData, error: suppliesError } = await supabase
-        .from('supplies')
-        .select('*')
-        .eq('establishment_id', establishmentId)
-        .order('name', { ascending: true });
+      // Carga paralela de todos los datos para mayor velocidad
+      const [suppliesRes, productsRes, settingsRes, salesRes] = await Promise.all([
+        // 1. Insumos
+        supabase
+          .from('supplies')
+          .select('*')
+          .eq('establishment_id', establishmentId)
+          .order('name', { ascending: true }),
 
-      if (suppliesError) throw suppliesError;
+        // 2. Productos
+        supabase
+          .from('products')
+          .select('id, updated_at')
+          .eq('establishment_id', establishmentId)
+          .order('updated_at', { ascending: false }),
 
-      if (!suppliesData || suppliesData.length === 0) {
+        // 3. Configuración
+        supabase
+          .from('establishments')
+          .select('menu_name')
+          .eq('id', establishmentId)
+          .single(),
+
+        // 4. Ventas (última semana)
+        supabase
+          .from('sales')
+          .select('product_id, quantity, products(name)')
+          .eq('establishment_id', establishmentId)
+          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      ]);
+      if (suppliesRes.error) throw suppliesRes.error;
+      const suppliesData = suppliesRes.data || [];
+
+      if (suppliesData.length === 0) {
         router.push("/demo/planner");
         return;
       }
 
-      // Calculate status for each supply and count by status
       let critical = 0;
       let low = 0;
-
       const suppliesWithStatus = suppliesData.map(supply => {
         const status = calculateStockStatus(supply);
         if (status === 'critical') critical++;
         else if (status === 'low') low++;
-
-        return {
-          id: supply.id,
-          name: supply.name,
-          category: supply.category || 'Otros',
-          current_quantity: supply.current_quantity,
-          unit: supply.unit,
-          min_threshold: supply.min_threshold,
-          optimal_quantity: supply.optimal_quantity,
-          status
-        };
+        return { ...supply, status };
       });
 
       setSupplies(suppliesWithStatus);
@@ -105,94 +128,50 @@ export default function DemoPage() {
       setCriticalSupplies(critical);
       setLowSupplies(low);
 
-      // Load products count and last modified
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('id, updated_at')
-        .eq('establishment_id', establishmentId)
-        .order('updated_at', { ascending: false });
+      // Procesar Productos
+      const productsData = productsRes.data || [];
+      setTotalProducts(productsData.length);
 
-      if (!productsError && productsData) {
-        setTotalProducts(productsData.length);
+      if (productsData.length > 0 && productsData[0].updated_at) {
+        const lastModified = new Date(productsData[0].updated_at);
+        const diffDays = Math.ceil(Math.abs(new Date().getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24));
 
-        // Calculate last modified
-        if (productsData.length > 0 && productsData[0].updated_at) {
-          const lastModified = new Date(productsData[0].updated_at);
-          const now = new Date();
-          const diffTime = Math.abs(now.getTime() - lastModified.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-          if (diffDays === 0) {
-            setMenuLastModified("Hoy");
-          } else if (diffDays === 1) {
-            setMenuLastModified("Ayer");
-          } else if (diffDays < 7) {
-            setMenuLastModified(`Hace ${diffDays} días`);
-          } else if (diffDays < 30) {
-            const weeks = Math.floor(diffDays / 7);
-            setMenuLastModified(`Hace ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`);
-          } else {
-            const months = Math.floor(diffDays / 30);
-            setMenuLastModified(`Hace ${months} ${months === 1 ? 'mes' : 'meses'}`);
-          }
-        }
+        if (diffDays === 0) setMenuLastModified("Hoy");
+        else if (diffDays === 1) setMenuLastModified("Ayer");
+        else if (diffDays < 7) setMenuLastModified(`Hace ${diffDays} días`);
+        else if (diffDays < 30) setMenuLastModified(`Hace ${Math.floor(diffDays / 7)} sem`);
+        else setMenuLastModified(`Hace ${Math.floor(diffDays / 30)} mes`);
       }
 
-      // Load menu name from establishment settings (if exists)
-      const { data: settingsData } = await supabase
-        .from('establishments')
-        .select('menu_name')
-        .eq('id', establishmentId)
-        .single();
-
-      if (settingsData?.menu_name) {
-        setMenuName(settingsData.menu_name);
+      // Procesar Configuración
+      if (settingsRes.data?.menu_name) {
+        setMenuName(settingsRes.data.menu_name);
       } else {
-        // Default menu name based on current season
         const month = new Date().getMonth();
-        let season = "Primavera";
-        if (month >= 2 && month <= 4) season = "Primavera";
-        else if (month >= 5 && month <= 7) season = "Verano";
-        else if (month >= 8 && month <= 10) season = "Otoño";
-        else season = "Invierno";
+        const season = (month >= 2 && month <= 4) ? "Primavera" :
+          (month >= 5 && month <= 7) ? "Verano" :
+            (month >= 8 && month <= 10) ? "Otoño" : "Invierno";
         setMenuName(`${season} ${new Date().getFullYear()}`);
       }
 
-      // Load top 5 selling products from the last week
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      // Procesar Ventas
+      const salesData = salesRes.data || [];
+      const salesByProduct = salesData.reduce((acc: any, sale: any) => {
+        if (sale.products?.name) {
+          const name = sale.products.name;
+          if (!acc[name]) acc[name] = { name, total: 0 };
+          acc[name].total += sale.quantity || 1;
+        }
+        return acc;
+      }, {});
 
-      const { data: salesData, error: salesError } = await supabase
-        .from('sales')
-        .select('product_id, quantity, products(name)')
-        .eq('establishment_id', establishmentId)
-        .gte('created_at', oneWeekAgo.toISOString());
-
-      if (!salesError && salesData) {
-        // Aggregate sales by product
-        const salesByProduct = salesData.reduce((acc: Record<string, { name: string; total: number }>, sale: any) => {
-          if (sale.products && sale.products.name) {
-            const productName = sale.products.name;
-            if (!acc[productName]) {
-              acc[productName] = { name: productName, total: 0 };
-            }
-            acc[productName].total += sale.quantity || 1;
-          }
-          return acc;
-        }, {});
-
-        // Convert to array and sort by total sales
-        const topProductsArray = Object.values(salesByProduct)
-          .sort((a, b) => b.total - a.total)
-          .slice(0, 5)
-          .map(p => ({ product_name: p.name, total_sales: p.total }));
-
-        setTopProducts(topProductsArray);
-      }
+      setTopProducts(Object.values(salesByProduct)
+        .sort((a: any, b: any) => b.total - a.total)
+        .slice(0, 5) as TopProduct[]);
 
     } catch (error: any) {
       console.error('Error loading dashboard:', error);
-      toast.error('Error al cargar datos: ' + error.message);
+      toast.error('Error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -263,13 +242,13 @@ export default function DemoPage() {
           </nav>
 
           {/* Dashboard Overview */}
-          <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+          <div className="min-h-screen bg-background p-4 ml-0 md:ml-20 lg:ml-72">
             <div className="max-w-5xl mx-auto">
               {/* Header - Compact */}
-              <div className="mb-4">
+              <div className="mb-2">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
                   <div>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
                     <p className="text-xs md:text-sm text-muted-foreground">
                       Vista general de tu negocio
                     </p>
@@ -297,24 +276,25 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              {/* Main Content Grid */}
               {/* Top Row: Inventario + Productos (2 columns) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 {/* 1. INVENTARIO - Half Donut Chart */}
                 <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                  <CardHeader className="pb-2 px-4 pt-4">
-                    <CardTitle className="text-sm md:text-base font-bold">Inventario</CardTitle>
+                  <CardHeader className="pb-1 px-3 pt-2">
+                    <CardTitle className="text-xs font-bold">Inventario</CardTitle>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4">
-                    <NeonDonutChart
-                      critical={criticalSupplies}
-                      low={lowSupplies}
-                      optimal={totalSupplies - criticalSupplies - lowSupplies}
-                    />
+                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
+                    <div className="flex-1 flex items-center justify-center">
+                      <NeonDonutChart
+                        critical={criticalSupplies}
+                        low={lowSupplies}
+                        optimal={totalSupplies - criticalSupplies - lowSupplies}
+                      />
+                    </div>
 
-                    <Link href="/demo/insumos">
-                      <Button variant="outline" size="sm" className="w-full mt-3 text-xs h-7">
-                        Ver inventario →
+                    <Link href="/demo/insumos" className="mt-auto pt-2">
+                      <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
+                        Ver inventario completo →
                       </Button>
                     </Link>
                   </CardContent>
@@ -322,54 +302,51 @@ export default function DemoPage() {
 
                 {/* 2. PRODUCTOS - Large Number Display */}
                 <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                  <CardHeader className="pb-2 px-4 pt-4">
-                    <CardTitle className="text-sm md:text-base font-bold">Productos</CardTitle>
-                    <CardDescription className="text-xs">Menú actual</CardDescription>
+                  <CardHeader className="pb-1 px-3 pt-2">
+                    <CardTitle className="text-xs font-bold">Productos</CardTitle>
+                    <CardDescription className="text-[10px]">Menú actual</CardDescription>
                   </CardHeader>
-                  <CardContent className="px-4 pb-4">
-                    <div className="flex flex-col items-center justify-center py-4">
-                      <p className="text-5xl md:text-6xl font-black text-primary mb-2" style={{
-                        fontFamily: 'Satoshi, sans-serif',
-                        textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
-                      }}>
-                        {totalProducts}
-                      </p>
-                      <p className="text-xs text-muted-foreground mb-3">en menú</p>
-
-                      {/* Menu metadata */}
-                      <div className="w-full space-y-1.5 mb-3">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Temporada:</span>
-                          <span className="font-medium">{menuName}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Última modificación:</span>
-                          <span className="font-medium">{menuLastModified}</span>
-                        </div>
+                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex flex-col">
+                        <p className="text-4xl font-black text-primary leading-none" style={{
+                          fontFamily: 'Satoshi, sans-serif',
+                          textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
+                        }}>
+                          {totalProducts}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">en menú</p>
                       </div>
 
-                      {/* Top 5 Selling Products */}
-                      {topProducts.length > 0 && (
-                        <div className="w-full mt-2 mb-3">
-                          <p className="text-xs font-semibold text-muted-foreground mb-2">Top 5 esta semana:</p>
-                          <div className="space-y-1.5">
-                            {topProducts.map((product, index) => (
-                              <div key={index} className="flex items-center justify-between text-xs bg-muted/30 rounded-md px-2 py-1">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-bold text-primary text-[10px]">#{index + 1}</span>
-                                  <span className="font-medium truncate max-w-[120px]">{product.product_name}</span>
-                                </div>
-                                <span className="text-muted-foreground text-[10px]">{product.total_sales} vendidos</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      <div className="text-right space-y-0.5">
+                        <div className="text-[10px] text-muted-foreground">Temporada: <span className="font-medium text-foreground">{menuName}</span></div>
+                        <div className="text-[10px] text-muted-foreground">Modificado: <span className="font-medium text-foreground">{menuLastModified}</span></div>
+                      </div>
                     </div>
 
-                    <Link href="/demo/productos">
-                      <Button variant="outline" size="sm" className="w-full text-xs h-7">
-                        Ver productos →
+                    {/* Top 5 Selling Products - Clean List */}
+                    {topProducts.length > 0 && (
+                      <div className="w-full mt-2 flex-1 overflow-hidden">
+                        <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">🔥 Top 5 Más Vendidos</p>
+                        <div className="space-y-1">
+                          {topProducts.slice(0, 5).map((product, index) => (
+                            <div key={index} className="flex items-center justify-between text-[10px] border-b border-border/40 last:border-0 pb-0.5">
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <span className={`font-bold w-3 ${index === 0 ? 'text-amber-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-700' : 'text-muted-foreground'}`}>
+                                  #{index + 1}
+                                </span>
+                                <span className="font-medium truncate">{product.product_name}</span>
+                              </div>
+                              <span className="text-muted-foreground whitespace-nowrap">{product.total_sales} u.</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Link href="/demo/productos" className="mt-auto pt-2">
+                      <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
+                        Ver todos los productos →
                       </Button>
                     </Link>
                   </CardContent>
@@ -377,19 +354,21 @@ export default function DemoPage() {
               </div>
 
               {/* Bottom Row: Ventas + Proyecciones (2 columns) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 {/* Ventas */}
-                <AnimatedSalesChart
-                  period={salesPeriod}
-                  onPeriodChange={setSalesPeriod}
+                <SalesChartSimple
+                  period="week"
                 />
 
                 {/* Proyecciones */}
-                <ProjectionsSummary />
+                <InventoryProjectionChart
+                  period="week"
+                  highSeason={false}
+                />
               </div>
 
               {/* Info Text */}
-              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+              <div className="p-2 rounded-lg bg-muted/50 border border-border">
                 <p className="text-xs text-muted-foreground">
                   <strong>Panel de Control</strong> - Resumen de tu negocio.
                   Para gestionar inventario, ve a{' '}
