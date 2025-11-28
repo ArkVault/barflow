@@ -13,9 +13,12 @@
 
 - 🎯 **Planificador de Inventario Inteligente** - Configuración inicial personalizada con selección de insumos
 - 📊 **Dashboard Interactivo** - Vista general con métricas clave y alertas en tiempo real
-- 🧪 **Gestión de Insumos** - Control de stock con alertas de niveles críticos, bajos y óptimos
+- 🧪 **Gestión de Insumos Avanzada** - Control por unidades (botellas/items) con cálculos automáticos
+- 📦 **Sistema de Contenido** - Tracking preciso por ml/g con resta automática en ventas
+- 🏷️ **Categorías Inteligentes** - 7 categorías con defaults automáticos por tipo
 - 🍸 **Gestión de Productos** - Menú digital con recetas, ingredientes y precios
-- 💰 **Registro de Ventas** - Seguimiento de transacciones y análisis de rendimiento
+- 📋 **Sistema de Menús** - Múltiples menús (temporadas, eventos) con historial
+- 💰 **Registro de Ventas** - Seguimiento de transacciones con deducción automática de inventario
 - 🔮 **Proyecciones Inteligentes** - Análisis predictivo con IA para optimizar compras
 - 🌍 **Multiidioma** - Soporte completo para Español e Inglés con cambio en tiempo real
 - 🌓 **Modo Oscuro** - Tema Monokai Ristretto con paleta de colores cálida
@@ -428,6 +431,36 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - [shadcn/ui](https://ui.shadcn.com/) - Componentes UI
 - [Tailwind CSS](https://tailwindcss.com/) - Framework CSS
 - [Vercel](https://vercel.com/) - Plataforma de deployment
+
+---
+
+## 📝 Changelog
+
+### v1.0.0 (2025-11-28)
+
+**🎉 Sistema de Inventario Avanzado**
+- Tracking de contenido por unidad (750ml, 1L, etc.)
+- Edición basada en unidades (botellas/items)
+- Cálculos automáticos de cantidad total
+- Resta automática de inventario en ventas
+- Logs de auditoría completos
+
+**🏷️ Categorías Inteligentes**
+- 7 nuevas categorías de insumos
+- Defaults automáticos por categoría
+- Migración de categorías legacy
+
+**📋 Sistema de Menús**
+- Crear múltiples menús (temporadas, eventos)
+- Un solo menú activo a la vez
+- Historial de menús anteriores
+- Activar/desactivar/eliminar menús
+
+**🎨 Mejoras de UI**
+- Tabla de insumos optimizada
+- Planner con items deseleccionados por default
+- Óptimo mostrado en unidades
+- MenuManager component
 
 ---
 
