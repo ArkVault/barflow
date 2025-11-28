@@ -109,16 +109,8 @@ const initialProducts: Product[] = [
 
 export default function ProductosPage() {
   const { t } = useLanguage();
-
-  // Helper function to translate category
-  const translateCategory = (category: string) => {
-    const categoryMap: Record<string, string> = {
-      'Cócteles': t('cocktails'),
-      'Cervezas': t('beers'),
-      'Shots': t('shots'),
-    };
-    return categoryMap[category] || category;
-  };
+  const [activeMenuId, setActiveMenuId] = useState<string>("");
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -133,6 +125,25 @@ export default function ProductosPage() {
     active: true,
     description: ''
   });
+
+  // Helper function to translate category
+  const translateCategory = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'Cócteles': t('cocktails'),
+      'Cervezas': t('beers'),
+      'Shots': t('shots'),
+    };
+    return categoryMap[category] || category;
+  };
+
+  // Filter products when active menu changes
+  const handleMenuChange = (menuId: string) => {
+    setActiveMenuId(menuId);
+    // TODO: Filter products by menuId from database
+    // For now, show all products
+    console.log('Filtering products for menu:', menuId);
+  };
+
 
   const handleEdit = (productId: number) => {
     const product = products.find(p => p.id === productId);
@@ -226,10 +237,7 @@ export default function ProductosPage() {
 
           {/* Menu Manager */}
           <div className="mb-8">
-            <MenuManager onMenuChange={(menuId) => {
-              // TODO: Filter products by menu
-              console.log('Selected menu:', menuId);
-            }} />
+            <MenuManager onMenuChange={handleMenuChange} />
           </div>
 
           {/* Botón Diseñar Menú */}
@@ -243,59 +251,70 @@ export default function ProductosPage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Card
-                key={product.id}
-                className="neumorphic border-0 cursor-pointer transition-all hover:scale-[1.02]"
-                onClick={() => handleViewRecipe(product.id)}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-xl">{product.name}</CardTitle>
-                    {product.active && <Badge className="bg-green-600">{t('active')}</Badge>}
-                  </div>
-                  <CardDescription>{translateCategory(product.category)}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</span>
-                      <span className="text-sm text-muted-foreground">{product.ingredients.length} {t('ingredientsCount')}</span>
+          {products.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg mb-2">
+                No hay productos en este menú
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Agrega productos para comenzar
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <Card
+                  key={product.id}
+                  className="neumorphic border-0 cursor-pointer transition-all hover:scale-[1.02]"
+                  onClick={() => handleViewRecipe(product.id)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-xl">{product.name}</CardTitle>
+                      {product.active && <Badge className="bg-green-600">{t('active')}</Badge>}
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="ghost"
-                        className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(product.id);
-                        }}
-                        title="Editar producto"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="neumorphic border-0 bg-background/50 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-0 focus-visible:ring-0"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(product.id);
-                        }}
-                        title="Eliminar producto"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Borrar
-                      </Button>
+                    <CardDescription>{translateCategory(product.category)}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground">{product.ingredients.length} {t('ingredientsCount')}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="ghost"
+                          className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(product.id);
+                          }}
+                          title="Editar producto"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="neumorphic border-0 bg-background/50 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(product.id);
+                          }}
+                          title="Eliminar producto"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Borrar
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Modal Ver Receta */}
