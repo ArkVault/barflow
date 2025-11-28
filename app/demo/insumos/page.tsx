@@ -406,11 +406,17 @@ export default function InsumosPage() {
                         <TableCell>
                           {supply.optimal_quantity ? (
                             <>
-                              {supply.optimal_quantity} {supply.content_unit || supply.unit}
-                              {optimalUnits && supply.content_per_unit && (
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  ({optimalUnits} uds)
-                                </span>
+                              {optimalUnits && supply.content_per_unit ? (
+                                <>
+                                  <span className="font-semibold">{optimalUnits}</span>
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    uds
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  {supply.optimal_quantity} {supply.content_unit || supply.unit}
+                                </>
                               )}
                             </>
                           ) : (
