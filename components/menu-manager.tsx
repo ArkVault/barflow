@@ -13,16 +13,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-     Select,
-     SelectContent,
-     SelectItem,
-     SelectTrigger,
-     SelectValue,
-} from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { Plus, Check, Edit2, Trash2 } from "lucide-react";
+import { Plus, Check, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
 interface Menu {
@@ -190,39 +183,46 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     </Button>
                </div>
 
-               {/* Menu Selector */}
+               {/* Previous Menus */}
                {inactiveMenus.length > 0 && (
-                    <div className="neumorphic-inset p-4 rounded-lg">
-                         <Label className="text-sm font-medium mb-2 block">
+                    <div className="space-y-3">
+                         <Label className="text-sm font-medium">
                               Menús Anteriores
                          </Label>
-                         <div className="space-y-2">
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                               {inactiveMenus.map((menu) => (
                                    <div
                                         key={menu.id}
-                                        className="flex items-center justify-between p-3 rounded-md bg-background/50 hover:bg-background transition-colors"
+                                        className="group relative overflow-hidden rounded-lg p-4 bg-gradient-to-br from-white/5 to-white/10 border border-white/10 hover:border-white/20 transition-all hover:scale-[1.02]"
                                    >
-                                        <div>
-                                             <p className="font-medium">{menu.name}</p>
-                                             <p className="text-xs text-muted-foreground">
-                                                  Creado: {new Date(menu.created_at).toLocaleDateString()}
-                                             </p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                             <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={() => activateMenu(menu.id)}
-                                             >
-                                                  Activar
-                                             </Button>
-                                             <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() => deleteMenu(menu.id)}
-                                             >
-                                                  <Trash2 className="w-4 h-4" />
-                                             </Button>
+                                        <div className="space-y-3">
+                                             <div>
+                                                  <p className="font-semibold text-foreground">{menu.name}</p>
+                                                  <p className="text-xs text-muted-foreground mt-1">
+                                                       {new Date(menu.created_at).toLocaleDateString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                       })}
+                                                  </p>
+                                             </div>
+                                             <div className="flex gap-2">
+                                                  <Button
+                                                       size="sm"
+                                                       className="flex-1 h-8 text-xs"
+                                                       onClick={() => activateMenu(menu.id)}
+                                                  >
+                                                       Activar
+                                                  </Button>
+                                                  <Button
+                                                       size="sm"
+                                                       variant="ghost"
+                                                       className="h-8 w-8 p-0"
+                                                       onClick={() => deleteMenu(menu.id)}
+                                                  >
+                                                       <Trash2 className="w-3.5 h-3.5" />
+                                                  </Button>
+                                             </div>
                                         </div>
                                    </div>
                               ))}

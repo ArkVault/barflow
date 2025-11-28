@@ -235,12 +235,11 @@ export default function ProductosPage() {
           {/* Botón Diseñar Menú */}
           <div className="mb-8">
             <Button
-              className="neumorphic-hover border-0 h-14 px-8 text-lg"
-              size="lg"
+              className="neumorphic-hover border-0"
               onClick={() => setIsAddingProduct(true)}
             >
-              <Plus className="w-5 h-5 mr-2" />
-              {t('designMenu')}
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar Producto
             </Button>
           </div>
 
