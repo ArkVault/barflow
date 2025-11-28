@@ -76,7 +76,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   const [showAddNew, setShowAddNew] = useState(false);
   const [newSupply, setNewSupply] = useState({
     name: "",
-    category: "Otros",
+    category: "Insumos para cócteles",
     unit: "L",
     quantity: 0
   });
@@ -97,7 +97,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   const addNewSupply = () => {
     if (newSupply.name && newSupply.quantity > 0) {
       setSupplies([...supplies, { ...newSupply, selected: true }]);
-      setNewSupply({ name: "", category: "Otros", unit: "L", quantity: 0 });
+      setNewSupply({ name: "", category: "Insumos para cócteles", unit: "L", quantity: 0 });
       setShowAddNew(false);
     }
   };
@@ -155,9 +155,19 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 {t('configureInventory')}
               </CardDescription>
             </div>
-            <Badge variant="outline" className="text-lg px-4 py-2">
-              {selectedCount} {t('selectedSupplies')}
-            </Badge>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-lg px-4 py-2">
+                {selectedCount} {t('selectedSupplies')}
+              </Badge>
+              <Button
+                onClick={() => setShowAddNew(true)}
+                className="neumorphic-hover border-0"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar Insumo
+              </Button>
+            </div>
           </div>
 
           {/* Period Selector */}
@@ -435,11 +445,20 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                           value={newSupply.name}
                           onChange={(e) => setNewSupply({ ...newSupply, name: e.target.value })}
                         />
-                        <Input
-                          placeholder="Categoría"
+                        <select
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           value={newSupply.category}
                           onChange={(e) => setNewSupply({ ...newSupply, category: e.target.value })}
-                        />
+                        >
+                          <option value="">Seleccionar categoría</option>
+                          <option value="Bebidas alcohólicas">Bebidas alcohólicas</option>
+                          <option value="Bebidas no alcohólicas">Bebidas no alcohólicas</option>
+                          <option value="Insumos para cócteles">Insumos para cócteles</option>
+                          <option value="Mezcladores y adornos">Mezcladores y adornos</option>
+                          <option value="Alimentos y aperitivos">Alimentos y aperitivos</option>
+                          <option value="Materiales desechables">Materiales desechables</option>
+                          <option value="Cristalería y utensilios">Cristalería y utensilios</option>
+                        </select>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <Input
