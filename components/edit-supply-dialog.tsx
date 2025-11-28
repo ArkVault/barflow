@@ -22,7 +22,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { SUPPLY_CATEGORIES } from "@/lib/supply-categories";
+import { SUPPLY_CATEGORIES, getCategoryDefaults } from "@/lib/supply-categories";
 
 interface Supply {
   id: string;
@@ -135,6 +135,35 @@ export function EditSupplyDialog({
     });
   };
 
+  // Handle category change - apply defaults
+  const handleCategoryChange = (newCategory: string) => {
+    const defaults = getCategoryDefaults(newCategory);
+
+    // Only update if content_per_unit hasn't been customized
+    const shouldUpdateDefaults = !supply || supply.content_per_unit === 1 || !supply.content_per_unit;
+
+    if (shouldUpdateDefaults) {
+      setFormData({
+        ...formData,
+        category: newCategory,
+        content_per_unit: defaults.contentPerUnit,
+        content_unit: defaults.contentUnit,
+      });
+
+      // Recalculate quantities with new defaults
+      setFormData(prev => ({
+        ...prev,
+        current_quantity: numberOfUnits * defaults.contentPerUnit,
+      }));
+    } else {
+      // Just update category without changing content settings
+      setFormData({
+        ...formData,
+        category: newCategory,
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!supply) return;
@@ -201,9 +230,7 @@ export function EditSupplyDialog({
                 <Label htmlFor="category">Categoría</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, category: value })
-                  }
+                  onValueChange={handleCategoryChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona categoría" />

@@ -13,41 +13,69 @@ export const SUPPLY_CATEGORIES = [
 export type SupplyCategory = typeof SUPPLY_CATEGORIES[number];
 
 // Category mapping for translation and organization
-export const CATEGORY_INFO: Record<string, { label: string; description: string; icon: string }> = {
+export const CATEGORY_INFO: Record<string, {
+     label: string;
+     description: string;
+     icon: string;
+     defaultContentPerUnit: number;
+     defaultContentUnit: string;
+     defaultUnit: string;
+}> = {
      "Bebidas alcohólicas": {
           label: "Bebidas alcohólicas",
           description: "Licores, vinos, cervezas",
-          icon: "🍾"
+          icon: "🍾",
+          defaultContentPerUnit: 750,
+          defaultContentUnit: "ml",
+          defaultUnit: "units" // Óptimo en unidades (botellas)
      },
      "Bebidas no alcohólicas": {
           label: "Bebidas no alcohólicas",
           description: "Refrescos, jugos, aguas",
-          icon: "🥤"
+          icon: "🥤",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "L",
+          defaultUnit: "L" // Óptimo en litros o unidades
      },
      "Insumos para cócteles": {
           label: "Insumos para cócteles",
           description: "Azúcar, limón, hierbabuena, jarabes",
-          icon: "🍋"
+          icon: "🍋",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "kg",
+          defaultUnit: "kg" // Óptimo en kg, litros o unidades
      },
      "Mezcladores y adornos": {
           label: "Mezcladores y adornos",
           description: "Tónicos, garnishes, frutas",
-          icon: "🍒"
+          icon: "🍒",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "L",
+          defaultUnit: "L"
      },
      "Alimentos y aperitivos": {
           label: "Alimentos y aperitivos",
           description: "Tapas, snacks",
-          icon: "🥜"
+          icon: "🥜",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "kg",
+          defaultUnit: "kg"
      },
      "Materiales desechables": {
           label: "Materiales desechables",
           description: "Vasos, servilletas, popotes",
-          icon: "🥤"
+          icon: "🥤",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "units",
+          defaultUnit: "units"
      },
      "Cristalería y utensilios": {
           label: "Cristalería y utensilios",
           description: "Copas, shakers, coladores",
-          icon: "🍸"
+          icon: "🍸",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "units",
+          defaultUnit: "units"
      }
 };
 
@@ -65,4 +93,22 @@ export const LEGACY_CATEGORY_MAP: Record<string, SupplyCategory> = {
 // Helper function to migrate old categories to new ones
 export function migrateCategory(oldCategory: string): SupplyCategory {
      return LEGACY_CATEGORY_MAP[oldCategory] || "Insumos para cócteles";
+}
+
+// Helper function to get category defaults
+export function getCategoryDefaults(category: string) {
+     const info = CATEGORY_INFO[category];
+     if (info) {
+          return {
+               contentPerUnit: info.defaultContentPerUnit,
+               contentUnit: info.defaultContentUnit,
+               unit: info.defaultUnit,
+          };
+     }
+     // Fallback defaults
+     return {
+          contentPerUnit: 1,
+          contentUnit: "units",
+          unit: "units",
+     };
 }
