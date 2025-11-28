@@ -155,19 +155,9 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 {t('configureInventory')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="text-lg px-4 py-2">
-                {selectedCount} {t('selectedSupplies')}
-              </Badge>
-              <Button
-                onClick={() => setShowAddNew(true)}
-                className="neumorphic-hover border-0"
-                size="sm"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar Insumo
-              </Button>
-            </div>
+            <Badge variant="outline" className="text-lg px-4 py-2">
+              {selectedCount} {t('selectedSupplies')}
+            </Badge>
           </div>
 
           {/* Period Selector */}
@@ -369,14 +359,24 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                   <h3 className="text-lg font-semibold">Introducción Manual</h3>
                   <p className="text-sm text-muted-foreground">Selecciona items del catálogo o agrega personalizados</p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => setInputMethod('none')}
-                  className="neumorphic-hover"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cambiar método
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowAddNew(true)}
+                    className="neumorphic-hover border-0"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar Insumo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setInputMethod('none')}
+                    className="neumorphic-hover"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cambiar método
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">

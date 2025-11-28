@@ -358,7 +358,6 @@ export default function InsumosPage() {
                     <TableHead>Nombre</TableHead>
                     <TableHead>Marca</TableHead>
                     <TableHead>{t('category')}</TableHead>
-                    <TableHead>Contenido x Unidad</TableHead>
                     <TableHead>Unidades</TableHead>
                     <TableHead>Cantidad Total</TableHead>
                     <TableHead>Óptimo</TableHead>
@@ -389,22 +388,20 @@ export default function InsumosPage() {
                         </TableCell>
                         <TableCell>{translateCategory(supply.category)}</TableCell>
                         <TableCell>
-                          {supply.content_per_unit && supply.content_unit ? (
-                            <span className="text-sm font-medium">
-                              {supply.content_per_unit}{supply.content_unit}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground italic">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
                           <span className="font-semibold">{units}</span>
                           <span className="text-xs text-muted-foreground ml-1">
                             {supply.content_per_unit ? 'uds' : supply.unit}
                           </span>
                         </TableCell>
                         <TableCell>
-                          {supply.current_quantity} {supply.content_unit || supply.unit}
+                          <span className="font-medium">
+                            {supply.current_quantity} {supply.content_unit || supply.unit}
+                          </span>
+                          {supply.content_per_unit && (
+                            <span className="text-xs text-muted-foreground ml-1">
+                              ({units} × {supply.content_per_unit}{supply.content_unit})
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {supply.optimal_quantity ? (
