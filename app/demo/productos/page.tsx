@@ -10,6 +10,8 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useLanguage } from "@/hooks/use-language"
+import { MenuManager } from "@/components/menu-manager"
+
 
 interface Product {
   id: number;
@@ -220,6 +222,14 @@ export default function ProductosPage() {
               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
               <p className="text-muted-foreground">{t('menuRecipes')}</p>
             </div>
+          </div>
+
+          {/* Menu Manager */}
+          <div className="mb-8">
+            <MenuManager onMenuChange={(menuId) => {
+              // TODO: Filter products by menu
+              console.log('Selected menu:', menuId);
+            }} />
           </div>
 
           {/* Botón Diseñar Menú */}
