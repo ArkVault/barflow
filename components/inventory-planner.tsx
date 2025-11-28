@@ -51,7 +51,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
           category: supply.category || 'Otros',
           unit: supply.unit,
           quantity: supply.current_quantity,
-          selected: true, // Mark as selected since they exist
+          selected: false, // Deselected by default to avoid adding everything
         }));
 
         setSupplies(loadedSupplies);
