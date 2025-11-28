@@ -35,7 +35,7 @@ CREATE POLICY "Users can view menus from their establishment"
   FOR SELECT
   USING (
     establishment_id IN (
-      SELECT establishment_id FROM public.user_establishments WHERE user_id = auth.uid()
+      SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
@@ -44,7 +44,7 @@ CREATE POLICY "Users can create menus in their establishment"
   FOR INSERT
   WITH CHECK (
     establishment_id IN (
-      SELECT establishment_id FROM public.user_establishments WHERE user_id = auth.uid()
+      SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
@@ -53,7 +53,7 @@ CREATE POLICY "Users can update menus in their establishment"
   FOR UPDATE
   USING (
     establishment_id IN (
-      SELECT establishment_id FROM public.user_establishments WHERE user_id = auth.uid()
+      SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
@@ -62,7 +62,7 @@ CREATE POLICY "Users can delete menus in their establishment"
   FOR DELETE
   USING (
     establishment_id IN (
-      SELECT establishment_id FROM public.user_establishments WHERE user_id = auth.uid()
+      SELECT id FROM public.establishments WHERE user_id = auth.uid()
     )
   );
 
