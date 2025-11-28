@@ -22,6 +22,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { SUPPLY_CATEGORIES } from "@/lib/supply-categories";
 
 interface Supply {
   id: string;
@@ -64,10 +65,30 @@ export function EditSupplyDialog({
 }: EditSupplyDialogProps) {
   const [formData, setFormData] = useState<Partial<Supply>>({});
   const [loading, setLoading] = useState(false);
+  const [numberOfUnits, setNumberOfUnits] = useState(0);
 
   // Update form data when supply changes
   useEffect(() => {
     if (supply) {
+      // Set default content_per_unit based on category
+      let defaultContentPerUnit = supply.content_per_unit || 1;
+      let defaultContentUnit = supply.content_unit || 'ml';
+
+      if (!supply.content_per_unit) {
+        // Check for alcoholic beverages category
+        if (supply.category === 'Bebidas alcohólicas' ||
+          supply.category === 'Licores' ||
+          supply.category === 'Licores Dulces') {
+          defaultContentPerUnit = 750;
+          defaultContentUnit = 'ml';
+        }
+      }
+
+      // Calculate number of units
+      const units = defaultContentPerUnit > 0
+        ? Math.floor(supply.current_quantity / defaultContentPerUnit)
+        : 0;
+
       setFormData({
         name: supply.name,
         category: supply.category,
@@ -75,12 +96,44 @@ export function EditSupplyDialog({
         unit: supply.unit,
         min_threshold: supply.min_threshold,
         optimal_quantity: supply.optimal_quantity || 0,
-        content_per_unit: supply.content_per_unit || 1,
-        content_unit: supply.content_unit || 'ml',
+        content_per_unit: defaultContentPerUnit,
+        content_unit: defaultContentUnit,
         brand: supply.brand || '',
       });
+
+      setNumberOfUnits(units);
     }
   }, [supply]);
+
+  // Handle units change - automatically calculate total quantity
+  const handleUnitsChange = (newUnits: number) => {
+    setNumberOfUnits(newUnits);
+    const contentPerUnit = formData.content_per_unit || 1;
+    const newTotalQuantity = newUnits * contentPerUnit;
+    setFormData({
+      ...formData,
+      current_quantity: newTotalQuantity,
+    });
+  };
+
+  // Handle content per unit change - recalculate total quantity
+  const handleContentPerUnitChange = (newContentPerUnit: number) => {
+    setFormData({
+      ...formData,
+      content_per_unit: newContentPerUnit,
+      current_quantity: numberOfUnits * newContentPerUnit,
+    });
+  };
+
+  // Handle optimal units change - automatically calculate optimal quantity
+  const handleOptimalUnitsChange = (optimalUnits: number) => {
+    const contentPerUnit = formData.content_per_unit || 1;
+    const newOptimalQuantity = optimalUnits * contentPerUnit;
+    setFormData({
+      ...formData,
+      optimal_quantity: newOptimalQuantity,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +209,7 @@ export function EditSupplyDialog({
                     <SelectValue placeholder="Selecciona categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
+                    {SUPPLY_CATEGORIES.map((cat) => (
                       <SelectItem key={cat} value={cat}>
                         {cat}
                       </SelectItem>
@@ -212,12 +265,7 @@ export function EditSupplyDialog({
                   type="number"
                   step="0.01"
                   value={formData.content_per_unit || 1}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      content_per_unit: parseFloat(e.target.value),
-                    })
-                  }
+                  onChange={(e) => handleContentPerUnitChange(parseFloat(e.target.value) || 1)}
                   placeholder="750"
                 />
               </div>
@@ -247,7 +295,23 @@ export function EditSupplyDialog({
               Ejemplo: Botella de 750ml → Contenido: 750ml
             </p>
 
+            {/* Units and Quantities */}
             <div className="grid grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="units">Unidades</Label>
+                <Input
+                  id="units"
+                  type="number"
+                  step="1"
+                  value={numberOfUnits}
+                  onChange={(e) => handleUnitsChange(parseInt(e.target.value) || 0)}
+                  placeholder="2"
+                />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Botellas/Items
+                </p>
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="quantity">Cantidad Total</Label>
                 <Input
@@ -255,34 +319,12 @@ export function EditSupplyDialog({
                   type="number"
                   step="0.01"
                   value={formData.current_quantity || 0}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      current_quantity: parseFloat(e.target.value),
-                    })
-                  }
-                  required
+                  readOnly
+                  className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground -mt-1">
-                  Total en {formData.content_unit || 'unidades'}
+                  {formData.content_unit || 'unidades'} (auto)
                 </p>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="optimal">Cantidad Óptima</Label>
-                <Input
-                  id="optimal"
-                  type="number"
-                  step="0.01"
-                  value={formData.optimal_quantity || 0}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      optimal_quantity: parseFloat(e.target.value),
-                    })
-                  }
-                  placeholder="Stock ideal"
-                />
               </div>
 
               <div className="grid gap-2">
@@ -300,6 +342,44 @@ export function EditSupplyDialog({
                   }
                   required
                 />
+              </div>
+            </div>
+
+            {/* Optimal Quantity */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="optimal_units">Unidades Óptimas</Label>
+                <Input
+                  id="optimal_units"
+                  type="number"
+                  step="1"
+                  value={
+                    formData.optimal_quantity && formData.content_per_unit
+                      ? Math.floor(formData.optimal_quantity / formData.content_per_unit)
+                      : 0
+                  }
+                  onChange={(e) => handleOptimalUnitsChange(parseInt(e.target.value) || 0)}
+                  placeholder="4"
+                />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  Según plan
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="optimal">Cantidad Óptima Total</Label>
+                <Input
+                  id="optimal"
+                  type="number"
+                  step="0.01"
+                  value={formData.optimal_quantity || 0}
+                  readOnly
+                  className="bg-muted"
+                  placeholder="Stock ideal"
+                />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  {formData.content_unit || 'unidades'} (auto)
+                </p>
               </div>
             </div>
           </div>
