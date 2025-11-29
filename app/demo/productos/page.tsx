@@ -141,26 +141,33 @@ export default function ProductosPage() {
   const handleMenuChange = (menuId: string) => {
     setActiveMenuId(menuId);
 
-    // Filter products by menu_id
-    // In demo mode, we simulate filtering by showing all products
-    // In production, this would filter from database
     if (menuId) {
-      // For now, show all products (mock data doesn't have menu_id)
-      // TODO: Filter from Supabase: WHERE menu_id = menuId
-      setProducts(allProducts);
-      console.log('Filtering products for menu:', menuId);
+      // Filter products that belong to this specific menu
+      const filteredProducts = allProducts.filter(p => p.menu_id === menuId);
+      setProducts(filteredProducts);
+      console.log(`Showing ${filteredProducts.length} products for menu:`, menuId);
     } else {
+      // No active menu, show nothing
       setProducts([]);
     }
   };
 
   // Load products on mount
   useEffect(() => {
-    // In production, load from Supabase filtered by active menu
-    // For now, use mock data
-    setProducts(initialProducts);
+    // In production, this would load from Supabase
+    // For demo, we'll use mock data
+    // Note: Mock products don't have menu_id, so they won't show
+    // until assigned to a menu
     setAllProducts(initialProducts);
-  }, []);
+
+    // If there's an active menu, filter products
+    if (activeMenuId) {
+      const filtered = initialProducts.filter(p => p.menu_id === activeMenuId);
+      setProducts(filtered);
+    } else {
+      setProducts([]);
+    }
+  }, [activeMenuId]);
 
 
   const handleEdit = (productId: number) => {
@@ -194,13 +201,27 @@ export default function ProductosPage() {
 
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.category && newProduct.price > 0) {
+      if (!activeMenuId) {
+        alert('Por favor selecciona un menú activo primero');
+        return;
+      }
+
       const productToAdd = {
         ...newProduct,
-        id: Math.max(...products.map(p => p.id), 0) + 1,
+        id: Math.max(...allProducts.map(p => p.id), 0) + 1,
+        menu_id: activeMenuId, // Assign to active menu
         ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
       };
+
+      // Add to all products
+      const updatedAllProducts = [...allProducts, productToAdd];
+      setAllProducts(updatedAllProducts);
+
+      // Add to filtered products (current menu)
       setProducts([...products, productToAdd]);
+
       setIsAddingProduct(false);
+
       // Reset form
       setNewProduct({
         id: 0,
@@ -272,10 +293,14 @@ export default function ProductosPage() {
           {products.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg mb-2">
-                No hay productos en este menú
+                {activeMenuId
+                  ? 'No hay productos en este menú'
+                  : 'Selecciona un menú para ver productos'}
               </p>
               <p className="text-sm text-muted-foreground">
-                Agrega productos para comenzar
+                {activeMenuId
+                  ? 'Usa el botón "Agregar Producto" para crear productos en este menú'
+                  : 'Activa un menú desde arriba'}
               </p>
             </div>
           ) : (
