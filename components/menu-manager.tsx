@@ -45,8 +45,11 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
           try {
                setLoading(true);
 
-               // For demo mode, create a default "Los Clásicos" menu
-               if (!establishmentId) {
+               // Check if we're in demo mode (no real establishment)
+               // Always show Los Clásicos menu in demo
+               const isDemo = !establishmentId || establishmentId === 'demo';
+
+               if (isDemo) {
                     const defaultMenu: Menu = {
                          id: 'los-clasicos',
                          name: 'Los Clásicos',
@@ -61,6 +64,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     return;
                }
 
+               // Production mode - load from Supabase
                const supabase = createClient();
 
                const { data, error } = await supabase
@@ -81,7 +85,18 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                }
           } catch (error: any) {
                console.error("Error loading menus:", error);
-               toast.error("Error al cargar menús");
+
+               // Fallback to demo menu on error
+               const defaultMenu: Menu = {
+                    id: 'los-clasicos',
+                    name: 'Los Clásicos',
+                    is_active: true,
+                    created_at: new Date().toISOString()
+               };
+
+               setMenus([defaultMenu]);
+               setSelectedMenuId(defaultMenu.id);
+               onMenuChange?.(defaultMenu.id);
           } finally {
                setLoading(false);
           }
