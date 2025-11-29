@@ -46,7 +46,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                setLoading(true);
 
                // Check if we're in demo mode (no real establishment)
-               // Always show Los Clásicos menu in demo
+               // Show Los Clásicos as an inactive menu that can be activated
                const isDemo = !establishmentId || establishmentId === 'demo';
 
                console.log('MenuManager - Loading menus:', { establishmentId, isDemo });
@@ -55,14 +55,13 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     const defaultMenu: Menu = {
                          id: 'los-clasicos',
                          name: 'Los Clásicos',
-                         is_active: true,
+                         is_active: false, // Inactive by default - user can activate it
                          created_at: new Date().toISOString()
                     };
 
-                    console.log('MenuManager - Setting default menu:', defaultMenu);
+                    console.log('MenuManager - Setting Los Clásicos as inactive menu:', defaultMenu);
                     setMenus([defaultMenu]);
-                    setSelectedMenuId(defaultMenu.id);
-                    onMenuChange?.(defaultMenu.id);
+                    setSelectedMenuId(''); // No active menu initially
                     setLoading(false);
                     return;
                }

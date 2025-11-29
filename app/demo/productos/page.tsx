@@ -412,12 +412,12 @@ export default function ProductosPage() {
               <p className="text-muted-foreground text-lg mb-2">
                 {activeMenuId
                   ? 'No hay productos en este menú'
-                  : 'Selecciona un menú para ver productos'}
+                  : 'No hay menú activo'}
               </p>
               <p className="text-sm text-muted-foreground">
                 {activeMenuId
                   ? 'Usa el botón "Agregar Producto" para crear productos en este menú'
-                  : 'Activa un menú desde arriba'}
+                  : 'Activa "Los Clásicos" o crea un nuevo menú para comenzar'}
               </p>
             </div>
           ) : (
