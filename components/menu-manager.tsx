@@ -49,6 +49,8 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                // Always show Los Clásicos menu in demo
                const isDemo = !establishmentId || establishmentId === 'demo';
 
+               console.log('MenuManager - Loading menus:', { establishmentId, isDemo });
+
                if (isDemo) {
                     const defaultMenu: Menu = {
                          id: 'los-clasicos',
@@ -57,6 +59,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                          created_at: new Date().toISOString()
                     };
 
+                    console.log('MenuManager - Setting default menu:', defaultMenu);
                     setMenus([defaultMenu]);
                     setSelectedMenuId(defaultMenu.id);
                     onMenuChange?.(defaultMenu.id);

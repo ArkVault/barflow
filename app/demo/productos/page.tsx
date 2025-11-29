@@ -254,15 +254,17 @@ export default function ProductosPage() {
 
   // Filter products when active menu changes
   const handleMenuChange = (menuId: string) => {
+    console.log('ProductosPage - Menu changed to:', menuId);
     setActiveMenuId(menuId);
 
     if (menuId) {
       // Filter products that belong to this specific menu
       const filteredProducts = allProducts.filter(p => p.menu_id === menuId);
+      console.log('ProductosPage - Filtered products:', filteredProducts.length, 'of', allProducts.length);
       setProducts(filteredProducts);
-      console.log(`Showing ${filteredProducts.length} products for menu:`, menuId);
     } else {
       // No active menu, show nothing
+      console.log('ProductosPage - No active menu, clearing products');
       setProducts([]);
     }
   };
