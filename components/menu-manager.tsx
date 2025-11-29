@@ -31,42 +31,40 @@ interface MenuManagerProps {
 
 export function MenuManager({ onMenuChange }: MenuManagerProps) {
      const { establishmentId } = useAuth();
-     const [menus, setMenus] = useState<Menu[]>([]);
+
+     // Initialize with Los Clásicos menu for demo
+     const defaultMenu: Menu = {
+          id: 'los-clasicos',
+          name: 'Los Clásicos',
+          is_active: false,
+          created_at: new Date().toISOString()
+     };
+
+     const [menus, setMenus] = useState<Menu[]>([defaultMenu]);
      const [selectedMenuId, setSelectedMenuId] = useState<string>("");
      const [showCreateDialog, setShowCreateDialog] = useState(false);
      const [newMenuName, setNewMenuName] = useState("");
-     const [loading, setLoading] = useState(true);
+     const [loading, setLoading] = useState(false);
 
      useEffect(() => {
           loadMenus();
      }, [establishmentId]);
 
      const loadMenus = async () => {
+          // Check if we're in demo mode
+          const isDemo = !establishmentId || establishmentId === 'demo';
+
+          console.log('MenuManager - Loading menus:', { establishmentId, isDemo });
+
+          // In demo mode, keep the default Los Clásicos menu
+          if (isDemo) {
+               console.log('MenuManager - Demo mode, keeping Los Clásicos menu');
+               return; // Don't override the default menu
+          }
+
+          // Production mode - load from Supabase
           try {
                setLoading(true);
-
-               // Check if we're in demo mode (no real establishment)
-               // Show Los Clásicos as an inactive menu that can be activated
-               const isDemo = !establishmentId || establishmentId === 'demo';
-
-               console.log('MenuManager - Loading menus:', { establishmentId, isDemo });
-
-               if (isDemo) {
-                    const defaultMenu: Menu = {
-                         id: 'los-clasicos',
-                         name: 'Los Clásicos',
-                         is_active: false, // Inactive by default - user can activate it
-                         created_at: new Date().toISOString()
-                    };
-
-                    console.log('MenuManager - Setting Los Clásicos as inactive menu:', defaultMenu);
-                    setMenus([defaultMenu]);
-                    setSelectedMenuId(''); // No active menu initially
-                    setLoading(false);
-                    return;
-               }
-
-               // Production mode - load from Supabase
                const supabase = createClient();
 
                const { data, error } = await supabase
@@ -87,18 +85,6 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                }
           } catch (error: any) {
                console.error("Error loading menus:", error);
-
-               // Fallback to demo menu on error
-               const defaultMenu: Menu = {
-                    id: 'los-clasicos',
-                    name: 'Los Clásicos',
-                    is_active: true,
-                    created_at: new Date().toISOString()
-               };
-
-               setMenus([defaultMenu]);
-               setSelectedMenuId(defaultMenu.id);
-               onMenuChange?.(defaultMenu.id);
           } finally {
                setLoading(false);
           }
