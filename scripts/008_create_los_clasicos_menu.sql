@@ -56,7 +56,7 @@ BEGIN
     ON CONFLICT DO NOTHING;
     
     -- Insert products for this menu
-    INSERT INTO public.products (establishment_id, menu_id, name, category, price, description, active, created_at)
+    INSERT INTO public.products (establishment_id, menu_id, name, category, price, description, is_active, created_at)
     SELECT 
       menu_record.establishment_id,
       m.id,
