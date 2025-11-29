@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useLanguage } from "@/hooks/use-language"
 import { MenuManager } from "@/components/menu-manager"
+import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "sonner"
 
 
 interface Product {
@@ -225,6 +228,7 @@ const initialProducts: Product[] = [
 
 export default function ProductosPage() {
   const { t } = useLanguage();
+  const { establishmentId } = useAuth();
   const [activeMenuId, setActiveMenuId] = useState<string>("");
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -252,22 +256,61 @@ export default function ProductosPage() {
     return categoryMap[category] || category;
   };
 
-  // Filter products when active menu changes
-  const handleMenuChange = (menuId: string) => {
+  // Load products from Supabase when menu changes
+  const handleMenuChange = async (menuId: string) => {
     console.log('ProductosPage - Menu changed to:', menuId);
     setActiveMenuId(menuId);
 
-    if (menuId) {
-      // Filter products that belong to this specific menu
-      const filteredProducts = allProducts.filter(p => p.menu_id === menuId);
-      console.log('ProductosPage - Filtered products:', filteredProducts.length, 'of', allProducts.length);
-      setProducts(filteredProducts);
-    } else {
-      // No active menu, show nothing
-      console.log('ProductosPage - No active menu, clearing products');
+    if (!menuId) {
+      console.log('ProductosPage - No menu selected, clearing products');
       setProducts([]);
+      return;
+    }
+
+    try {
+      console.log('ProductosPage - Loading products from Supabase for menu:', menuId);
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('menu_id', menuId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading products:', error);
+        toast.error('Error al cargar productos');
+        // Fallback to mock data
+        const mockFiltered = initialProducts.filter(p => p.menu_id === menuId);
+        setProducts(mockFiltered);
+        return;
+      }
+
+      console.log('ProductosPage - Loaded products from Supabase:', data?.length || 0);
+
+      // Convert Supabase data to Product format
+      const products = (data || []).map((p: any) => ({
+        id: parseInt(p.id) || 0,
+        name: p.name,
+        category: p.category || 'Cócteles',
+        price: parseFloat(p.price) || 0,
+        description: p.description || '',
+        active: p.is_active,
+        menu_id: p.menu_id,
+        ingredients: [] // TODO: Load ingredients from product_ingredients table
+      }));
+
+      setProducts(products);
+      setAllProducts(products);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      // Fallback to mock data
+      const mockFiltered = initialProducts.filter(p => p.menu_id === menuId);
+      setProducts(mockFiltered);
     }
   };
+
 
   // Load products on mount
   useEffect(() => {
