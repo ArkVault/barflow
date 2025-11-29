@@ -38,14 +38,29 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
      const [loading, setLoading] = useState(true);
 
      useEffect(() => {
-          if (establishmentId) {
-               loadMenus();
-          }
+          loadMenus();
      }, [establishmentId]);
 
      const loadMenus = async () => {
           try {
                setLoading(true);
+
+               // For demo mode, create a default "Los Clásicos" menu
+               if (!establishmentId) {
+                    const defaultMenu: Menu = {
+                         id: 'los-clasicos',
+                         name: 'Los Clásicos',
+                         is_active: true,
+                         created_at: new Date().toISOString()
+                    };
+
+                    setMenus([defaultMenu]);
+                    setSelectedMenuId(defaultMenu.id);
+                    onMenuChange?.(defaultMenu.id);
+                    setLoading(false);
+                    return;
+               }
+
                const supabase = createClient();
 
                const { data, error } = await supabase
