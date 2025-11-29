@@ -271,17 +271,21 @@ export default function ProductosPage() {
 
   // Load products on mount
   useEffect(() => {
+    console.log('ProductosPage - Initial load, setting up products');
     // In production, this would load from Supabase
     // For demo, we'll use mock data
-    // Note: Mock products don't have menu_id, so they won't show
-    // until assigned to a menu
     setAllProducts(initialProducts);
+    console.log('ProductosPage - All products loaded:', initialProducts.length);
+    console.log('ProductosPage - Products with los-clasicos menu_id:',
+      initialProducts.filter(p => p.menu_id === 'los-clasicos').length);
 
     // If there's an active menu, filter products
     if (activeMenuId) {
       const filtered = initialProducts.filter(p => p.menu_id === activeMenuId);
+      console.log('ProductosPage - Filtering for active menu:', activeMenuId, 'Found:', filtered.length);
       setProducts(filtered);
     } else {
+      console.log('ProductosPage - No active menu, showing empty state');
       setProducts([]);
     }
   }, [activeMenuId]);
