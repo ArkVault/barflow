@@ -51,18 +51,27 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
      }, [establishmentId]);
 
      const loadMenus = async () => {
+          console.log('MenuManager - Loading menus:', { establishmentId });
+
+          // Always keep Los Clásicos as fallback
+          const losClasicosMenu: Menu = {
+               id: 'los-clasicos',
+               name: 'Los Clásicos',
+               is_active: false,
+               created_at: new Date().toISOString()
+          };
+
           // Check if we're in demo mode
           const isDemo = !establishmentId || establishmentId === 'demo';
 
-          console.log('MenuManager - Loading menus:', { establishmentId, isDemo });
-
-          // In demo mode, keep the default Los Clásicos menu
+          // In demo mode, just use the default menu
           if (isDemo) {
-               console.log('MenuManager - Demo mode, keeping Los Clásicos menu');
-               return; // Don't override the default menu
+               console.log('MenuManager - Demo mode, using default Los Clásicos menu');
+               setMenus([losClasicosMenu]);
+               return;
           }
 
-          // Production mode - load from Supabase
+          // Production mode - load from Supabase and merge with Los Clásicos
           try {
                setLoading(true);
                const supabase = createClient();
@@ -75,16 +84,23 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               setMenus(data || []);
+               // Merge Supabase menus with Los Clásicos if not already present
+               const hasLosClasicos = data?.some(m => m.name === 'Los Clásicos');
+               const allMenus = hasLosClasicos ? (data || []) : [losClasicosMenu, ...(data || [])];
+
+               console.log('MenuManager - Loaded menus:', allMenus.length);
+               setMenus(allMenus);
 
                // Set active menu as selected
-               const activeMenu = data?.find((m) => m.is_active);
+               const activeMenu = allMenus.find((m) => m.is_active);
                if (activeMenu) {
                     setSelectedMenuId(activeMenu.id);
                     onMenuChange?.(activeMenu.id);
                }
           } catch (error: any) {
                console.error("Error loading menus:", error);
+               // Fallback to Los Clásicos on error
+               setMenus([losClasicosMenu]);
           } finally {
                setLoading(false);
           }
