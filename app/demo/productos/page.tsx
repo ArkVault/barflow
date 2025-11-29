@@ -24,18 +24,23 @@ interface Product {
   menu_id?: string; // Added for menu filtering
 }
 
+// Mock menu ID for "Los Clásicos"
+const LOS_CLASICOS_MENU_ID = 'los-clasicos';
+
 const initialProducts: Product[] = [
   {
     id: 1,
-    name: 'Mojito Clásico',
+    name: 'Mojito',
     category: 'Cócteles',
     price: 8.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
       { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
       { name: 'Hierbabuena', quantity: 10, unit: 'hojas' },
-      { name: 'Azúcar', quantity: 2, unit: 'cucharadas' },
-      { name: 'Limón', quantity: 1, unit: 'unidad' },
-      { name: 'Agua Mineral', quantity: 100, unit: 'ml' }
+      { name: 'Azúcar Blanca', quantity: 2, unit: 'cucharaditas' },
+      { name: 'Lima', quantity: 1, unit: 'unidad' },
+      { name: 'Agua Mineral', quantity: 100, unit: 'ml' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
     ],
     active: true,
     description: 'Refrescante cóctel cubano con hierbabuena y ron'
@@ -45,68 +50,178 @@ const initialProducts: Product[] = [
     name: 'Margarita',
     category: 'Cócteles',
     price: 9.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
-      { name: 'Tequila', quantity: 50, unit: 'ml' },
-      { name: 'Triple Sec', quantity: 25, unit: 'ml' },
-      { name: 'Jugo de Limón', quantity: 30, unit: 'ml' },
-      { name: 'Sal', quantity: 1, unit: 'pizca' }
+      { name: 'Tequila Blanco', quantity: 50, unit: 'ml' },
+      { name: 'Cointreau', quantity: 25, unit: 'ml' },
+      { name: 'Jugo de Lima', quantity: 25, unit: 'ml' },
+      { name: 'Sal', quantity: 1, unit: 'pizca' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
     ],
     active: true,
-    description: 'Clásico cóctel mexicano con tequila y limón'
+    description: 'Clásico cóctel mexicano con tequila y lima'
   },
   {
     id: 3,
     name: 'Piña Colada',
     category: 'Cócteles',
     price: 10.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
       { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
       { name: 'Crema de Coco', quantity: 30, unit: 'ml' },
       { name: 'Jugo de Piña', quantity: 90, unit: 'ml' },
-      { name: 'Piña', quantity: 50, unit: 'g' },
-      { name: 'Hielo', quantity: 100, unit: 'g' },
-      { name: 'Cereza', quantity: 1, unit: 'unidad' }
+      { name: 'Piña Natural', quantity: 50, unit: 'g' },
+      { name: 'Hielo', quantity: 150, unit: 'g' }
     ],
     active: true,
     description: 'Tropical y cremoso cóctel caribeño'
   },
   {
     id: 4,
-    name: 'Cuba Libre',
+    name: 'Daiquiri',
     category: 'Cócteles',
-    price: 7.50,
+    price: 8.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
-      { name: 'Ron Blanco', quantity: 50, unit: 'ml' },
-      { name: 'Coca Cola', quantity: 120, unit: 'ml' },
-      { name: 'Limón', quantity: 0.5, unit: 'unidad' }
+      { name: 'Ron Blanco', quantity: 60, unit: 'ml' },
+      { name: 'Jugo de Lima', quantity: 30, unit: 'ml' },
+      { name: 'Jarabe Simple', quantity: 15, unit: 'ml' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
     ],
     active: true,
-    description: 'Simple y delicioso, ron con cola y limón'
+    description: 'Cóctel cubano clásico, simple y refrescante'
   },
   {
     id: 5,
-    name: 'Cerveza Corona',
-    category: 'Cervezas',
-    price: 5.00,
+    name: 'Cosmopolitan',
+    category: 'Cócteles',
+    price: 10.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
-      { name: 'Cerveza Corona', quantity: 355, unit: 'ml' }
+      { name: 'Vodka', quantity: 40, unit: 'ml' },
+      { name: 'Cointreau', quantity: 15, unit: 'ml' },
+      { name: 'Jugo de Arándano', quantity: 30, unit: 'ml' },
+      { name: 'Jugo de Lima', quantity: 15, unit: 'ml' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
     ],
     active: true,
-    description: 'Cerveza mexicana premium'
+    description: 'Elegante cóctel popularizado en los 90s'
   },
   {
     id: 6,
-    name: 'Tequila Shot',
-    category: 'Shots',
-    price: 6.00,
+    name: 'Old Fashioned',
+    category: 'Cócteles',
+    price: 11.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
     ingredients: [
-      { name: 'Tequila', quantity: 45, unit: 'ml' },
-      { name: 'Sal', quantity: 1, unit: 'pizca' }
+      { name: 'Whisky Bourbon', quantity: 60, unit: 'ml' },
+      { name: 'Azúcar', quantity: 1, unit: 'cubo' },
+      { name: 'Angostura Bitters', quantity: 3, unit: 'gotas' },
+      { name: 'Naranja', quantity: 1, unit: 'rodaja' },
+      { name: 'Cereza Marrasquino', quantity: 1, unit: 'unidad' },
+      { name: 'Hielo', quantity: 80, unit: 'g' }
     ],
     active: true,
-    description: 'Shot de tequila tradicional'
+    description: 'Cóctel clásico americano con whisky'
   },
+  {
+    id: 7,
+    name: 'Manhattan',
+    category: 'Cócteles',
+    price: 10.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Whisky Rye', quantity: 50, unit: 'ml' },
+      { name: 'Vermut Rojo', quantity: 25, unit: 'ml' },
+      { name: 'Angostura Bitters', quantity: 2, unit: 'gotas' },
+      { name: 'Cereza Marrasquino', quantity: 1, unit: 'unidad' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
+    ],
+    active: true,
+    description: 'Sofisticado cóctel de Nueva York'
+  },
+  {
+    id: 8,
+    name: 'Negroni',
+    category: 'Cócteles',
+    price: 9.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Gin', quantity: 30, unit: 'ml' },
+      { name: 'Campari', quantity: 30, unit: 'ml' },
+      { name: 'Vermut Rojo', quantity: 30, unit: 'ml' },
+      { name: 'Naranja', quantity: 1, unit: 'rodaja' },
+      { name: 'Hielo', quantity: 80, unit: 'g' }
+    ],
+    active: true,
+    description: 'Amargo y aromático cóctel italiano'
+  },
+  {
+    id: 9,
+    name: 'Martini',
+    category: 'Cócteles',
+    price: 11.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Gin', quantity: 60, unit: 'ml' },
+      { name: 'Vermut Seco', quantity: 10, unit: 'ml' },
+      { name: 'Aceituna', quantity: 2, unit: 'unidades' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
+    ],
+    active: true,
+    description: 'El rey de los cócteles, elegante y seco'
+  },
+  {
+    id: 10,
+    name: 'Whisky Sour',
+    category: 'Cócteles',
+    price: 9.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Whisky Bourbon', quantity: 50, unit: 'ml' },
+      { name: 'Jugo de Limón', quantity: 30, unit: 'ml' },
+      { name: 'Jarabe Simple', quantity: 20, unit: 'ml' },
+      { name: 'Clara de Huevo', quantity: 15, unit: 'ml' },
+      { name: 'Angostura Bitters', quantity: 2, unit: 'gotas' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
+    ],
+    active: true,
+    description: 'Equilibrio perfecto entre dulce y ácido'
+  },
+  {
+    id: 11,
+    name: 'Caipirinha',
+    category: 'Cócteles',
+    price: 8.00,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Cachaça', quantity: 60, unit: 'ml' },
+      { name: 'Lima', quantity: 1, unit: 'unidad' },
+      { name: 'Azúcar Blanca', quantity: 2, unit: 'cucharaditas' },
+      { name: 'Hielo Picado', quantity: 150, unit: 'g' }
+    ],
+    active: true,
+    description: 'Cóctel nacional de Brasil, fresco y potente'
+  },
+  {
+    id: 12,
+    name: 'Aperol Spritz',
+    category: 'Cócteles',
+    price: 8.50,
+    menu_id: LOS_CLASICOS_MENU_ID,
+    ingredients: [
+      { name: 'Aperol', quantity: 60, unit: 'ml' },
+      { name: 'Prosecco', quantity: 90, unit: 'ml' },
+      { name: 'Agua Mineral', quantity: 30, unit: 'ml' },
+      { name: 'Naranja', quantity: 1, unit: 'rodaja' },
+      { name: 'Hielo', quantity: 100, unit: 'g' }
+    ],
+    active: true,
+    description: 'Refrescante aperitivo italiano'
+  }
 ]
+
 
 export default function ProductosPage() {
   const { t } = useLanguage();
