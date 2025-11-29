@@ -189,16 +189,17 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                          <Label className="text-sm font-medium">
                               Menús Anteriores
                          </Label>
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                               {inactiveMenus.map((menu) => (
                                    <div
                                         key={menu.id}
-                                        className="group relative overflow-hidden rounded-lg p-4 bg-gradient-to-br from-white/5 to-white/10 border border-white/10 hover:border-white/20 transition-all hover:scale-[1.02]"
+                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
+                                        onClick={() => activateMenu(menu.id)}
                                    >
-                                        <div className="space-y-3">
+                                        <div className="space-y-2">
                                              <div>
-                                                  <p className="font-semibold text-foreground">{menu.name}</p>
-                                                  <p className="text-xs text-muted-foreground mt-1">
+                                                  <p className="font-semibold text-foreground text-sm">{menu.name}</p>
+                                                  <p className="text-xs text-muted-foreground mt-0.5">
                                                        {new Date(menu.created_at).toLocaleDateString('es-ES', {
                                                             day: 'numeric',
                                                             month: 'short',
@@ -206,21 +207,27 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                                        })}
                                                   </p>
                                              </div>
-                                             <div className="flex gap-2">
+                                             <div className="flex gap-1.5">
                                                   <Button
                                                        size="sm"
-                                                       className="flex-1 h-8 text-xs"
-                                                       onClick={() => activateMenu(menu.id)}
+                                                       className="flex-1 h-7 text-xs"
+                                                       onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            activateMenu(menu.id);
+                                                       }}
                                                   >
                                                        Activar
                                                   </Button>
                                                   <Button
                                                        size="sm"
                                                        variant="ghost"
-                                                       className="h-8 w-8 p-0"
-                                                       onClick={() => deleteMenu(menu.id)}
+                                                       className="h-7 w-7 p-0"
+                                                       onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            deleteMenu(menu.id);
+                                                       }}
                                                   >
-                                                       <Trash2 className="w-3.5 h-3.5" />
+                                                       <Trash2 className="w-3 h-3" />
                                                   </Button>
                                              </div>
                                         </div>

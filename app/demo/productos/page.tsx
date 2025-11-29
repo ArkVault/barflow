@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar"
 import { Plus, Edit, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useLanguage } from "@/hooks/use-language"
@@ -21,6 +21,7 @@ interface Product {
   ingredients: Array<{ name: string; quantity: number; unit: string }>;
   active: boolean;
   description?: string;
+  menu_id?: string; // Added for menu filtering
 }
 
 const initialProducts: Product[] = [
@@ -139,10 +140,27 @@ export default function ProductosPage() {
   // Filter products when active menu changes
   const handleMenuChange = (menuId: string) => {
     setActiveMenuId(menuId);
-    // TODO: Filter products by menuId from database
-    // For now, show all products
-    console.log('Filtering products for menu:', menuId);
+
+    // Filter products by menu_id
+    // In demo mode, we simulate filtering by showing all products
+    // In production, this would filter from database
+    if (menuId) {
+      // For now, show all products (mock data doesn't have menu_id)
+      // TODO: Filter from Supabase: WHERE menu_id = menuId
+      setProducts(allProducts);
+      console.log('Filtering products for menu:', menuId);
+    } else {
+      setProducts([]);
+    }
   };
+
+  // Load products on mount
+  useEffect(() => {
+    // In production, load from Supabase filtered by active menu
+    // For now, use mock data
+    setProducts(initialProducts);
+    setAllProducts(initialProducts);
+  }, []);
 
 
   const handleEdit = (productId: number) => {
