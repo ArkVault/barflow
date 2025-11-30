@@ -59,6 +59,8 @@ export default function DemoPage() {
   const [criticalSupplies, setCriticalSupplies] = useState(0);
   const [lowSupplies, setLowSupplies] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [activeMenuName, setActiveMenuName] = useState("Sin menú activo");
+  const [activeMenuProductsCount, setActiveMenuProductsCount] = useState(0);
   const [menuName, setMenuName] = useState("Menú Actual");
   const [menuLastModified, setMenuLastModified] = useState("Nunca");
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
@@ -77,7 +79,7 @@ export default function DemoPage() {
       const supabase = createClient();
 
       // Carga paralela de todos los datos para mayor velocidad
-      const [suppliesRes, productsRes, settingsRes, salesRes] = await Promise.all([
+      const [suppliesRes, productsRes, activeMenuRes, settingsRes, salesRes] = await Promise.all([
         // 1. Insumos
         supabase
           .from('supplies')
@@ -88,19 +90,27 @@ export default function DemoPage() {
         // 2. Productos (solo activos)
         supabase
           .from('products')
-          .select('id, updated_at')
+          .select('id, updated_at, menu_id')
           .eq('establishment_id', establishmentId)
           .eq('is_active', true)
           .order('updated_at', { ascending: false }),
 
-        // 3. Configuración
+        // 3. Menú Activo
+        supabase
+          .from('menus')
+          .select('id, name')
+          .eq('establishment_id', establishmentId)
+          .eq('is_active', true)
+          .single(),
+
+        // 4. Configuración
         supabase
           .from('establishments')
           .select('menu_name')
           .eq('id', establishmentId)
           .single(),
 
-        // 4. Ventas (última semana)
+        // 5. Ventas (última semana)
         supabase
           .from('sales')
           .select('product_id, quantity, products(name)')
@@ -132,6 +142,17 @@ export default function DemoPage() {
       // Procesar Productos
       const productsData = productsRes.data || [];
       setTotalProducts(productsData.length);
+
+      // Procesar Menú Activo y sus productos
+      if (activeMenuRes.data) {
+        setActiveMenuName(activeMenuRes.data.name);
+        // Contar productos del menú activo
+        const activeMenuProducts = productsData.filter(p => p.menu_id === activeMenuRes.data.id);
+        setActiveMenuProductsCount(activeMenuProducts.length);
+      } else {
+        setActiveMenuName("Sin menú activo");
+        setActiveMenuProductsCount(0);
+      }
 
       if (productsData.length > 0 && productsData[0].updated_at) {
         const lastModified = new Date(productsData[0].updated_at);
@@ -324,7 +345,8 @@ export default function DemoPage() {
                       </div>
 
                       <div className="text-right space-y-0.5">
-                        <div className="text-[10px] text-muted-foreground">Temporada: <span className="font-medium text-foreground">{menuName}</span></div>
+                        <div className="text-[10px] text-muted-foreground">Menú Activo: <span className="font-medium text-foreground">{activeMenuName}</span></div>
+                        <div className="text-[10px] text-muted-foreground">Productos: <span className="font-medium text-foreground">{activeMenuProductsCount}</span></div>
                         <div className="text-[10px] text-muted-foreground">Modificado: <span className="font-medium text-foreground">{menuLastModified}</span></div>
                       </div>
                     </div>
