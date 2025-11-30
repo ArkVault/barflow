@@ -402,8 +402,9 @@ aside button[class*="neumorphic-hover"] {
 /* Active Menu Card Animation */
 .active-menu-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(197, 213, 234, 0.1) 0%, rgba(168, 197, 232, 0.1) 50%, rgba(143, 184, 229, 0.1) 100%);
-  border-color: transparent !important;
+  background: linear-gradient(135deg, rgba(197, 213, 234, 0.15) 0%, rgba(168, 197, 232, 0.15) 50%, rgba(143, 184, 229, 0.15) 100%);
+  border: 2px solid transparent;
+  box-shadow: 0 0 20px rgba(168, 197, 232, 0.3);
 }
 
 .active-menu-card::before {
@@ -414,18 +415,49 @@ aside button[class*="neumorphic-hover"] {
   padding: 2px;
   background: linear-gradient(90deg,
       #C5D5EA 0%,
-      #A8C5E8 25%,
-      #8FB8E5 50%,
-      #A8C5E8 75%,
-      #C5D5EA 100%);
+      #A8C5E8 20%,
+      #8FB8E5 40%,
+      #A8C5E8 60%,
+      #C5D5EA 80%,
+      #A8C5E8 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: border-flow 3s linear infinite;
+  animation: border-flow 4s linear infinite;
+  background-size: 300% 100%;
+  opacity: 1;
+}
+
+.active-menu-card::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(168, 197, 232, 0.2) 50%,
+      transparent 100%);
   background-size: 200% 100%;
+  animation: glow-flow 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
 }
 
 @keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glow-flow {
   0% {
     background-position: 0% 50%;
   }
