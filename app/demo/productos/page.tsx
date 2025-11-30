@@ -754,10 +754,24 @@ export default function ProductosPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Ingredientes</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>Ingredientes</Label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const newIngredients = [...editForm.ingredients, { name: '', quantity: 0, unit: '' }];
+                          setEditForm({ ...editForm, ingredients: newIngredients });
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Agregar Ingrediente
+                      </Button>
+                    </div>
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {editForm.ingredients.map((ing, idx) => (
-                        <div key={idx} className="grid grid-cols-3 gap-2 p-2 rounded-lg neumorphic-inset">
+                        <div key={idx} className="grid grid-cols-[1fr,1fr,1fr,auto] gap-2 p-2 rounded-lg neumorphic-inset">
                           <Input
                             placeholder="Ingrediente"
                             value={ing.name}
@@ -786,6 +800,17 @@ export default function ProductosPage() {
                               setEditForm({ ...editForm, ingredients: newIngredients });
                             }}
                           />
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const newIngredients = editForm.ingredients.filter((_, i) => i !== idx);
+                              setEditForm({ ...editForm, ingredients: newIngredients });
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
                         </div>
                       ))}
                     </div>
