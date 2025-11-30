@@ -223,8 +223,8 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                         {/* Menú Activo Badge - Top Right Corner */}
                                         <div style={{
                                              position: 'absolute',
-                                             top: '0.5rem',
-                                             right: '0.5rem',
+                                             top: '0.2rem',
+                                             right: '-9rem',
                                              zIndex: 50
                                         }}>
                                              <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
