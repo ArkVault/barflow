@@ -187,6 +187,11 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
      const activeMenu = menus.find((m) => m.is_active);
      const inactiveMenus = menus.filter((m) => !m.is_active);
 
+     console.log('MenuManager - All menus:', menus.length);
+     console.log('MenuManager - Active menu:', activeMenu?.name, activeMenu?.id);
+     console.log('MenuManager - Inactive menus:', inactiveMenus.map(m => `${m.name} (${m.id})`));
+
+
      return (
           <div className="space-y-4">
                {/* Header with New Menu Button */}
