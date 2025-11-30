@@ -334,7 +334,7 @@
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
 .btn-sky-gradient {
   background: transparent !important;
-  color: white !important;
+  color: #1a1a2e !important;
   position: relative;
   overflow: visible;
   border: none;
@@ -388,7 +388,7 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #87CEEB 0%, #4A90E2 50%, #5AB9EA 100%);
+  background: linear-gradient(135deg, #C5D5EA 0%, #A8C5E8 50%, #8FB8E5 100%);
   border-radius: inherit;
   z-index: -2;
   /* Behind the glow border */
