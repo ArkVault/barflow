@@ -218,10 +218,9 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                    <div
                                         key={activeMenu.id}
                                         className="group relative rounded-lg p-3 active-menu-card"
-                                        style={{ overflow: 'visible' }}
                                    >
-                                        {/* Menú Activo Badge - Top Right */}
-                                        <div className="absolute -top-2 -right-2 z-20">
+                                        {/* Menú Activo Badge - Inside Card, Top Right */}
+                                        <div className="absolute top-2 right-2 z-20">
                                              <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
                                                   Menú Activo
                                              </span>
@@ -229,7 +228,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                                         <div className="space-y-2 relative z-10">
                                              <div>
-                                                  <p className="font-semibold text-foreground text-sm">
+                                                  <p className="font-semibold text-foreground text-sm pr-24">
                                                        {activeMenu.name}
                                                   </p>
                                                   <p className="text-xs text-muted-foreground mt-0.5">

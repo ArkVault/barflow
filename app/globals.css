@@ -399,17 +399,34 @@ aside button[class*="neumorphic-hover"] {
   /* Original styles are preserved */
 }
 
-/* Active Menu Card Animation - Neumorphic Style */
+/* Active Menu Card Animation - Neumorphic Style with Sunset Gradient */
 .active-menu-card {
   position: relative !important;
-  background: var(--color-card) !important;
+  background: linear-gradient(135deg,
+      rgba(197, 213, 234, 0.4) 0%,
+      /* Lavanda */
+      rgba(168, 197, 232, 0.4) 20%,
+      /* Azul claro */
+      rgba(143, 184, 229, 0.4) 40%,
+      /* Azul cielo */
+      rgba(255, 183, 147, 0.3) 60%,
+      /* Naranja suave */
+      rgba(255, 159, 122, 0.3) 80%,
+      /* Naranja atardecer */
+      rgba(197, 213, 234, 0.4) 100%) !important;
+  /* Lavanda */
+  background-size: 200% 200% !important;
   box-shadow:
     12px 12px 24px var(--shadow-dark),
     -12px -12px 24px var(--shadow-light),
-    0 0 30px rgba(168, 197, 232, 0.4) !important;
+    0 0 30px rgba(168, 197, 232, 0.4),
+    inset 0 0 60px rgba(255, 183, 147, 0.1) !important;
   border: 2px solid rgba(168, 197, 232, 0.3) !important;
-  animation: neumorphic-pulse 2s ease-in-out infinite !important;
-  will-change: transform, box-shadow !important;
+  animation: neumorphic-pulse 2s ease-in-out infinite, gradient-shift 6s ease-in-out infinite !important;
+  will-change: transform, box-shadow, background-position !important;
+  overflow: visible !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 /* Ensure content is above effects */
@@ -426,7 +443,8 @@ aside button[class*="neumorphic-hover"] {
     box-shadow:
       12px 12px 24px var(--shadow-dark),
       -12px -12px 24px var(--shadow-light),
-      0 0 30px rgba(168, 197, 232, 0.4);
+      0 0 30px rgba(168, 197, 232, 0.4),
+      inset 0 0 60px rgba(255, 183, 147, 0.1);
   }
 
   50% {
@@ -434,6 +452,19 @@ aside button[class*="neumorphic-hover"] {
     box-shadow:
       14px 14px 28px var(--shadow-dark),
       -14px -14px 28px var(--shadow-light),
-      0 0 45px rgba(168, 197, 232, 0.6);
+      0 0 45px rgba(168, 197, 232, 0.6),
+      inset 0 0 80px rgba(255, 183, 147, 0.2);
+  }
+}
+
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
   }
 }
