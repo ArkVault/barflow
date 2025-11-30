@@ -189,25 +189,11 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
      return (
           <div className="space-y-4">
-               {/* Active Menu Display */}
+               {/* Header with New Menu Button */}
                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                         <div>
-                              <Label className="text-sm text-muted-foreground">Menú Actual</Label>
-                              <div className="flex items-center gap-2 mt-1">
-                                   <h3 className="text-xl font-bold">
-                                        {activeMenu?.name || "Sin menú activo"}
-                                   </h3>
-                                   {activeMenu && (
-                                        <Badge variant="default" className="bg-green-500">
-                                             <Check className="w-3 h-3 mr-1" />
-                                             Activo
-                                        </Badge>
-                                   )}
-                              </div>
-                         </div>
-                    </div>
-
+                    <Label className="text-lg font-semibold">
+                         Gestión de Menús
+                    </Label>
                     <Button
                          onClick={() => setShowCreateDialog(true)}
                          className="neumorphic-hover"
@@ -230,8 +216,8 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                         <div
                                              key={menu.id}
                                              className={`group relative overflow-hidden rounded-lg p-3 transition-all cursor-pointer ${isActive
-                                                       ? 'active-menu-card'
-                                                       : 'bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 hover:scale-[1.02]'
+                                                  ? 'active-menu-card'
+                                                  : 'bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 hover:scale-[1.02]'
                                                   }`}
                                              onClick={() => !isActive && activateMenu(menu.id)}
                                         >
