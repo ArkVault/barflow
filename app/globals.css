@@ -398,3 +398,43 @@ button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]
 aside button[class*="neumorphic-hover"] {
   /* Original styles are preserved */
 }
+
+/* Active Menu Card Animation */
+.active-menu-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(197, 213, 234, 0.1) 0%, rgba(168, 197, 232, 0.1) 50%, rgba(143, 184, 229, 0.1) 100%);
+  border-color: transparent !important;
+}
+
+.active-menu-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(90deg,
+      #C5D5EA 0%,
+      #A8C5E8 25%,
+      #8FB8E5 50%,
+      #A8C5E8 75%,
+      #C5D5EA 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-flow 3s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

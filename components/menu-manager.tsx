@@ -271,6 +271,38 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     </div>
                )}
 
+               {/* Active Menu Card - Visual Indicator */}
+               {activeMenu && (
+                    <div className="space-y-3">
+                         <Label className="text-sm font-medium">
+                              Menú en Uso
+                         </Label>
+                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                              <div className="group relative overflow-hidden rounded-lg p-3 active-menu-card">
+                                   {/* Menú Activo Badge */}
+                                   <div className="absolute top-2 right-2 z-10">
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
+                                             Menú Activo
+                                        </span>
+                                   </div>
+
+                                   <div className="space-y-2">
+                                        <div>
+                                             <p className="font-semibold text-foreground text-sm pr-16">{activeMenu.name}</p>
+                                             <p className="text-xs text-muted-foreground mt-0.5">
+                                                  {new Date(activeMenu.created_at).toLocaleDateString('es-ES', {
+                                                       day: 'numeric',
+                                                       month: 'short',
+                                                       year: 'numeric'
+                                                  })}
+                                             </p>
+                                        </div>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+               )}
+
                {/* Create Menu Dialog */}
                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                     <DialogContent>
