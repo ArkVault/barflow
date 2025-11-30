@@ -50,16 +50,9 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
           loadMenus();
      }, [establishmentId]);
 
+
      const loadMenus = async () => {
           console.log('MenuManager - Loading menus:', { establishmentId });
-
-          // Always keep Los Clásicos as fallback
-          const losClasicosMenu: Menu = {
-               id: 'los-clasicos',
-               name: 'Los Clásicos',
-               is_active: false,
-               created_at: new Date().toISOString()
-          };
 
           // Check if we're in demo mode
           const isDemo = !establishmentId || establishmentId === 'demo';
@@ -67,11 +60,17 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
           // In demo mode, just use the default menu
           if (isDemo) {
                console.log('MenuManager - Demo mode, using default Los Clásicos menu');
+               const losClasicosMenu: Menu = {
+                    id: 'los-clasicos',
+                    name: 'Los Clásicos',
+                    is_active: false,
+                    created_at: new Date().toISOString()
+               };
                setMenus([losClasicosMenu]);
                return;
           }
 
-          // Production mode - load from Supabase and merge with Los Clásicos
+          // Production mode - load from Supabase
           try {
                setLoading(true);
                const supabase = createClient();
@@ -84,27 +83,26 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               // Merge Supabase menus with Los Clásicos if not already present
-               const hasLosClasicos = data?.some(m => m.name === 'Los Clásicos');
-               const allMenus = hasLosClasicos ? (data || []) : [losClasicosMenu, ...(data || [])];
+               console.log('MenuManager - Loaded from Supabase:', data?.length || 0, 'menus');
+               console.log('MenuManager - Menu details:', data?.map(m => ({ id: m.id, name: m.name, active: m.is_active })));
 
-               console.log('MenuManager - Loaded menus:', allMenus.length);
-               setMenus(allMenus);
+               setMenus(data || []);
 
                // Set active menu as selected
-               const activeMenu = allMenus.find((m) => m.is_active);
+               const activeMenu = data?.find((m) => m.is_active);
                if (activeMenu) {
                     setSelectedMenuId(activeMenu.id);
                     onMenuChange?.(activeMenu.id);
                }
           } catch (error: any) {
                console.error("Error loading menus:", error);
-               // Fallback to Los Clásicos on error
-               setMenus([losClasicosMenu]);
+               // Fallback to empty array on error in production
+               setMenus([]);
           } finally {
                setLoading(false);
           }
      };
+
 
      const createMenu = async () => {
           if (!newMenuName.trim()) {
