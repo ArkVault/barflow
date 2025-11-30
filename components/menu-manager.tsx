@@ -219,8 +219,11 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                         key={activeMenu.id}
                                         className="group relative rounded-lg p-3 active-menu-card"
                                    >
-                                        {/* Menú Activo Badge - Inside Card, Top Right */}
-                                        <div className="absolute top-2 right-2 z-20">
+                                        {/* Menú Activo Badge - Top Right Corner */}
+                                        <div
+                                             className="absolute z-20"
+                                             style={{ top: '8px', right: '8px' }}
+                                        >
                                              <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
                                                   Menú Activo
                                              </span>
