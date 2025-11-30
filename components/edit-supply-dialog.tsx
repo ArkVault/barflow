@@ -392,22 +392,6 @@ export function EditSupplyDialog({
                   Según plan
                 </p>
               </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="optimal">Cantidad Óptima Total</Label>
-                <Input
-                  id="optimal"
-                  type="number"
-                  step="0.01"
-                  value={formData.optimal_quantity || 0}
-                  readOnly
-                  className="bg-muted"
-                  placeholder="Stock ideal"
-                />
-                <p className="text-xs text-muted-foreground -mt-1">
-                  {formData.content_unit || 'unidades'} (auto)
-                </p>
-              </div>
             </div>
           </div>
 
