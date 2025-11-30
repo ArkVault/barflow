@@ -217,91 +217,81 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     </Button>
                </div>
 
-               {/* Previous Menus */}
-               {inactiveMenus.length > 0 && (
+               {/* All Menus - Active and Inactive */}
+               {menus.length > 0 && (
                     <div className="space-y-3">
                          <Label className="text-sm font-medium">
-                              Menús Anteriores
+                              {activeMenu ? 'Menús' : 'Menús Anteriores'}
                          </Label>
                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                              {inactiveMenus.map((menu) => (
-                                   <div
-                                        key={menu.id}
-                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
-                                        onClick={() => activateMenu(menu.id)}
-                                   >
-                                        <div className="space-y-2">
-                                             <div>
-                                                  <p className="font-semibold text-foreground text-sm">{menu.name}</p>
-                                                  <p className="text-xs text-muted-foreground mt-0.5">
-                                                       {new Date(menu.created_at).toLocaleDateString('es-ES', {
-                                                            day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric'
-                                                       })}
-                                                  </p>
-                                             </div>
-                                             <div className="flex gap-1.5">
-                                                  <Button
-                                                       size="sm"
-                                                       className="flex-1 h-7 text-xs neumorphic-hover"
-                                                       onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            activateMenu(menu.id);
-                                                       }}
-                                                  >
-                                                       Activar
-                                                  </Button>
-                                                  <Button
-                                                       size="sm"
-                                                       variant="ghost"
-                                                       className="h-7 w-7 p-0"
-                                                       onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            deleteMenu(menu.id);
-                                                       }}
-                                                  >
-                                                       <Trash2 className="w-3 h-3" />
-                                                  </Button>
+                              {menus.map((menu) => {
+                                   const isActive = menu.is_active;
+                                   return (
+                                        <div
+                                             key={menu.id}
+                                             className={`group relative overflow-hidden rounded-lg p-3 transition-all cursor-pointer ${isActive
+                                                       ? 'active-menu-card'
+                                                       : 'bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 hover:scale-[1.02]'
+                                                  }`}
+                                             onClick={() => !isActive && activateMenu(menu.id)}
+                                        >
+                                             {/* Menú Activo Badge */}
+                                             {isActive && (
+                                                  <div className="absolute top-2 right-2 z-10">
+                                                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
+                                                            Menú Activo
+                                                       </span>
+                                                  </div>
+                                             )}
+
+                                             <div className="space-y-2">
+                                                  <div>
+                                                       <p className={`font-semibold text-foreground text-sm ${isActive ? 'pr-16' : ''}`}>
+                                                            {menu.name}
+                                                       </p>
+                                                       <p className="text-xs text-muted-foreground mt-0.5">
+                                                            {new Date(menu.created_at).toLocaleDateString('es-ES', {
+                                                                 day: 'numeric',
+                                                                 month: 'short',
+                                                                 year: 'numeric'
+                                                            })}
+                                                       </p>
+                                                  </div>
+
+                                                  {/* Only show buttons for inactive menus */}
+                                                  {!isActive && (
+                                                       <div className="flex gap-1.5">
+                                                            <Button
+                                                                 size="sm"
+                                                                 className="flex-1 h-7 text-xs neumorphic-hover"
+                                                                 onClick={(e) => {
+                                                                      e.stopPropagation();
+                                                                      activateMenu(menu.id);
+                                                                 }}
+                                                            >
+                                                                 Activar
+                                                            </Button>
+                                                            <Button
+                                                                 size="sm"
+                                                                 variant="ghost"
+                                                                 className="h-7 w-7 p-0"
+                                                                 onClick={(e) => {
+                                                                      e.stopPropagation();
+                                                                      deleteMenu(menu.id);
+                                                                 }}
+                                                            >
+                                                                 <Trash2 className="w-3 h-3" />
+                                                            </Button>
+                                                       </div>
+                                                  )}
                                              </div>
                                         </div>
-                                   </div>
-                              ))}
+                                   );
+                              })}
                          </div>
                     </div>
                )}
 
-               {/* Active Menu Card - Visual Indicator */}
-               {activeMenu && (
-                    <div className="space-y-3">
-                         <Label className="text-sm font-medium">
-                              Menú en Uso
-                         </Label>
-                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                              <div className="group relative overflow-hidden rounded-lg p-3 active-menu-card">
-                                   {/* Menú Activo Badge */}
-                                   <div className="absolute top-2 right-2 z-10">
-                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
-                                             Menú Activo
-                                        </span>
-                                   </div>
-
-                                   <div className="space-y-2">
-                                        <div>
-                                             <p className="font-semibold text-foreground text-sm pr-16">{activeMenu.name}</p>
-                                             <p className="text-xs text-muted-foreground mt-0.5">
-                                                  {new Date(activeMenu.created_at).toLocaleDateString('es-ES', {
-                                                       day: 'numeric',
-                                                       month: 'short',
-                                                       year: 'numeric'
-                                                  })}
-                                             </p>
-                                        </div>
-                                   </div>
-                              </div>
-                         </div>
-                    </div>
-               )}
 
                {/* Create Menu Dialog */}
                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
