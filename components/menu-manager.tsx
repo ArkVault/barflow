@@ -218,20 +218,23 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                    <div
                                         key={activeMenu.id}
                                         className="group relative rounded-lg p-3 active-menu-card"
+                                        style={{ position: 'relative' }}
                                    >
                                         {/* Menú Activo Badge - Top Right Corner */}
-                                        <div
-                                             className="absolute z-20"
-                                             style={{ top: '8px', right: '8px' }}
-                                        >
+                                        <div style={{
+                                             position: 'absolute',
+                                             top: '0.5rem',
+                                             right: '0.5rem',
+                                             zIndex: 50
+                                        }}>
                                              <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
                                                   Menú Activo
                                              </span>
                                         </div>
 
-                                        <div className="space-y-2 relative z-10">
+                                        <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
                                              <div>
-                                                  <p className="font-semibold text-foreground text-sm pr-24">
+                                                  <p className="font-semibold text-foreground text-sm" style={{ paddingRight: '6rem' }}>
                                                        {activeMenu.name}
                                                   </p>
                                                   <p className="text-xs text-muted-foreground mt-0.5">
