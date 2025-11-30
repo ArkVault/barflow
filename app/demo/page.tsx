@@ -85,11 +85,12 @@ export default function DemoPage() {
           .eq('establishment_id', establishmentId)
           .order('name', { ascending: true }),
 
-        // 2. Productos
+        // 2. Productos (solo activos)
         supabase
           .from('products')
           .select('id, updated_at')
           .eq('establishment_id', establishmentId)
+          .eq('is_active', true)
           .order('updated_at', { ascending: false }),
 
         // 3. Configuración
