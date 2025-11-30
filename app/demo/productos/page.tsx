@@ -17,7 +17,7 @@ import { toast } from "sonner"
 
 
 interface Product {
-  id: number;
+  id: string | number;
   name: string;
   category: string;
   price: number;
@@ -291,7 +291,7 @@ export default function ProductosPage() {
 
       // Convert Supabase data to Product format
       const products = (data || []).map((p: any) => ({
-        id: parseInt(p.id) || 0,
+        id: p.id, // Keep UUID as string
         name: p.name,
         category: p.category || 'Cócteles',
         price: parseFloat(p.price) || 0,
@@ -334,7 +334,7 @@ export default function ProductosPage() {
   }, [activeMenuId]);
 
 
-  const handleEdit = (productId: number) => {
+  const handleEdit = (productId: string | number) => {
     const product = products.find(p => p.id === productId);
     if (product) {
       setEditingProduct(product);
@@ -350,13 +350,13 @@ export default function ProductosPage() {
     }
   };
 
-  const handleDelete = (productId: number) => {
+  const handleDelete = (productId: string | number) => {
     if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       setProducts(products.filter(p => p.id !== productId));
     }
   };
 
-  const handleViewRecipe = (productId: number) => {
+  const handleViewRecipe = (productId: string | number) => {
     const product = products.find(p => p.id === productId);
     if (product) {
       setViewingProduct(product);
@@ -372,7 +372,7 @@ export default function ProductosPage() {
 
       const productToAdd = {
         ...newProduct,
-        id: Math.max(...allProducts.map(p => p.id), 0) + 1,
+        id: Date.now().toString(), // Generate unique string ID
         menu_id: activeMenuId, // Assign to active menu
         ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
       };
