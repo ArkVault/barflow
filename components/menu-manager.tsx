@@ -244,7 +244,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                              <div className="flex gap-1.5">
                                                   <Button
                                                        size="sm"
-                                                       className="flex-1 h-7 text-xs"
+                                                       className="flex-1 h-7 text-xs neumorphic-hover"
                                                        onClick={(e) => {
                                                             e.stopPropagation();
                                                             activateMenu(menu.id);
