@@ -28,7 +28,6 @@ interface Supply {
   optimal_quantity?: number;
   content_per_unit?: number;
   content_unit?: string;
-  brand?: string;
   status: 'ok' | 'low' | 'critical';
 }
 
@@ -98,7 +97,6 @@ export default function InsumosPage() {
         optimal_quantity: supply.optimal_quantity,
         content_per_unit: supply.content_per_unit,
         content_unit: supply.content_unit,
-        brand: supply.brand,
         status: calculateStockStatus(supply)
       }));
 
@@ -356,9 +354,7 @@ export default function InsumosPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nombre</TableHead>
-                    <TableHead>Marca</TableHead>
                     <TableHead>{t('category')}</TableHead>
-                    <TableHead>Unidades</TableHead>
                     <TableHead>Cantidad Total</TableHead>
                     <TableHead>Óptimo</TableHead>
                     <TableHead>{t('status')}</TableHead>
@@ -367,10 +363,70 @@ export default function InsumosPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredSupplies.map((supply) => {
-                    // Calculate number of units (bottles/items) from total quantity
-                    const units = supply.content_per_unit && supply.content_per_unit > 0
-                      ? Math.floor(supply.current_quantity / supply.content_per_unit)
-                      : supply.current_quantity;
+                    // Calculate display quantity based on content_per_unit and category
+                    let displayValue: number;
+                    let displayUnit: string;
+
+                    if (supply.content_per_unit && supply.content_per_unit > 0) {
+                      const units = supply.current_quantity / supply.content_per_unit;
+
+                      const category = supply.category?.toLowerCase() || '';
+                      const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
+
+                      // Check category first for more accurate unit determination
+                      if (category.includes('fruta') || category.includes('fruit')) {
+                        // Frutas: always show in kg
+                        const kg = supply.current_quantity / 1000;
+                        displayValue = kg;
+                        displayUnit = 'kg';
+                      } else if (category.includes('especia') || category.includes('spice')) {
+                        // Especias: show in gramos if less than 1kg, otherwise kg
+                        const kg = supply.current_quantity / 1000;
+                        if (kg < 1) {
+                          displayValue = supply.current_quantity;
+                          displayUnit = 'g';
+                        } else {
+                          displayValue = kg;
+                          displayUnit = 'kg';
+                        }
+                      } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
+                        // Licores y bebidas alcohólicas: show in bottles
+                        displayValue = units;
+                        displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
+                      } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
+                        // Refrescos y agua: show in bottles or liters
+                        if (contentUnit === 'l' || supply.content_per_unit >= 1000) {
+                          displayValue = supply.current_quantity / 1000;
+                          displayUnit = displayValue === 1 ? 'litro' : 'litros';
+                        } else {
+                          displayValue = units;
+                          displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
+                        }
+                      } else if (contentUnit === 'ml' || contentUnit === 'l') {
+                        // Default for liquids: show in bottles
+                        displayValue = units;
+                        displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
+                      } else if (contentUnit === 'g') {
+                        // Weight in grams: convert to kg for display
+                        const kg = supply.current_quantity / 1000;
+                        displayValue = kg;
+                        displayUnit = 'kg';
+                      } else if (contentUnit === 'kg') {
+                        displayValue = supply.current_quantity;
+                        displayUnit = 'kg';
+                      } else {
+                        displayValue = units;
+                        displayUnit = 'unidades';
+                      }
+                    } else {
+                      displayValue = supply.current_quantity;
+                      displayUnit = supply.unit;
+                    }
+
+                    // Format the display value
+                    const formattedValue = displayValue % 1 === 0
+                      ? displayValue.toFixed(0)
+                      : displayValue.toFixed(1);
 
                     const optimalUnits = supply.content_per_unit && supply.content_per_unit > 0 && supply.optimal_quantity
                       ? Math.floor(supply.optimal_quantity / supply.content_per_unit)
@@ -379,29 +435,12 @@ export default function InsumosPage() {
                     return (
                       <TableRow key={supply.id}>
                         <TableCell className="font-medium">{supply.name}</TableCell>
-                        <TableCell>
-                          {supply.brand ? (
-                            <span className="text-sm">{supply.brand}</span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground italic">-</span>
-                          )}
-                        </TableCell>
                         <TableCell>{translateCategory(supply.category)}</TableCell>
                         <TableCell>
-                          <span className="font-semibold">{units}</span>
+                          <span className="font-semibold">{formattedValue}</span>
                           <span className="text-xs text-muted-foreground ml-1">
-                            {supply.content_per_unit ? 'uds' : supply.unit}
+                            {displayUnit}
                           </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium">
-                            {supply.current_quantity} {supply.content_unit || supply.unit}
-                          </span>
-                          {supply.content_per_unit && (
-                            <span className="text-xs text-muted-foreground ml-1">
-                              ({units} × {supply.content_per_unit}{supply.content_unit})
-                            </span>
-                          )}
                         </TableCell>
                         <TableCell>
                           {supply.optimal_quantity ? (

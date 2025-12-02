@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 
@@ -85,8 +85,10 @@ export async function POST(request: NextRequest) {
           }
 
           // Use Gemini AI to parse the content
+          console.log('🤖 Starting AI parsing...');
           const apiKey = process.env.GEMINI_API_KEY;
           if (!apiKey) {
+               console.error('❌ GEMINI_API_KEY not configured');
                return NextResponse.json(
                     { error: 'GEMINI_API_KEY not configured' },
                     { status: 500 }
@@ -110,7 +112,9 @@ export async function POST(request: NextRequest) {
                categories = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
           }
 
-          const ai = new GoogleGenAI({ apiKey });
+          console.log('🔧 Initializing Google GenAI...');
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
           const prompt = `You are a data extraction and validation assistant for a bar inventory system. 
 
@@ -161,23 +165,39 @@ ${fileContent}
 
 Return the JSON array now:`;
 
-          const response = await ai.models.generateContent({
-               model: 'gemini-2.0-flash-exp',
-               contents: prompt,
-          });
+          console.log('📤 Sending request to Gemini AI...');
+          const result = await model.generateContent(prompt);
+          const response = result.response;
+          console.log('📥 Received response from Gemini AI');
+          console.log('Response type:', typeof response);
+          console.log('Response keys:', Object.keys(response || {}));
 
           // Extract JSON from response
           let parsedData;
           try {
-               const text = response.text?.trim() || '';
-               if (!text) {
+               console.log('🔍 Parsing AI response...');
+
+               // The correct way to access Gemini response text with @google/generative-ai
+               const responseText = response.text();
+
+               console.log('Response text length:', responseText.length);
+               console.log('Response text preview:', responseText.substring(0, 200));
+
+               if (!responseText) {
+                    console.error('❌ Empty response from AI');
+                    console.error('Response structure:', JSON.stringify(response, null, 2));
                     throw new Error('Empty response from AI');
                }
+
                // Remove markdown code blocks if present
-               const jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+               const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+               console.log('Cleaned JSON text preview:', jsonText.substring(0, 200));
+
                parsedData = JSON.parse(jsonText);
+               console.log('✅ Successfully parsed', parsedData.length, 'items');
           } catch (error) {
-               console.error('Error parsing AI response:', error);
+               console.error('❌ Error parsing AI response:', error);
+               console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
                return NextResponse.json(
                     { error: 'Failed to parse AI response. Please try again.' },
                     { status: 500 }
@@ -226,8 +246,24 @@ Return the JSON array now:`;
 
      } catch (error) {
           console.error('Error in parse-menu API:', error);
+
+          // Provide more specific error messages
+          let errorMessage = 'Internal server error';
+
+          if (error instanceof Error) {
+               errorMessage = error.message;
+               console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+               });
+          }
+
           return NextResponse.json(
-               { error: 'Internal server error' },
+               {
+                    error: errorMessage,
+                    details: error instanceof Error ? error.message : 'Unknown error'
+               },
                { status: 500 }
           );
      }

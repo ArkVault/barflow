@@ -27,39 +27,95 @@ export const CATEGORY_INFO: Record<string, {
           icon: "🍾",
           defaultContentPerUnit: 750,
           defaultContentUnit: "ml",
-          defaultUnit: "units" // Óptimo en unidades (botellas)
+          defaultUnit: "ml" // Backend en ml, visualización en botellas
+     },
+     "Licores": {
+          label: "Licores",
+          description: "Licores destilados",
+          icon: "🍾",
+          defaultContentPerUnit: 750,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml" // Backend en ml, visualización en botellas
+     },
+     "Licores Dulces": {
+          label: "Licores Dulces",
+          description: "Licores dulces y cremas",
+          icon: "🍾",
+          defaultContentPerUnit: 750,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml" // Backend en ml, visualización en botellas
      },
      "Bebidas no alcohólicas": {
           label: "Bebidas no alcohólicas",
           description: "Refrescos, jugos, aguas",
           icon: "🥤",
-          defaultContentPerUnit: 1,
-          defaultContentUnit: "L",
-          defaultUnit: "L" // Óptimo en litros o unidades
+          defaultContentPerUnit: 3000,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml" // Backend en ml, visualización en botellas/litros
+     },
+     "Refrescos": {
+          label: "Refrescos",
+          description: "Refrescos y bebidas carbonatadas",
+          icon: "🥤",
+          defaultContentPerUnit: 3000,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml" // Backend en ml, visualización en botellas/litros (3L por botella)
+     },
+     "Agua mineral": {
+          label: "Agua mineral",
+          description: "Agua embotellada",
+          icon: "💧",
+          defaultContentPerUnit: 1750,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml" // Backend en ml, visualización en botellas/litros (1.75L por botella)
      },
      "Insumos para cócteles": {
           label: "Insumos para cócteles",
           description: "Azúcar, limón, hierbabuena, jarabes",
           icon: "🍋",
-          defaultContentPerUnit: 1,
-          defaultContentUnit: "kg",
-          defaultUnit: "kg" // Óptimo en kg, litros o unidades
+          defaultContentPerUnit: 1000,
+          defaultContentUnit: "g",
+          defaultUnit: "g" // Backend en g, visualización en kg
+     },
+     "Frutas": {
+          label: "Frutas",
+          description: "Frutas frescas",
+          icon: "🍋",
+          defaultContentPerUnit: 1000,
+          defaultContentUnit: "g",
+          defaultUnit: "g" // Backend en g, visualización en kg
+     },
+     "Hierbas": {
+          label: "Hierbas",
+          description: "Hierbas aromáticas",
+          icon: "🌿",
+          defaultContentPerUnit: 100,
+          defaultContentUnit: "g",
+          defaultUnit: "g" // Backend en g, visualización en kg
+     },
+     "Especias": {
+          label: "Especias",
+          description: "Especias y condimentos",
+          icon: "🧂",
+          defaultContentPerUnit: 100,
+          defaultContentUnit: "g",
+          defaultUnit: "g" // Backend en g, visualización en gramos
      },
      "Mezcladores y adornos": {
           label: "Mezcladores y adornos",
           description: "Tónicos, garnishes, frutas",
           icon: "🍒",
-          defaultContentPerUnit: 1,
-          defaultContentUnit: "L",
-          defaultUnit: "L"
+          defaultContentPerUnit: 1000,
+          defaultContentUnit: "ml",
+          defaultUnit: "ml"
      },
      "Alimentos y aperitivos": {
           label: "Alimentos y aperitivos",
           description: "Tapas, snacks",
           icon: "🥜",
-          defaultContentPerUnit: 1,
-          defaultContentUnit: "kg",
-          defaultUnit: "kg"
+          defaultContentPerUnit: 1000,
+          defaultContentUnit: "g",
+          defaultUnit: "g"
      },
      "Materiales desechables": {
           label: "Materiales desechables",
@@ -76,6 +132,14 @@ export const CATEGORY_INFO: Record<string, {
           defaultContentPerUnit: 1,
           defaultContentUnit: "units",
           defaultUnit: "units"
+     },
+     "Otros": {
+          label: "Otros",
+          description: "Otros insumos",
+          icon: "📦",
+          defaultContentPerUnit: 1,
+          defaultContentUnit: "units",
+          defaultUnit: "units" // Debe definirse manualmente
      }
 };
 

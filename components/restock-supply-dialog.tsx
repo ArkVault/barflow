@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingCart, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +17,8 @@ interface Supply {
     unit: string;
     min_threshold: number;
     optimal_quantity?: number;
+    content_per_unit?: number;
+    content_unit?: string;
 }
 
 interface RestockSupplyDialogProps {
@@ -34,16 +37,94 @@ export interface PurchaseItem {
     addedAt: string;
 }
 
+type DisplayUnit = 'botellas' | 'kg' | 'litros' | 'gramos' | 'ml';
+
 export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }: RestockSupplyDialogProps) {
     const [quantity, setQuantity] = useState(0);
+    const [displayUnit, setDisplayUnit] = useState<DisplayUnit>('botellas');
+
+    // Determine available units based on supply category/content_unit
+    const getAvailableUnits = (): DisplayUnit[] => {
+        if (!supply) return ['botellas'];
+
+        const contentUnit = supply.content_unit || supply.unit;
+
+        if (contentUnit === 'ml' || contentUnit === 'L') {
+            return ['botellas', 'litros', 'ml'];
+        } else if (contentUnit === 'g' || contentUnit === 'kg') {
+            return ['kg', 'gramos'];
+        }
+
+        return ['botellas'];
+    };
+
+    // Convert display quantity to backend quantity (ml/g)
+    const convertToBackendUnit = (displayQty: number, unit: DisplayUnit): number => {
+        if (!supply) return displayQty;
+
+        const contentPerUnit = supply.content_per_unit || 1;
+        const contentUnit = supply.content_unit || supply.unit;
+
+        switch (unit) {
+            case 'botellas':
+                return displayQty * contentPerUnit;
+            case 'litros':
+                return displayQty * 1000; // Convert to ml
+            case 'ml':
+                return displayQty;
+            case 'kg':
+                return displayQty * 1000; // Convert to g
+            case 'gramos':
+                return displayQty;
+            default:
+                return displayQty;
+        }
+    };
+
+    // Convert backend quantity (ml/g) to display quantity
+    const convertToDisplayUnit = (backendQty: number, unit: DisplayUnit): number => {
+        if (!supply) return backendQty;
+
+        const contentPerUnit = supply.content_per_unit || 1;
+        const contentUnit = supply.content_unit || supply.unit;
+
+        switch (unit) {
+            case 'botellas':
+                return backendQty / contentPerUnit;
+            case 'litros':
+                return backendQty / 1000; // Convert from ml
+            case 'ml':
+                return backendQty;
+            case 'kg':
+                return backendQty / 1000; // Convert from g
+            case 'gramos':
+                return backendQty;
+            default:
+                return backendQty;
+        }
+    };
 
     useEffect(() => {
         if (supply && open) {
+            // Determine default display unit
+            const contentUnit = supply.content_unit || supply.unit;
+            let defaultUnit: DisplayUnit = 'botellas';
+
+            if (contentUnit === 'ml' || contentUnit === 'L') {
+                defaultUnit = 'botellas';
+            } else if (contentUnit === 'g' || contentUnit === 'kg') {
+                defaultUnit = 'kg';
+            }
+
+            setDisplayUnit(defaultUnit);
+
             // Calculate suggested quantity (difference between optimal and current)
-            const suggested = supply.optimal_quantity
+            const suggestedBackend = supply.optimal_quantity
                 ? Math.max(0, supply.optimal_quantity - supply.current_quantity)
                 : Math.max(0, supply.min_threshold - supply.current_quantity);
-            setQuantity(suggested);
+
+            const suggestedDisplay = convertToDisplayUnit(suggestedBackend, defaultUnit);
+            setQuantity(Math.round(suggestedDisplay * 10) / 10); // Round to 1 decimal
         }
     }, [supply, open]);
 
@@ -53,11 +134,14 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
             return;
         }
 
+        // Convert display quantity to backend quantity
+        const backendQuantity = convertToBackendUnit(quantity, displayUnit);
+
         const purchaseItem: PurchaseItem = {
             supplyId: supply.id,
             supplyName: supply.name,
             unit: supply.unit,
-            quantityToOrder: quantity,
+            quantityToOrder: backendQuantity,
             status: 'pending',
             addedAt: new Date().toISOString()
         };
@@ -72,6 +156,16 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
     const suggestedQuantity = supply.optimal_quantity
         ? Math.max(0, supply.optimal_quantity - supply.current_quantity)
         : Math.max(0, supply.min_threshold - supply.current_quantity);
+
+    // Get display values for current and optimal quantities
+    const currentDisplay = convertToDisplayUnit(supply.current_quantity, displayUnit);
+    const optimalDisplay = convertToDisplayUnit(
+        supply.optimal_quantity || supply.min_threshold,
+        displayUnit
+    );
+    const suggestedDisplay = convertToDisplayUnit(suggestedQuantity, displayUnit);
+
+    const availableUnits = getAvailableUnits();
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,12 +193,14 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
                         <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
                             <div>
                                 <p className="text-muted-foreground">Cantidad actual</p>
-                                <p className="font-bold text-lg">{supply.current_quantity} {supply.unit}</p>
+                                <p className="font-bold text-lg">
+                                    {Math.round(currentDisplay * 10) / 10} {displayUnit}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-muted-foreground">Cantidad óptima</p>
                                 <p className="font-bold text-lg">
-                                    {supply.optimal_quantity || supply.min_threshold} {supply.unit}
+                                    {Math.round(optimalDisplay * 10) / 10} {displayUnit}
                                 </p>
                             </div>
                         </div>
@@ -112,13 +208,13 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
                         {suggestedQuantity > 0 && (
                             <div className="mt-3 p-2 bg-primary/10 rounded-md">
                                 <p className="text-xs text-primary font-medium">
-                                    💡 Sugerencia: Pedir {suggestedQuantity} {supply.unit} para alcanzar el nivel óptimo
+                                    💡 Sugerencia: Pedir {Math.round(suggestedDisplay * 10) / 10} {displayUnit} para alcanzar el nivel óptimo
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Quantity Input */}
+                    {/* Quantity Input with Unit Selector */}
                     <div className="space-y-2">
                         <Label htmlFor="quantity" className="text-sm font-medium">
                             Cantidad a pedir
@@ -131,11 +227,20 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
                                 step="0.1"
                                 value={quantity}
                                 onChange={(e) => setQuantity(Number(e.target.value))}
-                                className="text-lg font-semibold"
+                                className="text-lg font-semibold flex-1"
                             />
-                            <span className="text-muted-foreground font-medium min-w-[40px]">
-                                {supply.unit}
-                            </span>
+                            <Select value={displayUnit} onValueChange={(value) => setDisplayUnit(value as DisplayUnit)}>
+                                <SelectTrigger className="w-[140px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableUnits.map((unit) => (
+                                        <SelectItem key={unit} value={unit}>
+                                            {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>

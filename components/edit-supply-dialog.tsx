@@ -27,14 +27,13 @@ import { SUPPLY_CATEGORIES, getCategoryDefaults } from "@/lib/supply-categories"
 interface Supply {
   id: string;
   name: string;
-  category: string;
+  category: string | null;
   current_quantity: number;
   unit: string;
   min_threshold: number;
   optimal_quantity?: number;
   content_per_unit?: number;
   content_unit?: string;
-  brand?: string;
 }
 
 interface EditSupplyDialogProps {
@@ -98,7 +97,6 @@ export function EditSupplyDialog({
         optimal_quantity: supply.optimal_quantity || 0,
         content_per_unit: defaultContentPerUnit,
         content_unit: defaultContentUnit,
-        brand: supply.brand || '',
       });
 
       setNumberOfUnits(units);
@@ -183,7 +181,6 @@ export function EditSupplyDialog({
           optimal_quantity: formData.optimal_quantity,
           content_per_unit: formData.content_per_unit,
           content_unit: formData.content_unit,
-          brand: formData.brand,
           updated_at: new Date().toISOString(),
         })
         .eq("id", supply.id);
@@ -229,7 +226,7 @@ export function EditSupplyDialog({
               <div className="grid gap-2">
                 <Label htmlFor="category">Categoría</Label>
                 <Select
-                  value={formData.category}
+                  value={formData.category || undefined}
                   onValueChange={handleCategoryChange}
                 >
                   <SelectTrigger>
@@ -267,21 +264,7 @@ export function EditSupplyDialog({
               </div>
             </div>
 
-            {/* Brand Field */}
-            <div className="grid gap-2">
-              <Label htmlFor="brand">Marca (opcional)</Label>
-              <Input
-                id="brand"
-                value={formData.brand || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, brand: e.target.value })
-                }
-                placeholder="Ej: Bacardi, Havana Club, etc."
-              />
-              <p className="text-xs text-muted-foreground">
-                Especifica la marca para matching exacto con productos
-              </p>
-            </div>
+
 
             {/* Content Fields */}
             <div className="grid grid-cols-2 gap-4">
