@@ -41,7 +41,11 @@ const getDisplayQuantity = (supply: Supply) => {
     const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
 
     // Check category first for more accurate unit determination
-    if (category.includes('fruta') || category.includes('fruit')) {
+    if (category.includes('otro') || category === 'otros') {
+      // Otros: always show in gramos
+      displayValue = supply.current_quantity;
+      displayUnit = 'g';
+    } else if (category.includes('fruta') || category.includes('fruit')) {
       // Frutas: always show in kg
       const kg = supply.current_quantity / 1000;
       displayValue = kg;

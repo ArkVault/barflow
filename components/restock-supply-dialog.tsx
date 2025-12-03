@@ -106,13 +106,35 @@ export function RestockSupplyDialog({ supply, open, onOpenChange, onAddToCart }:
 
     useEffect(() => {
         if (supply && open) {
-            // Determine default display unit
-            const contentUnit = supply.content_unit || supply.unit;
+            // Determine default display unit based on category first
+            const category = supply.category?.toLowerCase() || '';
+            const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
             let defaultUnit: DisplayUnit = 'botellas';
 
-            if (contentUnit === 'ml' || contentUnit === 'L') {
+            // Check category first for more accurate unit determination
+            if (category.includes('fruta') || category.includes('fruit')) {
+                // Frutas: default to kg
+                defaultUnit = 'kg';
+            } else if (category.includes('especia') || category.includes('spice')) {
+                // Especias: default to gramos
+                defaultUnit = 'gramos';
+            } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
+                // Refrescos y agua: default to litros if >= 1L, otherwise botellas
+                if (contentUnit === 'l' || (supply.content_per_unit && supply.content_per_unit >= 1000)) {
+                    defaultUnit = 'litros';
+                } else {
+                    defaultUnit = 'botellas';
+                }
+            } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
+                // Licores: default to botellas
                 defaultUnit = 'botellas';
-            } else if (contentUnit === 'g' || contentUnit === 'kg') {
+            } else if (contentUnit === 'ml' || contentUnit === 'l') {
+                // Default for liquids: botellas
+                defaultUnit = 'botellas';
+            } else if (contentUnit === 'g') {
+                // Weight in grams: default to kg
+                defaultUnit = 'kg';
+            } else if (contentUnit === 'kg') {
                 defaultUnit = 'kg';
             }
 

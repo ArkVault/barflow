@@ -23,23 +23,7 @@ export const CATEGORY_INFO: Record<string, {
 }> = {
      "Bebidas alcohólicas": {
           label: "Bebidas alcohólicas",
-          description: "Licores, vinos, cervezas",
-          icon: "🍾",
-          defaultContentPerUnit: 750,
-          defaultContentUnit: "ml",
-          defaultUnit: "ml" // Backend en ml, visualización en botellas
-     },
-     "Licores": {
-          label: "Licores",
-          description: "Licores destilados",
-          icon: "🍾",
-          defaultContentPerUnit: 750,
-          defaultContentUnit: "ml",
-          defaultUnit: "ml" // Backend en ml, visualización en botellas
-     },
-     "Licores Dulces": {
-          label: "Licores Dulces",
-          description: "Licores dulces y cremas",
+          description: "Licores, licores dulces, vinos, cervezas, destilados",
           icon: "🍾",
           defaultContentPerUnit: 750,
           defaultContentUnit: "ml",

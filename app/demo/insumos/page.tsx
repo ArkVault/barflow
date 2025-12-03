@@ -374,7 +374,11 @@ export default function InsumosPage() {
                       const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
 
                       // Check category first for more accurate unit determination
-                      if (category.includes('fruta') || category.includes('fruit')) {
+                      if (category.includes('otro') || category === 'otros') {
+                        // Otros: always show in gramos
+                        displayValue = supply.current_quantity;
+                        displayUnit = 'g';
+                      } else if (category.includes('fruta') || category.includes('fruit')) {
                         // Frutas: always show in kg
                         const kg = supply.current_quantity / 1000;
                         displayValue = kg;
@@ -428,9 +432,71 @@ export default function InsumosPage() {
                       ? displayValue.toFixed(0)
                       : displayValue.toFixed(1);
 
-                    const optimalUnits = supply.content_per_unit && supply.content_per_unit > 0 && supply.optimal_quantity
-                      ? Math.floor(supply.optimal_quantity / supply.content_per_unit)
-                      : supply.optimal_quantity;
+                    // Calculate optimal quantity with same logic as current quantity
+                    let optimalDisplayValue: number | undefined;
+                    let optimalDisplayUnit: string | undefined;
+
+                    if (supply.optimal_quantity) {
+                      if (supply.content_per_unit && supply.content_per_unit > 0) {
+                        const optimalUnits = supply.optimal_quantity / supply.content_per_unit;
+
+                        const category = supply.category?.toLowerCase() || '';
+                        const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
+
+                        // Use same logic as current quantity
+                        if (category.includes('otro') || category === 'otros') {
+                          // Otros: always show in gramos
+                          optimalDisplayValue = supply.optimal_quantity;
+                          optimalDisplayUnit = 'g';
+                        } else if (category.includes('fruta') || category.includes('fruit')) {
+                          const kg = supply.optimal_quantity / 1000;
+                          optimalDisplayValue = kg;
+                          optimalDisplayUnit = 'kg';
+                        } else if (category.includes('especia') || category.includes('spice')) {
+                          const kg = supply.optimal_quantity / 1000;
+                          if (kg < 1) {
+                            optimalDisplayValue = supply.optimal_quantity;
+                            optimalDisplayUnit = 'g';
+                          } else {
+                            optimalDisplayValue = kg;
+                            optimalDisplayUnit = 'kg';
+                          }
+                        } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
+                          optimalDisplayValue = optimalUnits;
+                          optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
+                        } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
+                          if (contentUnit === 'l' || supply.content_per_unit >= 1000) {
+                            optimalDisplayValue = supply.optimal_quantity / 1000;
+                            optimalDisplayUnit = optimalDisplayValue === 1 ? 'litro' : 'litros';
+                          } else {
+                            optimalDisplayValue = optimalUnits;
+                            optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
+                          }
+                        } else if (contentUnit === 'ml' || contentUnit === 'l') {
+                          optimalDisplayValue = optimalUnits;
+                          optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
+                        } else if (contentUnit === 'g') {
+                          const kg = supply.optimal_quantity / 1000;
+                          optimalDisplayValue = kg;
+                          optimalDisplayUnit = 'kg';
+                        } else if (contentUnit === 'kg') {
+                          optimalDisplayValue = supply.optimal_quantity;
+                          optimalDisplayUnit = 'kg';
+                        } else {
+                          optimalDisplayValue = optimalUnits;
+                          optimalDisplayUnit = 'unidades';
+                        }
+                      } else {
+                        optimalDisplayValue = supply.optimal_quantity;
+                        optimalDisplayUnit = supply.unit;
+                      }
+                    }
+
+                    const formattedOptimal = optimalDisplayValue
+                      ? (optimalDisplayValue % 1 === 0
+                        ? optimalDisplayValue.toFixed(0)
+                        : optimalDisplayValue.toFixed(1))
+                      : undefined;
 
                     return (
                       <TableRow key={supply.id}>
@@ -443,20 +509,12 @@ export default function InsumosPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {supply.optimal_quantity ? (
+                          {formattedOptimal ? (
                             <>
-                              {optimalUnits && supply.content_per_unit ? (
-                                <>
-                                  <span className="font-semibold">{optimalUnits}</span>
-                                  <span className="text-xs text-muted-foreground ml-1">
-                                    uds
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  {supply.optimal_quantity} {supply.content_unit || supply.unit}
-                                </>
-                              )}
+                              <span className="font-semibold">{formattedOptimal}</span>
+                              <span className="text-xs text-muted-foreground ml-1">
+                                {optimalDisplayUnit}
+                              </span>
                             </>
                           ) : (
                             <span className="text-xs text-muted-foreground italic">-</span>
