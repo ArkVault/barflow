@@ -69,34 +69,38 @@ export function EditSupplyDialog({
   // Update form data when supply changes
   useEffect(() => {
     if (supply) {
-      // Set default content_per_unit based on category
-      let defaultContentPerUnit = supply.content_per_unit || 1;
-      let defaultContentUnit = supply.content_unit || 'ml';
+      // Get defaults for the category - ALWAYS use these for unit and content_unit
+      const defaults = getCategoryDefaults(supply.category || '');
 
-      if (!supply.content_per_unit) {
-        // Check for alcoholic beverages category
-        if (supply.category === 'Bebidas alcohólicas' ||
-          supply.category === 'Licores' ||
-          supply.category === 'Licores Dulces') {
-          defaultContentPerUnit = 750;
-          defaultContentUnit = 'ml';
+      // For content_per_unit, use existing value if it's been customized (not default)
+      // Otherwise use category default
+      let contentPerUnit = defaults.contentPerUnit;
+      if (supply.content_per_unit && supply.content_per_unit !== 1) {
+        // Check if it matches any category default, if not, it's been customized
+        const isCustomized = supply.content_per_unit !== 750 &&
+          supply.content_per_unit !== 1000 &&
+          supply.content_per_unit !== 1750 &&
+          supply.content_per_unit !== 3000 &&
+          supply.content_per_unit !== 100;
+        if (isCustomized) {
+          contentPerUnit = supply.content_per_unit;
         }
       }
 
       // Calculate number of units
-      const units = defaultContentPerUnit > 0
-        ? Math.floor(supply.current_quantity / defaultContentPerUnit)
+      const units = contentPerUnit > 0
+        ? Math.floor(supply.current_quantity / contentPerUnit)
         : 0;
 
       setFormData({
         name: supply.name,
         category: supply.category,
         current_quantity: supply.current_quantity,
-        unit: supply.unit,
+        unit: defaults.unit, // ALWAYS use category default
         min_threshold: supply.min_threshold,
         optimal_quantity: supply.optimal_quantity || 0,
-        content_per_unit: defaultContentPerUnit,
-        content_unit: defaultContentUnit,
+        content_per_unit: contentPerUnit,
+        content_unit: defaults.contentUnit, // ALWAYS use category default
       });
 
       setNumberOfUnits(units);
@@ -144,6 +148,7 @@ export function EditSupplyDialog({
       setFormData({
         ...formData,
         category: newCategory,
+        unit: defaults.unit, // Set unit based on category
         content_per_unit: defaults.contentPerUnit,
         content_unit: defaults.contentUnit,
       });
@@ -154,10 +159,11 @@ export function EditSupplyDialog({
         current_quantity: numberOfUnits * defaults.contentPerUnit,
       }));
     } else {
-      // Just update category without changing content settings
+      // Just update category and unit without changing content settings
       setFormData({
         ...formData,
         category: newCategory,
+        unit: defaults.unit, // Always update unit to match category
       });
     }
   };
@@ -283,7 +289,7 @@ export function EditSupplyDialog({
               <div className="grid gap-2">
                 <Label htmlFor="content_unit">Unidad de Contenido</Label>
                 <Select
-                  value={formData.content_unit || 'ml'}
+                  value={formData.content_unit}
                   onValueChange={(value) =>
                     setFormData({ ...formData, content_unit: value })
                   }
