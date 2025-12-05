@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/auth-context'
+import { SubscriptionGuard } from '@/components/subscription-guard'
 import { Toaster } from 'sonner'
 
 const geist = Geist({
@@ -42,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link
           href="https://api.fontshare.com/v2/css?f[]=satoshi@700,900&display=swap"
@@ -51,7 +52,9 @@ export default function RootLayout({
       </head>
       <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
         <AuthProvider>
-          {children}
+          <SubscriptionGuard>
+            {children}
+          </SubscriptionGuard>
           <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>

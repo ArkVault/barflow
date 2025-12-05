@@ -6,9 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wine, TrendingUp, BarChart3, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,7 +74,6 @@ export default function LoginPage() {
 
           if (estError) {
             console.error('Error creating establishment:', estError);
-            // Don't fail - establishment can be created later
           }
 
           // Check if email confirmation is required
@@ -105,7 +103,6 @@ export default function LoginPage() {
 
         if (loginError) {
           console.error('Login error:', loginError);
-          // Provide specific error messages
           if (loginError.message.includes('Invalid login credentials')) {
             toast.error("Email o contraseña incorrectos. ¿No tienes cuenta? Regístrate.");
           } else if (loginError.message.includes('Email not confirmed')) {
@@ -120,7 +117,6 @@ export default function LoginPage() {
         if (data.session) {
           console.log('Login successful, session created:', data.session);
           toast.success("¡Bienvenido de vuelta!");
-          // Use window.location for more reliable redirect
           setTimeout(() => {
             window.location.href = "/demo";
           }, 500);
@@ -143,187 +139,218 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 animate-gradient-shift">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+      {/* Animated Gradient Background with darker tones */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-700/20 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-700/20 via-transparent to-transparent"></div>
       </div>
 
-      {/* Floating orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/30 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-float-delay"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+
+      {/* Floating orbs with glassmorphism */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-full blur-3xl animate-float opacity-60"></div>
+      <div className="absolute bottom-20 right-20 w-[32rem] h-[32rem] bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-float-delay opacity-50"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse opacity-40"></div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+      <div className="relative z-10 w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center px-4">
         {/* Hero Text */}
-        <div className="text-white space-y-6 hidden lg:block">
-          <h1 className="text-6xl font-bold leading-tight drop-shadow-lg">
-            Gestiona tu bar
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-100">
-              con inteligencia
-            </span>
-          </h1>
-          <p className="text-xl text-white leading-relaxed drop-shadow-md">
-            Sistema completo de inventario, ventas y proyecciones con IA.
-            Optimiza tu negocio desde el primer día.
-          </p>
-          <div className="flex gap-4 pt-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-white drop-shadow">Análisis en tiempo real</span>
+        <div className="text-white space-y-8 hidden lg:block">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+              <Sparkles className="w-4 h-4 text-purple-300" />
+              <span className="text-sm font-medium text-purple-100">Sistema Profesional de Gestión</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-white drop-shadow">IA predictiva</span>
+
+            <h1 className="text-7xl font-bold leading-tight">
+              <span className="block text-white drop-shadow-2xl">BarFlow</span>
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 drop-shadow-lg">
+                Gestión Inteligente
+              </span>
+            </h1>
+          </div>
+
+          <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
+            Optimiza tu inventario, proyecta ventas y toma decisiones basadas en datos.
+            La herramienta profesional para bares modernos.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="glass-card p-4 rounded-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <BarChart3 className="w-5 h-5 text-purple-300" />
+                </div>
+                <h3 className="font-semibold text-white">Análisis en Tiempo Real</h3>
+              </div>
+              <p className="text-sm text-gray-400">Monitorea tu inventario y ventas al instante</p>
+            </div>
+
+            <div className="glass-card p-4 rounded-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <TrendingUp className="w-5 h-5 text-blue-300" />
+                </div>
+                <h3 className="font-semibold text-white">IA Predictiva</h3>
+              </div>
+              <p className="text-sm text-gray-400">Proyecciones inteligentes de demanda</p>
             </div>
           </div>
         </div>
 
-        {/* Auth Card */}
-        <Card className="neumorphic border-0 backdrop-blur-xl bg-white/95 shadow-2xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-              {isSignUp ? "Crear cuenta" : "Iniciar sesión"}
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              {isSignUp
-                ? "Comienza a optimizar tu bar hoy"
-                : "Bienvenido de vuelta a Barflow"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAuth} className="space-y-4">
-              {isSignUp && (
+        {/* Glassmorphism Auth Card */}
+        <div className="relative group">
+          {/* Glow effect */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+
+          {/* Main glass card */}
+          <div className="relative glass-card-premium rounded-2xl p-8 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+            {/* Shimmer effect on edges */}
+            <div className="absolute inset-0 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent shimmer"></div>
+            </div>
+
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-sm border border-white/20 mb-4">
+                  <Wine className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                  {isSignUp ? "Crear Cuenta" : "Bienvenido"}
+                </h2>
+                <p className="text-gray-300">
+                  {isSignUp
+                    ? "Comienza a optimizar tu negocio hoy"
+                    : "Ingresa a tu cuenta de BarFlow"}
+                </p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleAuth} className="space-y-5">
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="barName" className="text-white font-medium">
+                      Nombre de tu establecimiento
+                    </Label>
+                    <Input
+                      id="barName"
+                      placeholder="Ej: La Cantina del Centro"
+                      value={formData.barName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, barName: e.target.value })
+                      }
+                      required
+                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <Label htmlFor="barName" className="text-gray-700 font-medium">
-                    Nombre de tu bar
+                  <Label htmlFor="email" className="text-white font-medium">
+                    Correo Electrónico
                   </Label>
                   <Input
-                    id="barName"
-                    placeholder="Mi Bar Increíble"
-                    value={formData.barName}
+                    id="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={formData.email}
                     onChange={(e) =>
-                      setFormData({ ...formData, barName: e.target.value })
+                      setFormData({ ...formData, email: e.target.value })
                     }
                     required
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
                   />
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  required
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 font-medium">
-                  Contraseña
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  required
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
-                />
-              </div>
-
-              {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
-                    Confirmar contraseña
+                  <Label htmlFor="password" className="text-white font-medium">
+                    Contraseña
                   </Label>
                   <Input
-                    id="confirmPassword"
+                    id="password"
                     type="password"
                     placeholder="••••••••"
-                    value={formData.confirmPassword}
+                    value={formData.password}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
+                      setFormData({ ...formData, password: e.target.value })
                     }
                     required
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
                   />
                 </div>
-              )}
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 font-semibold h-12 shadow-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
-                  </>
-                ) : isSignUp ? (
-                  "Crear cuenta"
-                ) : (
-                  "Iniciar sesión"
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-white font-medium">
+                      Confirmar Contraseña
+                    </Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      required
+                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                    />
+                  </div>
                 )}
-              </Button>
 
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-2 text-gray-600">o</span>
-                </div>
-              </div>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold h-12 shadow-lg shadow-purple-500/50 border-0 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/60"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : isSignUp ? (
+                    "Crear Cuenta"
+                  ) : (
+                    "Iniciar Sesión"
+                  )}
+                </Button>
 
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="w-full text-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium"
-              >
-                {isSignUp
-                  ? "¿Ya tienes cuenta? Inicia sesión"
-                  : "¿No tienes cuenta? Regístrate"}
-              </button>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-white/20"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-transparent px-2 text-gray-400">o</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="w-full text-center text-gray-300 hover:text-white transition-colors text-sm font-medium py-2 rounded-lg hover:bg-white/5"
+                >
+                  {isSignUp
+                    ? "¿Ya tienes cuenta? Inicia sesión"
+                    : "¿No tienes cuenta? Regístrate"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
-        @keyframes gradient-shift {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
         @keyframes float {
           0%, 100% {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(-20px);
+            transform: translateY(-30px);
           }
         }
 
@@ -332,21 +359,60 @@ export default function LoginPage() {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(20px);
+            transform: translateY(30px);
           }
         }
 
-        .animate-gradient-shift {
-          background-size: 200% 200%;
-          animation: gradient-shift 15s ease infinite;
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
 
         .animate-float {
-          animation: float 6s ease-in-out infinite;
+          animation: float 8s ease-in-out infinite;
         }
 
         .animate-float-delay {
-          animation: float-delay 8s ease-in-out infinite;
+          animation: float-delay 10s ease-in-out infinite;
+        }
+
+        .shimmer {
+          animation: shimmer 3s infinite;
+        }
+
+        .glass-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-premium {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0.05)
+          );
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          box-shadow: 
+            0 8px 32px 0 rgba(31, 38, 135, 0.37),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-input {
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+
+        .glass-input:focus {
+          background: rgba(255, 255, 255, 0.08);
         }
       `}</style>
     </div>

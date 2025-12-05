@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -30,25 +31,42 @@ export default function SignUpPage() {
     }
 
     try {
+      // Calculate trial end date (30 days from now)
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 30);
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-            `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: {
-            email_confirm: false
+            email_confirm: true
           }
         },
       });
-      
+
       if (error) throw error;
-      
+
       if (data.user) {
-        // Store session
-        localStorage.setItem('supabase.auth.token', JSON.stringify(data));
-        window.location.href = "/dashboard";
+        // Create establishment with trial period
+        const { error: estError } = await supabase
+          .from('establishments')
+          .insert({
+            user_id: data.user.id,
+            name: email.split('@')[0] + "'s Bar", // Default name
+            trial_end_date: trialEndDate.toISOString(),
+            subscription_status: 'trialing',
+            plan_type: 'free_trial'
+          });
+
+        if (estError) {
+          console.error('Error creating establishment:', estError);
+        }
+
+        // Show success message
+        toast.success("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
+        router.push('/auth/sign-up-success');
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ocurrió un error");
