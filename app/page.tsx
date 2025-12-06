@@ -9,7 +9,7 @@ export default function HomePage() {
       <div className="container mx-auto px-6 py-16 md:py-24">
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance bg-gradient-to-r from-foreground/70 via-foreground/60 to-foreground/70 bg-clip-text text-transparent">
-            BarFlow
+            Barmode
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 text-balance max-w-3xl mx-auto">
             Sistema inteligente de gestión de inventario para bares y restaurantes con proyecciones automatizadas

@@ -139,19 +139,29 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-      {/* Animated Gradient Background with darker tones */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-700/20 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-700/20 via-transparent to-transparent"></div>
-      </div>
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/backgroundvideo.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+
+      {/* Gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-transparent to-blue-900/30"></div>
 
       {/* Animated grid pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
 
-      {/* Floating orbs with glassmorphism */}
-      <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-full blur-3xl animate-float opacity-60"></div>
-      <div className="absolute bottom-20 right-20 w-[32rem] h-[32rem] bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-float-delay opacity-50"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse opacity-40"></div>
+      {/* Subtle floating orbs */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-3xl animate-float opacity-40"></div>
+      <div className="absolute bottom-20 right-20 w-[32rem] h-[32rem] bg-gradient-to-br from-blue-500/15 to-purple-500/15 rounded-full blur-3xl animate-float-delay opacity-30"></div>
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center px-4">
@@ -164,7 +174,7 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-7xl font-bold leading-tight">
-              <span className="block text-white drop-shadow-2xl">BarFlow</span>
+              <span className="block text-white drop-shadow-2xl">Barmode</span>
               <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 drop-shadow-lg">
                 Gestión Inteligente
               </span>
@@ -223,7 +233,7 @@ export default function LoginPage() {
                 <p className="text-gray-300">
                   {isSignUp
                     ? "Comienza a optimizar tu negocio hoy"
-                    : "Ingresa a tu cuenta de BarFlow"}
+                    : "Ingresa a tu cuenta de Barmode"}
                 </p>
               </div>
 

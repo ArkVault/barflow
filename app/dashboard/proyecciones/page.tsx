@@ -43,21 +43,21 @@ export default async function ProyeccionesPage() {
     .order("sale_date", { ascending: false });
 
   return (
-    <DashboardLayout userName={data.user.email || ""} establishmentName={establishment.name}>
+    <DashboardLayout
+      userName={data.user.email || ""}
+      establishmentName={establishment.name}
+      pageTitle="Proyecciones Inteligentes"
+      pageDescription="Planifica tu inventario con predicciones basadas en IA"
+      headerActions={
+        <GenerateProjectionsButton
+          establishmentId={establishment.id}
+          supplies={supplies || []}
+          sales={sales || []}
+        />
+      }
+    >
       <main className="container mx-auto p-6">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-balance">Proyecciones Inteligentes</h1>
-            <p className="text-muted-foreground">Planifica tu inventario con predicciones basadas en IA</p>
-          </div>
-          <GenerateProjectionsButton 
-            establishmentId={establishment.id}
-            supplies={supplies || []}
-            sales={sales || []}
-          />
-        </div>
-
-        <ProjectionView 
+        <ProjectionView
           establishmentId={establishment.id}
           supplies={supplies || []}
           sales={sales || []}

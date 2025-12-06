@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 
 interface SidebarNavProps {
   userName: string;
@@ -66,12 +67,24 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
 
           {/* Logo */}
           <div className="mb-8">
-            <h1 className={cn(
-              "font-bold text-foreground/80 transition-all",
-              isCollapsed ? "text-xl text-center" : "text-2xl"
-            )}>
-              {isCollapsed ? "BF" : "BarFlow"}
-            </h1>
+            <Link href="/dashboard" className="block">
+              <img
+                src="/modoclaro.png"
+                alt="Barmode"
+                className={cn(
+                  "dark:hidden transition-all object-contain",
+                  isCollapsed ? "h-4 mx-auto" : "h-5"
+                )}
+              />
+              <img
+                src="/modoscuro.png"
+                alt="Barmode"
+                className={cn(
+                  "hidden dark:block transition-all object-contain",
+                  isCollapsed ? "h-4 mx-auto" : "h-5"
+                )}
+              />
+            </Link>
           </div>
 
           {/* Main Navigation Items */}
@@ -129,7 +142,16 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
                   </div>
                 </Link>
               );
-            })}
+            })
+
+            }
+
+            {/* Upgrade Plan Button */}
+            {!isCollapsed && (
+              <div className="px-2 mb-2">
+                <UpgradePlanButton className="w-full" />
+              </div>
+            )}
 
             {/* Logout Button */}
             <button

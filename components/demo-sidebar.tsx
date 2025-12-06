@@ -53,17 +53,27 @@ export function DemoSidebar() {
         </div>
 
         {/* Logo / Title */}
-        <div className="mb-8 flex items-center gap-3 px-2">
-          <div className="h-9 w-9 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Package2 className="h-5 w-5 text-primary" />
-          </div>
+        <Link href="/demo" className="mb-8 block">
+          <img
+            src="/modoclaro.png"
+            alt="Barmode Demo"
+            className={cn(
+              "dark:hidden transition-all object-contain",
+              isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
+            )}
+          />
+          <img
+            src="/modoscuro.png"
+            alt="Barmode Demo"
+            className={cn(
+              "hidden dark:block transition-all object-contain",
+              isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
+            )}
+          />
           {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-muted-foreground">Demo</span>
-              <span className="text-lg font-semibold tracking-tight">BarFlow</span>
-            </div>
+            <span className="text-xs font-medium text-muted-foreground mt-2 block">Demo</span>
           )}
-        </div>
+        </Link>
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-2">

@@ -79,7 +79,7 @@ export default function DemoPage() {
       const supabase = createClient();
 
       // Carga paralela de todos los datos para mayor velocidad
-      const [suppliesRes, productsRes, activeMenuRes, settingsRes, salesRes] = await Promise.all([
+      const [suppliesRes, productsRes, activeMenuRes, salesRes] = await Promise.all([
         // 1. Insumos
         supabase
           .from('supplies')
@@ -103,14 +103,8 @@ export default function DemoPage() {
           .eq('is_active', true)
           .single(),
 
-        // 4. Configuración
-        supabase
-          .from('establishments')
-          .select('menu_name')
-          .eq('id', establishmentId)
-          .single(),
 
-        // 5. Ventas (última semana)
+        // 4. Ventas (última semana)
         supabase
           .from('sales')
           .select('product_id, quantity, products(name)')
@@ -165,16 +159,12 @@ export default function DemoPage() {
         else setMenuLastModified(`Hace ${Math.floor(diffDays / 30)} mes`);
       }
 
-      // Procesar Configuración
-      if (settingsRes.data?.menu_name) {
-        setMenuName(settingsRes.data.menu_name);
-      } else {
-        const month = new Date().getMonth();
-        const season = (month >= 2 && month <= 4) ? "Primavera" :
-          (month >= 5 && month <= 7) ? "Verano" :
-            (month >= 8 && month <= 10) ? "Otoño" : "Invierno";
-        setMenuName(`${season} ${new Date().getFullYear()}`);
-      }
+      // Generar nombre de menú basado en la temporada
+      const month = new Date().getMonth();
+      const season = (month >= 2 && month <= 4) ? "Primavera" :
+        (month >= 5 && month <= 7) ? "Verano" :
+          (month >= 8 && month <= 10) ? "Otoño" : "Invierno";
+      setMenuName(`${season} ${new Date().getFullYear()}`);
 
       // Procesar Ventas
       const salesData = salesRes.data || [];
@@ -241,10 +231,17 @@ export default function DemoPage() {
           {/* Navigation */}
           <nav className="border-b neumorphic-inset bg-background/80 backdrop-blur">
             <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-              <Link href="/">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  BarFlow Demo
-                </h1>
+              <Link href="/" className="block">
+                <img
+                  src="/modoclaro.png"
+                  alt="Barmode Demo"
+                  className="h-8 dark:hidden"
+                />
+                <img
+                  src="/modoscuro.png"
+                  alt="Barmode Demo"
+                  className="h-8 hidden dark:block"
+                />
               </Link>
               <div className="flex items-center gap-2">
                 <Button

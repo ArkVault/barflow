@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BarFlow - Sistema de Inventario para Bares',
+  title: 'Barmode - Sistema de Inventario para Bares',
   description: 'Sistema inteligente de gestión de inventario y proyecciones para bares y restaurantes',
   generator: 'v0.app',
   icons: {

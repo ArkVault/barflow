@@ -35,8 +35,17 @@ export function DashboardNav({ userName, establishmentName }: DashboardNavProps)
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-2xl font-bold text-primary">
-              BarFlow
+            <Link href="/dashboard" className="block">
+              <img
+                src="/modoclaro.png"
+                alt="Barmode"
+                className="h-8 dark:hidden"
+              />
+              <img
+                src="/modoscuro.png"
+                alt="Barmode"
+                className="h-8 hidden dark:block"
+              />
             </Link>
             <div className="hidden md:flex gap-1">
               {navItems.map((item) => {

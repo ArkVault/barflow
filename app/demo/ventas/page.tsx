@@ -25,10 +25,17 @@ export default function VentasPage() {
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/demo">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                BarFlow
-              </h1>
+            <Link href="/demo" className="block">
+              <img
+                src="/modoclaro.png"
+                alt="Barmode"
+                className="h-8 dark:hidden object-contain"
+              />
+              <img
+                src="/modoscuro.png"
+                alt="Barmode"
+                className="h-8 hidden dark:block object-contain"
+              />
             </Link>
             <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
           </div>

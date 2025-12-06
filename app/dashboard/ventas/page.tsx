@@ -56,16 +56,14 @@ export default async function VentasPage() {
     .order("sale_date", { ascending: true });
 
   return (
-    <DashboardLayout userName={data.user.email || ""} establishmentName={establishment.name}>
+    <DashboardLayout
+      userName={data.user.email || ""}
+      establishmentName={establishment.name}
+      pageTitle="Ventas y Contabilidad"
+      pageDescription="Gestiona tus ventas y analiza tus ingresos"
+      headerActions={<RecordSaleDialog establishmentId={establishment.id} products={products || []} />}
+    >
       <main className="container mx-auto p-6">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-balance">Ventas y Contabilidad</h1>
-            <p className="text-muted-foreground">Gestiona tus ventas y analiza tus ingresos</p>
-          </div>
-          <RecordSaleDialog establishmentId={establishment.id} products={products || []} />
-        </div>
-
         <div className="space-y-6">
           <SalesStats establishmentId={establishment.id} />
           <SalesChart data={chartData || []} />

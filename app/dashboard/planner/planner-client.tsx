@@ -18,14 +18,19 @@ export function PlannerClient({ userName, establishmentName }: PlannerClientProp
     if (typeof window !== "undefined") {
       localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
     }
-    
+
     // TODO: In production, save to Supabase database
     // For now, just redirect to dashboard
     router.push("/dashboard");
   };
 
   return (
-    <DashboardLayout userName={userName} establishmentName={establishmentName}>
+    <DashboardLayout
+      userName={userName}
+      establishmentName={establishmentName}
+      pageTitle="Planner de Inventario"
+      pageDescription="Configura tu plan de inventario inicial"
+    >
       <div className="p-6">
         <InventoryPlanner onComplete={handlePlanComplete} />
       </div>

@@ -29,15 +29,14 @@ export default async function InsumosPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <DashboardLayout userName={data.user.email || ""} establishmentName={establishment.name}>
+    <DashboardLayout
+      userName={data.user.email || ""}
+      establishmentName={establishment.name}
+      pageTitle="Gestión de Insumos"
+      pageDescription="Administra tu inventario y stock"
+      headerActions={<AddSupplyDialog establishmentId={establishment.id} />}
+    >
       <main className="container mx-auto p-6">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-balance">Gestión de Insumos</h1>
-            <p className="text-muted-foreground">Administra tu inventario y stock</p>
-          </div>
-          <AddSupplyDialog establishmentId={establishment.id} />
-        </div>
         <SuppliesTable supplies={supplies || []} />
       </main>
     </DashboardLayout>

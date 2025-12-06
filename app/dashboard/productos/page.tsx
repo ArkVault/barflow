@@ -47,15 +47,14 @@ export default async function ProductosPage() {
     .order("name");
 
   return (
-    <DashboardLayout userName={data.user.email || ""} establishmentName={establishment.name}>
+    <DashboardLayout
+      userName={data.user.email || ""}
+      establishmentName={establishment.name}
+      pageTitle="Gestión de Productos"
+      pageDescription="Administra tu menú y recetas"
+      headerActions={<AddProductDialog establishmentId={establishment.id} supplies={supplies || []} />}
+    >
       <main className="container mx-auto p-6">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-balance">Gestión de Productos</h1>
-            <p className="text-muted-foreground">Administra tu menú y recetas</p>
-          </div>
-          <AddProductDialog establishmentId={establishment.id} supplies={supplies || []} />
-        </div>
         <ProductsTable products={products || []} supplies={supplies || []} />
       </main>
     </DashboardLayout>
