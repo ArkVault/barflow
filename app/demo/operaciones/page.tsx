@@ -41,6 +41,7 @@ interface Account {
      closedAt?: Date;
      items: AccountItem[];
      total: number;
+     seatLabel?: string; // For bars: "Asiento 1", "Asiento 2", etc.
 }
 
 interface Table {
@@ -577,17 +578,17 @@ export default function OperacionesPage() {
      };
 
      const openNewAccount = (sectionId: string, itemId: string, type: 'table' | 'bar') => {
-          const newAccount: Account = {
-               id: `acc-${Date.now()}`,
-               status: 'abierta',
-               openedAt: new Date(),
-               items: [],
-               total: 0,
-          };
-
           setSections(sections.map(section => {
                if (section.id === sectionId) {
                     if (type === 'table') {
+                         const newAccount: Account = {
+                              id: `acc-${Date.now()}`,
+                              status: 'abierta',
+                              openedAt: new Date(),
+                              items: [],
+                              total: 0,
+                         };
+
                          return {
                               ...section,
                               tables: section.tables.map(table =>
@@ -602,6 +603,19 @@ export default function OperacionesPage() {
                               ),
                          };
                     } else {
+                         // For bars, generate seat label
+                         const bar = section.bars.find(b => b.id === itemId);
+                         const seatNumber = bar ? bar.accounts.length + 1 : 1;
+
+                         const newAccount: Account = {
+                              id: `acc-${Date.now()}`,
+                              status: 'abierta',
+                              openedAt: new Date(),
+                              items: [],
+                              total: 0,
+                              seatLabel: `Asiento ${seatNumber}`,
+                         };
+
                          return {
                               ...section,
                               bars: section.bars.map(bar =>
@@ -620,7 +634,7 @@ export default function OperacionesPage() {
                return section;
           }));
 
-          // Auto-switch to Comandas tab and select the table/bar
+          // Switch to comandas tab and select the newly created account
           setActiveTab('comandas');
           setSelectedTableForOrder(`${sectionId}-${itemId}`);
      };
@@ -642,7 +656,10 @@ export default function OperacionesPage() {
                          const bar = section.bars.find(b => b.id === itemId);
                          if (bar) {
                               accountToClose = bar.accounts.find(acc => acc.id === accountId);
-                              tableName = bar.name;
+                              // For bars, include seat label if available
+                              tableName = accountToClose?.seatLabel
+                                   ? `${bar.name} - ${accountToClose.seatLabel}`
+                                   : bar.name;
                          }
                     }
                }
@@ -994,8 +1011,34 @@ export default function OperacionesPage() {
           const deltaX = e.clientX - resizingSection.startX;
           const deltaY = e.clientY - resizingSection.startY;
 
-          const newWidth = Math.max(400, resizingSection.startWidth + deltaX);
-          const newHeight = Math.max(300, resizingSection.startHeight + deltaY);
+          // Find the section to calculate minimum size based on content
+          const section = sections.find(s => s.id === resizingSection.id);
+          if (!section) return;
+
+          // Calculate minimum width and height based on tables and bars positions
+          let minWidth = 400; // Default minimum
+          let minHeight = 300; // Default minimum
+
+          // Check all tables (80x80)
+          section.tables.forEach(table => {
+               const tableRight = table.x + 80;
+               const tableBottom = table.y + 80;
+               minWidth = Math.max(minWidth, tableRight + 20); // +20 for padding
+               minHeight = Math.max(minHeight, tableBottom + 20);
+          });
+
+          // Check all bars (dimensions depend on orientation)
+          section.bars.forEach(bar => {
+               const barWidth = bar.orientation === 'vertical' ? 72 : 180;
+               const barHeight = bar.orientation === 'vertical' ? 180 : 72;
+               const barRight = bar.x + barWidth;
+               const barBottom = bar.y + barHeight;
+               minWidth = Math.max(minWidth, barRight + 20); // +20 for padding
+               minHeight = Math.max(minHeight, barBottom + 20);
+          });
+
+          const newWidth = Math.max(minWidth, resizingSection.startWidth + deltaX);
+          const newHeight = Math.max(minHeight, resizingSection.startHeight + deltaY);
 
           setSections(sections.map(sec =>
                sec.id === resizingSection.id
