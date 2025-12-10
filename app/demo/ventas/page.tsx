@@ -388,23 +388,46 @@ export default function VentasPage() {
 
           {/* History Tab */}
           {activeTab === 'history' && (
-            <div className="space-y-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="neumorphic border-0 p-6">
-                  <div className="text-sm text-muted-foreground mb-1">Ventas Hoy</div>
-                  <div className="text-3xl font-bold text-green-600">$4,250</div>
-                  <div className="text-xs text-muted-foreground mt-1">+15% vs ayer</div>
+            <div className="space-y-4">
+              {/* Stats Cards - Compact */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="neumorphic border-0 p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Ventas Hoy</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    ${sales
+                      .filter(s => {
+                        const saleDate = new Date(s.created_at);
+                        const today = new Date();
+                        return saleDate.toDateString() === today.toDateString();
+                      })
+                      .reduce((sum, s) => sum + parseFloat(s.total.toString()), 0)
+                      .toFixed(2)}
+                  </div>
                 </Card>
-                <Card className="neumorphic border-0 p-6">
-                  <div className="text-sm text-muted-foreground mb-1">Transacciones</div>
-                  <div className="text-3xl font-bold">87</div>
-                  <div className="text-xs text-muted-foreground mt-1">Hoy</div>
+                <Card className="neumorphic border-0 p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Transacciones Hoy</div>
+                  <div className="text-2xl font-bold">
+                    {sales.filter(s => {
+                      const saleDate = new Date(s.created_at);
+                      const today = new Date();
+                      return saleDate.toDateString() === today.toDateString();
+                    }).length}
+                  </div>
                 </Card>
-                <Card className="neumorphic border-0 p-6">
-                  <div className="text-sm text-muted-foreground mb-1">Ticket Promedio</div>
-                  <div className="text-3xl font-bold">$48.85</div>
-                  <div className="text-xs text-muted-foreground mt-1">+8% vs ayer</div>
+                <Card className="neumorphic border-0 p-4">
+                  <div className="text-xs text-muted-foreground mb-1">Ticket Promedio</div>
+                  <div className="text-2xl font-bold">
+                    ${(() => {
+                      const todaySales = sales.filter(s => {
+                        const saleDate = new Date(s.created_at);
+                        const today = new Date();
+                        return saleDate.toDateString() === today.toDateString();
+                      });
+                      if (todaySales.length === 0) return '0.00';
+                      const total = todaySales.reduce((sum, s) => sum + parseFloat(s.total.toString()), 0);
+                      return (total / todaySales.length).toFixed(2);
+                    })()}
+                  </div>
                 </Card>
               </div>
 

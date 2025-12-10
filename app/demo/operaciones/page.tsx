@@ -124,7 +124,7 @@ export default function OperacionesPage() {
      const [selectedItem, setSelectedItem] = useState<{ type: 'table' | 'bar', sectionId: string, itemId: string } | null>(null);
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [dragOffset, setDragOffset] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-     const [activeTab, setActiveTab] = useState<'mesas' | 'comandas'>('comandas');
+     const [activeTab, setActiveTab] = useState<'mesas' | 'comandas'>('mesas');
      const [tableCounter, setTableCounter] = useState(1);
      const [isDragging, setIsDragging] = useState(false);
 
@@ -563,6 +563,10 @@ export default function OperacionesPage() {
                }
                return section;
           }));
+
+          // Auto-switch to Comandas tab and select the table/bar
+          setActiveTab('comandas');
+          setSelectedTableForOrder(`${sectionId}-${itemId}`);
      };
 
      const closeAccount = async (sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar') => {
@@ -602,9 +606,22 @@ export default function OperacionesPage() {
                try {
                     const supabase = createClient();
 
+                    // Get next sequential ticket number
+                    const { data: ticketData, error: ticketError } = await supabase
+                         .rpc('get_next_ticket_number', { p_establishment_id: establishmentId });
+
+                    if (ticketError) {
+                         console.error('Error getting ticket number:', ticketError);
+                         toast.error('Error al generar número de ticket');
+                         return;
+                    }
+
+                    const ticketNumber = ticketData || 1;
+                    const orderNumber = `#${String(ticketNumber).padStart(6, '0')}`;
+
                     const saleData = {
                          establishment_id: establishmentId,
-                         order_number: `#${accountId.slice(0, 8)}`,
+                         order_number: orderNumber,
                          table_name: tableName,
                          items: accountToClose.items.map(item => ({
                               productName: item.productName,
@@ -927,16 +944,6 @@ export default function OperacionesPage() {
                               <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
                                    <button
                                         type="button"
-                                        onClick={() => setActiveTab('comandas')}
-                                        className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === 'comandas'
-                                             ? 'bg-background text-foreground shadow-sm font-medium'
-                                             : 'text-muted-foreground hover:text-foreground'
-                                             }`}
-                                   >
-                                        📋 Comandas
-                                   </button>
-                                   <button
-                                        type="button"
                                         onClick={() => setActiveTab('mesas')}
                                         className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === 'mesas'
                                              ? 'bg-background text-foreground shadow-sm font-medium'
@@ -945,6 +952,16 @@ export default function OperacionesPage() {
                                    >
                                         <Grid3x3 className="w-4 h-4" />
                                         Mesas
+                                   </button>
+                                   <button
+                                        type="button"
+                                        onClick={() => setActiveTab('comandas')}
+                                        className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === 'comandas'
+                                             ? 'bg-background text-foreground shadow-sm font-medium'
+                                             : 'text-muted-foreground hover:text-foreground'
+                                             }`}
+                                   >
+                                        📋 Comandas
                                    </button>
                               </div>
                          </div>
