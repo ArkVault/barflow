@@ -91,6 +91,13 @@ const statusColors = {
      'por-pagar': 'from-orange-400 to-orange-600',
 };
 
+const barStatusColors = {
+     libre: 'from-green-600 to-green-800',
+     reservada: 'from-yellow-600 to-yellow-800',
+     ocupada: 'from-blue-600 to-blue-800',
+     'por-pagar': 'from-orange-600 to-orange-800',
+};
+
 const statusLabels = {
      libre: 'Libre',
      reservada: 'Reservada',
@@ -138,6 +145,7 @@ export default function OperacionesPage() {
      const [tableCounter, setTableCounter] = useState(1);
      const [isDragging, setIsDragging] = useState(false);
      const [hasMoved, setHasMoved] = useState(false);
+     const [resizingSection, setResizingSection] = useState<{ id: string, startX: number, startY: number, startWidth: number, startHeight: number } | null>(null);
 
      // Comandas state
      const [selectedTableForOrder, setSelectedTableForOrder] = useState<string | null>(null);
@@ -490,8 +498,17 @@ export default function OperacionesPage() {
                y: 50 + (sections.length * 30),
                width: 600,
                height: 450,
-               tables: [],
-               bars: [],
+               tables: [
+                    { id: `table-${Date.now()}-1`, name: 'Mesa 1', x: 50, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: `table-${Date.now()}-2`, name: 'Mesa 2', x: 200, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: `table-${Date.now()}-3`, name: 'Mesa 3', x: 350, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: `table-${Date.now()}-4`, name: 'Mesa 4', x: 50, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: `table-${Date.now()}-5`, name: 'Mesa 5', x: 200, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: `table-${Date.now()}-6`, name: 'Mesa 6', x: 350, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+               ],
+               bars: [
+                    { id: `bar-${Date.now()}`, name: 'Barra 1', x: 150, y: 320, status: 'libre', accounts: [], currentAccountId: undefined, orientation: 'horizontal' },
+               ],
           };
           setSections([...sections, newSection]);
      };
@@ -917,8 +934,8 @@ export default function OperacionesPage() {
                } else if (draggedItem.type === 'bar') {
                     // Find the bar to get its orientation
                     const bar = section.bars.find(b => b.id === draggedItem.itemId);
-                    const barWidth = bar?.orientation === 'vertical' ? 64 : 128;
-                    const barHeight = bar?.orientation === 'vertical' ? 128 : 64;
+                    const barWidth = bar?.orientation === 'vertical' ? 72 : 180;
+                    const barHeight = bar?.orientation === 'vertical' ? 180 : 72;
                     x = Math.max(0, Math.min(x, section.width - barWidth));
                     y = Math.max(0, Math.min(y, section.height - barHeight));
 
@@ -954,6 +971,55 @@ export default function OperacionesPage() {
           }
      }, [isDragging, draggedItem, dragOffset, sections]);
 
+     // Resize handlers for sections
+     const handleResizeStart = (e: React.MouseEvent, sectionId: string) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const section = sections.find(s => s.id === sectionId);
+          if (!section) return;
+
+          setResizingSection({
+               id: sectionId,
+               startX: e.clientX,
+               startY: e.clientY,
+               startWidth: section.width,
+               startHeight: section.height,
+          });
+     };
+
+     const handleResizeMove = (e: MouseEvent) => {
+          if (!resizingSection) return;
+
+          const deltaX = e.clientX - resizingSection.startX;
+          const deltaY = e.clientY - resizingSection.startY;
+
+          const newWidth = Math.max(400, resizingSection.startWidth + deltaX);
+          const newHeight = Math.max(300, resizingSection.startHeight + deltaY);
+
+          setSections(sections.map(sec =>
+               sec.id === resizingSection.id
+                    ? { ...sec, width: newWidth, height: newHeight }
+                    : sec
+          ));
+     };
+
+     const handleResizeEnd = () => {
+          setResizingSection(null);
+     };
+
+     // Add mouse event listeners for resize
+     useEffect(() => {
+          if (resizingSection) {
+               window.addEventListener('mousemove', handleResizeMove);
+               window.addEventListener('mouseup', handleResizeEnd);
+               return () => {
+                    window.removeEventListener('mousemove', handleResizeMove);
+                    window.removeEventListener('mouseup', handleResizeEnd);
+               };
+          }
+     }, [resizingSection, sections]);
+
      return (
           <div className="min-h-svh bg-background">
                <DemoSidebar />
@@ -988,25 +1054,25 @@ export default function OperacionesPage() {
 
                          {/* Tabs */}
                          <div className="mb-6">
-                              <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
+                              <div className="inline-flex items-center gap-3 p-1.5 w-fit">
                                    <button
                                         type="button"
                                         onClick={() => setActiveTab('mesas')}
-                                        className={`px - 6 py - 2.5 rounded - full transition - colors flex items - center gap - 2 ${activeTab === 'mesas'
-                                             ? 'bg-background text-foreground shadow-sm font-medium'
-                                             : 'text-muted-foreground hover:text-foreground'
-                                             } `}
+                                        className={`px-8 py-3.5 rounded-3xl transition-all flex items-center gap-2.5 text-base font-medium ${activeTab === 'mesas'
+                                             ? 'bg-background text-foreground shadow-lg neumorphic'
+                                             : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                                             }`}
                                    >
-                                        <Grid3x3 className="w-4 h-4" />
+                                        <Grid3x3 className="w-5 h-5" />
                                         Mesas
                                    </button>
                                    <button
                                         type="button"
                                         onClick={() => setActiveTab('comandas')}
-                                        className={`px - 6 py - 2.5 rounded - full transition - colors flex items - center gap - 2 ${activeTab === 'comandas'
-                                             ? 'bg-background text-foreground shadow-sm font-medium'
-                                             : 'text-muted-foreground hover:text-foreground'
-                                             } `}
+                                        className={`px-8 py-3.5 rounded-3xl transition-all flex items-center gap-2.5 text-base font-medium ${activeTab === 'comandas'
+                                             ? 'bg-background text-foreground shadow-lg neumorphic'
+                                             : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                                             }`}
                                    >
                                         📋 Comandas
                                    </button>
@@ -1286,7 +1352,7 @@ export default function OperacionesPage() {
                                                                  className="h-8"
                                                             >
                                                                  <Square className="w-3 h-3 mr-1" />
-                                                                 Mesa
+                                                                 + Mesa
                                                             </Button>
                                                             <Button
                                                                  size="sm"
@@ -1295,7 +1361,7 @@ export default function OperacionesPage() {
                                                                  className="h-8"
                                                             >
                                                                  <Minus className="w-3 h-3 mr-1" />
-                                                                 Barra
+                                                                 + Barra
                                                             </Button>
                                                             <Button
                                                                  size="sm"
@@ -1379,11 +1445,11 @@ export default function OperacionesPage() {
                                                                  className={cn(
                                                                       "relative rounded-2xl flex flex-col items-center justify-center",
                                                                       "bg-gradient-to-br shadow-lg transition-all hover:scale-110",
-                                                                      statusColors[bar.status]
+                                                                      barStatusColors[bar.status]
                                                                  )}
                                                                  style={{
-                                                                      width: bar.orientation === 'vertical' ? '64px' : '128px',
-                                                                      height: bar.orientation === 'vertical' ? '128px' : '64px',
+                                                                      width: bar.orientation === 'vertical' ? '72px' : '180px',
+                                                                      height: bar.orientation === 'vertical' ? '180px' : '72px',
                                                                       boxShadow: '0 0 20px rgba(0,0,0,0.3)'
                                                                  }}
                                                                  onClick={(e) => {
@@ -1429,6 +1495,20 @@ export default function OperacionesPage() {
                                                             </div>
                                                        </div>
                                                   ))}
+
+                                                  {/* Resize Handle */}
+                                                  <div
+                                                       onMouseDown={(e) => handleResizeStart(e, section.id)}
+                                                       className="absolute bottom-0 right-0 w-8 h-8 cursor-se-resize group/resize z-20"
+                                                       style={{ touchAction: 'none' }}
+                                                  >
+                                                       <div className="absolute bottom-2 right-2 w-5 h-5 border-r-3 border-b-3 border-primary/50 group-hover/resize:border-primary transition-colors rounded-br-lg"
+                                                            style={{
+                                                                 borderRightWidth: '3px',
+                                                                 borderBottomWidth: '3px'
+                                                            }}
+                                                       />
+                                                  </div>
                                              </div>
                                         ))}
                                    </div>
