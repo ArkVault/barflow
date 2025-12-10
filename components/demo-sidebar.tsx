@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Boxes, Package2, Receipt, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard } from "lucide-react";
+import { Boxes, Package2, Receipt, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard, User, Grid3x3 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/hooks/use-language";
@@ -14,6 +14,7 @@ const demoNavItems = [
   { href: "/demo/planner", labelKey: "planner" as const, icon: ClipboardList },
   { href: "/demo/insumos", labelKey: "supplies" as const, icon: Boxes },
   { href: "/demo/productos", labelKey: "products" as const, icon: Package2 },
+  { href: "/demo/operaciones", label: "Operaciones", icon: Grid3x3 },
   { href: "/demo/ventas", labelKey: "sales" as const, icon: Receipt },
   { href: "/demo/proyecciones", labelKey: "projections" as const, icon: BarChart3 },
 ];
@@ -79,13 +80,14 @@ export function DemoSidebar() {
         <nav className="flex-1 space-y-2">
           {demoNavItems.map((item) => {
             const isActive = pathname === item.href;
+            const displayLabel = 'label' in item ? item.label : t(item.labelKey);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className="block"
-                title={isCollapsed ? t(item.labelKey) : undefined}
+                title={isCollapsed ? displayLabel : undefined}
               >
                 <div className="relative btn-glow-wrapper">
                   <div
@@ -98,7 +100,7 @@ export function DemoSidebar() {
                     )}
                   >
                     <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!isCollapsed && <span>{t(item.labelKey)}</span>}
+                    {!isCollapsed && <span>{displayLabel}</span>}
                   </div>
                 </div>
               </Link>
@@ -106,13 +108,19 @@ export function DemoSidebar() {
           })}
         </nav>
 
-        {/* Footer badge */}
-        <div className={cn("mt-4 flex items-center gap-3 px-2 text-xs text-muted-foreground", isCollapsed && "justify-center")}
-        >
-          <div className="h-7 rounded-full bg-accent flex items-center px-2 text-[10px] font-medium">
-            <span className="mr-1">⚡</span>
-            {!isCollapsed && <span>{t('demoMode')}</span>}
-          </div>
+        {/* Account Button - Bottom Right */}
+        <div className="mt-4 flex justify-end">
+          <Link href="/demo/cuenta" title="Cuenta">
+            <button
+              className={cn(
+                "flex items-center justify-center rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                "hover:bg-accent/60 text-gray-900 dark:text-gray-100",
+                "neumorphic-hover"
+              )}
+            >
+              <User className="h-5 w-5 flex-shrink-0" />
+            </button>
+          </Link>
         </div>
       </div>
     </aside>

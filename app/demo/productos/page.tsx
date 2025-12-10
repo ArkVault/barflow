@@ -10,11 +10,13 @@ import { GlowButton } from "@/components/glow-button"
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/hooks/use-language"
 import { MenuManager } from "@/components/menu-manager"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
+import { ProductImageUpload } from "@/components/product-image-upload"
 
 
 interface Product {
@@ -25,7 +27,8 @@ interface Product {
   ingredients: Array<{ name: string; quantity: number; unit: string }>;
   active: boolean;
   description?: string;
-  menu_id?: string; // Added for menu filtering
+  menu_id?: string;
+  image_url?: string | null;
 }
 
 // Mock menu ID for "Los Clásicos"
@@ -233,6 +236,7 @@ export default function ProductosPage() {
   const [activeMenuId, setActiveMenuId] = useState<string>("");
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; icon: string }>>([]);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editForm, setEditForm] = useState<Product | null>(null);
@@ -247,12 +251,34 @@ export default function ProductosPage() {
     description: ''
   });
 
+  // Load categories from Supabase
+  useEffect(() => {
+    const loadCategories = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('product_categories')
+        .select('id, name, icon')
+        .order('display_order');
+
+      if (!error && data) {
+        setCategories(data);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
   // Helper function to translate category
   const translateCategory = (category: string) => {
     const categoryMap: Record<string, string> = {
       'Cócteles': t('cocktails'),
       'Cervezas': t('beers'),
       'Shots': t('shots'),
+      'Bebidas sin alcohol': 'Non-alcoholic drinks',
+      'Alimentos': 'Food',
+      'Postres': 'Desserts',
+      'Entradas': 'Appetizers',
+      'Vinos': 'Wines',
     };
     return categoryMap[category] || category;
   };
@@ -299,6 +325,7 @@ export default function ProductosPage() {
         description: p.description || '',
         active: p.is_active,
         menu_id: p.menu_id,
+        image_url: p.image_url, // Include image URL
         ingredients: [] // TODO: Load ingredients from product_ingredients table
       }));
 
@@ -481,12 +508,44 @@ export default function ProductosPage() {
                   className="neumorphic border-0 cursor-pointer transition-all hover:scale-[1.02]"
                   onClick={() => handleViewRecipe(product.id)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl">{product.name}</CardTitle>
-                      {product.active && <Badge className="bg-green-600">{t('active')}</Badge>}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-4">
+                      {/* Product Image Upload */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ProductImageUpload
+                          productId={String(product.id)}
+                          currentImageUrl={product.image_url}
+                          onImageUpdate={(imageUrl) => {
+                            // Update local state
+                            setProducts(products.map(p =>
+                              p.id === product.id ? { ...p, image_url: imageUrl } : p
+                            ));
+                          }}
+                        />
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {/* Badge at top */}
+                        <div className="flex justify-start">
+                          {product.active && (
+                            <Badge className="bg-green-600 whitespace-nowrap">
+                              {t('active')}
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Product name below badge */}
+                        <div>
+                          <CardTitle className="text-xl leading-tight">
+                            {product.name}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            {translateCategory(product.category)}
+                          </CardDescription>
+                        </div>
+                      </div>
                     </div>
-                    <CardDescription>{translateCategory(product.category)}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -595,12 +654,24 @@ export default function ProductosPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="new-category">Categoría *</Label>
-                      <Input
-                        id="new-category"
-                        placeholder="Ej: Cócteles"
+                      <Select
                         value={newProduct.category}
-                        onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                      />
+                        onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
+                      >
+                        <SelectTrigger id="new-category">
+                          <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              <span className="flex items-center gap-2">
+                                <span>{cat.icon}</span>
+                                <span>{cat.name}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -731,11 +802,24 @@ export default function ProductosPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="category">Categoría</Label>
-                      <Input
-                        id="category"
+                      <Select
                         value={editForm.category}
-                        onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                      />
+                        onValueChange={(value) => setEditForm({ ...editForm, category: value })}
+                      >
+                        <SelectTrigger id="category">
+                          <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              <span className="flex items-center gap-2">
+                                <span>{cat.icon}</span>
+                                <span>{cat.name}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
