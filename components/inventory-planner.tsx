@@ -361,7 +361,21 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => setShowAddNew(true)}
+                    onClick={() => {
+                      const section = document.getElementById('personalizado-section');
+                      if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add highlight effect
+                        setTimeout(() => {
+                          section.classList.add('highlight-pulse');
+                          setShowAddNew(true);
+                          // Remove highlight after 5 seconds
+                          setTimeout(() => {
+                            section.classList.remove('highlight-pulse');
+                          }, 5000);
+                        }, 500);
+                      }
+                    }}
                     className="neumorphic-hover border-0"
                     size="sm"
                   >
@@ -423,7 +437,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 ))}
 
                 {/* Add New Supply */}
-                <div>
+                <div id="personalizado-section">
                   <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                     <span className="h-1 w-8 bg-emerald-500 rounded" />
                     Personalizado

@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, X } from 'lucide-react';
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from 'next/navigation';
+import { GlowButton } from "@/components/glow-button";
 
 interface Supply {
   id: string;
@@ -75,7 +76,7 @@ export function AddProductDialog({ establishmentId, supplies }: AddProductDialog
 
     try {
       const supabase = createClient();
-      
+
       const validIngredients = ingredients.filter(
         ing => ing.supply_id && ing.quantity_needed
       );
@@ -130,12 +131,17 @@ export function AddProductDialog({ establishmentId, supplies }: AddProductDialog
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="neumorphic-hover border-0 gap-2">
-          <Plus className="h-4 w-4" />
-          Agregar Producto
-        </Button>
-      </DialogTrigger>
+      <div onClick={() => setOpen(true)} className="inline-block cursor-pointer">
+        <GlowButton onClick={(e) => {
+          e.preventDefault();
+          setOpen(true);
+        }}>
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-inner">
+            <Plus className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+          </div>
+          <span className="hidden sm:inline">Nuevo Menú</span>
+        </GlowButton>
+      </div>
       <DialogContent className="neumorphic border-0 max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Agregar Nuevo Producto</DialogTitle>

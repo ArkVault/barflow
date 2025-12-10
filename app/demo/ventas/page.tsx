@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DemoSidebar } from "@/components/demo-sidebar"
 import { useLanguage } from "@/hooks/use-language"
+import { GlowButton } from "@/components/glow-button"
+import { Plus } from "lucide-react"
 
 const sales = [
   { id: 1, date: '2024-11-25', time: '18:45', product: 'Mojito Clásico', unitPrice: 8.50, quantity: 2, total: 17.00 },
@@ -37,7 +39,6 @@ export default function VentasPage() {
                 className="h-8 hidden dark:block object-contain"
               />
             </Link>
-            <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
           </div>
         </div>
       </nav>
@@ -49,7 +50,12 @@ export default function VentasPage() {
               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('salesAccounting')}</h2>
               <p className="text-muted-foreground">{t('transactionLog')}</p>
             </div>
-            <Button className="neumorphic-hover border-0">+ {t('registerSale')}</Button>
+            <GlowButton>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-inner">
+                <Plus className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="hidden sm:inline">{t('registerSale')}</span>
+            </GlowButton>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

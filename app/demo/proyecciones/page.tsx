@@ -21,17 +21,13 @@ const SalesProjectionChart = dynamic(() => import("@/components/sales-projection
   loading: () => <div className="h-[340px] w-full animate-pulse bg-muted/20 rounded-lg" />,
   ssr: false
 });
-import { RefreshCw, Flame } from "lucide-react"
+import { Flame } from "lucide-react"
 
 export default function ProyeccionesPage() {
   const { t } = useLanguage();
   const [period, setPeriod] = useState<'week' | 'month'>('week');
   const [highSeason, setHighSeason] = useState(false);
 
-  const handleRefresh = () => {
-    // TODO: Implementar lógica de actualización de proyecciones
-    console.log('Actualizando proyecciones...');
-  };
 
   return (
     <div className="min-h-svh bg-background">
@@ -51,7 +47,6 @@ export default function ProyeccionesPage() {
                 className="h-8 hidden dark:block object-contain"
               />
             </Link>
-            <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
           </div>
         </div>
       </nav>
@@ -59,23 +54,11 @@ export default function ProyeccionesPage() {
       <div className="min-h-screen bg-background p-4 ml-0 md:ml-20 lg:ml-72">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <div>
-              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                {t('smartProjections')}
-              </h2>
-              <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                className="neumorphic-hover border-0"
-                onClick={handleRefresh}
-                size="sm"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                {t('updateProjections')}
-              </Button>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+              {t('smartProjections')}
+            </h2>
+            <p className="text-muted-foreground">{t('aiPredictiveAnalysis')}</p>
           </div>
 
           {/* Controls Section */}

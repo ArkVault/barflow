@@ -13,9 +13,11 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/contexts/auth-context";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { calculateStockStatus } from "@/lib/stock-utils";
+import { AccountButton } from "@/components/account-button";
+import { GlowButton } from "@/components/glow-button";
 
 import dynamic from 'next/dynamic';
 
@@ -244,18 +246,13 @@ export default function DemoPage() {
                 />
               </Link>
               <div className="flex items-center gap-2">
-                <Button
-                  className="neumorphic-hover border-0 rounded-full"
-                  onClick={handleReconfigure}
-                >
-                  ⚙️ {t('reconfigurePlan')}
-                </Button>
-                <Button
-                  className="neumorphic-hover border-0 rounded-full"
-                  onClick={() => signOut()}
-                >
-                  Cerrar Sesión
-                </Button>
+                <AccountButton />
+                <GlowButton onClick={() => signOut()}>
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-inner">
+                    <LogOut className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                  </div>
+                  <span className="hidden sm:inline">Cerrar Sesión</span>
+                </GlowButton>
               </div>
             </div>
           </nav>

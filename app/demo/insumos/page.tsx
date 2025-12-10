@@ -10,7 +10,8 @@ import { useState, useEffect } from "react"
 import { useLanguage } from "@/hooks/use-language"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import { Loader2, Trash2, Pencil, ShoppingCart, Package } from "lucide-react"
+import { Loader2, Trash2, Pencil, ShoppingCart, Package, Plus } from "lucide-react"
+import { GlowButton } from "@/components/glow-button"
 import { toast } from "sonner"
 import { EditSupplyDialog } from "@/components/edit-supply-dialog"
 import { calculateStockStatus } from "@/lib/stock-utils"
@@ -274,7 +275,6 @@ export default function InsumosPage() {
                 className="h-8 hidden dark:block object-contain"
               />
             </Link>
-            <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
           </div>
         </div>
       </nav>
@@ -287,13 +287,11 @@ export default function InsumosPage() {
               <p className="text-muted-foreground">{t('inventoryControl')}</p>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowPurchaseListDialog(true)}
-                className="neumorphic-hover border-0 relative"
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Insumos a Comprar
+              <GlowButton onClick={() => setShowPurchaseListDialog(true)} className="relative">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-inner">
+                  <ShoppingCart className="w-3.5 h-3.5 text-white" />
+                </div>
+                <span className="hidden sm:inline">Insumos a Comprar</span>
                 {purchaseList.length > 0 && (
                   <Badge
                     variant="destructive"
@@ -302,9 +300,14 @@ export default function InsumosPage() {
                     {purchaseList.length}
                   </Badge>
                 )}
-              </Button>
+              </GlowButton>
               <Link href="/demo/planner">
-                <Button className="neumorphic-hover border-0">+ {t('addSupply')}</Button>
+                <GlowButton>
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-inner">
+                    <Plus className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <span className="hidden sm:inline">Añadir Insumo</span>
+                </GlowButton>
               </Link>
             </div>
           </div>

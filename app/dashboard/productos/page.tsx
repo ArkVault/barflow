@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation';
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ProductsTable } from "@/components/products-table";
 import { AddProductDialog } from "@/components/add-product-dialog";
+import { GlowButton } from "@/components/glow-button";
+import { ArrowLeft } from "lucide-react";
 
 export default async function ProductosPage() {
   const supabase = await createClient();
@@ -52,7 +55,19 @@ export default async function ProductosPage() {
       establishmentName={establishment.name}
       pageTitle="Gestión de Productos"
       pageDescription="Administra tu menú y recetas"
-      headerActions={<AddProductDialog establishmentId={establishment.id} supplies={supplies || []} />}
+      headerActions={
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard">
+            <GlowButton>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-inner">
+                <ArrowLeft className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+              </div>
+              <span className="hidden sm:inline">Dashboard</span>
+            </GlowButton>
+          </Link>
+          <AddProductDialog establishmentId={establishment.id} supplies={supplies || []} />
+        </div>
+      }
     >
       <main className="container mx-auto p-6">
         <ProductsTable products={products || []} supplies={supplies || []} />

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar"
 import { Plus, Edit, Trash2, X } from "lucide-react"
+import { GlowButton } from "@/components/glow-button"
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -431,7 +432,6 @@ export default function ProductosPage() {
                 className="h-8 hidden dark:block object-contain"
               />
             </Link>
-            <Link href="/demo"><Button variant="outline" className="neumorphic-hover border-0">← Dashboard</Button></Link>
           </div>
         </div>
       </nav>
@@ -452,13 +452,12 @@ export default function ProductosPage() {
 
           {/* Botón Diseñar Menú */}
           <div className="mb-8">
-            <Button
-              className="neumorphic-hover border-0"
-              onClick={() => setIsAddingProduct(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar Producto
-            </Button>
+            <GlowButton onClick={() => setIsAddingProduct(true)}>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-inner">
+                <Plus className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="hidden sm:inline">Agregar Producto</span>
+            </GlowButton>
           </div>
 
           {products.length === 0 ? (

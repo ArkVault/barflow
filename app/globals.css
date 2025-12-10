@@ -330,6 +330,12 @@
   }
 }
 
+/* Highlight pulse animation for drawing attention */
+.highlight-pulse {
+  animation: highlight-pulse-animation 5s ease-in-out;
+  position: relative;
+}
+
 /* Apply sky blue gradient to primary buttons (excluding sidebar and outline/ghost variants) */
 button[class*="neumorphic-hover"]:not([variant="outline"]):not([variant="ghost"]):not(aside *),
 .btn-sky-gradient {
@@ -466,5 +472,45 @@ aside button[class*="neumorphic-hover"] {
 
   50% {
     background-position: 100% 50%;
+  }
+}
+
+@keyframes highlight-pulse-animation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+
+  10% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.4),
+      0 0 30px rgba(16, 185, 129, 0.3),
+      inset 0 0 20px rgba(16, 185, 129, 0.1);
+  }
+
+  20% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.3),
+      0 0 40px rgba(16, 185, 129, 0.4),
+      inset 0 0 30px rgba(16, 185, 129, 0.15);
+  }
+
+  40% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.2),
+      0 0 30px rgba(16, 185, 129, 0.3),
+      inset 0 0 20px rgba(16, 185, 129, 0.1);
+  }
+
+  60% {
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.25),
+      0 0 35px rgba(16, 185, 129, 0.35),
+      inset 0 0 25px rgba(16, 185, 129, 0.12);
+  }
+
+  80% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.15),
+      0 0 20px rgba(16, 185, 129, 0.2),
+      inset 0 0 15px rgba(16, 185, 129, 0.08);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }

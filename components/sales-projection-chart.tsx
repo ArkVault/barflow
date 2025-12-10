@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
@@ -174,9 +174,25 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                          </Select>
                     </div>
                </CardHeader>
-               <CardContent>
-                    <ResponsiveContainer width="100%" height={320}>
-                         <BarChart data={chartData}>
+               <CardContent className="px-3 pb-2">
+                    <ResponsiveContainer width="100%" height={160}>
+                         <LineChart data={chartData}>
+                              <defs>
+                                   {/* Gradiente para línea de ventas reales - VERDE */}
+                                   <linearGradient id="salesActualGradient" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+                                        <stop offset="50%" stopColor="#22c55e" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#4ade80" stopOpacity={1} />
+                                   </linearGradient>
+
+                                   {/* Gradiente para línea proyectada - NARANJA */}
+                                   <linearGradient id="salesProjectedGradient" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#ea580c" stopOpacity={1} />
+                                        <stop offset="50%" stopColor="#f97316" stopOpacity={1} />
+                                        <stop offset="100%" stopColor="#fb923c" stopOpacity={1} />
+                                   </linearGradient>
+                              </defs>
+
                               <CartesianGrid
                                    strokeDasharray="3 3"
                                    stroke="currentColor"
@@ -217,40 +233,84 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                               />
                               <Legend
                                    wrapperStyle={{ paddingTop: '20px' }}
-                                   iconType="square"
+                                   iconType="circle"
                               />
-                              <Bar
+
+                              {/* Línea de ventas reales con efecto neon - VERDE */}
+                              <Line
+                                   type="monotone"
                                    dataKey="ventas"
-                                   fill="#22c55e"
+                                   stroke="url(#salesActualGradient)"
+                                   strokeWidth={4}
                                    name="Ventas Reales"
-                                   radius={[8, 8, 0, 0]}
+                                   dot={{
+                                        fill: '#22c55e',
+                                        r: 6,
+                                        strokeWidth: 2,
+                                        stroke: '#fff',
+                                        filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))'
+                                   }}
+                                   activeDot={{
+                                        r: 8,
+                                        fill: '#22c55e',
+                                        stroke: '#fff',
+                                        strokeWidth: 2,
+                                        filter: 'drop-shadow(0 0 12px rgba(34, 197, 94, 1))'
+                                   }}
+                                   connectNulls={false}
+                                   filter="drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))"
                               />
-                              <Bar
+
+                              {/* Línea proyectada con efecto neon - NARANJA */}
+                              <Line
+                                   type="monotone"
                                    dataKey="proyectado"
-                                   fill="#9333EA"
+                                   stroke="url(#salesProjectedGradient)"
+                                   strokeWidth={4}
+                                   strokeDasharray="8 4"
                                    name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
-                                   radius={[8, 8, 0, 0]}
-                                   opacity={0.85}
+                                   dot={{
+                                        fill: '#f97316',
+                                        r: 6,
+                                        strokeWidth: 2,
+                                        stroke: '#fff',
+                                        filter: 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.8))'
+                                   }}
+                                   activeDot={{
+                                        r: 8,
+                                        fill: '#f97316',
+                                        stroke: '#fff',
+                                        strokeWidth: 2,
+                                        filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 1))'
+                                   }}
+                                   connectNulls={false}
+                                   filter="drop-shadow(0 0 8px rgba(249, 115, 22, 0.6))"
                               />
-                         </BarChart>
+                         </LineChart>
                     </ResponsiveContainer>
-                    <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
+
+                    <div className="mt-6 grid grid-cols-2 gap-4 text-xs">
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded bg-green-500"></div>
-                              <span className="text-muted-foreground">Ventas Reales</span>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#10b981] to-[#4ade80]"
+                                   style={{ boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)' }}></div>
+                              <span className="text-muted-foreground font-medium">Ventas Reales</span>
                          </div>
                          <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded bg-[#9333EA] opacity-85"></div>
-                              <span className="text-muted-foreground">Proyección (Regresión)</span>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#ea580c] to-[#fb923c]"
+                                   style={{ boxShadow: '0 0 8px rgba(249, 115, 22, 0.6)' }}></div>
+                              <span className="text-muted-foreground font-medium">Proyección</span>
                          </div>
                     </div>
+
                     {highSeason && (
-                         <div className="mt-3 p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                         <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
+                              style={{ boxShadow: '0 0 12px rgba(245, 158, 11, 0.1)' }}>
                               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                                    ⚠️ Temporada Alta: Proyección ajustada con +40% de ventas esperadas
                               </p>
                          </div>
                     )}
+
                     <div className="mt-3 p-2 rounded bg-muted/30 border border-muted/50">
                          <p className="text-xs text-muted-foreground">
                               💡 <strong>Patrón de fin de semana:</strong> Viernes y Sábado tienen +40% más ventas

@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Plus, Check, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { GlowButton } from "@/components/glow-button";
 
 interface Menu {
      id: string;
@@ -197,13 +198,12 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     <Label className="text-lg font-semibold">
                          Gestión de Menús
                     </Label>
-                    <Button
-                         onClick={() => setShowCreateDialog(true)}
-                         className="neumorphic-hover"
-                    >
-                         <Plus className="w-4 h-4 mr-2" />
-                         Nuevo Menú
-                    </Button>
+                    <GlowButton onClick={() => setShowCreateDialog(true)}>
+                         <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-inner">
+                              <Plus className="w-3.5 h-3.5 text-white" />
+                         </div>
+                         <span className="hidden sm:inline">Nuevo Menú</span>
+                    </GlowButton>
                </div>
 
                {/* Menus List */}
