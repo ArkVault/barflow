@@ -874,10 +874,10 @@ export default function ProductosPage() {
                           <Input
                             type="number"
                             placeholder="Cantidad"
-                            value={ing.quantity}
+                            value={isNaN(ing.quantity) ? '' : ing.quantity}
                             onChange={(e) => {
                               const newIngredients = [...editForm.ingredients];
-                              newIngredients[idx].quantity = parseFloat(e.target.value);
+                              newIngredients[idx].quantity = parseFloat(e.target.value) || 0;
                               setEditForm({ ...editForm, ingredients: newIngredients });
                             }}
                           />
