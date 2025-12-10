@@ -61,6 +61,7 @@ interface Bar {
      status: Status;
      accounts: Account[];
      currentAccountId?: string;
+     orientation?: 'horizontal' | 'vertical';
 }
 
 interface Section {
@@ -114,8 +115,17 @@ export default function OperacionesPage() {
                y: 50,
                width: 600,
                height: 450,
-               tables: [],
-               bars: [],
+               tables: [
+                    { id: 'table-1', name: 'Mesa 1', x: 50, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: 'table-2', name: 'Mesa 2', x: 200, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: 'table-3', name: 'Mesa 3', x: 350, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: 'table-4', name: 'Mesa 4', x: 50, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: 'table-5', name: 'Mesa 5', x: 200, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+                    { id: 'table-6', name: 'Mesa 6', x: 350, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
+               ],
+               bars: [
+                    { id: 'bar-1', name: 'Barra 1', x: 150, y: 320, status: 'libre', accounts: [], currentAccountId: undefined, orientation: 'horizontal' },
+               ],
           },
      ]);
 
@@ -127,6 +137,7 @@ export default function OperacionesPage() {
      const [activeTab, setActiveTab] = useState<'mesas' | 'comandas'>('mesas');
      const [tableCounter, setTableCounter] = useState(1);
      const [isDragging, setIsDragging] = useState(false);
+     const [hasMoved, setHasMoved] = useState(false);
 
      // Comandas state
      const [selectedTableForOrder, setSelectedTableForOrder] = useState<string | null>(null);
@@ -485,22 +496,33 @@ export default function OperacionesPage() {
           setSections([...sections, newSection]);
      };
 
+     // Renumber tables sequentially
+     const renumberTables = (updatedSections: Section[]) => {
+          return updatedSections.map(section => ({
+               ...section,
+               tables: section.tables.map((table, index) => ({
+                    ...table,
+                    name: `Mesa ${index + 1}`
+               }))
+          }));
+     };
+
      const addTable = (sectionId: string) => {
-          setSections(sections.map(section => {
+          const updated = sections.map(section => {
                if (section.id === sectionId) {
                     const newTable: Table = {
                          id: `table-${Date.now()}`,
-                         name: `Mesa ${tableCounter}`,
+                         name: `Mesa ${section.tables.length + 1}`, // Temporary name
                          x: 20,
                          y: 20,
                          status: 'libre',
                          accounts: [],
                     };
-                    setTableCounter(tableCounter + 1);
                     return { ...section, tables: [...section.tables, newTable] };
                }
                return section;
-          }));
+          });
+          setSections(renumberTables(updated));
      };
 
      const addBar = (sectionId: string) => {
@@ -513,8 +535,25 @@ export default function OperacionesPage() {
                          y: 100,
                          status: 'libre',
                          accounts: [],
+                         orientation: 'horizontal',
                     };
                     return { ...section, bars: [...section.bars, newBar] };
+               }
+               return section;
+          }));
+     };
+
+     const toggleBarOrientation = (sectionId: string, barId: string) => {
+          setSections(sections.map(section => {
+               if (section.id === sectionId) {
+                    return {
+                         ...section,
+                         bars: section.bars.map(bar =>
+                              bar.id === barId
+                                   ? { ...bar, orientation: bar.orientation === 'horizontal' ? 'vertical' : 'horizontal' }
+                                   : bar
+                         ),
+                    };
                }
                return section;
           }));
@@ -755,12 +794,13 @@ export default function OperacionesPage() {
      };
 
      const deleteTable = (sectionId: string, tableId: string) => {
-          setSections(sections.map(section => {
+          const updated = sections.map(section => {
                if (section.id === sectionId) {
                     return { ...section, tables: section.tables.filter(t => t.id !== tableId) };
                }
                return section;
-          }));
+          });
+          setSections(renumberTables(updated));
      };
 
      const deleteBar = (sectionId: string, barId: string) => {
@@ -800,112 +840,119 @@ export default function OperacionesPage() {
           }));
      };
 
-     const handleDragStart = (e: React.DragEvent, type: 'table' | 'bar' | 'section', sectionId: string, itemId: string) => {
-          setDraggedItem({ type, sectionId, itemId });
-          setIsDragging(true);
+     // Mouse-based drag handlers for real-time dragging
+     const handleMouseDown = (e: React.MouseEvent, type: 'table' | 'bar' | 'section', sectionId: string, itemId: string) => {
+          e.preventDefault();
+          e.stopPropagation();
 
-          // Calculate offset from mouse to element's top-left corner
+          // Calculate offset from mouse to element's top-left corner using the actual DOM element
           const rect = e.currentTarget.getBoundingClientRect();
           const offsetX = e.clientX - rect.left;
           const offsetY = e.clientY - rect.top;
+
+          setDraggedItem({ type, sectionId, itemId });
           setDragOffset({ x: offsetX, y: offsetY });
-
-          // Set drag image to be transparent for smoother visual feedback
-          const dragImage = document.createElement('div');
-          dragImage.style.opacity = '0';
-          document.body.appendChild(dragImage);
-          e.dataTransfer.setDragImage(dragImage, 0, 0);
-          setTimeout(() => document.body.removeChild(dragImage), 0);
+          setIsDragging(true);
+          setHasMoved(false); // Reset movement tracker
      };
 
-     const handleDragOver = (e: React.DragEvent) => {
-          e.preventDefault();
-     };
+     const handleMouseMove = (e: MouseEvent) => {
+          if (!draggedItem || !isDragging) return;
 
-     const handleDrop = (e: React.DragEvent, sectionId: string) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsDragging(false);
+          // Mark that we've moved
+          setHasMoved(true);
 
-          if (!draggedItem) return;
+          const canvas = document.getElementById('operations-canvas');
+          if (!canvas) return;
 
-          const rect = e.currentTarget.getBoundingClientRect();
-          let x = e.clientX - rect.left - dragOffset.x;
-          let y = e.clientY - rect.top - dragOffset.y;
+          const canvasRect = canvas.getBoundingClientRect();
+          let x = e.clientX - canvasRect.left - dragOffset.x;
+          let y = e.clientY - canvasRect.top - dragOffset.y;
 
-          // Get section dimensions for boundary checking
-          const section = sections.find(s => s.id === sectionId);
-          if (!section) return;
+          if (draggedItem.type === 'section') {
+               // Dragging a section
+               const section = sections.find(s => s.id === draggedItem.itemId);
+               if (!section) return;
 
-          if (draggedItem.type === 'table') {
-               // Constrain table within section boundaries (table is 80px wide, 80px tall)
-               const tableWidth = 80;
-               const tableHeight = 80;
-               x = Math.max(0, Math.min(x, section.width - tableWidth));
-               y = Math.max(0, Math.min(y, section.height - tableHeight));
+               // Constrain within canvas
+               x = Math.max(0, Math.min(x, canvasRect.width - section.width));
+               y = Math.max(0, Math.min(y, canvasRect.height - section.height));
 
-               setSections(sections.map(sec => {
-                    if (sec.id === sectionId) {
-                         return {
-                              ...sec,
-                              tables: sec.tables.map(table =>
-                                   table.id === draggedItem.itemId ? { ...table, x, y } : table
-                              ),
-                         };
-                    }
-                    return sec;
-               }));
-          } else if (draggedItem.type === 'bar') {
-               // Constrain bar within section boundaries (bar is 128px wide, 64px tall)
-               const barWidth = 128;
-               const barHeight = 64;
-               x = Math.max(0, Math.min(x, section.width - barWidth));
-               y = Math.max(0, Math.min(y, section.height - barHeight));
+               setSections(sections.map(sec =>
+                    sec.id === draggedItem.itemId
+                         ? { ...sec, x, y }
+                         : sec
+               ));
+          } else {
+               // Dragging table or bar within section
+               const section = sections.find(s => s.id === draggedItem.sectionId);
+               if (!section) return;
 
-               setSections(sections.map(sec => {
-                    if (sec.id === sectionId) {
-                         return {
-                              ...sec,
-                              bars: sec.bars.map(bar =>
-                                   bar.id === draggedItem.itemId ? { ...bar, x, y } : bar
-                              ),
-                         };
-                    }
-                    return sec;
-               }));
+               // Calculate position relative to section
+               const sectionRect = {
+                    left: canvasRect.left + section.x,
+                    top: canvasRect.top + section.y,
+               };
+
+               x = e.clientX - sectionRect.left - dragOffset.x;
+               y = e.clientY - sectionRect.top - dragOffset.y;
+
+               if (draggedItem.type === 'table') {
+                    const tableWidth = 80;
+                    const tableHeight = 80;
+                    x = Math.max(0, Math.min(x, section.width - tableWidth));
+                    y = Math.max(0, Math.min(y, section.height - tableHeight));
+
+                    setSections(sections.map(sec => {
+                         if (sec.id === draggedItem.sectionId) {
+                              return {
+                                   ...sec,
+                                   tables: sec.tables.map(table =>
+                                        table.id === draggedItem.itemId ? { ...table, x, y } : table
+                                   ),
+                              };
+                         }
+                         return sec;
+                    }));
+               } else if (draggedItem.type === 'bar') {
+                    // Find the bar to get its orientation
+                    const bar = section.bars.find(b => b.id === draggedItem.itemId);
+                    const barWidth = bar?.orientation === 'vertical' ? 64 : 128;
+                    const barHeight = bar?.orientation === 'vertical' ? 128 : 64;
+                    x = Math.max(0, Math.min(x, section.width - barWidth));
+                    y = Math.max(0, Math.min(y, section.height - barHeight));
+
+                    setSections(sections.map(sec => {
+                         if (sec.id === draggedItem.sectionId) {
+                              return {
+                                   ...sec,
+                                   bars: sec.bars.map(bar =>
+                                        bar.id === draggedItem.itemId ? { ...bar, x, y } : bar
+                                   ),
+                              };
+                         }
+                         return sec;
+                    }));
+               }
           }
-
-          setDraggedItem(null);
      };
 
-     const handleCanvasDrop = (e: React.DragEvent) => {
-          e.preventDefault();
+     const handleMouseUp = () => {
+          setDraggedItem(null);
           setIsDragging(false);
-
-          if (!draggedItem || draggedItem.type !== 'section') return;
-
-          const rect = e.currentTarget.getBoundingClientRect();
-          let x = e.clientX - rect.left - dragOffset.x;
-          let y = e.clientY - rect.top - dragOffset.y;
-
-          // Get section dimensions for boundary checking
-          const section = sections.find(s => s.id === draggedItem.itemId);
-          if (!section) return;
-
-          // Constrain section within canvas boundaries
-          const canvasWidth = rect.width;
-          const canvasHeight = rect.height;
-          x = Math.max(0, Math.min(x, canvasWidth - section.width));
-          y = Math.max(0, Math.min(y, canvasHeight - section.height));
-
-          setSections(sections.map(sec =>
-               sec.id === draggedItem.itemId
-                    ? { ...sec, x, y }
-                    : sec
-          ));
-
-          setDraggedItem(null);
      };
+
+     // Add global mouse event listeners
+     useEffect(() => {
+          if (isDragging) {
+               window.addEventListener('mousemove', handleMouseMove);
+               window.addEventListener('mouseup', handleMouseUp);
+               return () => {
+                    window.removeEventListener('mousemove', handleMouseMove);
+                    window.removeEventListener('mouseup', handleMouseUp);
+               };
+          }
+     }, [isDragging, draggedItem, dragOffset, sections]);
 
      return (
           <div className="min-h-svh bg-background">
@@ -945,10 +992,10 @@ export default function OperacionesPage() {
                                    <button
                                         type="button"
                                         onClick={() => setActiveTab('mesas')}
-                                        className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === 'mesas'
+                                        className={`px - 6 py - 2.5 rounded - full transition - colors flex items - center gap - 2 ${activeTab === 'mesas'
                                              ? 'bg-background text-foreground shadow-sm font-medium'
                                              : 'text-muted-foreground hover:text-foreground'
-                                             }`}
+                                             } `}
                                    >
                                         <Grid3x3 className="w-4 h-4" />
                                         Mesas
@@ -956,10 +1003,10 @@ export default function OperacionesPage() {
                                    <button
                                         type="button"
                                         onClick={() => setActiveTab('comandas')}
-                                        className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === 'comandas'
+                                        className={`px - 6 py - 2.5 rounded - full transition - colors flex items - center gap - 2 ${activeTab === 'comandas'
                                              ? 'bg-background text-foreground shadow-sm font-medium'
                                              : 'text-muted-foreground hover:text-foreground'
-                                             }`}
+                                             } `}
                                    >
                                         📋 Comandas
                                    </button>
@@ -1195,23 +1242,20 @@ export default function OperacionesPage() {
                                              backgroundSize: '20px 20px',
                                              backgroundColor: 'var(--background)',
                                         }}
-                                        onDragOver={handleDragOver}
-                                        onDrop={handleCanvasDrop}
+                                        id="operations-canvas"
                                    >
                                         {sections.map(section => (
                                              <div
                                                   key={section.id}
-                                                  draggable
-                                                  onDragStart={(e) => handleDragStart(e, 'section', section.id, section.id)}
+                                                  onMouseDown={(e) => handleMouseDown(e, 'section', section.id, section.id)}
                                                   className="absolute neumorphic rounded-2xl bg-background/50 backdrop-blur-sm border-2 border-primary/20 cursor-move"
                                                   style={{
                                                        left: section.x,
                                                        top: section.y,
                                                        width: section.width,
                                                        height: section.height,
+                                                       userSelect: 'none',
                                                   }}
-                                                  onDragOver={handleDragOver}
-                                                  onDrop={(e) => handleDrop(e, section.id)}
                                              >
                                                   {/* Section Header */}
                                                   <div className="absolute -top-10 left-0 right-0 flex items-center justify-between px-2">
@@ -1268,16 +1312,13 @@ export default function OperacionesPage() {
                                                   {section.tables.map(table => (
                                                        <div
                                                             key={table.id}
-                                                            draggable
-                                                            onDragStart={(e) => handleDragStart(e, 'table', section.id, table.id)}
-                                                            className={cn(
-                                                                 "absolute cursor-move group",
-                                                                 !isDragging && "transition-all duration-200 ease-out"
-                                                            )}
+                                                            onMouseDown={(e) => handleMouseDown(e, 'table', section.id, table.id)}
+                                                            className="absolute cursor-move group"
                                                             style={{
                                                                  left: table.x,
                                                                  top: table.y,
-                                                                 opacity: isDragging && draggedItem?.itemId === table.id ? 0.5 : 1
+                                                                 opacity: isDragging && draggedItem?.itemId === table.id ? 0.5 : 1,
+                                                                 userSelect: 'none',
                                                             }}
                                                        >
                                                             <div
@@ -1289,7 +1330,9 @@ export default function OperacionesPage() {
                                                                  style={{ boxShadow: '0 0 20px rgba(0,0,0,0.3)' }}
                                                                  onClick={(e) => {
                                                                       e.stopPropagation();
-                                                                      handleItemClick(section.id, table.id, 'table');
+                                                                      if (!hasMoved) {
+                                                                           handleItemClick(section.id, table.id, 'table');
+                                                                      }
                                                                  }}
                                                             >
                                                                  <button
@@ -1323,30 +1366,43 @@ export default function OperacionesPage() {
                                                   {section.bars.map(bar => (
                                                        <div
                                                             key={bar.id}
-                                                            draggable
-                                                            onDragStart={(e) => handleDragStart(e, 'bar', section.id, bar.id)}
-                                                            className={cn(
-                                                                 "absolute cursor-move group",
-                                                                 !isDragging && "transition-all duration-200 ease-out"
-                                                            )}
+                                                            onMouseDown={(e) => handleMouseDown(e, 'bar', section.id, bar.id)}
+                                                            className="absolute cursor-move group"
                                                             style={{
                                                                  left: bar.x,
                                                                  top: bar.y,
-                                                                 opacity: isDragging && draggedItem?.itemId === bar.id ? 0.5 : 1
+                                                                 opacity: isDragging && draggedItem?.itemId === bar.id ? 0.5 : 1,
+                                                                 userSelect: 'none',
                                                             }}
                                                        >
                                                             <div
                                                                  className={cn(
-                                                                      "relative w-32 h-16 rounded-2xl flex flex-col items-center justify-center",
+                                                                      "relative rounded-2xl flex flex-col items-center justify-center",
                                                                       "bg-gradient-to-br shadow-lg transition-all hover:scale-110",
                                                                       statusColors[bar.status]
                                                                  )}
-                                                                 style={{ boxShadow: '0 0 20px rgba(0,0,0,0.3)' }}
+                                                                 style={{
+                                                                      width: bar.orientation === 'vertical' ? '64px' : '128px',
+                                                                      height: bar.orientation === 'vertical' ? '128px' : '64px',
+                                                                      boxShadow: '0 0 20px rgba(0,0,0,0.3)'
+                                                                 }}
                                                                  onClick={(e) => {
                                                                       e.stopPropagation();
-                                                                      handleItemClick(section.id, bar.id, 'bar');
+                                                                      if (!hasMoved) {
+                                                                           handleItemClick(section.id, bar.id, 'bar');
+                                                                      }
                                                                  }}
                                                             >
+                                                                 <button
+                                                                      onClick={(e) => {
+                                                                           e.stopPropagation();
+                                                                           toggleBarOrientation(section.id, bar.id);
+                                                                      }}
+                                                                      className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                                                      title="Rotar barra"
+                                                                 >
+                                                                      ↻
+                                                                 </button>
                                                                  <button
                                                                       onClick={(e) => {
                                                                            e.stopPropagation();
