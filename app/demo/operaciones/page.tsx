@@ -184,11 +184,19 @@ export default function OperacionesPage() {
 
                if (productsData) {
                     setProducts(productsData);
-
-                    // Extract unique categories
-                    const uniqueCategories = Array.from(new Set(productsData.map(p => p.category)));
-                    setCategories(['Todos', ...uniqueCategories]);
                }
+
+               // Get all product categories from product_categories table
+               const { data: categoriesData } = await supabase
+                    .from('product_categories')
+                    .select('name')
+                    .order('display_order');
+
+               if (categoriesData) {
+                    const categoryNames = categoriesData.map(cat => cat.name);
+                    setCategories(['Todos', ...categoryNames]);
+               }
+
                setLoadingProducts(false);
           };
 
