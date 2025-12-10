@@ -31,7 +31,7 @@ export function DemoSidebar() {
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="relative h-[480px] max-h-[80vh] w-full neumorphic rounded-[2rem] bg-background/90 px-4 py-6 flex flex-col">
+      <div className="relative h-[560px] max-h-[85vh] w-full neumorphic rounded-[2rem] bg-background/90 px-4 py-6 flex flex-col">
         {/* Collapse Button */}
         <button
           type="button"
@@ -47,14 +47,31 @@ export function DemoSidebar() {
           />
         </button>
 
-        {/* Theme and Language Toggles - Top Right */}
-        <div className={cn("absolute top-4 right-4 flex gap-2", isCollapsed && "flex-col")}>
-          <ThemeToggle />
-          <LanguageToggle />
+        {/* Theme, Language, and Account Icons - Top Right */}
+        <div className={cn("absolute top-4 right-4 flex gap-1", isCollapsed && "flex-col")}>
+          <div className="scale-90 origin-top-right">
+            <ThemeToggle />
+          </div>
+          <div className="scale-90 origin-top-right">
+            <LanguageToggle />
+          </div>
+          <div className="scale-90 origin-top-right">
+            <Link href="/demo/cuenta" title="Cuenta">
+              <button
+                className={cn(
+                  "h-10 w-10 rounded-lg inline-flex items-center justify-center transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "neumorphic-hover border-0"
+                )}
+              >
+                <User className="h-5 w-5" />
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Logo / Title */}
-        <Link href="/demo" className="mb-8 block">
+        <Link href="/demo" className="mb-8 mt-12 block">
           <img
             src="/modoclaro.png"
             alt="Barmode Demo"
@@ -107,21 +124,6 @@ export function DemoSidebar() {
             );
           })}
         </nav>
-
-        {/* Account Button - Bottom Right */}
-        <div className="mt-4 flex justify-end">
-          <Link href="/demo/cuenta" title="Cuenta">
-            <button
-              className={cn(
-                "flex items-center justify-center rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                "hover:bg-accent/60 text-gray-900 dark:text-gray-100",
-                "neumorphic-hover"
-              )}
-            >
-              <User className="h-5 w-5 flex-shrink-0" />
-            </button>
-          </Link>
-        </div>
       </div>
     </aside>
   );

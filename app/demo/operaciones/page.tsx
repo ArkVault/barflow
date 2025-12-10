@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { createClient } from '@/lib/supabase/client';
 import { ProductImage } from '@/components/product-image';
+import { useAuth } from '@/contexts/auth-context';
+import { toast } from 'sonner';
 
 type Status = 'libre' | 'reservada' | 'ocupada' | 'por-pagar';
 
@@ -103,6 +105,7 @@ const accountStatusLabels = {
 };
 
 export default function OperacionesPage() {
+     const { establishmentId } = useAuth();
      const [sections, setSections] = useState<Section[]>([
           {
                id: '1',
@@ -562,7 +565,95 @@ export default function OperacionesPage() {
           }));
      };
 
-     const closeAccount = (sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar') => {
+     const closeAccount = async (sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar') => {
+          // Find the account to get its details before closing
+          let accountToClose: Account | undefined;
+          let tableName = '';
+
+          sections.forEach(section => {
+               if (section.id === sectionId) {
+                    if (type === 'table') {
+                         const table = section.tables.find(t => t.id === itemId);
+                         if (table) {
+                              accountToClose = table.accounts.find(acc => acc.id === accountId);
+                              tableName = table.name;
+                         }
+                    } else {
+                         const bar = section.bars.find(b => b.id === itemId);
+                         if (bar) {
+                              accountToClose = bar.accounts.find(acc => acc.id === accountId);
+                              tableName = bar.name;
+                         }
+                    }
+               }
+          });
+
+          console.log('closeAccount called:', {
+               accountToClose: accountToClose ? 'Found' : 'Not found',
+               establishmentId: establishmentId || 'Missing',
+               tableName,
+               accountId,
+               itemsCount: accountToClose?.items.length || 0,
+               total: accountToClose?.total || 0
+          });
+
+          // Save to Supabase sales table
+          if (accountToClose && establishmentId) {
+               try {
+                    const supabase = createClient();
+
+                    const saleData = {
+                         establishment_id: establishmentId,
+                         order_number: `#${accountId.slice(0, 8)}`,
+                         table_name: tableName,
+                         items: accountToClose.items.map(item => ({
+                              productName: item.productName,
+                              quantity: item.quantity,
+                              unitPrice: item.unitPrice,
+                              total: item.total,
+                         })),
+                         subtotal: accountToClose.total,
+                         tax: 0,
+                         total: accountToClose.total,
+                         payment_method: 'Efectivo',
+                    };
+
+                    console.log('Attempting to save sale:', saleData);
+
+                    const { data, error } = await supabase
+                         .from('sales')
+                         .insert([saleData])
+                         .select();
+
+                    if (error) {
+                         console.error('Error saving sale - Full error:', error);
+                         console.error('Error saving sale - Stringified:', JSON.stringify(error, null, 2));
+                         console.error('Error saving sale - Details:', {
+                              message: error.message,
+                              details: error.details,
+                              hint: error.hint,
+                              code: error.code,
+                         });
+                         toast.error(`Error al guardar la venta: ${error.message || 'Error desconocido'}`);
+                    } else {
+                         console.log('Sale saved successfully:', data);
+                         toast.success('Venta registrada correctamente');
+                    }
+               } catch (error) {
+                    console.error('Exception saving sale:', error);
+                    toast.error('Error al guardar la venta');
+               }
+          } else {
+               if (!accountToClose) {
+                    console.error('No account found to close');
+               }
+               if (!establishmentId) {
+                    console.error('No establishmentId available');
+                    toast.error('No se pudo identificar el establecimiento');
+               }
+          }
+
+          // Update local state
           setSections(sections.map(section => {
                if (section.id === sectionId) {
                     if (type === 'table') {

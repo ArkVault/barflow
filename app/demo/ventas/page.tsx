@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import Link from 'next/link';
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DemoSidebar } from "@/components/demo-sidebar";
 import { useLanguage } from "@/hooks/use-language";
 import { GlowButton } from "@/components/glow-button";
-import { Plus, Minus, Trash2, ShoppingCart, CreditCard, Banknote, X } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingCart, CreditCard, Banknote, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from '@/lib/supabase/client';
 import { ProductImage } from '@/components/product-image';
+import { useAuth } from '@/contexts/auth-context';
 
 interface Product {
   id: string;
@@ -23,14 +24,24 @@ interface Product {
   image_url?: string | null;
 }
 
-const salesHistory = [
-  { id: 1, date: '2024-11-25', time: '18:45', product: 'Mojito Clásico', unitPrice: 8.50, quantity: 2, total: 17.00 },
-  { id: 2, date: '2024-11-25', time: '18:52', product: 'Margarita', unitPrice: 9.00, quantity: 1, total: 9.00 },
-  { id: 3, date: '2024-11-25', time: '19:10', product: 'Cerveza Corona', unitPrice: 5.00, quantity: 4, total: 20.00 },
-  { id: 4, date: '2024-11-25', time: '19:25', product: 'Piña Colada', unitPrice: 10.00, quantity: 2, total: 20.00 },
-  { id: 5, date: '2024-11-25', time: '19:40', product: 'Cuba Libre', unitPrice: 7.50, quantity: 3, total: 22.50 },
-  { id: 6, date: '2024-11-25', time: '20:05', product: 'Tequila Shot', unitPrice: 6.00, quantity: 6, total: 36.00 },
-];
+interface SaleItem {
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+interface Sale {
+  id: string;
+  order_number: string;
+  table_name: string | null;
+  items: SaleItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  payment_method: string | null;
+  created_at: string;
+}
 
 interface CartItem {
   id: string;
@@ -41,12 +52,15 @@ interface CartItem {
 
 export default function VentasPage() {
   const { t } = useLanguage();
+  const { establishmentId } = useAuth();
   const [activeTab, setActiveTab] = useState<'pos' | 'history'>('pos');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [expandedSale, setExpandedSale] = useState<string | null>(null);
 
   // Fetch products from active menu
   useEffect(() => {
@@ -81,6 +95,27 @@ export default function VentasPage() {
 
     fetchProducts();
   }, []);
+
+  // Fetch sales when switching to history tab
+  useEffect(() => {
+    if (activeTab === 'history' && establishmentId) {
+      const fetchSales = async () => {
+        const supabase = createClient();
+
+        const { data: salesData, error } = await supabase
+          .from('sales')
+          .select('*')
+          .eq('establishment_id', establishmentId)
+          .order('created_at', { ascending: false });
+
+        if (!error && salesData) {
+          setSales(salesData);
+        }
+      };
+
+      fetchSales();
+    }
+  }, [activeTab, establishmentId]);
 
   // Get unique categories
   const categories = ['Todos', ...Array.from(new Set(products.map(p => p.category)))];
@@ -376,29 +411,101 @@ export default function VentasPage() {
               {/* Sales Table */}
               <Card className="neumorphic border-0">
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-4">{t('recentTransactions')}</h3>
+                  <h3 className="text-xl font-bold mb-4">Ventas Recientes</h3>
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-12"></TableHead>
+                        <TableHead>Ticket</TableHead>
+                        <TableHead>Mesa/Barra</TableHead>
                         <TableHead>Fecha</TableHead>
-                        <TableHead>{t('time')}</TableHead>
-                        <TableHead>{t('product')}</TableHead>
-                        <TableHead>Precio Unitario</TableHead>
-                        <TableHead>{t('quantity')}</TableHead>
-                        <TableHead className="text-right">{t('total')}</TableHead>
+                        <TableHead>Hora</TableHead>
+                        <TableHead>Items</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {salesHistory.map((sale) => (
-                        <TableRow key={sale.id}>
-                          <TableCell>{new Date(sale.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</TableCell>
-                          <TableCell>{sale.time}</TableCell>
-                          <TableCell className="font-medium">{sale.product}</TableCell>
-                          <TableCell>${sale.unitPrice.toFixed(2)}</TableCell>
-                          <TableCell>{sale.quantity}x</TableCell>
-                          <TableCell className="text-right font-bold">${sale.total.toFixed(2)}</TableCell>
+                      {sales.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                            No hay ventas registradas
+                          </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        sales.map((sale) => (
+                          <Fragment key={sale.id}>
+                            <TableRow
+                              key={sale.id}
+                              className="cursor-pointer hover:bg-accent/50"
+                              onClick={() => setExpandedSale(expandedSale === sale.id ? null : sale.id)}
+                            >
+                              <TableCell>
+                                {expandedSale === sale.id ? (
+                                  <ChevronUp className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4" />
+                                )}
+                              </TableCell>
+                              <TableCell className="font-medium">{sale.order_number}</TableCell>
+                              <TableCell>{sale.table_name || '-'}</TableCell>
+                              <TableCell>
+                                {new Date(sale.created_at).toLocaleDateString('es-ES', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric'
+                                })}
+                              </TableCell>
+                              <TableCell>
+                                {new Date(sale.created_at).toLocaleTimeString('es-ES', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{sale.items.length} items</Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-bold text-green-600">
+                                ${sale.total.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            {expandedSale === sale.id && (
+                              <TableRow>
+                                <TableCell colSpan={7} className="bg-muted/30">
+                                  <div className="py-4 px-6">
+                                    <h4 className="font-semibold mb-3 text-sm">Detalles del Ticket:</h4>
+                                    <div className="space-y-2">
+                                      {sale.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                                          <div className="flex-1">
+                                            <span className="font-medium">{item.productName}</span>
+                                            <span className="text-muted-foreground text-sm ml-2">
+                                              x{item.quantity}
+                                            </span>
+                                          </div>
+                                          <div className="text-right">
+                                            <div className="text-sm text-muted-foreground">
+                                              ${item.unitPrice.toFixed(2)} c/u
+                                            </div>
+                                            <div className="font-semibold">
+                                              ${item.total.toFixed(2)}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div className="mt-4 pt-3 border-t border-border flex justify-between items-center">
+                                      <span className="font-semibold">Total:</span>
+                                      <span className="text-lg font-bold text-green-600">
+                                        ${sale.total.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </Fragment>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
