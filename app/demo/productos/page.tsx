@@ -401,6 +401,19 @@ export default function ProductosPage() {
       try {
         const supabase = createClient();
 
+        // Debug: Check user authentication
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+          console.error('Auth error:', authError);
+          toast.error('Error de autenticación');
+          return;
+        }
+
+        console.log('✅ Current user:', user.id);
+        console.log('✅ Establishment ID:', establishmentId);
+        console.log('✅ Active Menu ID:', activeMenuId);
+
         const productData = {
           menu_id: activeMenuId,
           name: newProduct.name,
@@ -412,29 +425,36 @@ export default function ProductosPage() {
           is_active: true
         };
 
-        const { data, error } = await supabase
+        console.log('📦 Product data to insert:', JSON.stringify(productData, null, 2));
+
+        const response = await supabase
           .from('products')
           .insert([productData])
           .select()
           .single();
 
-        if (error) {
-          console.error('Error adding product:', error);
-          console.error('Error details:', {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
+        console.log('📡 Supabase response:', response);
+
+        if (response.error) {
+          console.error('❌ Error adding product:', response.error);
+          console.error('❌ Error type:', typeof response.error);
+          console.error('❌ Error keys:', Object.keys(response.error));
+          console.error('❌ Error details:', {
+            message: response.error.message,
+            code: response.error.code,
+            details: response.error.details,
+            hint: response.error.hint,
+            full: JSON.stringify(response.error)
           });
-          toast.error(`Error al agregar producto: ${error.message || 'Error desconocido'}`);
+          toast.error(`Error: ${response.error.message || response.error.code || 'Error desconocido'}`);
           return;
         }
 
-        if (data) {
+        if (response.data) {
           // Add to local state
           const productToAdd = {
             ...newProduct,
-            id: data.id,
+            id: response.data.id,
             menu_id: activeMenuId,
             ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
           };
@@ -458,8 +478,8 @@ export default function ProductosPage() {
           description: ''
         });
       } catch (error) {
-        console.error('Error:', error);
-        toast.error('Error al agregar producto');
+        console.error('💥 Unexpected error:', error);
+        toast.error('Error inesperado al agregar producto');
       }
     } else {
       toast.error('Por favor completa todos los campos requeridos');
