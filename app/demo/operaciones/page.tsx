@@ -1402,8 +1402,7 @@ export default function OperacionesPage() {
                                                                  onClick={() => addTable(section.id)}
                                                                  className="h-8"
                                                             >
-                                                                 <Square className="w-3 h-3 mr-1" />
-                                                                 + Mesa
+                                                                 +Mesa
                                                             </Button>
                                                             <Button
                                                                  size="sm"
@@ -1411,8 +1410,7 @@ export default function OperacionesPage() {
                                                                  onClick={() => addBar(section.id)}
                                                                  className="h-8"
                                                             >
-                                                                 <Minus className="w-3 h-3 mr-1" />
-                                                                 + Barra
+                                                                 +Barra
                                                             </Button>
                                                             <Button
                                                                  size="sm"
