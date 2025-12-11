@@ -420,7 +420,13 @@ export default function ProductosPage() {
 
         if (error) {
           console.error('Error adding product:', error);
-          toast.error('Error al agregar producto');
+          console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
+          toast.error(`Error al agregar producto: ${error.message || 'Error desconocido'}`);
           return;
         }
 
