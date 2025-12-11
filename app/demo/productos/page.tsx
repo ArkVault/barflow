@@ -391,39 +391,72 @@ export default function ProductosPage() {
     }
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (newProduct.name && newProduct.category && newProduct.price > 0) {
       if (!activeMenuId) {
-        alert('Por favor selecciona un menú activo primero');
+        toast.error('Por favor selecciona un menú activo primero');
         return;
       }
 
-      const productToAdd = {
-        ...newProduct,
-        id: Date.now().toString(), // Generate unique string ID
-        menu_id: activeMenuId, // Assign to active menu
-        ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
-      };
+      try {
+        const supabase = createClient();
 
-      // Add to all products
-      const updatedAllProducts = [...allProducts, productToAdd];
-      setAllProducts(updatedAllProducts);
+        const productData = {
+          menu_id: activeMenuId,
+          name: newProduct.name,
+          category: newProduct.category,
+          price: newProduct.price,
+          description: newProduct.description || null,
+          ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0),
+          image_url: newProduct.image_url || null,
+          is_active: true
+        };
 
-      // Add to filtered products (current menu)
-      setProducts([...products, productToAdd]);
+        const { data, error } = await supabase
+          .from('products')
+          .insert([productData])
+          .select()
+          .single();
 
-      setIsAddingProduct(false);
+        if (error) {
+          console.error('Error adding product:', error);
+          toast.error('Error al agregar producto');
+          return;
+        }
 
-      // Reset form
-      setNewProduct({
-        id: 0,
-        name: '',
-        category: '',
-        price: 0,
-        ingredients: [{ name: '', quantity: 0, unit: '' }],
-        active: true,
-        description: ''
-      });
+        if (data) {
+          // Add to local state
+          const productToAdd = {
+            ...newProduct,
+            id: data.id,
+            menu_id: activeMenuId,
+            ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
+          };
+
+          setAllProducts([...allProducts, productToAdd]);
+          setProducts([...products, productToAdd]);
+
+          toast.success('Producto agregado exitosamente');
+        }
+
+        setIsAddingProduct(false);
+
+        // Reset form
+        setNewProduct({
+          id: 0,
+          name: '',
+          category: '',
+          price: 0,
+          ingredients: [{ name: '', quantity: 0, unit: '' }],
+          active: true,
+          description: ''
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Error al agregar producto');
+      }
+    } else {
+      toast.error('Por favor completa todos los campos requeridos');
     }
   };
 
