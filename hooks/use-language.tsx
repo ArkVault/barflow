@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { translations, type Language } from "@/lib/translations";
 
 interface LanguageContextType {
@@ -9,7 +9,7 @@ interface LanguageContextType {
   t: (key: keyof typeof translations.es) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("es");
@@ -24,21 +24,26 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("language", lang);
     document.documentElement.lang = lang;
-    // Also dispatch event for any legacy components
-    window.dispatchEvent(new CustomEvent('languageChange', { detail: lang }));
-  };
+  }, []);
 
-  const t = (key: keyof typeof translations.es): string => {
-    return translations[language][key] || key;
-  };
+  const t = useCallback((key: keyof typeof translations.es): string => {
+    return translations[language][key] || String(key);
+  }, [language]);
 
-  // Avoid hydration mismatch
+  // Avoid hydration mismatch - render children but with default Spanish
   if (!mounted) {
-    return <>{children}</>;
+    const defaultT = (key: keyof typeof translations.es): string => {
+      return translations.es[key] || String(key);
+    };
+    return (
+      <LanguageContext.Provider value={{ language: "es", setLanguage: () => { }, t: defaultT }}>
+        {children}
+      </LanguageContext.Provider>
+    );
   }
 
   return (
@@ -48,44 +53,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useLanguage() {
+export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);
 
-  // Fallback for components not wrapped in provider
-  const [fallbackLanguage, setFallbackLanguage] = useState<Language>("es");
-
-  useEffect(() => {
-    if (!context) {
-      const savedLanguage = localStorage.getItem("language") as Language | null;
-      const initialLanguage = savedLanguage || "es";
-      setFallbackLanguage(initialLanguage);
-
-      const handleLanguageChange = (event: CustomEvent<Language>) => {
-        setFallbackLanguage(event.detail);
-      };
-
-      window.addEventListener('languageChange', handleLanguageChange as EventListener);
-
-      return () => {
-        window.removeEventListener('languageChange', handleLanguageChange as EventListener);
-      };
-    }
-  }, [context]);
-
-  if (context) {
-    return context;
+  if (!context) {
+    // This should never happen if LanguageProvider wraps the app
+    console.warn("useLanguage must be used within a LanguageProvider");
+    return {
+      language: "es",
+      setLanguage: () => { },
+      t: (key) => translations.es[key] || String(key),
+    };
   }
 
-  const setLanguage = (lang: Language) => {
-    setFallbackLanguage(lang);
-    localStorage.setItem("language", lang);
-    document.documentElement.lang = lang;
-    window.dispatchEvent(new CustomEvent('languageChange', { detail: lang }));
-  };
-
-  const t = (key: keyof typeof translations.es): string => {
-    return translations[fallbackLanguage][key] || key;
-  };
-
-  return { language: fallbackLanguage, setLanguage, t };
+  return context;
 }

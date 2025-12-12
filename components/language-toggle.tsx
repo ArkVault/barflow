@@ -8,15 +8,7 @@ export function LanguageToggle() {
 
   const toggleLanguage = () => {
     const newLanguage = language === "es" ? "en" : "es";
-    if (setLanguage) {
-      setLanguage(newLanguage);
-    } else {
-      // Fallback for when not in provider
-      localStorage.setItem("language", newLanguage);
-      document.documentElement.lang = newLanguage;
-      window.dispatchEvent(new CustomEvent('languageChange', { detail: newLanguage }));
-      window.location.reload(); // Force reload if no provider
-    }
+    setLanguage(newLanguage);
   };
 
   return (
