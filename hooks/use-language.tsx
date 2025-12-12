@@ -25,14 +25,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLanguage = useCallback((lang: Language) => {
+    console.log("[LanguageProvider] Setting language to:", lang);
     setLanguageState(lang);
     localStorage.setItem("language", lang);
     document.documentElement.lang = lang;
   }, []);
 
   const t = useCallback((key: keyof typeof translations.es): string => {
-    return translations[language][key] || String(key);
+    const result = translations[language][key] || String(key);
+    return result;
   }, [language]);
+
+  console.log("[LanguageProvider] Current language:", language, "Mounted:", mounted);
 
   // Avoid hydration mismatch - render children but with default Spanish
   if (!mounted) {
