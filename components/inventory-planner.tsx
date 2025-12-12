@@ -55,7 +55,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
         }));
 
         setSupplies(loadedSupplies);
-        toast.success(`${data.length} insumos cargados desde tu inventario`);
+        toast.success(`${data.length} ${t('suppliesLoaded')}`);
       } else {
         // No supplies yet, use defaults
         setSupplies(
@@ -64,7 +64,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
       }
     } catch (error: any) {
       console.error('Error loading supplies:', error);
-      toast.error('Error al cargar insumos: ' + error.message);
+      toast.error(`${t('errorLoadingSupplies')} ${error.message}`);
       // Fallback to defaults
       setSupplies(
         defaultBarSupplies.map(s => ({ ...s, quantity: s.defaultQuantity, selected: false }))
@@ -132,7 +132,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
         <Card className="w-full max-w-5xl neumorphic border-0 p-12">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-lg text-muted-foreground">Cargando tu inventario...</p>
+            <p className="text-lg text-muted-foreground">{t('loadingInventory')}</p>
           </div>
         </Card>
       </div>
@@ -147,7 +147,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
             <div>
               <CardTitle className="text-3xl font-bold mb-2">
                 {supplies.length > 0 && supplies.some(s => s.selected)
-                  ? `Plan ${period === 'month' ? 'Mensual' : 'Semanal'} Actual`
+                  ? `${period === 'month' ? t('monthlyPlan') : t('weeklyPlan')} ${t('currentPlan')}`
                   : t('inventoryPlanner')
                 }
               </CardTitle>
@@ -193,8 +193,8 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
           {inputMethod === 'none' && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold mb-2">¿Cómo deseas agregar tu inventario?</h3>
-                <p className="text-muted-foreground">Elige el método que prefieras para configurar tu plan</p>
+                <h3 className="text-xl font-semibold mb-2">{t('howToAddInventory')}</h3>
+                <p className="text-muted-foreground">{t('chooseMethod')}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -208,12 +208,12 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Plus className="h-8 w-8 text-primary" />
                       </div>
-                      <h4 className="text-lg font-semibold mb-2">Introducir Manualmente o Editar Plan Actual</h4>
+                      <h4 className="text-lg font-semibold mb-2">{t('manualEntry')}</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Selecciona items de nuestro catálogo predefinido, edita tu plan existente o agrega insumos personalizados
+                        {t('manualEntryDescription')}
                       </p>
                       <div className="flex items-center text-sm text-primary font-medium">
-                        <span>Continuar</span>
+                        <span>{t('continue')}</span>
                         <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -233,12 +233,12 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       <div className="w-16 h-16 rounded-3xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Upload className="h-8 w-8 text-secondary" />
                       </div>
-                      <h4 className="text-lg font-semibold mb-2">Importar desde Archivo</h4>
+                      <h4 className="text-lg font-semibold mb-2">{t('importFromFile')}</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente
+                        {t('importDescription')}
                       </p>
                       <div className="flex items-center text-sm text-secondary font-medium">
-                        <span>Continuar</span>
+                        <span>{t('continue')}</span>
                         <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -256,8 +256,8 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold">Importar desde Archivo</h3>
-                  <p className="text-sm text-muted-foreground">Sube tu archivo y nuestro AI lo procesará</p>
+                  <h3 className="text-lg font-semibold">{t('importFromFile')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('uploadFileAI')}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -265,7 +265,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                   className="neumorphic-hover"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  Cambiar método
+                  {t('changeMethod')}
                 </Button>
               </div>
 
@@ -274,9 +274,9 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
               {supplies.filter(s => s.selected).length > 0 && (
                 <div className="mt-6 pt-6 border-t">
                   <div className="mb-4">
-                    <h4 className="font-semibold mb-2">Items Importados ({supplies.filter(s => s.selected).length})</h4>
+                    <h4 className="font-semibold mb-2">{t('importedItems')} ({supplies.filter(s => s.selected).length})</h4>
                     <p className="text-sm text-muted-foreground">
-                      Revisa los items importados y ajusta cantidades si es necesario
+                      {t('reviewImported')}
                     </p>
                   </div>
 
@@ -293,18 +293,18 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                               <p className="font-medium text-sm truncate">{supply.name}</p>
                               {supply.matchedExisting ? (
                                 <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
-                                  En DB
+                                  {t('inDatabase')}
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">
-                                  Nuevo
+                                  {t('newItem')}
                                 </Badge>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">{supply.category}</p>
                             {supply.matchConfidence > 0 && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Confianza: {Math.round(supply.matchConfidence * 100)}%
+                                {t('confidence')}: {Math.round(supply.matchConfidence * 100)}%
                               </p>
                             )}
                           </div>
@@ -356,8 +356,8 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold">Introducción Manual</h3>
-                  <p className="text-sm text-muted-foreground">Selecciona items del catálogo o agrega personalizados</p>
+                  <h3 className="text-lg font-semibold">{t('manualIntroduction')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('selectFromCatalog')}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -380,7 +380,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                     size="sm"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Agregar Insumo
+                    {t('addSupply')}
                   </Button>
                   <Button
                     variant="outline"
@@ -388,7 +388,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                     className="neumorphic-hover"
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Cambiar método
+                    {t('changeMethod')}
                   </Button>
                 </div>
               </div>
@@ -440,7 +440,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                 <div id="personalizado-section">
                   <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                     <span className="h-1 w-8 bg-emerald-500 rounded" />
-                    Personalizado
+                    {t('customized')}
                   </h3>
                   {!showAddNew ? (
                     <Button
@@ -449,13 +449,13 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       className="w-full neumorphic-hover border-dashed"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Agregar nuevo insumo
+                      {t('addNewSupply')}
                     </Button>
                   ) : (
                     <div className="neumorphic-inset p-4 rounded-lg space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <Input
-                          placeholder="Nombre del insumo"
+                          placeholder={t('supplyNamePlaceholder')}
                           value={newSupply.name}
                           onChange={(e) => setNewSupply({ ...newSupply, name: e.target.value })}
                         />
@@ -464,7 +464,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                           value={newSupply.category}
                           onChange={(e) => setNewSupply({ ...newSupply, category: e.target.value })}
                         >
-                          <option value="">Seleccionar categoría</option>
+                          <option value="">{t('selectCategory')}</option>
                           <option value="Bebidas alcohólicas">Bebidas alcohólicas</option>
                           <option value="Bebidas no alcohólicas">Bebidas no alcohólicas</option>
                           <option value="Insumos para cócteles">Insumos para cócteles</option>
@@ -476,13 +476,13 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <Input
-                          placeholder="Unidad (L, kg, etc.)"
+                          placeholder={t('unitPlaceholder')}
                           value={newSupply.unit}
                           onChange={(e) => setNewSupply({ ...newSupply, unit: e.target.value })}
                         />
                         <Input
                           type="number"
-                          placeholder="Cantidad"
+                          placeholder={t('quantityPlaceholder')}
                           value={newSupply.quantity || ""}
                           onChange={(e) => setNewSupply({ ...newSupply, quantity: Number(e.target.value) })}
                           min="0"
@@ -491,7 +491,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
                       <div className="flex gap-2">
                         <Button onClick={addNewSupply} className="flex-1">
                           <Check className="w-4 h-4 mr-2" />
-                          Agregar
+                          {t('add')}
                         </Button>
                         <Button variant="outline" onClick={() => setShowAddNew(false)}>
                           <X className="w-4 h-4" />

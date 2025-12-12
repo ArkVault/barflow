@@ -6,9 +6,11 @@ import { InventoryPlanner } from "@/components/inventory-planner";
 import { DemoSidebar } from "@/components/demo-sidebar";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/use-language";
 
 export default function PlannerPage() {
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [saving, setSaving] = useState(false);
 
   const handlePlanComplete = async (supplies: SupplyPlan[], period: PlanPeriod) => {
@@ -33,13 +35,18 @@ export default function PlannerPage() {
           if (typeof window !== "undefined") {
             localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
           }
-          toast.warning('Plan guardado localmente. Inicia sesión para sincronizar con la base de datos.');
+          toast.warning(language === 'es'
+            ? 'Plan guardado localmente. Inicia sesión para sincronizar con la base de datos.'
+            : 'Plan saved locally. Log in to sync with the database.');
         } else {
           throw new Error(data.error || 'Error saving plan');
         }
       } else {
         // Successfully saved to database
-        toast.success(data.message || `Plan guardado: ${data.inserted} nuevos, ${data.updated} actualizados`);
+        const successMsg = language === 'es'
+          ? `Plan guardado: ${data.inserted} nuevos, ${data.updated} actualizados`
+          : `Plan saved: ${data.inserted} new, ${data.updated} updated`;
+        toast.success(data.message || successMsg);
 
         // Also save to localStorage as backup
         if (typeof window !== "undefined") {
@@ -58,7 +65,9 @@ export default function PlannerPage() {
         localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
       }
 
-      toast.error('Error al guardar en la base de datos. Se guardó localmente.');
+      toast.error(language === 'es'
+        ? 'Error al guardar en la base de datos. Se guardó localmente.'
+        : 'Error saving to database. Saved locally.');
       router.push("/demo/insumos");
     } finally {
       setSaving(false);
