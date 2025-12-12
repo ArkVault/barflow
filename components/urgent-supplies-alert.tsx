@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/hooks/use-language";
 import useSWR from "swr";
 import { useState } from "react";
 import { usePeriod } from "@/contexts/period-context";
@@ -68,6 +69,7 @@ function SemiCircleGauge({ ratio }: { ratio: number }) {
 }
 
 export function UrgentSuppliesAlert() {
+  const { t } = useLanguage();
   const { period } = usePeriod();
   const [statusFilter, setStatusFilter] = useState<"all" | "critical" | "warning" | "optimal">("all");
 
@@ -85,9 +87,9 @@ export function UrgentSuppliesAlert() {
       <Card className="neumorphic border-0">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            ⚠️ Insumos urgentes
+            ⚠️ {t('urgentSupplies')}
           </CardTitle>
-          <CardDescription>Error al cargar los datos</CardDescription>
+          <CardDescription>{t('errorLoadingData')}</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -98,9 +100,9 @@ export function UrgentSuppliesAlert() {
       <Card className="neumorphic border-0">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            ⚠️ Insumos urgentes
+            ⚠️ {t('urgentSupplies')}
           </CardTitle>
-          <CardDescription>Cargando...</CardDescription>
+          <CardDescription>{t('loading')}...</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -163,9 +165,8 @@ export function UrgentSuppliesAlert() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('critical')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'critical' ? 'bg-destructive text-destructive-foreground' : 'hover:bg-destructive/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'critical' ? 'bg-destructive text-destructive-foreground' : 'hover:bg-destructive/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-destructive" />
                 <span>Crítico</span>
@@ -174,9 +175,8 @@ export function UrgentSuppliesAlert() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('warning')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'warning' ? 'bg-amber-500 text-white' : 'hover:bg-amber-500/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'warning' ? 'bg-amber-500 text-white' : 'hover:bg-amber-500/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
                 <span>Bajo</span>
@@ -185,9 +185,8 @@ export function UrgentSuppliesAlert() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('optimal')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${
-                  statusFilter === 'optimal' ? 'bg-emerald-500 text-white' : 'hover:bg-emerald-500/10'
-                }`}
+                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'optimal' ? 'bg-emerald-500 text-white' : 'hover:bg-emerald-500/10'
+                  }`}
               >
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span>Bien</span>
@@ -196,9 +195,8 @@ export function UrgentSuppliesAlert() {
               <button
                 type="button"
                 onClick={() => setStatusFilter('all')}
-                className={`px-2 py-1 rounded-full ${
-                  statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
-                }`}
+                className={`px-2 py-1 rounded-full ${statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
+                  }`}
               >
                 Ver todo
               </button>
@@ -230,7 +228,7 @@ export function UrgentSuppliesAlert() {
                   {getUrgencyBadge(supply.urgencyLevel, supply.daysUntilDepleted)}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
                 <div>
                   <span className="text-muted-foreground">Stock actual:</span>
