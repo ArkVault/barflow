@@ -224,7 +224,7 @@ export default function DemoPage() {
       <div className="min-h-svh bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-lg text-muted-foreground">Cargando dashboard...</p>
+          <p className="text-lg text-muted-foreground">{t('loadingDashboard')}</p>
         </div>
       </div>
     );
@@ -257,7 +257,7 @@ export default function DemoPage() {
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-inner">
                     <LogOut className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                   </div>
-                  <span className="hidden sm:inline">Cerrar Sesión</span>
+                  <span className="hidden sm:inline">{t('closeSession')}</span>
                 </GlowButton>
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function DemoPage() {
                   <div>
                     <h2 className="text-xl md:text-2xl font-bold mb-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('dashboardDemo')}</h2>
                     <p className="text-xs md:text-sm text-muted-foreground">
-                      Vista general de tu negocio
+                      {t('businessOverviewDesc')}
                     </p>
                   </div>
 
@@ -286,7 +286,7 @@ export default function DemoPage() {
                         : "text-muted-foreground hover:text-foreground"
                         }`}
                     >
-                      📅 Semana
+                      📅 {t('week')}
                     </button>
                     <button
                       type="button"
@@ -296,7 +296,7 @@ export default function DemoPage() {
                         : "text-muted-foreground hover:text-foreground"
                         }`}
                     >
-                      📆 Mes
+                      📆 {t('month')}
                     </button>
                   </div>
                 </div>
@@ -307,7 +307,7 @@ export default function DemoPage() {
                 {/* 1. INVENTARIO - Half Donut Chart */}
                 <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
                   <CardHeader className="pb-1 px-3 pt-2">
-                    <CardTitle className="text-xs font-bold">Inventario</CardTitle>
+                    <CardTitle className="text-xs font-bold">{t('inventory')}</CardTitle>
                   </CardHeader>
                   <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
                     <div className="flex-1 flex items-center justify-center">
@@ -320,7 +320,7 @@ export default function DemoPage() {
 
                     <Link href="/demo/insumos" className="mt-auto pt-2">
                       <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
-                        Ver inventario completo →
+                        {t('viewFullInventory')} →
                       </Button>
                     </Link>
                   </CardContent>
@@ -329,8 +329,8 @@ export default function DemoPage() {
                 {/* 2. PRODUCTOS - Large Number Display */}
                 <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
                   <CardHeader className="pb-1 px-3 pt-2">
-                    <CardTitle className="text-xs font-bold">Productos</CardTitle>
-                    <CardDescription className="text-[10px]">Menú actual</CardDescription>
+                    <CardTitle className="text-xs font-bold">{t('products')}</CardTitle>
+                    <CardDescription className="text-[10px]">{t('currentMenu')}</CardDescription>
                   </CardHeader>
                   <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
                     <div className="flex items-start justify-between w-full">
@@ -341,20 +341,20 @@ export default function DemoPage() {
                         }}>
                           {totalProducts}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">en menú</p>
+                        <p className="text-[10px] text-muted-foreground">{t('inMenu')}</p>
                       </div>
 
                       <div className="text-right space-y-0.5">
-                        <div className="text-[10px] text-muted-foreground">Menú Activo: <span className="font-medium text-foreground">{activeMenuName}</span></div>
-                        <div className="text-[10px] text-muted-foreground">Productos: <span className="font-medium text-foreground">{activeMenuProductsCount}</span></div>
-                        <div className="text-[10px] text-muted-foreground">Modificado: <span className="font-medium text-foreground">{menuLastModified}</span></div>
+                        <div className="text-[10px] text-muted-foreground">{t('activeMenu')}: <span className="font-medium text-foreground">{activeMenuName}</span></div>
+                        <div className="text-[10px] text-muted-foreground">{t('products')}: <span className="font-medium text-foreground">{activeMenuProductsCount}</span></div>
+                        <div className="text-[10px] text-muted-foreground">{t('modified')}: <span className="font-medium text-foreground">{menuLastModified}</span></div>
                       </div>
                     </div>
 
                     {/* Top 5 Selling Products - Clean List */}
                     {topProducts.length > 0 && (
                       <div className="w-full mt-2 flex-1 overflow-hidden">
-                        <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">🔥 Top 5 Más Vendidos</p>
+                        <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">{t('topSelling')}</p>
                         <div className="space-y-1">
                           {topProducts.slice(0, 5).map((product, index) => (
                             <div key={index} className="flex items-center justify-between text-[10px] border-b border-border/40 last:border-0 pb-0.5">
@@ -373,7 +373,7 @@ export default function DemoPage() {
 
                     <Link href="/demo/productos" className="mt-auto pt-2">
                       <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
-                        Ver todos los productos →
+                        {t('viewAllProducts')} →
                       </Button>
                     </Link>
                   </CardContent>
@@ -397,10 +397,10 @@ export default function DemoPage() {
               {/* Info Text */}
               <div className="p-2 rounded-lg bg-muted/50 border border-border">
                 <p className="text-xs text-muted-foreground">
-                  <strong>Panel de Control</strong> - Resumen de tu negocio.
-                  Para gestionar inventario, ve a{' '}
+                  <strong>{t('controlPanel')}</strong> - {t('businessSummary')}.
+                  {t('goToSupplies')}{' '}
                   <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
-                    Insumos
+                    {t('supplies')}
                   </Link>.
                 </p>
               </div>

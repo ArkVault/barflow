@@ -107,6 +107,26 @@ export const translations = {
     usedIn: "Utilizado en",
     inventoryProjection: "Proyección de inventario",
 
+    // Demo Page Cards
+    inventory: "Inventario",
+    viewFullInventory: "Ver inventario completo",
+    currentMenu: "Menú actual",
+    inMenu: "en menú",
+    modified: "Modificado",
+    topSelling: "🔥 Top 5 Más Vendidos",
+    viewAllProducts: "Ver todos los productos",
+    salesCard: "Ventas",
+    projectionsCard: "Proyecciones",
+    businessOverviewDesc: "Vista general de tu negocio",
+    controlPanel: "Panel de Control",
+    businessSummary: "Resumen de tu negocio",
+    goToSupplies: "Para gestionar inventario, ve a",
+    loadingDashboard: "Cargando dashboard...",
+    inventoryReset: "Inventario reiniciado",
+    confirmReconfigure: "¿Reconfigurar el plan eliminará todo tu inventario actual. ¿Continuar?",
+    closeSession: "Cerrar Sesión",
+
+
     // Supplies
     supplyManagement: "Gestión de Insumos",
     inventoryControl: "Control de inventario y stock",
@@ -422,6 +442,25 @@ export const translations = {
     minimum: "Minimum",
     usedIn: "Used in",
     inventoryProjection: "Inventory projection",
+
+    // Demo Page Cards
+    inventory: "Inventory",
+    viewFullInventory: "View full inventory",
+    currentMenu: "Current menu",
+    inMenu: "in menu",
+    modified: "Modified",
+    topSelling: "🔥 Top 5 Best Selling",
+    viewAllProducts: "View all products",
+    salesCard: "Sales",
+    projectionsCard: "Projections",
+    businessOverviewDesc: "Your business overview",
+    controlPanel: "Control Panel",
+    businessSummary: "Your business summary",
+    goToSupplies: "To manage inventory, go to",
+    loadingDashboard: "Loading dashboard...",
+    inventoryReset: "Inventory reset",
+    confirmReconfigure: "Reconfiguring the plan will delete all your current inventory. Continue?",
+    closeSession: "Log Out",
 
     // Supplies
     supplyManagement: "Supply Management",
