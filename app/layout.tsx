@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/auth-context'
 import { SubscriptionGuard } from '@/components/subscription-guard'
+import { LanguageProvider } from '@/hooks/use-language'
 import { Toaster } from 'sonner'
 
 const geist = Geist({
@@ -51,12 +52,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
-        <AuthProvider>
-          <SubscriptionGuard>
-            {children}
-          </SubscriptionGuard>
-          <Toaster position="top-right" richColors />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <SubscriptionGuard>
+              {children}
+            </SubscriptionGuard>
+            <Toaster position="top-right" richColors />
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   )
