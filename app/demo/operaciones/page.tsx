@@ -145,6 +145,26 @@ export default function OperacionesPage() {
           return name;
      };
 
+     // Helper to translate product categories
+     const translateCategory = (category: string) => {
+          if (language === 'es') return category;
+
+          const categoryMap: Record<string, string> = {
+               'Todos': 'All',
+               'Cócteles': 'Cocktails',
+               'Cervezas': 'Beers',
+               'Shots': 'Shots',
+               'Bebidas sin alcohol': 'Non-alcoholic',
+               'Alimentos': 'Food',
+               'Postres': 'Desserts',
+               'Entradas': 'Appetizers',
+               'Vinos': 'Wines',
+               'Licores': 'Spirits',
+               'Bebidas alcohólicas': 'Alcoholic drinks',
+          };
+          return categoryMap[category] || category;
+     };
+
      const [sections, setSections] = useState<Section[]>([
           {
                id: '1',
@@ -1208,7 +1228,7 @@ export default function OperacionesPage() {
                                                             selectedCategory === category && "bg-primary text-primary-foreground shadow-lg"
                                                        )}
                                                   >
-                                                       {category}
+                                                       {translateCategory(category)}
                                                   </Button>
                                              ))}
                                         </div>
