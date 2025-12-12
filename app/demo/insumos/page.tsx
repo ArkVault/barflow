@@ -238,16 +238,40 @@ export default function InsumosPage() {
 
   // Helper function to translate category
   const translateCategory = (category: string) => {
+    if (language === 'es') return category; // Keep Spanish as-is
+
     const categoryMap: Record<string, string> = {
-      'Licores': t('liquors'),
-      'Licores Dulces': t('liquors'),
-      'Refrescos': t('refreshments'),
-      'Especias': t('spices'),
-      'Frutas': t('fruits'),
-      'Hierbas': 'Hierbas',
-      'Otros': 'Otros',
+      'Licores': 'Spirits',
+      'Licores Dulces': 'Sweet Liquors',
+      'Bebidas alcohólicas': 'Alcoholic Beverages',
+      'Bebidas no alcohólicas': 'Non-Alcoholic Beverages',
+      'Refrescos': 'Soft Drinks',
+      'Especias': 'Spices',
+      'Frutas': 'Fruits',
+      'Hierbas': 'Herbs',
+      'Insumos para cócteles': 'Cocktail Supplies',
+      'Mezcladores y adornos': 'Mixers & Garnishes',
+      'Alimentos y aperitivos': 'Food & Snacks',
+      'Materiales desechables': 'Disposable Materials',
+      'Cristalería y utensilios': 'Glassware & Utensils',
+      'Otros': 'Other',
     };
     return categoryMap[category] || category;
+  };
+
+  // Helper function to translate units
+  const translateUnit = (unit: string) => {
+    if (language === 'es') return unit;
+
+    const unitMap: Record<string, string> = {
+      'botella': 'bottle',
+      'botellas': 'bottles',
+      'litro': 'liter',
+      'litros': 'liters',
+      'unidades': 'units',
+      'unidad': 'unit',
+    };
+    return unitMap[unit] || unit;
   };
 
   const criticalCount = supplies.filter(s => s.status === 'critical').length;
@@ -532,7 +556,7 @@ export default function InsumosPage() {
                         <TableCell>
                           <span className="font-semibold">{formattedValue}</span>
                           <span className="text-xs text-muted-foreground ml-1">
-                            {displayUnit}
+                            {translateUnit(displayUnit)}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -540,7 +564,7 @@ export default function InsumosPage() {
                             <>
                               <span className="font-semibold">{formattedOptimal}</span>
                               <span className="text-xs text-muted-foreground ml-1">
-                                {optimalDisplayUnit}
+                                {translateUnit(optimalDisplayUnit || '')}
                               </span>
                             </>
                           ) : (
