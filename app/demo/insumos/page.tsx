@@ -35,7 +35,7 @@ interface Supply {
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
 export default function InsumosPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
   const [supplies, setSupplies] = useState<Supply[]>([]);
@@ -104,7 +104,7 @@ export default function InsumosPage() {
       setSupplies(suppliesWithStatus);
     } catch (error: any) {
       console.error('Error fetching supplies:', error);
-      toast.error('Error al cargar insumos: ' + error.message);
+      toast.error(`${t('errorLoadingSupplies')} ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -116,7 +116,10 @@ export default function InsumosPage() {
   };
 
   const handleDelete = async (supply: Supply) => {
-    if (!confirm(`¿Estás seguro de eliminar "${supply.name}"? Esta acción no se puede deshacer.`)) {
+    const confirmMsg = language === 'es'
+      ? `¿Estás seguro de eliminar "${supply.name}"? Esta acción no se puede deshacer.`
+      : `Are you sure you want to delete "${supply.name}"? This action cannot be undone.`;
+    if (!confirm(confirmMsg)) {
       return;
     }
 
@@ -130,11 +133,13 @@ export default function InsumosPage() {
 
       if (error) throw error;
 
-      toast.success(`${supply.name} eliminado correctamente`);
+      toast.success(language === 'es'
+        ? `${supply.name} eliminado correctamente`
+        : `${supply.name} deleted successfully`);
       fetchSupplies(); // Reload list
     } catch (error: any) {
       console.error('Error deleting supply:', error);
-      toast.error('Error al eliminar: ' + error.message);
+      toast.error((language === 'es' ? 'Error al eliminar: ' : 'Error deleting: ') + error.message);
     }
   };
 
@@ -159,7 +164,9 @@ export default function InsumosPage() {
 
       // If item is already ordered, don't allow update
       if (existingItem.status === 'ordered') {
-        toast.warning(`${item.supplyName} ya está en estado "Pedido". Confirma la recepción primero.`);
+        toast.warning(language === 'es'
+          ? `${item.supplyName} ya está en estado "Pedido". Confirma la recepción primero.`
+          : `${item.supplyName} is already "Ordered". Confirm receipt first.`);
         return;
       }
 
@@ -169,17 +176,21 @@ export default function InsumosPage() {
         status: 'pending' // Reset to pending when updating
       };
       setPurchaseList(updated);
-      toast.success(`${item.supplyName} actualizado en la lista de compras`);
+      toast.success(language === 'es'
+        ? `${item.supplyName} actualizado en la lista de compras`
+        : `${item.supplyName} updated in shopping list`);
     } else {
       // Add new item
       setPurchaseList([...purchaseList, item]);
-      toast.success(`${item.supplyName} agregado a la lista de compras`);
+      toast.success(language === 'es'
+        ? `${item.supplyName} agregado a la lista de compras`
+        : `${item.supplyName} added to shopping list`);
     }
   };
 
   const handleRemoveFromCart = (supplyId: string) => {
     setPurchaseList(purchaseList.filter(item => item.supplyId !== supplyId));
-    toast.success("Item eliminado de la lista de compras");
+    toast.success(language === 'es' ? "Item eliminado de la lista de compras" : "Item removed from shopping list");
   };
 
   const handleMarkAsOrdered = (supplyId: string) => {
@@ -197,7 +208,7 @@ export default function InsumosPage() {
       // Find the supply to update
       const supply = supplies.find(s => s.id === supplyId);
       if (!supply) {
-        toast.error("Insumo no encontrado");
+        toast.error(language === 'es' ? "Insumo no encontrado" : "Supply not found");
         return;
       }
 
@@ -216,10 +227,12 @@ export default function InsumosPage() {
       // Reload supplies
       await fetchSupplies();
 
-      toast.success(`${supply.name} abastecido: +${quantity} ${supply.unit}`);
+      toast.success(language === 'es'
+        ? `${supply.name} abastecido: +${quantity} ${supply.unit}`
+        : `${supply.name} restocked: +${quantity} ${supply.unit}`);
     } catch (error: any) {
       console.error('Error confirming receipt:', error);
-      toast.error('Error al confirmar recepción: ' + error.message);
+      toast.error((language === 'es' ? 'Error al confirmar recepción: ' : 'Error confirming receipt: ') + error.message);
     }
   };
 
@@ -251,7 +264,7 @@ export default function InsumosPage() {
         <DemoSidebar />
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando insumos...</p>
+          <p className="text-muted-foreground">{language === 'es' ? 'Cargando insumos...' : 'Loading supplies...'}</p>
         </div>
       </div>
     );
@@ -291,7 +304,7 @@ export default function InsumosPage() {
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-inner">
                   <ShoppingCart className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="hidden sm:inline">Insumos a Comprar</span>
+                <span className="hidden sm:inline">{t('suppliesToBuy')}</span>
                 {purchaseList.length > 0 && (
                   <Badge
                     variant="destructive"
@@ -306,7 +319,7 @@ export default function InsumosPage() {
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-inner">
                     <Plus className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <span className="hidden sm:inline">Añadir Insumo</span>
+                  <span className="hidden sm:inline">{t('addSupply')}</span>
                 </GlowButton>
               </Link>
             </div>
@@ -350,11 +363,15 @@ export default function InsumosPage() {
           {supplies.length === 0 ? (
             <Card className="neumorphic border-0 p-12 text-center">
               <p className="text-muted-foreground mb-4">
-                No tienes insumos registrados aún.
+                {language === 'es'
+                  ? 'No tienes insumos registrados aún.'
+                  : 'You have no registered supplies yet.'}
               </p>
               <Link href="/demo/planner">
                 <Button>
-                  Ir al Planner para agregar insumos
+                  {language === 'es'
+                    ? 'Ir al Planner para agregar insumos'
+                    : 'Go to Planner to add supplies'}
                 </Button>
               </Link>
             </Card>
@@ -363,10 +380,10 @@ export default function InsumosPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre</TableHead>
+                    <TableHead>{t('name')}</TableHead>
                     <TableHead>{t('category')}</TableHead>
-                    <TableHead>Cantidad Total</TableHead>
-                    <TableHead>Óptimo</TableHead>
+                    <TableHead>{language === 'es' ? 'Cantidad Total' : 'Total Quantity'}</TableHead>
+                    <TableHead>{t('optimal')}</TableHead>
                     <TableHead>{t('status')}</TableHead>
                     <TableHead className="text-right">{t('actions')}</TableHead>
                   </TableRow>
@@ -549,7 +566,7 @@ export default function InsumosPage() {
                             className="mr-2 text-primary hover:text-primary"
                           >
                             <ShoppingCart className="h-4 w-4 mr-1" />
-                            Abastecer
+                            {t('restock')}
                           </Button>
                           <Button
                             variant="ghost"
@@ -558,7 +575,7 @@ export default function InsumosPage() {
                             className="mr-2"
                           >
                             <Pencil className="h-4 w-4 mr-1" />
-                            Editar
+                            {t('edit')}
                           </Button>
                           <Button
                             variant="ghost"
@@ -567,7 +584,7 @@ export default function InsumosPage() {
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
-                            Eliminar
+                            {t('delete')}
                           </Button>
                         </TableCell>
                       </TableRow>
