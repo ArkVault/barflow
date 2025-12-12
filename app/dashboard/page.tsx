@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/dashboard-layout";
+import { DashboardHeader } from "@/components/dashboard-header";
 import { StatsOverview } from "@/components/stats-overview";
 import { UrgentSuppliesAlert } from "@/components/urgent-supplies-alert";
 import { StockRiskTabs } from "@/components/stock-risk-tabs";
@@ -24,22 +25,19 @@ export default async function DashboardPage() {
   return (
     <DashboardLayout userName={data.user.email || ""} establishmentName={establishment?.name || "Mi Establecimiento"}>
       <PeriodProvider>
-      <main className="container mx-auto p-6">
-        <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-balance">Vista General del Negocio</h1>
-            <p className="text-muted-foreground">Resumen de tu establecimiento</p>
+        <main className="container mx-auto p-6">
+          <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <DashboardHeader />
+            <StockTrafficLight />
           </div>
-          <StockTrafficLight />
-        </div>
-        
-        <StatsOverview />
-        
-        <div className="mt-8 space-y-6">
-          <UrgentSuppliesAlert />
-          <StockRiskTabs />
-        </div>
-      </main>
+
+          <StatsOverview />
+
+          <div className="mt-8 space-y-6">
+            <UrgentSuppliesAlert />
+            <StockRiskTabs />
+          </div>
+        </main>
       </PeriodProvider>
     </DashboardLayout>
   );

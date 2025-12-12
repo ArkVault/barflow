@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/hooks/use-language";
 import useSWR from "swr";
 
 interface Stats {
@@ -13,6 +14,7 @@ interface Stats {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function StatsOverview() {
+  const { t } = useLanguage();
   const { data, error, isLoading } = useSWR<Stats>(
     '/api/stats',
     fetcher,
@@ -34,7 +36,7 @@ export function StatsOverview() {
       <Card className="neumorphic border-0">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Productos Totales
+            {t('productsTotal')}
           </CardTitle>
           <span className="text-2xl">📦</span>
         </CardHeader>
@@ -48,7 +50,7 @@ export function StatsOverview() {
       <Card className="neumorphic border-0">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Stock Bajo
+            {t('lowStock')}
           </CardTitle>
           <span className="text-2xl">⚠️</span>
         </CardHeader>
@@ -62,7 +64,7 @@ export function StatsOverview() {
       <Card className="neumorphic border-0">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Ventas Hoy
+            {t('salesToday')}
           </CardTitle>
           <span className="text-2xl">💰</span>
         </CardHeader>
@@ -76,7 +78,7 @@ export function StatsOverview() {
       <Card className="neumorphic border-0">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Ingresos del Mes
+            {t('monthlyRevenue')}
           </CardTitle>
           <span className="text-2xl">📈</span>
         </CardHeader>

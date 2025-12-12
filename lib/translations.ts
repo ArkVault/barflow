@@ -59,6 +59,10 @@ export const translations = {
     healthyInventory: "Inventario saludable",
     totalProducts: "Total Productos",
     activeMenus: "Menús Activos",
+    businessOverview: "Vista General del Negocio",
+    establishmentSummary: "Resumen de tu establecimiento",
+    productsTotal: "Productos Totales",
+    monthlyRevenue: "Ingresos del Mes",
 
     // Supplies
     supplyManagement: "Gestión de Insumos",
@@ -333,6 +337,10 @@ export const translations = {
     healthyInventory: "Healthy inventory",
     totalProducts: "Total Products",
     activeMenus: "Active Menus",
+    businessOverview: "Business Overview",
+    establishmentSummary: "Your establishment summary",
+    productsTotal: "Total Products",
+    monthlyRevenue: "Monthly Revenue",
 
     // Supplies
     supplyManagement: "Supply Management",
