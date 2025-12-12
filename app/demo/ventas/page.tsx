@@ -82,6 +82,26 @@ export default function VentasPage() {
     return categoryMap[category] || category;
   };
 
+  // Helper to translate table/bar names
+  const translateTableName = (name: string | null) => {
+    if (!name) return '-';
+    if (language === 'es') return name;
+    // Translate "Mesa X" -> "Table X" and "Barra X" -> "Bar X"
+    if (name.startsWith('Mesa ')) {
+      return 'Table ' + name.substring(5);
+    }
+    if (name.startsWith('Barra ')) {
+      return 'Bar ' + name.substring(6);
+    }
+    // Handle "Barra X - Asiento Y"
+    if (name.includes(' - Asiento ')) {
+      const parts = name.split(' - Asiento ');
+      const barPart = parts[0].startsWith('Barra ') ? 'Bar ' + parts[0].substring(6) : parts[0];
+      return `${barPart} - Seat ${parts[1]}`;
+    }
+    return name;
+  };
+
   // Fetch products from active menu
   useEffect(() => {
     const fetchProducts = async () => {
@@ -493,16 +513,16 @@ export default function VentasPage() {
                                 )}
                               </TableCell>
                               <TableCell className="font-medium">{sale.order_number}</TableCell>
-                              <TableCell>{sale.table_name || '-'}</TableCell>
+                              <TableCell>{translateTableName(sale.table_name)}</TableCell>
                               <TableCell>
-                                {new Date(sale.created_at).toLocaleDateString('es-ES', {
+                                {new Date(sale.created_at).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
                                   day: '2-digit',
                                   month: '2-digit',
                                   year: 'numeric'
                                 })}
                               </TableCell>
                               <TableCell>
-                                {new Date(sale.created_at).toLocaleTimeString('es-ES', {
+                                {new Date(sale.created_at).toLocaleTimeString(language === 'es' ? 'es-ES' : 'en-US', {
                                   hour: '2-digit',
                                   minute: '2-digit'
                                 })}

@@ -14,7 +14,7 @@ const demoNavItems = [
   { href: "/demo/planner", labelKey: "planner" as const, icon: ClipboardList },
   { href: "/demo/insumos", labelKey: "supplies" as const, icon: Boxes },
   { href: "/demo/productos", labelKey: "products" as const, icon: Package2 },
-  { href: "/demo/operaciones", label: "Operaciones", icon: Grid3x3 },
+  { href: "/demo/operaciones", labelKey: "operations" as const, icon: Grid3x3 },
   { href: "/demo/ventas", labelKey: "sales" as const, icon: Receipt },
   { href: "/demo/proyecciones", labelKey: "projections" as const, icon: BarChart3 },
 ];
@@ -97,7 +97,7 @@ export function DemoSidebar() {
         <nav className="flex-1 space-y-2">
           {demoNavItems.map((item) => {
             const isActive = pathname === item.href;
-            const displayLabel = 'label' in item ? item.label : t(item.labelKey);
+            const displayLabel: string = t(item.labelKey);
 
             return (
               <Link
