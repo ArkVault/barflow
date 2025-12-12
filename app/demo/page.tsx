@@ -106,10 +106,10 @@ export default function DemoPage() {
           .single(),
 
 
-        // 4. Ventas (última semana)
+        // 4. Ventas (última semana) - Get items from JSONB
         supabase
           .from('sales')
-          .select('product_id, quantity, products(name)')
+          .select('id, items, total, created_at')
           .eq('establishment_id', establishmentId)
           .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
       ]);
@@ -168,20 +168,26 @@ export default function DemoPage() {
           (month >= 8 && month <= 10) ? "Otoño" : "Invierno";
       setMenuName(`${season} ${new Date().getFullYear()}`);
 
-      // Procesar Ventas
+      // Procesar Ventas - Parse items from JSONB
       const salesData = salesRes.data || [];
-      const salesByProduct = salesData.reduce((acc: any, sale: any) => {
-        if (sale.products?.name) {
-          const name = sale.products.name;
-          if (!acc[name]) acc[name] = { name, total: 0 };
-          acc[name].total += sale.quantity || 1;
-        }
-        return acc;
-      }, {});
+      const salesByProduct: Record<string, { name: string; total: number }> = {};
+
+      salesData.forEach((sale: any) => {
+        const items = sale.items || [];
+        items.forEach((item: any) => {
+          const productName = item.name || item.product_name || 'Producto Desconocido';
+          const quantity = item.quantity || 1;
+          if (!salesByProduct[productName]) {
+            salesByProduct[productName] = { name: productName, total: 0 };
+          }
+          salesByProduct[productName].total += quantity;
+        });
+      });
 
       setTopProducts(Object.values(salesByProduct)
-        .sort((a: any, b: any) => b.total - a.total)
-        .slice(0, 5) as TopProduct[]);
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5)
+        .map(p => ({ product_name: p.name, total_sales: p.total })));
 
     } catch (error: any) {
       console.error('Error loading dashboard:', error);
