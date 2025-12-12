@@ -104,7 +104,7 @@ export default function OperacionesPage() {
      const { establishmentId } = useAuth();
      const { t, language } = useLanguage();
 
-     // Translated status labels
+     // Translated status labels (short versions for UI elements)
      const statusLabels = language === 'es' ? {
           libre: 'Libre',
           reservada: 'Reservada',
@@ -114,7 +114,7 @@ export default function OperacionesPage() {
           libre: 'Free',
           reservada: 'Reserved',
           ocupada: 'Occupied',
-          'por-pagar': 'Pending Payment',
+          'por-pagar': 'Pending',
      };
 
      const accountStatusLabels = language === 'es' ? {
@@ -127,6 +127,22 @@ export default function OperacionesPage() {
           'en-consumo': 'In consumption',
           'lista-para-cobrar': 'Ready to pay',
           'pagada': 'Paid',
+     };
+
+     // Helper to translate table/bar names
+     const translateName = (name: string) => {
+          if (language === 'es') return name;
+          // Translate "Mesa X" -> "Table X" and "Barra X" -> "Bar X"
+          if (name.startsWith('Mesa ')) {
+               return 'Table ' + name.substring(5);
+          }
+          if (name.startsWith('Barra ')) {
+               return 'Bar ' + name.substring(6);
+          }
+          if (name.startsWith('Sección ')) {
+               return 'Section ' + name.substring(8);
+          }
+          return name;
      };
 
      const [sections, setSections] = useState<Section[]>([
@@ -1408,7 +1424,7 @@ export default function OperacionesPage() {
                                                                  className="text-lg font-bold cursor-pointer hover:text-primary"
                                                                  onClick={() => setEditingName({ type: 'section', sectionId: section.id })}
                                                             >
-                                                                 {section.name}
+                                                                 {translateName(section.name)}
                                                             </h3>
                                                        )}
                                                        <div className="flex gap-2">
@@ -1475,7 +1491,7 @@ export default function OperacionesPage() {
                                                                  >
                                                                       <X className="w-3 h-3" />
                                                                  </button>
-                                                                 <span className="text-white font-bold text-xs">{table.name}</span>
+                                                                 <span className="text-white font-bold text-xs">{translateName(table.name)}</span>
                                                                  <select
                                                                       value={table.status}
                                                                       onChange={(e) => {
@@ -1543,7 +1559,7 @@ export default function OperacionesPage() {
                                                                  >
                                                                       <X className="w-3 h-3" />
                                                                  </button>
-                                                                 <span className="text-white font-bold text-xs">{bar.name}</span>
+                                                                 <span className="text-white font-bold text-xs">{translateName(bar.name)}</span>
                                                                  <select
                                                                       value={bar.status}
                                                                       onChange={(e) => {
