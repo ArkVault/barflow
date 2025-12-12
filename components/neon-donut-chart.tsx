@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/hooks/use-language";
+
 interface NeonDonutChartProps {
      critical: number;
      low: number;
@@ -7,6 +9,7 @@ interface NeonDonutChartProps {
 }
 
 export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) {
+     const { t } = useLanguage();
      const total = critical + low + optimal;
 
      // Calculate percentages
@@ -103,7 +106,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                          textAnchor="middle"
                          className="fill-muted-foreground text-[9px]"
                     >
-                         Insumos
+                         {t('supplies')}
                     </text>
 
                     {/* Gradients */}
@@ -133,7 +136,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               <div className="flex items-center gap-1.5">
                                    <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-red-400 to-red-600"
                                         style={{ boxShadow: '0 0 4px rgba(239, 68, 68, 0.6)' }} />
-                                   <span className="text-muted-foreground">Críticos</span>
+                                   <span className="text-muted-foreground">{t('critical')}</span>
                               </div>
                               <span className="font-bold text-red-500">{criticalPercent.toFixed(1)}%</span>
                          </div>
@@ -143,7 +146,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               <div className="flex items-center gap-1.5">
                                    <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-amber-400 to-amber-600"
                                         style={{ boxShadow: '0 0 4px rgba(245, 158, 11, 0.6)' }} />
-                                   <span className="text-muted-foreground">Bajos</span>
+                                   <span className="text-muted-foreground">{t('low')}</span>
                               </div>
                               <span className="font-bold text-amber-500">{lowPercent.toFixed(1)}%</span>
                          </div>
@@ -153,7 +156,7 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                               <div className="flex items-center gap-1.5">
                                    <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-green-400 to-green-600"
                                         style={{ boxShadow: '0 0 4px rgba(34, 197, 94, 0.6)' }} />
-                                   <span className="text-muted-foreground">Óptimos</span>
+                                   <span className="text-muted-foreground">{t('optimal')}</span>
                               </div>
                               <span className="font-bold text-green-500">{optimalPercent.toFixed(1)}%</span>
                          </div>

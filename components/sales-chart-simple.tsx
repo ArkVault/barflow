@@ -6,19 +6,21 @@ import { LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { TrendingUp } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/hooks/use-language';
 
 interface SalesChartSimpleProps {
     period: 'week' | 'month';
 }
 
 export function SalesChartSimple({ period }: SalesChartSimpleProps) {
+    const { t, language } = useLanguage();
     const [chartData, setChartData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { establishmentId } = useAuth();
 
     useEffect(() => {
         generateSalesData();
-    }, [period]);
+    }, [period, language]);
 
     const generateSalesData = () => {
         // Datos históricos simulados con patrón de fin de semana
@@ -28,8 +30,12 @@ export function SalesChartSimple({ period }: SalesChartSimpleProps) {
 
         // Generar datos para la gráfica
         const labels = period === 'week'
-            ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-            : ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+            ? language === 'es'
+                ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+                : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            : language === 'es'
+                ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
+                : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
         const data = [];
 
@@ -49,10 +55,13 @@ export function SalesChartSimple({ period }: SalesChartSimpleProps) {
             <CardHeader className="pb-2 px-3 pt-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
-                    Ventas
+                    {t('sales')}
                 </CardTitle>
                 <CardDescription className="text-[10px]">
-                    Ventas reales de la {period === 'week' ? 'semana' : 'mes'}
+                    {language === 'es'
+                        ? `Ventas reales de la ${period === 'week' ? 'semana' : 'mes'}`
+                        : `Actual sales for the ${period === 'week' ? 'week' : 'month'}`
+                    }
                 </CardDescription>
             </CardHeader>
             <CardContent className="px-3 pb-2">
@@ -92,7 +101,7 @@ export function SalesChartSimple({ period }: SalesChartSimpleProps) {
                                 borderRadius: '8px',
                                 boxShadow: '0 0 12px rgba(34, 197, 94, 0.2)'
                             }}
-                            formatter={(value: any) => [value ? `${value} ventas` : 'N/A', '']}
+                            formatter={(value: any) => [value ? `${value} ${t('sales').toLowerCase()}` : 'N/A', '']}
                             labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px' }}
                         />
                         <Area

@@ -7,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { TrendingUp } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/hooks/use-language';
 
 interface InventoryProjectionProps {
      period: 'week' | 'month';
@@ -59,6 +60,7 @@ function projectFutureValues(
 }
 
 export function InventoryProjectionChart({ period, highSeason }: InventoryProjectionProps) {
+     const { t, language } = useLanguage();
      const [selectedProduct, setSelectedProduct] = useState<string>('all');
      const [chartData, setChartData] = useState<any[]>([]);
      const [supplies, setSupplies] = useState<Supply[]>([]);
@@ -73,7 +75,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
 
      useEffect(() => {
           generateProjections();
-     }, [period, highSeason, selectedProduct, supplies]);
+     }, [period, highSeason, selectedProduct, supplies, language]);
 
      const loadSupplies = async () => {
           try {
@@ -109,8 +111,12 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
 
           // Generar datos para la gráfica
           const labels = period === 'week'
-               ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-               : ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+               ? language === 'es'
+                    ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+                    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+               : language === 'es'
+                    ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
+                    : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
           const data = [];
 
@@ -135,24 +141,29 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                          <div className="flex-1">
                               <CardTitle className="text-lg flex items-center gap-2">
                                    <TrendingUp className="w-5 h-5" />
-                                   Proyección de Inventario
+                                   {t('inventoryProjection')}
                               </CardTitle>
                               <CardDescription>
-                                   Comparación superpuesta: Real (azul) vs Proyección (morado) {highSeason && '(Temporada Alta)'}
+                                   {language === 'es'
+                                        ? `Comparación superpuesta: Real (azul) vs Proyección (morado) ${highSeason ? '(Temporada Alta)' : ''}`
+                                        : `Overlaid comparison: Actual (blue) vs Projection (purple) ${highSeason ? '(High Season)' : ''}`
+                                   }
                               </CardDescription>
                          </div>
                          <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
                               <SelectTrigger className="w-[220px]">
-                                   <SelectValue placeholder={loading ? "Cargando..." : "Seleccionar insumo"} />
+                                   <SelectValue placeholder={loading
+                                        ? (language === 'es' ? "Cargando..." : "Loading...")
+                                        : (language === 'es' ? "Seleccionar insumo" : "Select supply")} />
                               </SelectTrigger>
                               <SelectContent>
                                    <SelectItem value="all">
-                                        <span className="font-semibold">📊 Todos los Insumos</span>
+                                        <span className="font-semibold">📊 {language === 'es' ? 'Todos los Insumos' : 'All Supplies'}</span>
                                    </SelectItem>
                                    {supplies.length > 0 && (
                                         <>
                                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                                  🔥 Top 10 Más Demanda
+                                                  🔥 {language === 'es' ? 'Top 10 Más Demanda' : 'Top 10 Most Demanded'}
                                              </div>
                                              {supplies.slice(0, 10).map(supply => (
                                                   <SelectItem key={supply.id} value={supply.id}>
@@ -162,7 +173,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                              {supplies.length > 10 && (
                                                   <>
                                                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
-                                                            Otros Insumos
+                                                            {language === 'es' ? 'Otros Insumos' : 'Other Supplies'}
                                                        </div>
                                                        {supplies.slice(10).map(supply => (
                                                             <SelectItem key={supply.id} value={supply.id}>
@@ -238,12 +249,8 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                         borderRadius: '12px',
                                         boxShadow: '0 0 20px rgba(135, 206, 235, 0.2)'
                                    }}
-                                   formatter={(value: any) => [value ? `${value} unidades` : 'N/A', '']}
+                                   formatter={(value: any) => [value ? `${value} ${language === 'es' ? 'unidades' : 'units'}` : 'N/A', '']}
                                    labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}
-                              />
-                              <Legend
-                                   wrapperStyle={{ paddingTop: '20px' }}
-                                   iconType="circle"
                               />
 
                               {/* Línea de inventario real con efecto neon */}
@@ -315,17 +322,17 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                          <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#4A90E2] to-[#87CEEB]"
                                    style={{ boxShadow: '0 0 8px rgba(74, 144, 226, 0.6)' }}></div>
-                              <span className="text-muted-foreground font-medium">Inventario Real</span>
+                              <span className="text-muted-foreground font-medium">{language === 'es' ? 'Inventario Real' : 'Actual Inventory'}</span>
                          </div>
                          <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#9333EA] to-[#C084FC]"
                                    style={{ boxShadow: '0 0 8px rgba(147, 51, 234, 0.6)' }}></div>
-                              <span className="text-muted-foreground font-medium">Proyección</span>
+                              <span className="text-muted-foreground font-medium">{language === 'es' ? 'Proyección' : 'Projection'}</span>
                          </div>
                          <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 to-red-300"
                                    style={{ boxShadow: '0 0 6px rgba(239, 68, 68, 0.4)' }}></div>
-                              <span className="text-muted-foreground font-medium">Nivel Crítico</span>
+                              <span className="text-muted-foreground font-medium">{language === 'es' ? 'Nivel Crítico' : 'Critical Level'}</span>
                          </div>
                     </div>
 
@@ -333,14 +340,14 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                          <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
                               style={{ boxShadow: '0 0 12px rgba(245, 158, 11, 0.1)' }}>
                               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                                   ⚠️ Temporada Alta: Proyección ajustada con +30% de demanda
+                                   ⚠️ {language === 'es' ? 'Temporada Alta: Proyección ajustada con +30% de demanda' : 'High Season: Projection adjusted with +30% demand'}
                               </p>
                          </div>
                     )}
 
                     <div className="mt-3 p-2 rounded bg-muted/30 border border-muted/50">
                          <p className="text-xs text-muted-foreground">
-                              💡 <strong>Patrón de fin de semana:</strong> Viernes y Sábado tienen +40% más consumo
+                              💡 <strong>{language === 'es' ? 'Patrón de fin de semana:' : 'Weekend pattern:'}</strong> {language === 'es' ? 'Viernes y Sábado tienen +40% más consumo' : 'Friday and Saturday have +40% more consumption'}
                          </p>
                     </div>
                </CardContent>

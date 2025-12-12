@@ -154,11 +154,11 @@ export default function DemoPage() {
         const lastModified = new Date(productsData[0].updated_at);
         const diffDays = Math.ceil(Math.abs(new Date().getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) setMenuLastModified("Hoy");
-        else if (diffDays === 1) setMenuLastModified("Ayer");
-        else if (diffDays < 7) setMenuLastModified(`Hace ${diffDays} días`);
-        else if (diffDays < 30) setMenuLastModified(`Hace ${Math.floor(diffDays / 7)} sem`);
-        else setMenuLastModified(`Hace ${Math.floor(diffDays / 30)} mes`);
+        if (diffDays === 0) setMenuLastModified(t('today'));
+        else if (diffDays === 1) setMenuLastModified(t('yesterday'));
+        else if (diffDays < 7) setMenuLastModified(t('daysAgo').replace('{days}', String(diffDays)));
+        else if (diffDays < 30) setMenuLastModified(t('weeksAgo').replace('{weeks}', String(Math.floor(diffDays / 7))));
+        else setMenuLastModified(t('monthsAgo').replace('{months}', String(Math.floor(diffDays / 30))));
       }
 
       // Generar nombre de menú basado en la temporada

@@ -126,6 +126,12 @@ export const translations = {
     confirmReconfigure: "¿Reconfigurar el plan eliminará todo tu inventario actual. ¿Continuar?",
     closeSession: "Cerrar Sesión",
 
+    // Time relative
+    daysAgo: "Hace {days} días",
+    weeksAgo: "Hace {weeks} sem",
+    monthsAgo: "Hace {months} mes",
+    never: "Nunca",
+
 
     // Supplies
     supplyManagement: "Gestión de Insumos",
@@ -461,6 +467,12 @@ export const translations = {
     inventoryReset: "Inventory reset",
     confirmReconfigure: "Reconfiguring the plan will delete all your current inventory. Continue?",
     closeSession: "Log Out",
+
+    // Time relative
+    daysAgo: "{days} days ago",
+    weeksAgo: "{weeks} weeks ago",
+    monthsAgo: "{months} months ago",
+    never: "Never",
 
     // Supplies
     supplyManagement: "Supply Management",
