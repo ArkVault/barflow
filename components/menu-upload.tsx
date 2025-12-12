@@ -11,7 +11,7 @@ interface MenuUploadProps {
 }
 
 export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
-     const { t } = useLanguage();
+     const { t, language } = useLanguage();
      const [file, setFile] = useState<File | null>(null);
      const [uploading, setUploading] = useState(false);
      const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -30,7 +30,9 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                     setMessage('');
                } else {
                     setStatus('error');
-                    setMessage('Tipo de archivo no válido. Use CSV o Excel.');
+                    setMessage(language === 'es'
+                         ? 'Tipo de archivo no válido. Use CSV o Excel.'
+                         : 'Invalid file type. Use CSV or Excel.');
                     setFile(null);
                }
           }
@@ -55,19 +57,21 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                const data = await response.json();
 
                if (!response.ok) {
-                    throw new Error(data.error || 'Error al procesar el archivo');
+                    throw new Error(data.error || (language === 'es' ? 'Error al procesar el archivo' : 'Error processing file'));
                }
 
                setStatus('success');
                const summary = data.summary || { total: data.supplies?.length || 0, new: 0, matched: 0 };
 
-               let successMessage = `✓ ${summary.total} insumos importados • ` +
-                    `${summary.new} nuevos • ` +
-                    `${summary.matched} coincidencias con DB`;
+               let successMessage = language === 'es'
+                    ? `✓ ${summary.total} insumos importados • ${summary.new} nuevos • ${summary.matched} coincidencias con DB`
+                    : `✓ ${summary.total} supplies imported • ${summary.new} new • ${summary.matched} DB matches`;
 
                // Add detected sheet info if available
                if (summary.detectedSheet) {
-                    successMessage += ` • Pestaña: "${summary.detectedSheet}"`;
+                    successMessage += language === 'es'
+                         ? ` • Pestaña: "${summary.detectedSheet}"`
+                         : ` • Sheet: "${summary.detectedSheet}"`;
                }
 
                setMessage(successMessage);
@@ -78,12 +82,12 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                     setFile(null);
                     setStatus('idle');
                     setMessage('');
-               }, 5000); // Increased timeout to 5s to read sheet name
+               }, 5000);
 
           } catch (error) {
                console.error('Upload error:', error);
                setStatus('error');
-               setMessage(error instanceof Error ? error.message : 'Error al procesar el archivo');
+               setMessage(error instanceof Error ? error.message : (language === 'es' ? 'Error al procesar el archivo' : 'Error processing file'));
           } finally {
                setUploading(false);
           }
@@ -94,10 +98,10 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                          <FileSpreadsheet className="h-5 w-5 text-primary" />
-                         Importar Menú
+                         {language === 'es' ? 'Importar Menú' : 'Import Menu'}
                     </CardTitle>
                     <CardDescription>
-                         Sube tu menú en formato CSV o Excel y  nuestro AI lo parseará automáticamente
+                         {t('importDescription')}
                     </CardDescription>
                </CardHeader>
                <CardContent className="space-y-4">
@@ -120,7 +124,9 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                                                   </div>
                                              ) : (
                                                   <p className="text-sm text-muted-foreground">
-                                                       Haz clic para seleccionar archivo CSV o Excel
+                                                       {language === 'es'
+                                                            ? 'Haz clic para seleccionar archivo CSV o Excel'
+                                                            : 'Click to select a CSV or Excel file'}
                                                   </p>
                                              )}
                                         </div>
@@ -145,12 +151,12 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                                    {uploading ? (
                                         <>
                                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                             Procesando...
+                                             {language === 'es' ? 'Procesando...' : 'Processing...'}
                                         </>
                                    ) : (
                                         <>
                                              <Upload className="h-4 w-4 mr-2" />
-                                             Importar
+                                             {language === 'es' ? 'Importar' : 'Import'}
                                         </>
                                    )}
                               </Button>
@@ -172,9 +178,9 @@ export function MenuUpload({ onSuppliesParsed }: MenuUploadProps) {
                     )}
 
                     <div className="text-xs text-muted-foreground space-y-1">
-                         <p>• Formatos aceptados: CSV (.csv), Excel (.xlsx, .xls)</p>
-                         <p>• Los campos reconocidos: nombre, cantidad, unidad, categoría</p>
-                         <p>• Otros campos serán ignorados automáticamente</p>
+                         <p>• {language === 'es' ? 'Formatos aceptados:' : 'Accepted formats:'} CSV (.csv), Excel (.xlsx, .xls)</p>
+                         <p>• {language === 'es' ? 'Los campos reconocidos:' : 'Recognized fields:'} {language === 'es' ? 'nombre, cantidad, unidad, categoría' : 'name, quantity, unit, category'}</p>
+                         <p>• {language === 'es' ? 'Otros campos serán ignorados automáticamente' : 'Other fields will be ignored automatically'}</p>
                     </div>
                </CardContent>
           </Card>
