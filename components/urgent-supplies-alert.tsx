@@ -115,13 +115,13 @@ export function UrgentSuppliesAlert() {
       <Card className="neumorphic border-0">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            ✅ Inventario saludable
+            ✅ {t('healthyInventory')}
           </CardTitle>
-          <CardDescription>No hay insumos críticos para el periodo seleccionado</CardDescription>
+          <CardDescription>{t('noUrgentSupplies')}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Todos los insumos tienen stock suficiente para el periodo seleccionado.
+            {t('allSuppliesSufficient')}
           </p>
         </CardContent>
       </Card>
@@ -140,11 +140,11 @@ export function UrgentSuppliesAlert() {
 
   const getUrgencyBadge = (level: string, days: number) => {
     if (level === 'critical') {
-      return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
+      return <Badge variant="destructive" className="neumorphic-inset">{t('critical')} ({days}d)</Badge>;
     } else if (level === 'warning') {
-      return <Badge className="neumorphic-inset bg-amber-500 text-white">Urgente ({days}d)</Badge>;
+      return <Badge className="neumorphic-inset bg-amber-500 text-white">{t('urgent')} ({days}d)</Badge>;
     } else {
-      return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
+      return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">{t('good')} ({days}d)</Badge>;
     }
   };
 
@@ -154,10 +154,10 @@ export function UrgentSuppliesAlert() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
-              ⚠️ Insumos urgentes
+              ⚠️ {t('urgentSupplies')}
             </CardTitle>
             <CardDescription>
-              {visibleSupplies.length} insumo{visibleSupplies.length !== 1 ? 's' : ''} en el estado seleccionado para este periodo
+              {visibleSupplies.length} {t('suppliesInStatus')}
             </CardDescription>
           </div>
           <div className="flex flex-col gap-2 md:items-end">
@@ -169,7 +169,7 @@ export function UrgentSuppliesAlert() {
                   }`}
               >
                 <span className="h-2 w-2 rounded-full bg-destructive" />
-                <span>Crítico</span>
+                <span>{t('critical')}</span>
                 <span className="text-[10px] opacity-80">({criticalSupplies.length})</span>
               </button>
               <button
@@ -179,7 +179,7 @@ export function UrgentSuppliesAlert() {
                   }`}
               >
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                <span>Bajo</span>
+                <span>{t('low')}</span>
                 <span className="text-[10px] opacity-80">({warningSupplies.length})</span>
               </button>
               <button
@@ -189,7 +189,7 @@ export function UrgentSuppliesAlert() {
                   }`}
               >
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span>Bien</span>
+                <span>{t('good')}</span>
                 <span className="text-[10px] opacity-80">({optimalSupplies.length})</span>
               </button>
               <button
@@ -198,7 +198,7 @@ export function UrgentSuppliesAlert() {
                 className={`px-2 py-1 rounded-full ${statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
                   }`}
               >
-                Ver todo
+                {t('viewAll')}
               </button>
             </div>
           </div>
@@ -231,13 +231,13 @@ export function UrgentSuppliesAlert() {
 
               <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Stock actual:</span>
+                  <span className="text-muted-foreground">{t('currentStock')}:</span>
                   <span className="ml-2 font-medium">
                     {supply.current_quantity} {supply.unit}
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Mínimo:</span>
+                  <span className="text-muted-foreground">{t('minimum')}:</span>
                   <span className="ml-2 font-medium">
                     {supply.min_threshold} {supply.unit}
                   </span>
@@ -247,7 +247,7 @@ export function UrgentSuppliesAlert() {
               {supply.products.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-border">
                   <p className="text-xs text-muted-foreground mb-2">
-                    Utilizado en:
+                    {t('usedIn')}:
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {supply.products.map((product, idx) => (
