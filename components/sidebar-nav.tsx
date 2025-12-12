@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { UpgradePlanButton } from "@/components/upgrade-plan-button";
+import { useLanguage } from "@/hooks/use-language";
 
 interface SidebarNavProps {
   userName: string;
@@ -18,6 +19,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -26,17 +28,17 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
   };
 
   const navItems = [
-    { href: "/dashboard", label: "Panel de Control", icon: "🏠" },
-    { href: "/dashboard/planner", label: "Planner", icon: "📋" },
-    { href: "/dashboard/insumos", label: "Insumos", icon: "📦" },
-    { href: "/dashboard/productos", label: "Productos", icon: "🛒" },
-    { href: "/dashboard/ventas", label: "Ventas", icon: "📊" },
-    { href: "/dashboard/proyecciones", label: "Proyecciones", icon: "📈" },
+    { href: "/dashboard", label: t('dashboard'), icon: "🏠" },
+    { href: "/dashboard/planner", label: t('planner'), icon: "📋" },
+    { href: "/dashboard/insumos", label: t('supplies'), icon: "📦" },
+    { href: "/dashboard/productos", label: t('products'), icon: "🛒" },
+    { href: "/dashboard/ventas", label: t('sales'), icon: "📊" },
+    { href: "/dashboard/proyecciones", label: t('projections'), icon: "📈" },
   ];
 
   const bottomNavItems = [
-    { href: "/dashboard/cuenta", label: "Cuenta", icon: "👤" },
-    { href: "/dashboard/configuracion", label: "Configuración", icon: "⚙️" },
+    { href: "/dashboard/cuenta", label: t('account'), icon: "👤" },
+    { href: "/dashboard/configuracion", label: t('settings'), icon: "⚙️" },
   ];
 
   return (
@@ -54,7 +56,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="absolute -right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full neumorphic flex items-center justify-center hover:scale-105 transition-transform"
-            aria-label={isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+            aria-label={isCollapsed ? t('expandSidebar') : t('collapseSidebar')}
           >
             <span className={cn("text-xl transition-transform", isCollapsed && "rotate-180")}>‹</span>
           </button>
@@ -162,7 +164,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
               )}
             >
               <span className="text-xl flex-shrink-0">🚪</span>
-              {!isCollapsed && <span className="font-medium">Cerrar Sesión</span>}
+              {!isCollapsed && <span className="font-medium">{t('logout')}</span>}
             </button>
           </div>
         </div>

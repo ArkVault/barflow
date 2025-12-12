@@ -33,6 +33,8 @@ export const translations = {
     view: "Ver",
     download: "Descargar",
     upload: "Subir",
+    expandSidebar: "Expandir sidebar",
+    collapseSidebar: "Colapsar sidebar",
 
     // Demo
     demoMode: "Modo demo sin datos reales",
@@ -337,6 +339,8 @@ export const translations = {
     view: "View",
     download: "Download",
     upload: "Upload",
+    expandSidebar: "Expand sidebar",
+    collapseSidebar: "Collapse sidebar",
 
     // Demo
     demoMode: "Demo mode without real data",
