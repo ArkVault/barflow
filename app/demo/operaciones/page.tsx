@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ProductImage } from '@/components/product-image';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/use-language';
 
 type Status = 'libre' | 'reservada' | 'ocupada' | 'por-pagar';
 
@@ -99,22 +100,35 @@ const barStatusColors = {
      'por-pagar': 'from-orange-600 to-orange-800',
 };
 
-const statusLabels = {
-     libre: 'Libre',
-     reservada: 'Reservada',
-     ocupada: 'Ocupada',
-     'por-pagar': 'Por Pagar',
-};
-
-const accountStatusLabels = {
-     'abierta': 'Cuenta abierta',
-     'en-consumo': 'En consumo',
-     'lista-para-cobrar': 'Lista para cobrar',
-     'pagada': 'Pagada',
-};
-
 export default function OperacionesPage() {
      const { establishmentId } = useAuth();
+     const { t, language } = useLanguage();
+
+     // Translated status labels
+     const statusLabels = language === 'es' ? {
+          libre: 'Libre',
+          reservada: 'Reservada',
+          ocupada: 'Ocupada',
+          'por-pagar': 'Por Pagar',
+     } : {
+          libre: 'Free',
+          reservada: 'Reserved',
+          ocupada: 'Occupied',
+          'por-pagar': 'Pending Payment',
+     };
+
+     const accountStatusLabels = language === 'es' ? {
+          'abierta': 'Cuenta abierta',
+          'en-consumo': 'En consumo',
+          'lista-para-cobrar': 'Lista para cobrar',
+          'pagada': 'Pagada',
+     } : {
+          'abierta': 'Account open',
+          'en-consumo': 'In consumption',
+          'lista-para-cobrar': 'Ready to pay',
+          'pagada': 'Paid',
+     };
+
      const [sections, setSections] = useState<Section[]>([
           {
                id: '1',
@@ -693,7 +707,7 @@ export default function OperacionesPage() {
 
                     if (ticketError) {
                          console.error('Error getting ticket number:', ticketError);
-                         toast.error('Error al generar número de ticket');
+                         toast.error(language === 'es' ? 'Error al generar número de ticket' : 'Error generating ticket number');
                          return;
                     }
 
@@ -732,14 +746,16 @@ export default function OperacionesPage() {
                               hint: error.hint,
                               code: error.code,
                          });
-                         toast.error(`Error al guardar la venta: ${error.message || 'Error desconocido'}`);
+                         toast.error(language === 'es'
+                              ? `Error al guardar la venta: ${error.message || 'Error desconocido'}`
+                              : `Error saving sale: ${error.message || 'Unknown error'}`);
                     } else {
                          console.log('Sale saved successfully:', data);
-                         toast.success('Venta registrada correctamente');
+                         toast.success(language === 'es' ? 'Venta registrada correctamente' : 'Sale recorded successfully');
                     }
                } catch (error) {
                     console.error('Exception saving sale:', error);
-                    toast.error('Error al guardar la venta');
+                    toast.error(language === 'es' ? 'Error al guardar la venta' : 'Error saving sale');
                }
           } else {
                if (!accountToClose) {
@@ -747,7 +763,7 @@ export default function OperacionesPage() {
                }
                if (!establishmentId) {
                     console.error('No establishmentId available');
-                    toast.error('No se pudo identificar el establecimiento');
+                    toast.error(language === 'es' ? 'No se pudo identificar el establecimiento' : 'Could not identify establishment');
                }
           }
 
@@ -1098,9 +1114,9 @@ export default function OperacionesPage() {
                          {/* Header */}
                          <div className="mb-6">
                               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                                   Operaciones
+                                   {t('operations')}
                               </h2>
-                              <p className="text-muted-foreground">Gestión de mesas y comandas</p>
+                              <p className="text-muted-foreground">{language === 'es' ? 'Gestión de mesas y comandas' : 'Table and order management'}</p>
                          </div>
 
                          {/* Tabs */}
@@ -1115,7 +1131,7 @@ export default function OperacionesPage() {
                                              }`}
                                    >
                                         <Grid3x3 className="w-5 h-5" />
-                                        Mesas
+                                        {language === 'es' ? 'Mesas' : 'Tables'}
                                    </button>
                                    <button
                                         type="button"
@@ -1125,7 +1141,7 @@ export default function OperacionesPage() {
                                              : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                                              }`}
                                    >
-                                        📋 Comandas
+                                        📋 {language === 'es' ? 'Comandas' : 'Orders'}
                                    </button>
                               </div>
                          </div>
@@ -1139,7 +1155,7 @@ export default function OperacionesPage() {
                                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-inner">
                                                   <Grid3x3 className="w-3.5 h-3.5 text-white" />
                                              </div>
-                                             <span className="hidden sm:inline">Agregar Sección</span>
+                                             <span className="hidden sm:inline">{language === 'es' ? 'Agregar Sección' : 'Add Section'}</span>
                                         </GlowButton>
                                    </div>
 
@@ -1185,15 +1201,15 @@ export default function OperacionesPage() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                              {loadingProducts ? (
                                                   <div className="col-span-full text-center py-12 text-muted-foreground">
-                                                       <p>Cargando productos...</p>
+                                                       <p>{language === 'es' ? 'Cargando productos...' : 'Loading products...'}</p>
                                                   </div>
                                              ) : getFilteredProducts().length === 0 ? (
                                                   <div className="col-span-full text-center py-12 text-muted-foreground">
-                                                       <p>No hay productos disponibles</p>
+                                                       <p>{language === 'es' ? 'No hay productos disponibles' : 'No products available'}</p>
                                                        <p className="text-sm mt-2">
                                                             {products.length === 0
-                                                                 ? 'Agrega productos en la sección de Productos'
-                                                                 : 'No hay productos en esta categoría'}
+                                                                 ? (language === 'es' ? 'Agrega productos en la sección de Productos' : 'Add products in the Products section')
+                                                                 : (language === 'es' ? 'No hay productos en esta categoría' : 'No products in this category')}
                                                        </p>
                                                   </div>
                                              ) : (
@@ -1250,7 +1266,7 @@ export default function OperacionesPage() {
                                                                       onClick={() => addProductToOrder(product, getProductQuantity(product.id))}
                                                                  >
                                                                       <Plus className="w-4 h-4 mr-2" />
-                                                                      Agregar
+                                                                      {t('add')}
                                                                  </GlowButton>
                                                             </div>
                                                        </div>
@@ -1262,17 +1278,17 @@ export default function OperacionesPage() {
                                    {/* Order Section */}
                                    <div className="space-y-4">
                                         <div className="neumorphic rounded-2xl p-4 sticky top-4">
-                                             <h3 className="text-lg font-bold mb-4">Comanda Actual</h3>
+                                             <h3 className="text-lg font-bold mb-4">{language === 'es' ? 'Comanda Actual' : 'Current Order'}</h3>
 
                                              {/* Table Selection */}
                                              <div className="mb-4">
-                                                  <label className="text-sm text-muted-foreground mb-2 block">Seleccionar Mesa/Barra:</label>
+                                                  <label className="text-sm text-muted-foreground mb-2 block">{language === 'es' ? 'Seleccionar Mesa/Barra:' : 'Select Table/Bar:'}</label>
                                                   <select
                                                        value={selectedTableForOrder || ''}
                                                        onChange={(e) => setSelectedTableForOrder(e.target.value)}
                                                        className="w-full p-2 rounded-lg border bg-background"
                                                   >
-                                                       <option value="">-- Seleccionar --</option>
+                                                       <option value="">{language === 'es' ? '-- Seleccionar --' : '-- Select --'}</option>
                                                        {getAllTablesAndBars().map(item => (
                                                             <option key={item.id} value={item.id}>
                                                                  {item.sectionName} - {item.name} ({statusLabels[item.status]})
@@ -1284,7 +1300,7 @@ export default function OperacionesPage() {
                                              {/* Order Items */}
                                              {currentOrder.length === 0 ? (
                                                   <div className="text-center py-8 text-muted-foreground">
-                                                       <p className="text-sm">Selecciona productos para agregar</p>
+                                                       <p className="text-sm">{language === 'es' ? 'Selecciona productos para agregar' : 'Select products to add'}</p>
                                                   </div>
                                              ) : (
                                                   <>
@@ -1338,7 +1354,7 @@ export default function OperacionesPage() {
                                                                  disabled={!selectedTableForOrder || currentOrder.length === 0}
                                                             >
                                                                  <DollarSign className="w-4 h-4 mr-2" />
-                                                                 Aprobar Comanda
+                                                                 {language === 'es' ? 'Aprobar Comanda' : 'Approve Order'}
                                                             </GlowButton>
                                                        </div>
                                                   </>
@@ -1402,7 +1418,7 @@ export default function OperacionesPage() {
                                                                  onClick={() => addTable(section.id)}
                                                                  className="h-8"
                                                             >
-                                                                 +Mesa
+                                                                 +{language === 'es' ? 'Mesa' : 'Table'}
                                                             </Button>
                                                             <Button
                                                                  size="sm"
@@ -1410,7 +1426,7 @@ export default function OperacionesPage() {
                                                                  onClick={() => addBar(section.id)}
                                                                  className="h-8"
                                                             >
-                                                                 +Barra
+                                                                 +{language === 'es' ? 'Barra' : 'Bar'}
                                                             </Button>
                                                             <Button
                                                                  size="sm"
@@ -1514,7 +1530,7 @@ export default function OperacionesPage() {
                                                                            toggleBarOrientation(section.id, bar.id);
                                                                       }}
                                                                       className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                                      title="Rotar barra"
+                                                                      title={language === 'es' ? 'Rotar barra' : 'Rotate bar'}
                                                                  >
                                                                       ↻
                                                                  </button>
@@ -1575,7 +1591,7 @@ export default function OperacionesPage() {
                                    {selectedItem && sections.find(s => s.id === selectedItem.sectionId)?.bars.find(b => b.id === selectedItem.itemId)?.name}
                               </DialogTitle>
                               <DialogDescription>
-                                   Gestión de cuenta
+                                   {language === 'es' ? 'Gestión de cuenta' : 'Account management'}
                               </DialogDescription>
                          </DialogHeader>
 
@@ -1586,13 +1602,13 @@ export default function OperacionesPage() {
                                    return (
                                         <div className="space-y-4">
                                              <div className="text-center py-8">
-                                                  <p className="text-muted-foreground mb-4">No hay cuenta activa</p>
+                                                  <p className="text-muted-foreground mb-4">{language === 'es' ? 'No hay cuenta activa' : 'No active account'}</p>
                                                   <GlowButton onClick={() => {
                                                        openNewAccount(selectedItem.sectionId, selectedItem.itemId, selectedItem.type);
                                                        setIsModalOpen(false);
                                                   }}>
                                                        <Plus className="w-4 h-4 mr-2" />
-                                                       Abrir Nueva Cuenta
+                                                       {language === 'es' ? 'Abrir Nueva Cuenta' : 'Open New Account'}
                                                   </GlowButton>
                                              </div>
                                         </div>
@@ -1606,7 +1622,7 @@ export default function OperacionesPage() {
                                         {/* Account Status */}
                                         <div className="neumorphic rounded-2xl p-4">
                                              <div className="flex items-center justify-between mb-3">
-                                                  <span className="text-sm text-muted-foreground">Estado:</span>
+                                                  <span className="text-sm text-muted-foreground">{language === 'es' ? 'Estado:' : 'Status:'}</span>
                                                   <Badge className="bg-gradient-to-r from-blue-400 to-blue-600 text-white">
                                                        {accountStatusLabels[currentAccount.status]}
                                                   </Badge>
@@ -1614,12 +1630,12 @@ export default function OperacionesPage() {
                                              <div className="flex items-center justify-between mb-3">
                                                   <span className="text-sm text-muted-foreground flex items-center gap-2">
                                                        <Clock className="w-4 h-4" />
-                                                       Hora de apertura:
+                                                       {language === 'es' ? 'Hora de apertura:' : 'Opening time:'}
                                                   </span>
-                                                  <span className="font-medium">{currentAccount.openedAt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                  <span className="font-medium">{currentAccount.openedAt.toLocaleTimeString(language === 'es' ? 'es-ES' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                              </div>
                                              <div className="flex items-center justify-between mb-3">
-                                                  <span className="text-sm text-muted-foreground">Tiempo transcurrido:</span>
+                                                  <span className="text-sm text-muted-foreground">{language === 'es' ? 'Tiempo transcurrido:' : 'Elapsed time:'}</span>
                                                   <span className="font-medium">{getElapsedTime(currentAccount.openedAt)}</span>
                                              </div>
                                              <div className="flex items-center justify-between pt-3 border-t">
@@ -1634,7 +1650,7 @@ export default function OperacionesPage() {
                                         {/* Items List */}
                                         {currentAccount.items.length > 0 && (
                                              <div className="neumorphic rounded-2xl p-4">
-                                                  <h4 className="font-semibold mb-3">Productos:</h4>
+                                                  <h4 className="font-semibold mb-3">{language === 'es' ? 'Productos:' : 'Products:'}</h4>
                                                   <div className="space-y-2 max-h-48 overflow-y-auto">
                                                        {currentAccount.items.map(item => (
                                                             <div key={item.id} className="flex justify-between text-sm">
@@ -1653,7 +1669,7 @@ export default function OperacionesPage() {
                                                   className="flex-1"
                                                   onClick={() => setIsModalOpen(false)}
                                              >
-                                                  Cancelar
+                                                  {t('cancel')}
                                              </Button>
                                              <GlowButton
                                                   className="flex-1"
@@ -1664,7 +1680,7 @@ export default function OperacionesPage() {
                                                   }}
                                              >
                                                   <DollarSign className="w-4 h-4 mr-2" />
-                                                  Marcar como Pagada
+                                                  {language === 'es' ? 'Marcar como Pagada' : 'Mark as Paid'}
                                              </GlowButton>
                                         </div>
                                    </div>
