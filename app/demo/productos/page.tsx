@@ -231,7 +231,7 @@ const initialProducts: Product[] = [
 
 
 export default function ProductosPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const [activeMenuId, setActiveMenuId] = useState<string>("");
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
@@ -270,10 +270,12 @@ export default function ProductosPage() {
 
   // Helper function to translate category
   const translateCategory = (category: string) => {
+    if (language === 'es') return category;
+
     const categoryMap: Record<string, string> = {
-      'Cócteles': t('cocktails'),
-      'Cervezas': t('beers'),
-      'Shots': t('shots'),
+      'Cócteles': 'Cocktails',
+      'Cervezas': 'Beers',
+      'Shots': 'Shots',
       'Bebidas sin alcohol': 'Non-alcoholic drinks',
       'Alimentos': 'Food',
       'Postres': 'Desserts',
@@ -307,7 +309,7 @@ export default function ProductosPage() {
 
       if (error) {
         console.error('Error loading products:', error);
-        toast.error('Error al cargar productos');
+        toast.error(language === 'es' ? 'Error al cargar productos' : 'Error loading products');
         // Fallback to mock data
         const mockFiltered = initialProducts.filter(p => p.menu_id === menuId);
         setProducts(mockFiltered);
@@ -379,7 +381,10 @@ export default function ProductosPage() {
   };
 
   const handleDelete = (productId: string | number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    const confirmMsg = language === 'es'
+      ? '¿Estás seguro de que quieres eliminar este producto?'
+      : 'Are you sure you want to delete this product?';
+    if (confirm(confirmMsg)) {
       setProducts(products.filter(p => p.id !== productId));
     }
   };
@@ -394,7 +399,9 @@ export default function ProductosPage() {
   const handleAddProduct = async () => {
     if (newProduct.name && newProduct.category && newProduct.price > 0) {
       if (!activeMenuId) {
-        toast.error('Por favor selecciona un menú activo primero');
+        toast.error(language === 'es'
+          ? 'Por favor selecciona un menú activo primero'
+          : 'Please select an active menu first');
         return;
       }
 
@@ -406,7 +413,7 @@ export default function ProductosPage() {
 
         if (authError || !user) {
           console.error('Auth error:', authError);
-          toast.error('Error de autenticación');
+          toast.error(language === 'es' ? 'Error de autenticación' : 'Authentication error');
           return;
         }
 
@@ -462,7 +469,7 @@ export default function ProductosPage() {
           setAllProducts([...allProducts, productToAdd]);
           setProducts([...products, productToAdd]);
 
-          toast.success('Producto agregado exitosamente');
+          toast.success(language === 'es' ? 'Producto agregado exitosamente' : 'Product added successfully');
         }
 
         setIsAddingProduct(false);
@@ -479,10 +486,12 @@ export default function ProductosPage() {
         });
       } catch (error) {
         console.error('💥 Unexpected error:', error);
-        toast.error('Error inesperado al agregar producto');
+        toast.error(language === 'es' ? 'Error inesperado al agregar producto' : 'Unexpected error adding product');
       }
     } else {
-      toast.error('Por favor completa todos los campos requeridos');
+      toast.error(language === 'es'
+        ? 'Por favor completa todos los campos requeridos'
+        : 'Please fill in all required fields');
     }
   };
 
@@ -542,7 +551,7 @@ export default function ProductosPage() {
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-inner">
                 <Plus className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="hidden sm:inline">Agregar Producto</span>
+              <span className="hidden sm:inline">{t('addProduct')}</span>
             </GlowButton>
           </div>
 
@@ -550,13 +559,13 @@ export default function ProductosPage() {
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg mb-2">
                 {activeMenuId
-                  ? 'No hay productos en este menú'
-                  : 'No hay menú activo'}
+                  ? (language === 'es' ? 'No hay productos en este menú' : 'No products in this menu')
+                  : (language === 'es' ? 'No hay menú activo' : 'No active menu')}
               </p>
               <p className="text-sm text-muted-foreground">
                 {activeMenuId
-                  ? 'Usa el botón "Agregar Producto" para crear productos en este menú'
-                  : 'Activa "Los Clásicos" o crea un nuevo menú para comenzar'}
+                  ? (language === 'es' ? 'Usa el botón "Agregar Producto" para crear productos en este menú' : 'Use the "Add Product" button to create products in this menu')
+                  : (language === 'es' ? 'Activa "Los Clásicos" o crea un nuevo menú para comenzar' : 'Activate "Los Clásicos" or create a new menu to begin')}
               </p>
             </div>
           ) : (
@@ -621,10 +630,10 @@ export default function ProductosPage() {
                             e.stopPropagation();
                             handleEdit(product.id);
                           }}
-                          title="Editar producto"
+                          title={language === 'es' ? 'Editar producto' : 'Edit product'}
                         >
                           <Edit className="w-4 h-4 mr-1" />
-                          Editar
+                          {t('edit')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -634,10 +643,10 @@ export default function ProductosPage() {
                             e.stopPropagation();
                             handleDelete(product.id);
                           }}
-                          title="Eliminar producto"
+                          title={language === 'es' ? 'Eliminar producto' : 'Delete product'}
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
-                          Borrar
+                          {t('delete')}
                         </Button>
                       </div>
                     </div>
@@ -670,7 +679,7 @@ export default function ProductosPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-lg mb-3">Ingredientes:</h3>
+                    <h3 className="font-semibold text-lg mb-3">{t('ingredients')}:</h3>
                     <div className="space-y-2">
                       {viewingProduct.ingredients.map((ing, idx) => (
                         <div key={idx} className="flex justify-between items-center p-3 rounded-lg neumorphic-inset">
@@ -692,33 +701,33 @@ export default function ProductosPage() {
             <Card className="neumorphic border-0 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-2xl">Diseñar Nuevo Producto</CardTitle>
+                  <CardTitle className="text-2xl">{language === 'es' ? 'Diseñar Nuevo Producto' : 'Design New Product'}</CardTitle>
                   <Button variant="ghost" size="icon" onClick={() => setIsAddingProduct(false)}>
                     <X className="w-5 h-5" />
                   </Button>
                 </div>
-                <CardDescription>Crea un nuevo producto para tu menú</CardDescription>
+                <CardDescription>{language === 'es' ? 'Crea un nuevo producto para tu menú' : 'Create a new product for your menu'}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="new-name">Nombre del Producto *</Label>
+                      <Label htmlFor="new-name">{t('productName')} *</Label>
                       <Input
                         id="new-name"
-                        placeholder="Ej: Mojito Clásico"
+                        placeholder={language === 'es' ? 'Ej: Mojito Clásico' : 'Ex: Classic Mojito'}
                         value={newProduct.name}
                         onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="new-category">Categoría *</Label>
+                      <Label htmlFor="new-category">{t('category')} *</Label>
                       <Select
                         value={newProduct.category}
                         onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
                       >
                         <SelectTrigger id="new-category">
-                          <SelectValue placeholder="Selecciona una categoría" />
+                          <SelectValue placeholder={language === 'es' ? 'Selecciona una categoría' : 'Select a category'} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
@@ -735,7 +744,7 @@ export default function ProductosPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="new-price">Precio *</Label>
+                    <Label htmlFor="new-price">{t('price')} *</Label>
                     <Input
                       id="new-price"
                       type="number"
@@ -747,10 +756,10 @@ export default function ProductosPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="new-description">Descripción</Label>
+                    <Label htmlFor="new-description">{t('description')}</Label>
                     <Input
                       id="new-description"
-                      placeholder="Describe tu producto..."
+                      placeholder={language === 'es' ? 'Describe tu producto...' : 'Describe your product...'}
                       value={newProduct.description || ''}
                       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     />
@@ -758,7 +767,7 @@ export default function ProductosPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label>Ingredientes</Label>
+                      <Label>{t('ingredients')}</Label>
                       <Button
                         type="button"
                         variant="outline"
@@ -767,14 +776,14 @@ export default function ProductosPage() {
                         className="neumorphic-hover border-0"
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Agregar
+                        {t('add')}
                       </Button>
                     </div>
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {newProduct.ingredients.map((ing, idx) => (
                         <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 p-2 rounded-lg neumorphic-inset">
                           <Input
-                            placeholder="Ingrediente"
+                            placeholder={language === 'es' ? 'Ingrediente' : 'Ingredient'}
                             value={ing.name}
                             onChange={(e) => {
                               const newIngredients = [...newProduct.ingredients];
@@ -784,7 +793,7 @@ export default function ProductosPage() {
                           />
                           <Input
                             type="number"
-                            placeholder="Cantidad"
+                            placeholder={language === 'es' ? 'Cantidad' : 'Quantity'}
                             value={ing.quantity || ''}
                             onChange={(e) => {
                               const newIngredients = [...newProduct.ingredients];
@@ -793,7 +802,7 @@ export default function ProductosPage() {
                             }}
                           />
                           <Input
-                            placeholder="Unidad"
+                            placeholder={language === 'es' ? 'Unidad' : 'Unit'}
                             value={ing.unit}
                             onChange={(e) => {
                               const newIngredients = [...newProduct.ingredients];
@@ -824,10 +833,10 @@ export default function ProductosPage() {
                       disabled={!newProduct.name || !newProduct.category || newProduct.price <= 0}
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Crear Producto
+                      {language === 'es' ? 'Crear Producto' : 'Create Product'}
                     </Button>
                     <Button variant="outline" onClick={() => setIsAddingProduct(false)} className="flex-1">
-                      Cancelar
+                      {t('cancel')}
                     </Button>
                   </div>
                 </div>
@@ -842,7 +851,7 @@ export default function ProductosPage() {
             <Card className="neumorphic border-0 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-2xl">Editar Producto</CardTitle>
+                  <CardTitle className="text-2xl">{t('editProduct')}</CardTitle>
                   <Button variant="ghost" size="icon" onClick={() => setEditingProduct(null)}>
                     <X className="w-5 h-5" />
                   </Button>
@@ -852,7 +861,7 @@ export default function ProductosPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Nombre</Label>
+                      <Label htmlFor="name">{t('name')}</Label>
                       <Input
                         id="name"
                         value={editForm.name}
@@ -860,13 +869,13 @@ export default function ProductosPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="category">Categoría</Label>
+                      <Label htmlFor="category">{t('category')}</Label>
                       <Select
                         value={editForm.category}
                         onValueChange={(value) => setEditForm({ ...editForm, category: value })}
                       >
                         <SelectTrigger id="category">
-                          <SelectValue placeholder="Selecciona una categoría" />
+                          <SelectValue placeholder={language === 'es' ? 'Selecciona una categoría' : 'Select a category'} />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
@@ -883,7 +892,7 @@ export default function ProductosPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Precio</Label>
+                    <Label htmlFor="price">{t('price')}</Label>
                     <Input
                       id="price"
                       type="number"
@@ -894,7 +903,7 @@ export default function ProductosPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description">Descripción</Label>
+                    <Label htmlFor="description">{t('description')}</Label>
                     <Input
                       id="description"
                       value={editForm.description || ''}
@@ -904,7 +913,7 @@ export default function ProductosPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label>Ingredientes</Label>
+                      <Label>{t('ingredients')}</Label>
                       <Button
                         type="button"
                         size="sm"
@@ -915,14 +924,14 @@ export default function ProductosPage() {
                         }}
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Agregar Ingrediente
+                        {language === 'es' ? 'Agregar Ingrediente' : 'Add Ingredient'}
                       </Button>
                     </div>
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {editForm.ingredients.map((ing, idx) => (
                         <div key={idx} className="grid grid-cols-[1fr,1fr,1fr,auto] gap-2 p-2 rounded-lg neumorphic-inset">
                           <Input
-                            placeholder="Ingrediente"
+                            placeholder={language === 'es' ? 'Ingrediente' : 'Ingredient'}
                             value={ing.name}
                             onChange={(e) => {
                               const newIngredients = [...editForm.ingredients];
@@ -932,7 +941,7 @@ export default function ProductosPage() {
                           />
                           <Input
                             type="number"
-                            placeholder="Cantidad"
+                            placeholder={language === 'es' ? 'Cantidad' : 'Quantity'}
                             value={isNaN(ing.quantity) ? '' : ing.quantity}
                             onChange={(e) => {
                               const newIngredients = [...editForm.ingredients];
@@ -941,7 +950,7 @@ export default function ProductosPage() {
                             }}
                           />
                           <Input
-                            placeholder="Unidad"
+                            placeholder={language === 'es' ? 'Unidad' : 'Unit'}
                             value={ing.unit}
                             onChange={(e) => {
                               const newIngredients = [...editForm.ingredients];
@@ -967,10 +976,10 @@ export default function ProductosPage() {
 
                   <div className="flex gap-2 pt-4">
                     <Button onClick={handleSaveEdit} className="flex-1">
-                      Guardar Cambios
+                      {language === 'es' ? 'Guardar Cambios' : 'Save Changes'}
                     </Button>
                     <Button variant="outline" onClick={() => setEditingProduct(null)} className="flex-1">
-                      Cancelar
+                      {t('cancel')}
                     </Button>
                   </div>
                 </div>

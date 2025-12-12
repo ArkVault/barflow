@@ -51,7 +51,7 @@ interface CartItem {
 }
 
 export default function VentasPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const [activeTab, setActiveTab] = useState<'pos' | 'history'>('pos');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -165,7 +165,10 @@ export default function VentasPage() {
 
   const handleCheckout = (paymentMethod: 'cash' | 'card') => {
     // TODO: Implement actual checkout logic
-    alert(`Venta procesada con ${paymentMethod === 'cash' ? 'Efectivo' : 'Tarjeta'}: $${calculateTotal().toFixed(2)}`);
+    const paymentLabel = language === 'es'
+      ? (paymentMethod === 'cash' ? 'Efectivo' : 'Tarjeta')
+      : (paymentMethod === 'cash' ? 'Cash' : 'Card');
+    alert(`${language === 'es' ? 'Venta procesada con' : 'Sale processed with'} ${paymentLabel}: $${calculateTotal().toFixed(2)}`);
     clearCart();
   };
 
@@ -196,9 +199,9 @@ export default function VentasPage() {
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-              Ventas
+              {t('sales')}
             </h2>
-            <p className="text-muted-foreground">Punto de venta y registro de transacciones</p>
+            <p className="text-muted-foreground">{language === 'es' ? 'Punto de venta y registro de transacciones' : 'Point of sale and transaction records'}</p>
           </div>
 
           {/* Tabs */}
@@ -213,7 +216,7 @@ export default function VentasPage() {
                   }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                Punto de Venta
+                {language === 'es' ? 'Punto de Venta' : 'Point of Sale'}
               </button>
               <button
                 type="button"
@@ -223,7 +226,7 @@ export default function VentasPage() {
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
-                📊 Registro de Ventas
+                📊 {language === 'es' ? 'Registro de Ventas' : 'Sales History'}
               </button>
             </div>
           </div>
@@ -237,7 +240,7 @@ export default function VentasPage() {
                 <Card className="neumorphic border-0 p-4">
                   <div className="space-y-3">
                     <Input
-                      placeholder="Buscar productos..."
+                      placeholder={language === 'es' ? 'Buscar productos...' : 'Search products...'}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full"
@@ -262,12 +265,12 @@ export default function VentasPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {loading ? (
                     <div className="col-span-full text-center py-12 text-muted-foreground">
-                      <p>Cargando productos...</p>
+                      <p>{language === 'es' ? 'Cargando productos...' : 'Loading products...'}</p>
                     </div>
                   ) : filteredProducts.length === 0 ? (
                     <div className="col-span-full text-center py-12 text-muted-foreground">
-                      <p>No hay productos disponibles</p>
-                      <p className="text-sm mt-2">Agrega productos en la sección de Productos</p>
+                      <p>{language === 'es' ? 'No hay productos disponibles' : 'No products available'}</p>
+                      <p className="text-sm mt-2">{language === 'es' ? 'Agrega productos en la sección de Productos' : 'Add products in the Products section'}</p>
                     </div>
                   ) : (
                     filteredProducts.map(product => (
@@ -299,7 +302,7 @@ export default function VentasPage() {
               <div className="space-y-4">
                 <Card className="neumorphic border-0 p-4 sticky top-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold">Carrito</h3>
+                    <h3 className="text-lg font-bold">{language === 'es' ? 'Carrito' : 'Cart'}</h3>
                     {cart.length > 0 && (
                       <Button
                         variant="ghost"
@@ -308,7 +311,7 @@ export default function VentasPage() {
                         className="text-destructive"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Limpiar
+                        {language === 'es' ? 'Limpiar' : 'Clear'}
                       </Button>
                     )}
                   </div>
@@ -316,7 +319,7 @@ export default function VentasPage() {
                   {cart.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">Carrito vacío</p>
+                      <p className="text-sm">{language === 'es' ? 'Carrito vacío' : 'Empty cart'}</p>
                     </div>
                   ) : (
                     <>
@@ -369,13 +372,13 @@ export default function VentasPage() {
                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-inner">
                               <Banknote className="w-3.5 h-3.5 text-white" />
                             </div>
-                            <span className="text-sm">Efectivo</span>
+                            <span className="text-sm">{language === 'es' ? 'Efectivo' : 'Cash'}</span>
                           </GlowButton>
                           <GlowButton onClick={() => handleCheckout('card')} className="w-full">
                             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-inner">
                               <CreditCard className="w-3.5 h-3.5 text-white" />
                             </div>
-                            <span className="text-sm">Tarjeta</span>
+                            <span className="text-sm">{language === 'es' ? 'Tarjeta' : 'Card'}</span>
                           </GlowButton>
                         </div>
                       </div>
@@ -392,7 +395,7 @@ export default function VentasPage() {
               {/* Stats Cards - Compact */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="neumorphic border-0 p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Ventas Hoy</div>
+                  <div className="text-xs text-muted-foreground mb-1">{language === 'es' ? 'Ventas Hoy' : 'Sales Today'}</div>
                   <div className="text-2xl font-bold text-green-600">
                     ${sales
                       .filter(s => {
@@ -405,7 +408,7 @@ export default function VentasPage() {
                   </div>
                 </Card>
                 <Card className="neumorphic border-0 p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Transacciones Hoy</div>
+                  <div className="text-xs text-muted-foreground mb-1">{language === 'es' ? 'Transacciones Hoy' : 'Transactions Today'}</div>
                   <div className="text-2xl font-bold">
                     {sales.filter(s => {
                       const saleDate = new Date(s.created_at);
@@ -415,7 +418,7 @@ export default function VentasPage() {
                   </div>
                 </Card>
                 <Card className="neumorphic border-0 p-4">
-                  <div className="text-xs text-muted-foreground mb-1">Ticket Promedio</div>
+                  <div className="text-xs text-muted-foreground mb-1">{language === 'es' ? 'Ticket Promedio' : 'Average Ticket'}</div>
                   <div className="text-2xl font-bold">
                     ${(() => {
                       const todaySales = sales.filter(s => {
@@ -434,15 +437,15 @@ export default function VentasPage() {
               {/* Sales Table */}
               <Card className="neumorphic border-0">
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-4">Ventas Recientes</h3>
+                  <h3 className="text-xl font-bold mb-4">{language === 'es' ? 'Ventas Recientes' : 'Recent Sales'}</h3>
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-12"></TableHead>
-                        <TableHead>Ticket</TableHead>
-                        <TableHead>Mesa/Barra</TableHead>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Hora</TableHead>
+                        <TableHead>{language === 'es' ? 'Ticket' : 'Ticket'}</TableHead>
+                        <TableHead>{language === 'es' ? 'Mesa/Barra' : 'Table/Bar'}</TableHead>
+                        <TableHead>{language === 'es' ? 'Fecha' : 'Date'}</TableHead>
+                        <TableHead>{language === 'es' ? 'Hora' : 'Time'}</TableHead>
                         <TableHead>Items</TableHead>
                         <TableHead className="text-right">Total</TableHead>
                       </TableRow>
@@ -451,7 +454,7 @@ export default function VentasPage() {
                       {sales.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                            No hay ventas registradas
+                            {language === 'es' ? 'No hay ventas registradas' : 'No sales recorded'}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -495,7 +498,7 @@ export default function VentasPage() {
                               <TableRow>
                                 <TableCell colSpan={7} className="bg-muted/30">
                                   <div className="py-4 px-6">
-                                    <h4 className="font-semibold mb-3 text-sm">Detalles del Ticket:</h4>
+                                    <h4 className="font-semibold mb-3 text-sm">{language === 'es' ? 'Detalles del Ticket:' : 'Ticket Details:'}</h4>
                                     <div className="space-y-2">
                                       {sale.items.map((item, idx) => (
                                         <div key={idx} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
