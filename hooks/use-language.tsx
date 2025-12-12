@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { translations, type Language } from "@/lib/translations";
 
 interface LanguageContextType {
@@ -17,34 +17,43 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    // Get initial language from localStorage
     const savedLanguage = localStorage.getItem("language") as Language | null;
     if (savedLanguage && (savedLanguage === "es" || savedLanguage === "en")) {
       setLanguageState(savedLanguage);
     }
   }, []);
 
-  const setLanguage = useCallback((lang: Language) => {
+  const setLanguage = (lang: Language) => {
+    console.log("[Language] Changing to:", lang);
     setLanguageState(lang);
     localStorage.setItem("language", lang);
     document.documentElement.lang = lang;
-  }, []);
+  };
 
-  const t = useCallback((key: keyof typeof translations.es): string => {
-    return translations[language][key] || String(key);
-  }, [language]);
+  // Create t function that uses current language state
+  const t = (key: keyof typeof translations.es): string => {
+    const result = translations[language]?.[key];
+    if (!result) {
+      console.warn(`[Translation] Missing key: ${String(key)} for language: ${language}`);
+      return String(key);
+    }
+    return result;
+  };
 
-  // Avoid hydration mismatch - render children but with default Spanish
+  // During SSR/hydration, use Spanish defaults
   if (!mounted) {
-    const defaultT = (key: keyof typeof translations.es): string => {
-      return translations.es[key] || String(key);
-    };
     return (
-      <LanguageContext.Provider value={{ language: "es", setLanguage: () => { }, t: defaultT }}>
+      <LanguageContext.Provider value={{
+        language: "es",
+        setLanguage: () => { },
+        t: (key) => translations.es[key] || String(key)
+      }}>
         {children}
       </LanguageContext.Provider>
     );
   }
+
+  console.log("[LanguageProvider] Rendering with language:", language);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
@@ -57,8 +66,7 @@ export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);
 
   if (!context) {
-    // This should never happen if LanguageProvider wraps the app
-    console.warn("useLanguage must be used within a LanguageProvider");
+    console.error("[useLanguage] No LanguageContext found! Make sure LanguageProvider wraps the app.");
     return {
       language: "es",
       setLanguage: () => { },
