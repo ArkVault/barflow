@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Plus, Check, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { GlowButton } from "@/components/glow-button";
+import { useLanguage } from "@/hooks/use-language";
 
 interface Menu {
      id: string;
@@ -32,6 +33,7 @@ interface MenuManagerProps {
 
 export function MenuManager({ onMenuChange }: MenuManagerProps) {
      const { establishmentId } = useAuth();
+     const { t, language } = useLanguage();
 
      // Initialize with Los Clásicos menu for demo
      const defaultMenu: Menu = {
@@ -107,7 +109,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
      const createMenu = async () => {
           if (!newMenuName.trim()) {
-               toast.error("Por favor ingresa un nombre para el menú");
+               toast.error(language === 'es' ? "Por favor ingresa un nombre para el menú" : "Please enter a name for the menu");
                return;
           }
 
@@ -126,13 +128,13 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               toast.success("Menú creado exitosamente");
+               toast.success(language === 'es' ? "Menú creado exitosamente" : "Menu created successfully");
                setNewMenuName("");
                setShowCreateDialog(false);
                loadMenus();
           } catch (error: any) {
                console.error("Error creating menu:", error);
-               toast.error("Error al crear menú");
+               toast.error(language === 'es' ? "Error al crear menú" : "Error creating menu");
           }
      };
 
@@ -147,24 +149,27 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               toast.success("Menú activado");
+               toast.success(language === 'es' ? "Menú activado" : "Menu activated");
                setSelectedMenuId(menuId);
                onMenuChange?.(menuId);
                loadMenus();
           } catch (error: any) {
                console.error("Error activating menu:", error);
-               toast.error("Error al activar menú");
+               toast.error(language === 'es' ? "Error al activar menú" : "Error activating menu");
           }
      };
 
      const deleteMenu = async (menuId: string) => {
           const menu = menus.find((m) => m.id === menuId);
           if (menu?.is_active) {
-               toast.error("No puedes eliminar el menú activo");
+               toast.error(language === 'es' ? "No puedes eliminar el menú activo" : "You cannot delete the active menu");
                return;
           }
 
-          if (!confirm("¿Estás seguro de eliminar este menú?")) {
+          const confirmMsg = language === 'es'
+               ? "¿Estás seguro de eliminar este menú?"
+               : "Are you sure you want to delete this menu?";
+          if (!confirm(confirmMsg)) {
                return;
           }
 
@@ -175,11 +180,11 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               toast.success("Menú eliminado");
+               toast.success(language === 'es' ? "Menú eliminado" : "Menu deleted");
                loadMenus();
           } catch (error: any) {
                console.error("Error deleting menu:", error);
-               toast.error("Error al eliminar menú");
+               toast.error(language === 'es' ? "Error al eliminar menú" : "Error deleting menu");
           }
      };
 
@@ -196,13 +201,13 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                {/* Header with New Menu Button */}
                <div className="flex items-center justify-between">
                     <Label className="text-lg font-semibold">
-                         Gestión de Menús
+                         {language === 'es' ? 'Gestión de Menús' : 'Menu Management'}
                     </Label>
                     <GlowButton onClick={() => setShowCreateDialog(true)}>
                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-inner">
                               <Plus className="w-3.5 h-3.5 text-white" />
                          </div>
-                         <span className="hidden sm:inline">Nuevo Menú</span>
+                         <span className="hidden sm:inline">{language === 'es' ? 'Nuevo Menú' : 'New Menu'}</span>
                     </GlowButton>
                </div>
 
@@ -210,7 +215,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                {menus.length > 0 && (
                     <div className="space-y-3">
                          <Label className="text-sm font-medium">
-                              Menús
+                              {language === 'es' ? 'Menús' : 'Menus'}
                          </Label>
                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                               {/* Active Menu First (if exists) */}
@@ -228,7 +233,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                              zIndex: 50
                                         }}>
                                              <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
-                                                  Menú Activo
+                                                  {language === 'es' ? 'Menú Activo' : 'Active Menu'}
                                              </span>
                                         </div>
 
@@ -280,7 +285,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                                             activateMenu(menu.id);
                                                        }}
                                                   >
-                                                       Activar
+                                                       {language === 'es' ? 'Activar' : 'Activate'}
                                                   </Button>
                                                   <Button
                                                        size="sm"
@@ -308,29 +313,31 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                     <DialogContent>
                          <DialogHeader>
-                              <DialogTitle>Crear Nuevo Menú</DialogTitle>
+                              <DialogTitle>{language === 'es' ? 'Crear Nuevo Menú' : 'Create New Menu'}</DialogTitle>
                               <DialogDescription>
-                                   Dale un nombre a tu nuevo menú (ej: "Menú Verano 2025", "Menú Especial Navidad")
+                                   {language === 'es'
+                                        ? 'Dale un nombre a tu nuevo menú (ej: "Menú Verano 2025", "Menú Especial Navidad")'
+                                        : 'Give your new menu a name (e.g., "Summer 2025 Menu", "Christmas Special Menu")'}
                               </DialogDescription>
                          </DialogHeader>
 
                          <div className="grid gap-4 py-4">
                               <div className="grid gap-2">
-                                   <Label htmlFor="menu-name">Nombre del Menú</Label>
+                                   <Label htmlFor="menu-name">{language === 'es' ? 'Nombre del Menú' : 'Menu Name'}</Label>
                                    <Input
                                         id="menu-name"
                                         value={newMenuName}
                                         onChange={(e) => setNewMenuName(e.target.value)}
-                                        placeholder="Ej: Menú Verano 2025"
+                                        placeholder={language === 'es' ? 'Ej: Menú Verano 2025' : 'E.g., Summer 2025 Menu'}
                                    />
                               </div>
                          </div>
 
                          <DialogFooter>
                               <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                                   Cancelar
+                                   {t('cancel')}
                               </Button>
-                              <Button onClick={createMenu}>Crear Menú</Button>
+                              <Button onClick={createMenu}>{language === 'es' ? 'Crear Menú' : 'Create Menu'}</Button>
                          </DialogFooter>
                     </DialogContent>
                </Dialog>
