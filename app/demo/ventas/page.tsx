@@ -62,6 +62,26 @@ export default function VentasPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [expandedSale, setExpandedSale] = useState<string | null>(null);
 
+  // Helper to translate product categories
+  const translateCategory = (category: string) => {
+    if (language === 'es') return category;
+
+    const categoryMap: Record<string, string> = {
+      'Todos': 'All',
+      'Cócteles': 'Cocktails',
+      'Cervezas': 'Beers',
+      'Shots': 'Shots',
+      'Bebidas sin alcohol': 'Non-alcoholic',
+      'Alimentos': 'Food',
+      'Postres': 'Desserts',
+      'Entradas': 'Appetizers',
+      'Vinos': 'Wines',
+      'Licores': 'Spirits',
+      'Bebidas alcohólicas': 'Alcoholic drinks',
+    };
+    return categoryMap[category] || category;
+  };
+
   // Fetch products from active menu
   useEffect(() => {
     const fetchProducts = async () => {
@@ -254,7 +274,7 @@ export default function VentasPage() {
                           onClick={() => setSelectedCategory(category)}
                           className="neumorphic-hover"
                         >
-                          {category}
+                          {translateCategory(category)}
                         </Button>
                       ))}
                     </div>
