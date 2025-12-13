@@ -20,6 +20,7 @@ import {
      Sparkles,
 } from "lucide-react";
 import { GlowButton } from "./glow-button";
+import { useLanguage } from "@/hooks/use-language";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -33,6 +34,7 @@ interface UserProfile {
 export default function AccountContent() {
      const { user, establishmentId } = useAuth();
      const { subscription } = useSubscription();
+     const { language } = useLanguage();
      const [profile, setProfile] = useState<UserProfile>({
           email: "",
           full_name: "",
@@ -88,11 +90,11 @@ export default function AccountContent() {
                });
 
                if (userError) throw userError;
-               toast.success("Perfil actualizado correctamente");
+               toast.success(language === 'es' ? "Perfil actualizado correctamente" : "Profile updated successfully");
                setIsEditing(false);
           } catch (error) {
                console.error("Error updating profile:", error);
-               toast.error("Error al actualizar el perfil");
+               toast.error(language === 'es' ? "Error al actualizar el perfil" : "Error updating profile");
           } finally {
                setIsSaving(false);
           }
@@ -120,14 +122,14 @@ export default function AccountContent() {
 
                const stripe = await stripePromise;
                if (!stripe) {
-                    toast.error("Error al cargar Stripe");
+                    toast.error(language === 'es' ? "Error al cargar Stripe" : "Error loading Stripe");
                     return;
                }
 
                (stripe as any).redirectToCheckout({ sessionId });
           } catch (error) {
                console.error("Error creating checkout session:", error);
-               toast.error("Error al procesar el upgrade");
+               toast.error(language === 'es' ? "Error al procesar el upgrade" : "Error processing upgrade");
           } finally {
                setIsUpgrading(false);
           }
@@ -136,10 +138,10 @@ export default function AccountContent() {
 
      const getPlanName = () => {
           switch (subscription.planType) {
-               case "chain": return "Plan Cadena";
-               case "bar_yearly": return "Bar Sucursal (Anual)";
-               case "bar_monthly": return "Bar Sucursal (Mensual)";
-               default: return "Trial Gratuito";
+               case "chain": return language === 'es' ? "Plan Cadena" : "Chain Plan";
+               case "bar_yearly": return language === 'es' ? "Bar Sucursal (Anual)" : "Bar Branch (Yearly)";
+               case "bar_monthly": return language === 'es' ? "Bar Sucursal (Mensual)" : "Bar Branch (Monthly)";
+               default: return language === 'es' ? "Trial Gratuito" : "Free Trial";
           }
      };
 
@@ -188,9 +190,9 @@ export default function AccountContent() {
           <div className="max-w-5xl mx-auto p-6 space-y-8">
                {/* Header */}
                <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Mi Cuenta</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{language === 'es' ? 'Mi Cuenta' : 'My Account'}</h1>
                     <p className="text-muted-foreground">
-                         Administra tu perfil y suscripción
+                         {language === 'es' ? 'Administra tu perfil y suscripción' : 'Manage your profile and subscription'}
                     </p>
                </div>
 
@@ -201,7 +203,7 @@ export default function AccountContent() {
                          className={`relative pb-4 text-sm font-medium transition-colors ${activeTab === "profile" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                               }`}
                     >
-                         Datos de perfil
+                         {language === 'es' ? 'Datos de perfil' : 'Profile Data'}
                          {activeTab === "profile" && (
                               <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary shadow-[0_0_12px_rgba(59,130,246,0.6)]" />
                          )}
@@ -211,7 +213,7 @@ export default function AccountContent() {
                          className={`relative pb-4 text-sm font-medium transition-colors ${activeTab === "subscription" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                               }`}
                     >
-                         Suscripción
+                         {language === 'es' ? 'Suscripción' : 'Subscription'}
                          {activeTab === "subscription" && (
                               <span className="absolute bottom-0 left-0 h-0.5 w-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.6)]" />
                          )}
@@ -227,7 +229,7 @@ export default function AccountContent() {
                                    <div className="grid gap-6 md:grid-cols-2">
                                         <div className="space-y-2">
                                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                  Nombre completo
+                                                  {language === 'es' ? 'Nombre completo' : 'Full Name'}
                                              </Label>
                                              {isEditing ? (
                                                   <Input
@@ -249,7 +251,7 @@ export default function AccountContent() {
 
                                         <div className="space-y-2">
                                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                  Teléfono
+                                                  {language === 'es' ? 'Teléfono' : 'Phone'}
                                              </Label>
                                              {isEditing ? (
                                                   <Input
@@ -264,7 +266,7 @@ export default function AccountContent() {
 
                                         <div className="space-y-2">
                                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                  Establecimiento
+                                                  {language === 'es' ? 'Establecimiento' : 'Establishment'}
                                              </Label>
                                              {isEditing ? (
                                                   <Input
@@ -285,7 +287,7 @@ export default function AccountContent() {
                                                   onClick={() => setIsEditing(true)}
                                              >
                                                   <Edit2 className="mr-2 h-4 w-4" />
-                                                  Editar perfil
+                                                  {language === 'es' ? 'Editar perfil' : 'Edit Profile'}
                                              </Button>
                                         ) : (
                                              <div className="flex gap-3">
@@ -293,7 +295,7 @@ export default function AccountContent() {
                                                        variant="ghost"
                                                        onClick={() => setIsEditing(false)}
                                                   >
-                                                       Cancelar
+                                                       {language === 'es' ? 'Cancelar' : 'Cancel'}
                                                   </Button>
                                                   <Button
                                                        onClick={handleSaveProfile}
@@ -302,12 +304,12 @@ export default function AccountContent() {
                                                        {isSaving ? (
                                                             <span className="flex items-center gap-2">
                                                                  <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-                                                                 Guardando...
+                                                                 {language === 'es' ? 'Guardando...' : 'Saving...'}
                                                             </span>
                                                        ) : (
                                                             <>
                                                                  <Save className="mr-2 h-4 w-4" />
-                                                                 Guardar cambios
+                                                                 {language === 'es' ? 'Guardar cambios' : 'Save Changes'}
                                                             </>
                                                        )}
                                                   </Button>
@@ -325,14 +327,14 @@ export default function AccountContent() {
                               <div className="neumorphic rounded-2xl p-8">
                                    <div className="flex items-start justify-between">
                                         <div>
-                                             <p className="text-sm font-medium text-muted-foreground mb-1">Plan Actual</p>
+                                             <p className="text-sm font-medium text-muted-foreground mb-1">{language === 'es' ? 'Plan Actual' : 'Current Plan'}</p>
                                              <h3 className="text-3xl font-semibold tracking-tight">
                                                   {getPlanName()}
                                              </h3>
                                              {subscription.isTrialing && (
                                                   <div className="mt-3 inline-flex items-center rounded-full bg-yellow-500/10 px-3 py-1.5 text-sm font-medium text-yellow-600 dark:text-yellow-500 ring-1 ring-inset ring-yellow-500/20">
                                                        <Clock className="mr-1.5 h-4 w-4" />
-                                                       {subscription.daysRemaining} días restantes de prueba
+                                                       {subscription.daysRemaining} {language === 'es' ? 'días restantes de prueba' : 'trial days remaining'}
                                                   </div>
                                              )}
                                         </div>
@@ -350,7 +352,7 @@ export default function AccountContent() {
                                                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center shadow-inner">
                                                        <Sparkles className="w-3.5 h-3.5 text-white" />
                                                   </div>
-                                                  <span>Mejorar mi plan</span>
+                                                  <span>{language === 'es' ? 'Mejorar mi plan' : 'Upgrade my plan'}</span>
                                              </GlowButton>
                                         </div>
                                    )}
@@ -360,13 +362,13 @@ export default function AccountContent() {
                               {(showUpgradeOptions || subscription.isTrialing) && !currentPlanIsTopTier && (
                                    <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                             <h4 className="text-lg font-semibold">Planes disponibles</h4>
+                                             <h4 className="text-lg font-semibold">{language === 'es' ? 'Planes disponibles' : 'Available Plans'}</h4>
                                              {showUpgradeOptions && !subscription.isTrialing && (
                                                   <button
                                                        onClick={() => setShowUpgradeOptions(false)}
                                                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                                                   >
-                                                       Ocultar planes
+                                                       {language === 'es' ? 'Ocultar planes' : 'Hide plans'}
                                                   </button>
                                              )}
                                         </div>
@@ -412,7 +414,7 @@ export default function AccountContent() {
                                                                  {isUpgrading ? (
                                                                       <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                                                                  ) : (
-                                                                      "Mejorar Plan"
+                                                                      language === 'es' ? "Mejorar Plan" : "Upgrade Plan"
                                                                  )}
                                                             </Button>
                                                        </div>
@@ -425,9 +427,9 @@ export default function AccountContent() {
                               {currentPlanIsTopTier && (
                                    <div className="neumorphic rounded-2xl p-8 text-center space-y-3">
                                         <Crown className="mx-auto h-12 w-12 text-yellow-500" />
-                                        <h4 className="text-xl font-semibold">¡Estás en el nivel máximo!</h4>
+                                        <h4 className="text-xl font-semibold">{language === 'es' ? '¡Estás en el nivel máximo!' : "You're at the top tier!"}</h4>
                                         <p className="text-muted-foreground">
-                                             Tienes acceso a todas las funcionalidades exclusivas de BarFlow.
+                                             {language === 'es' ? 'Tienes acceso a todas las funcionalidades exclusivas de BarFlow.' : 'You have access to all exclusive BarFlow features.'}
                                         </p>
                                    </div>
                               )}

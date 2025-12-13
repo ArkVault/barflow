@@ -56,7 +56,7 @@ export function DemoSidebar() {
             <LanguageToggle />
           </div>
           <div className="scale-90 origin-top-right">
-            <Link href="/demo/cuenta" title="Cuenta">
+            <Link href="/demo/cuenta" title={t('account')}>
               <button
                 className={cn(
                   "h-10 w-10 rounded-lg inline-flex items-center justify-center transition-colors",
