@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Boxes, Package2, Receipt, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard, User, Grid3x3 } from "lucide-react";
+import { Boxes, Package2, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard, User, ShoppingCart } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/hooks/use-language";
@@ -14,8 +14,7 @@ const demoNavItems = [
   { href: "/demo/planner", labelKey: "planner" as const, icon: ClipboardList },
   { href: "/demo/insumos", labelKey: "supplies" as const, icon: Boxes },
   { href: "/demo/productos", labelKey: "products" as const, icon: Package2 },
-  { href: "/demo/operaciones", labelKey: "operations" as const, icon: Grid3x3 },
-  { href: "/demo/ventas", labelKey: "sales" as const, icon: Receipt },
+  { href: "/demo/punto-de-venta", labelKey: "pos" as const, icon: ShoppingCart },
   { href: "/demo/proyecciones", labelKey: "projections" as const, icon: BarChart3 },
 ];
 
@@ -74,7 +73,7 @@ export function DemoSidebar() {
         <Link href="/demo" className="mb-8 mt-12 block">
           <img
             src="/modoclaro.png"
-            alt="Barmode Demo"
+            alt="Barmode"
             className={cn(
               "dark:hidden transition-all object-contain",
               isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
@@ -82,14 +81,14 @@ export function DemoSidebar() {
           />
           <img
             src="/modoscuro.png"
-            alt="Barmode Demo"
+            alt="Barmode"
             className={cn(
               "hidden dark:block transition-all object-contain",
               isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
             )}
           />
           {!isCollapsed && (
-            <span className="text-xs font-medium text-muted-foreground mt-2 block">Demo</span>
+            <span className="text-xs font-medium text-muted-foreground mt-2 block">v0.1</span>
           )}
         </Link>
 

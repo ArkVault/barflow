@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -37,6 +38,7 @@ type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 export default function InsumosPage() {
   const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
+  const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +73,20 @@ export default function InsumosPage() {
       fetchSupplies();
     }
   }, [establishmentId]);
+
+  // Handle restock query param from /proyecciones
+  useEffect(() => {
+    const restockId = searchParams.get('restock');
+    if (restockId && supplies.length > 0 && !loading) {
+      const supplyToRestock = supplies.find(s => s.id === restockId);
+      if (supplyToRestock) {
+        setRestockingSupply(supplyToRestock);
+        setShowRestockDialog(true);
+        // Clear the URL param after opening
+        window.history.replaceState({}, '', '/demo/insumos');
+      }
+    }
+  }, [searchParams, supplies, loading]);
 
   const fetchSupplies = async () => {
     if (!establishmentId) return;

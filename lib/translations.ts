@@ -10,6 +10,7 @@ export const translations = {
     account: "Cuenta",
     settings: "Configuración",
     operations: "Operaciones",
+    pos: "Punto de Venta",
 
     // Common Actions
     back: "Volver",
@@ -355,6 +356,7 @@ export const translations = {
     account: "Account",
     settings: "Settings",
     operations: "Operations",
+    pos: "Point of Sale",
 
     // Common Actions
     back: "Back",

@@ -10,6 +10,7 @@ interface AuthContextType {
      loading: boolean;
      signOut: () => Promise<void>;
      establishmentId: string | null;
+     establishmentName: string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,12 +18,14 @@ const AuthContext = createContext<AuthContextType>({
      loading: true,
      signOut: async () => { },
      establishmentId: null,
+     establishmentName: null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
      const [user, setUser] = useState<User | null>(null);
      const [loading, setLoading] = useState(true);
      const [establishmentId, setEstablishmentId] = useState<string | null>(null);
+     const [establishmentName, setEstablishmentName] = useState<string | null>(null);
      const router = useRouter();
      const supabase = createClient();
 
@@ -45,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     fetchEstablishment(session.user.id);
                } else {
                     setEstablishmentId(null);
+                    setEstablishmentName(null);
                }
                setLoading(false);
           });
@@ -55,12 +59,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      const fetchEstablishment = async (userId: string) => {
           const { data } = await supabase
                .from("establishments")
-               .select("id")
+               .select("id, name")
                .eq("user_id", userId)
                .single();
 
           if (data) {
                setEstablishmentId(data.id);
+               setEstablishmentName(data.name || null);
           }
      };
 
@@ -68,11 +73,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await supabase.auth.signOut();
           setUser(null);
           setEstablishmentId(null);
+          setEstablishmentName(null);
           router.push("/auth/login");
      };
 
      return (
-          <AuthContext.Provider value={{ user, loading, signOut, establishmentId }}>
+          <AuthContext.Provider value={{ user, loading, signOut, establishmentId, establishmentName }}>
                {children}
           </AuthContext.Provider>
      );

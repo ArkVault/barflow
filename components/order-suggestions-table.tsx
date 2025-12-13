@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertTriangle, Loader2 } from "lucide-react";
+import { ShoppingCart, AlertTriangle, Loader2, Plus } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
@@ -21,6 +22,7 @@ interface Supply {
 }
 
 interface OrderSuggestion {
+     supplyId: string;
      supply: string;
      unit: string;
      currentStock: number;
@@ -102,6 +104,7 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
 
                          if (suggestedOrder > 0) {
                               orderSuggestions.push({
+                                   supplyId: supply.id,
                                    supply: supply.name,
                                    unit: supply.unit,
                                    currentStock: supply.current_quantity,
@@ -236,13 +239,16 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                                                   </div>
                                              </TableCell>
                                              <TableCell className="text-right">
-                                                  <Button
-                                                       variant="ghost"
-                                                       size="sm"
-                                                       className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                                                  >
-                                                       {language === 'es' ? 'Agregar' : 'Add'}
-                                                  </Button>
+                                                  <Link href={`/demo/insumos?restock=${suggestion.supplyId}`}>
+                                                       <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="neumorphic border-0 bg-primary/10 hover:bg-primary/20 text-primary focus:outline-none focus:ring-0 focus-visible:ring-0"
+                                                       >
+                                                            <Plus className="w-3 h-3 mr-1" />
+                                                            {language === 'es' ? 'Abastecer' : 'Restock'}
+                                                       </Button>
+                                                  </Link>
                                              </TableCell>
                                         </TableRow>
                                    ))}

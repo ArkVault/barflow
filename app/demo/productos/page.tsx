@@ -569,89 +569,74 @@ export default function ProductosPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map((product) => (
-                <Card
+                <div
                   key={product.id}
-                  className="neumorphic border-0 cursor-pointer transition-all hover:scale-[1.02]"
+                  className="relative rounded-xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] h-[180px] group"
+                  style={{
+                    backgroundImage: product.image_url
+                      ? `url(${product.image_url})`
+                      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
                   onClick={() => handleViewRecipe(product.id)}
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-4">
-                      {/* Product Image Upload */}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <ProductImageUpload
-                          productId={String(product.id)}
-                          currentImageUrl={product.image_url}
-                          onImageUpdate={(imageUrl) => {
-                            // Update local state
-                            setProducts(products.map(p =>
-                              p.id === product.id ? { ...p, image_url: imageUrl } : p
-                            ));
-                          }}
-                        />
-                      </div>
+                  {/* Dark overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
 
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0 space-y-2">
-                        {/* Badge at top */}
-                        <div className="flex justify-start">
-                          {product.active && (
-                            <Badge className="bg-green-600 whitespace-nowrap">
-                              {t('active')}
-                            </Badge>
-                          )}
-                        </div>
+                  {/* Active badge */}
+                  {product.active && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <Badge className="bg-green-600 text-white text-xs">
+                        {t('active')}
+                      </Badge>
+                    </div>
+                  )}
 
-                        {/* Product name below badge */}
-                        <div>
-                          <CardTitle className="text-xl leading-tight">
-                            {product.name}
-                          </CardTitle>
-                          <CardDescription className="mt-1">
-                            {translateCategory(product.category)}
-                          </CardDescription>
-                        </div>
-                      </div>
+                  {/* Content */}
+                  <div className="relative h-full flex flex-col justify-end p-3">
+                    {/* Product info */}
+                    <div className="mb-2">
+                      <h4 className="font-bold text-white text-sm line-clamp-2 drop-shadow-lg">
+                        {product.name}
+                      </h4>
+                      <p className="text-xs text-white/70">{translateCategory(product.category)}</p>
+                      <p className="text-lg font-bold text-white drop-shadow-lg mt-1">
+                        ${product.price.toFixed(2)}
+                      </p>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</span>
-                        <span className="text-sm text-muted-foreground">{product.ingredients.length} {t('ingredientsCount')}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          variant="ghost"
-                          className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(product.id);
-                          }}
-                          title={language === 'es' ? 'Editar producto' : 'Edit product'}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          {t('edit')}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="neumorphic border-0 bg-background/50 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-0 focus-visible:ring-0"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(product.id);
-                          }}
-                          title={language === 'es' ? 'Eliminar producto' : 'Delete product'}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          {t('delete')}
-                        </Button>
-                      </div>
+
+                    {/* Controls */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 h-7 bg-transparent border-2 border-white text-white hover:bg-white/20 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(product.id);
+                        }}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        {t('edit')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 h-7 bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500/20 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(product.id);
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        {t('delete')}
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
