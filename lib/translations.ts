@@ -151,7 +151,7 @@ export const translations = {
     unitOfMeasure: "Unidad de Medida",
 
     // Products
-    productManagement: "Gestión de Productos",
+    productManagement: "Menús y Productos",
     menuRecipes: "Menú y recetas de bebidas",
     designMenu: "Agregar Producto",
     addProduct: "Añadir Producto",
@@ -495,7 +495,7 @@ export const translations = {
     unitOfMeasure: "Unit of Measure",
 
     // Products
-    productManagement: "Product Management",
+    productManagement: "Menus & Products",
     menuRecipes: "Menu and drink recipes",
     designMenu: "Add Product",
     addProduct: "Add Product",
