@@ -24,14 +24,16 @@ interface Menu {
      id: string;
      name: string;
      is_active: boolean;
+     is_secondary_active?: boolean;
      created_at: string;
 }
 
 interface MenuManagerProps {
      onMenuChange?: (menuId: string) => void;
+     onActiveMenusChange?: (primaryMenuId: string | null, secondaryMenuId: string | null) => void;
 }
 
-export function MenuManager({ onMenuChange }: MenuManagerProps) {
+export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerProps) {
      const { establishmentId } = useAuth();
      const { t, language } = useLanguage();
 
@@ -40,6 +42,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
           id: 'los-clasicos',
           name: 'Los Clásicos',
           is_active: false,
+          is_secondary_active: false,
           created_at: new Date().toISOString()
      };
 
@@ -67,6 +70,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                     id: 'los-clasicos',
                     name: 'Los Clásicos',
                     is_active: false,
+                    is_secondary_active: false,
                     created_at: new Date().toISOString()
                };
                setMenus([losClasicosMenu]);
@@ -87,16 +91,24 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                if (error) throw error;
 
                console.log('MenuManager - Loaded from Supabase:', data?.length || 0, 'menus');
-               console.log('MenuManager - Menu details:', data?.map(m => ({ id: m.id, name: m.name, active: m.is_active })));
+               console.log('MenuManager - Menu details:', data?.map(m => ({ id: m.id, name: m.name, active: m.is_active, secondary: m.is_secondary_active })));
 
                setMenus(data || []);
 
                // Set active menu as selected
                const activeMenu = data?.find((m) => m.is_active);
+               const secondaryMenu = data?.find((m) => m.is_secondary_active);
+
                if (activeMenu) {
                     setSelectedMenuId(activeMenu.id);
                     onMenuChange?.(activeMenu.id);
                }
+
+               // Notify parent of both active menus
+               onActiveMenusChange?.(
+                    activeMenu?.id || null,
+                    secondaryMenu?.id || null
+               );
           } catch (error: any) {
                console.error("Error loading menus:", error);
                // Fallback to empty array on error in production
@@ -122,6 +134,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                          establishment_id: establishmentId,
                          name: newMenuName,
                          is_active: false,
+                         is_secondary_active: false,
                     })
                     .select()
                     .single();
@@ -149,7 +162,7 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
 
                if (error) throw error;
 
-               toast.success(language === 'es' ? "Menú activado" : "Menu activated");
+               toast.success(language === 'es' ? "Menú activado como principal" : "Menu activated as primary");
                setSelectedMenuId(menuId);
                onMenuChange?.(menuId);
                loadMenus();
@@ -159,10 +172,60 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
           }
      };
 
+     const activateSecondaryMenu = async (menuId: string) => {
+          const activeMenu = menus.find(m => m.is_active);
+          if (activeMenu?.id === menuId) {
+               toast.error(language === 'es'
+                    ? "Este menú ya es el principal. Elige otro para secundario."
+                    : "This menu is already the primary. Choose another for secondary.");
+               return;
+          }
+
+          try {
+               const supabase = createClient();
+
+               const { error } = await supabase
+                    .from("menus")
+                    .update({ is_secondary_active: true, updated_at: new Date().toISOString() })
+                    .eq("id", menuId);
+
+               if (error) throw error;
+
+               toast.success(language === 'es' ? "Menú activado como secundario" : "Menu activated as secondary");
+               loadMenus();
+          } catch (error: any) {
+               console.error("Error activating secondary menu:", error);
+               toast.error(language === 'es' ? "Error al activar menú secundario" : "Error activating secondary menu");
+          }
+     };
+
+     const deactivateSecondaryMenu = async (menuId: string) => {
+          try {
+               const supabase = createClient();
+
+               const { error } = await supabase
+                    .from("menus")
+                    .update({ is_secondary_active: false, updated_at: new Date().toISOString() })
+                    .eq("id", menuId);
+
+               if (error) throw error;
+
+               toast.success(language === 'es' ? "Menú secundario desactivado" : "Secondary menu deactivated");
+               loadMenus();
+          } catch (error: any) {
+               console.error("Error deactivating secondary menu:", error);
+               toast.error(language === 'es' ? "Error al desactivar menú secundario" : "Error deactivating secondary menu");
+          }
+     };
+
      const deleteMenu = async (menuId: string) => {
           const menu = menus.find((m) => m.id === menuId);
           if (menu?.is_active) {
                toast.error(language === 'es' ? "No puedes eliminar el menú activo" : "You cannot delete the active menu");
+               return;
+          }
+          if (menu?.is_secondary_active) {
+               toast.error(language === 'es' ? "No puedes eliminar el menú secundario activo" : "You cannot delete the active secondary menu");
                return;
           }
 
@@ -189,10 +252,12 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
      };
 
      const activeMenu = menus.find((m) => m.is_active);
-     const inactiveMenus = menus.filter((m) => !m.is_active);
+     const secondaryActiveMenu = menus.find((m) => m.is_secondary_active);
+     const inactiveMenus = menus.filter((m) => !m.is_active && !m.is_secondary_active);
 
      console.log('MenuManager - All menus:', menus.length);
      console.log('MenuManager - Active menu:', activeMenu?.name, activeMenu?.id);
+     console.log('MenuManager - Secondary active menu:', secondaryActiveMenu?.name, secondaryActiveMenu?.id);
      console.log('MenuManager - Inactive menus:', inactiveMenus.map(m => `${m.name} (${m.id})`));
 
 
@@ -222,24 +287,17 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                               {activeMenu && (
                                    <div
                                         key={activeMenu.id}
-                                        className="group relative rounded-lg p-3 active-menu-card"
-                                        style={{ position: 'relative' }}
+                                        className="group relative rounded-lg p-3 active-menu-card overflow-hidden"
                                    >
-                                        {/* Menú Activo Badge - Top Right Corner */}
-                                        <div style={{
-                                             position: 'absolute',
-                                             top: '0.2rem',
-                                             right: '-9rem',
-                                             zIndex: 50
-                                        }}>
-                                             <span className="inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg whitespace-nowrap">
-                                                  {language === 'es' ? 'Menú Activo' : 'Active Menu'}
-                                             </span>
-                                        </div>
-
                                         <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
+                                             {/* Menú Principal Badge */}
+                                             <div className="flex justify-end mb-1">
+                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg">
+                                                       {language === 'es' ? 'Principal' : 'Primary'}
+                                                  </span>
+                                             </div>
                                              <div>
-                                                  <p className="font-semibold text-foreground text-sm" style={{ paddingRight: '6rem' }}>
+                                                  <p className="font-semibold text-foreground text-sm">
                                                        {activeMenu.name}
                                                   </p>
                                                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -254,13 +312,49 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                    </div>
                               )}
 
+                              {/* Secondary Active Menu (if exists) */}
+                              {secondaryActiveMenu && (
+                                   <div
+                                        key={secondaryActiveMenu.id}
+                                        className="group relative rounded-lg p-3 secondary-menu-card overflow-hidden"
+                                   >
+                                        <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
+                                             {/* Menú Secundario Badge */}
+                                             <div className="flex justify-end mb-1">
+                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-400 to-violet-500 text-white shadow-lg">
+                                                       {language === 'es' ? 'Secundario' : 'Secondary'}
+                                                  </span>
+                                             </div>
+                                             <div>
+                                                  <p className="font-semibold text-foreground text-sm">
+                                                       {secondaryActiveMenu.name}
+                                                  </p>
+                                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                                       {new Date(secondaryActiveMenu.created_at).toLocaleDateString('es-ES', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                       })}
+                                                  </p>
+                                             </div>
+                                             <Button
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  className="w-full h-7 text-xs text-purple-600 hover:text-purple-800 hover:bg-purple-100"
+                                                  onClick={() => deactivateSecondaryMenu(secondaryActiveMenu.id)}
+                                             >
+                                                  {language === 'es' ? 'Desactivar' : 'Deactivate'}
+                                             </Button>
+                                        </div>
+                                   </div>
+                              )}
+
 
                               {/* Inactive Menus */}
                               {inactiveMenus.map((menu) => (
                                    <div
                                         key={menu.id}
-                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
-                                        onClick={() => activateMenu(menu.id)}
+                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02]"
                                    >
                                         <div className="space-y-2">
                                              <div>
@@ -276,21 +370,44 @@ export function MenuManager({ onMenuChange }: MenuManagerProps) {
                                                   </p>
                                              </div>
 
-                                             <div className="flex gap-1.5">
+                                             <div className="flex gap-1.5 items-center">
                                                   <Button
                                                        size="sm"
-                                                       className="flex-1 h-7 text-xs neumorphic-hover"
+                                                       className="flex-1 h-7 text-xs font-medium border-0 shadow-md hover:shadow-lg transition-shadow"
+                                                       style={{
+                                                            background: 'linear-gradient(135deg, #C5D5EA 0%, #A8C5E8 50%, #8FB8E5 100%)',
+                                                            color: '#1a365d',
+                                                       }}
                                                        onClick={(e) => {
                                                             e.stopPropagation();
                                                             activateMenu(menu.id);
                                                        }}
                                                   >
-                                                       {language === 'es' ? 'Activar' : 'Activate'}
+                                                       {language === 'es' ? 'Principal' : 'Primary'}
                                                   </Button>
+                                                  {/* Secondary activation button - only show if there's already a primary */}
+                                                  {activeMenu && (
+                                                       <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="flex-1 h-7 text-xs font-medium border-2 hover:shadow-md transition-shadow"
+                                                            style={{
+                                                                 borderColor: '#A8C5E8',
+                                                                 color: '#4a6fa5',
+                                                                 background: 'transparent',
+                                                            }}
+                                                            onClick={(e) => {
+                                                                 e.stopPropagation();
+                                                                 activateSecondaryMenu(menu.id);
+                                                            }}
+                                                       >
+                                                            {language === 'es' ? 'Secundario' : 'Secondary'}
+                                                       </Button>
+                                                  )}
                                                   <Button
                                                        size="sm"
                                                        variant="ghost"
-                                                       className="h-7 w-7 p-0"
+                                                       className="h-7 w-7 p-0 flex-shrink-0"
                                                        onClick={(e) => {
                                                             e.stopPropagation();
                                                             deleteMenu(menu.id);

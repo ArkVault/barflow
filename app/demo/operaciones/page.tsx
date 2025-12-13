@@ -207,32 +207,37 @@ export default function OperacionesPage() {
      const [productQuantities, setProductQuantities] = useState<{ [key: string]: number }>({});
      const [loadingProducts, setLoadingProducts] = useState(true);
 
-     // Fetch active menu products
+     // Fetch active menu products (primary and secondary)
      useEffect(() => {
           const fetchProducts = async () => {
                setLoadingProducts(true);
                const supabase = createClient();
 
-               // Get active menu
-               const { data: activeMenu } = await supabase
+               // Get both primary and secondary active menus
+               const { data: activeMenus } = await supabase
                     .from('menus')
-                    .select('id')
-                    .eq('is_active', true)
-                    .single();
+                    .select('id, name, is_active, is_secondary_active')
+                    .or('is_active.eq.true,is_secondary_active.eq.true');
 
-               if (!activeMenu) {
+               if (!activeMenus || activeMenus.length === 0) {
                     setLoadingProducts(false);
                     return;
                }
 
-               // Get products from active menu (only active products)
+               // Collect menu IDs from both primary and secondary active menus
+               const menuIds = activeMenus.map(menu => menu.id);
+               console.log('OperacionesPage - Active menus:', activeMenus.map(m => ({ id: m.id, name: m.name, primary: m.is_active, secondary: m.is_secondary_active })));
+               console.log('OperacionesPage - Fetching products from menu IDs:', menuIds);
+
+               // Get products from all active menus (only active products)
                const { data: productsData } = await supabase
                     .from('products')
                     .select('id, name, price, category, menu_id, image_url')
-                    .eq('menu_id', activeMenu.id)
+                    .in('menu_id', menuIds)
                     .eq('is_active', true);
 
                if (productsData) {
+                    console.log('OperacionesPage - Loaded products:', productsData.length);
                     setProducts(productsData);
                }
 
