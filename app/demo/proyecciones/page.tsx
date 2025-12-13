@@ -24,7 +24,7 @@ const SalesProjectionChart = dynamic(() => import("@/components/sales-projection
 import { Flame } from "lucide-react"
 
 export default function ProyeccionesPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [period, setPeriod] = useState<'week' | 'month'>('week');
   const [highSeason, setHighSeason] = useState(false);
 
@@ -67,7 +67,7 @@ export default function ProyeccionesPage() {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 {/* Period Selector */}
                 <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium">Temporalidad:</Label>
+                  <Label className="text-sm font-medium">{language === 'es' ? 'Temporalidad:' : 'Time Period:'}</Label>
                   <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
                     <button
                       type="button"
@@ -97,10 +97,12 @@ export default function ProyeccionesPage() {
                   <Flame className={`w-5 h-5 ${highSeason ? 'text-orange-500' : 'text-muted-foreground'}`} />
                   <div className="flex flex-col">
                     <Label htmlFor="high-season" className="text-sm font-medium cursor-pointer">
-                      Temporada Alta
+                      {language === 'es' ? 'Temporada Alta' : 'High Season'}
                     </Label>
                     <span className="text-xs text-muted-foreground">
-                      {highSeason ? 'Demanda aumentada (+30-40%)' : 'Demanda normal'}
+                      {highSeason
+                        ? (language === 'es' ? 'Demanda aumentada (+30-40%)' : 'Increased demand (+30-40%)')
+                        : (language === 'es' ? 'Demanda normal' : 'Normal demand')}
                     </span>
                   </div>
                   <Switch
@@ -127,12 +129,16 @@ export default function ProyeccionesPage() {
           {/* Info Card */}
           <div className="mt-6 p-4 rounded-lg bg-muted/30 border border-muted">
             <p className="text-sm text-muted-foreground mb-2">
-              <strong>📊 Metodología:</strong> Las proyecciones utilizan <strong>regresión lineal</strong> sobre datos históricos
-              para estimar tendencias futuras de inventario y ventas.
+              <strong>📊 {language === 'es' ? 'Metodología:' : 'Methodology:'}</strong> {language === 'es'
+                ? 'Las proyecciones utilizan'
+                : 'Projections use'} <strong>{language === 'es' ? 'regresión lineal' : 'linear regression'}</strong> {language === 'es'
+                  ? 'sobre datos históricos para estimar tendencias futuras de inventario y ventas.'
+                  : 'on historical data to estimate future inventory and sales trends.'}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>🔥 Temporada Alta:</strong> Activa este modo durante períodos de alta demanda (festividades, eventos especiales)
-              para ajustar las proyecciones automáticamente. Los pedidos sugeridos se actualizan en tiempo real.
+              <strong>🔥 {language === 'es' ? 'Temporada Alta:' : 'High Season:'}</strong> {language === 'es'
+                ? 'Activa este modo durante períodos de alta demanda (festividades, eventos especiales) para ajustar las proyecciones automáticamente. Los pedidos sugeridos se actualizan en tiempo real.'
+                : 'Enable this mode during high demand periods (holidays, special events) to automatically adjust projections. Suggested orders update in real time.'}
             </p>
           </div>
         </div>

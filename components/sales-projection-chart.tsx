@@ -7,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { TrendingUp } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
+import { useLanguage } from '@/hooks/use-language';
 
 interface SalesProjectionProps {
      period: 'week' | 'month';
@@ -58,6 +59,7 @@ function projectFutureSales(
 }
 
 export function SalesProjectionChart({ period, highSeason }: SalesProjectionProps) {
+     const { language } = useLanguage();
      const [selectedProduct, setSelectedProduct] = useState<string>('all');
      const [chartData, setChartData] = useState<any[]>([]);
      const [products, setProducts] = useState<Product[]>([]);
@@ -72,7 +74,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
 
      useEffect(() => {
           generateProjections();
-     }, [period, highSeason, selectedProduct, products]);
+     }, [period, highSeason, selectedProduct, products, language]);
 
      const loadProducts = async () => {
           try {
@@ -108,8 +110,12 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
 
           // Generar datos para la gráfica
           const labels = period === 'week'
-               ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-               : ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+               ? language === 'es'
+                    ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+                    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+               : language === 'es'
+                    ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
+                    : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
           const data = [];
 
@@ -132,24 +138,28 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                          <div className="flex-1">
                               <CardTitle className="text-lg flex items-center gap-2">
                                    <TrendingUp className="w-5 h-5" />
-                                   Proyección de Ventas
+                                   {language === 'es' ? 'Proyección de Ventas' : 'Sales Projection'}
                               </CardTitle>
                               <CardDescription>
-                                   Comparación superpuesta: Real (verde) vs Proyección (morado) {highSeason && '(Temporada Alta)'}
+                                   {language === 'es'
+                                        ? `Comparación superpuesta: Real (verde) vs Proyección (morado) ${highSeason ? '(Temporada Alta)' : ''}`
+                                        : `Overlaid comparison: Actual (green) vs Projection (purple) ${highSeason ? '(High Season)' : ''}`}
                               </CardDescription>
                          </div>
                          <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
                               <SelectTrigger className="w-[220px]">
-                                   <SelectValue placeholder={loading ? "Cargando..." : "Seleccionar producto"} />
+                                   <SelectValue placeholder={loading
+                                        ? (language === 'es' ? "Cargando..." : "Loading...")
+                                        : (language === 'es' ? "Seleccionar producto" : "Select product")} />
                               </SelectTrigger>
                               <SelectContent>
                                    <SelectItem value="all">
-                                        <span className="font-semibold">📊 Todos los Productos</span>
+                                        <span className="font-semibold">📊 {language === 'es' ? 'Todos los Productos' : 'All Products'}</span>
                                    </SelectItem>
                                    {products.length > 0 && (
                                         <>
                                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                                  🔥 Top 10 Más Vendidos
+                                                  🔥 {language === 'es' ? 'Top 10 Más Vendidos' : 'Top 10 Best Sellers'}
                                              </div>
                                              {products.slice(0, 10).map(product => (
                                                   <SelectItem key={product.id} value={product.id}>
@@ -159,7 +169,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                              {products.length > 10 && (
                                                   <>
                                                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
-                                                            Otros Productos
+                                                            {language === 'es' ? 'Otros Productos' : 'Other Products'}
                                                        </div>
                                                        {products.slice(10).map(product => (
                                                             <SelectItem key={product.id} value={product.id}>
@@ -214,7 +224,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    axisLine={false}
                                    tickLine={false}
                                    label={{
-                                        value: 'Ventas',
+                                        value: language === 'es' ? 'Ventas' : 'Sales',
                                         angle: -90,
                                         position: 'insideLeft',
                                         className: 'opacity-50 dark:opacity-50',
@@ -228,7 +238,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                         borderRadius: '12px',
                                         boxShadow: '0 0 20px rgba(34, 197, 94, 0.2)'
                                    }}
-                                   formatter={(value: any) => [value ? `${value} ventas` : 'N/A', '']}
+                                   formatter={(value: any) => [value ? `${value} ${language === 'es' ? 'ventas' : 'sales'}` : 'N/A', '']}
                                    labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}
                               />
                               <Legend
@@ -242,7 +252,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    dataKey="ventas"
                                    stroke="url(#salesActualGradient)"
                                    strokeWidth={4}
-                                   name="Ventas Reales"
+                                   name={language === 'es' ? 'Ventas Reales' : 'Actual Sales'}
                                    dot={{
                                         fill: '#22c55e',
                                         r: 6,
@@ -268,7 +278,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    stroke="url(#salesProjectedGradient)"
                                    strokeWidth={4}
                                    strokeDasharray="8 4"
-                                   name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
+                                   name={language === 'es' ? `Proyección ${highSeason ? '(Temp. Alta)' : ''}` : `Projection ${highSeason ? '(High Season)' : ''}`}
                                    dot={{
                                         fill: '#f97316',
                                         r: 6,
@@ -293,12 +303,12 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                          <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#10b981] to-[#4ade80]"
                                    style={{ boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)' }}></div>
-                              <span className="text-muted-foreground font-medium">Ventas Reales</span>
+                              <span className="text-muted-foreground font-medium">{language === 'es' ? 'Ventas Reales' : 'Actual Sales'}</span>
                          </div>
                          <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#ea580c] to-[#fb923c]"
                                    style={{ boxShadow: '0 0 8px rgba(249, 115, 22, 0.6)' }}></div>
-                              <span className="text-muted-foreground font-medium">Proyección</span>
+                              <span className="text-muted-foreground font-medium">{language === 'es' ? 'Proyección' : 'Projection'}</span>
                          </div>
                     </div>
 
@@ -306,14 +316,14 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                          <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
                               style={{ boxShadow: '0 0 12px rgba(245, 158, 11, 0.1)' }}>
                               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                                   ⚠️ Temporada Alta: Proyección ajustada con +40% de ventas esperadas
+                                   ⚠️ {language === 'es' ? 'Temporada Alta: Proyección ajustada con +40% de ventas esperadas' : 'High Season: Projection adjusted with +40% expected sales'}
                               </p>
                          </div>
                     )}
 
                     <div className="mt-3 p-2 rounded bg-muted/30 border border-muted/50">
                          <p className="text-xs text-muted-foreground">
-                              💡 <strong>Patrón de fin de semana:</strong> Viernes y Sábado tienen +40% más ventas
+                              💡 <strong>{language === 'es' ? 'Patrón de fin de semana:' : 'Weekend pattern:'}</strong> {language === 'es' ? 'Viernes y Sábado tienen +40% más ventas' : 'Friday and Saturday have +40% more sales'}
                          </p>
                     </div>
                </CardContent>

@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/hooks/use-language";
 
 interface OrderSuggestion {
      supply: string;
@@ -20,6 +21,8 @@ interface OrderSuggestionsTableProps {
 }
 
 export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
+     const { language } = useLanguage();
+
      // Mock data - esto se reemplazará con datos reales basados en proyecciones
      const suggestions: OrderSuggestion[] = period === 'week' ? [
           {
@@ -100,10 +103,10 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
 
      const getPriorityLabel = (priority: string) => {
           switch (priority) {
-               case 'high': return 'Alta';
-               case 'medium': return 'Media';
-               case 'low': return 'Baja';
-               default: return 'Normal';
+               case 'high': return language === 'es' ? 'Alta' : 'High';
+               case 'medium': return language === 'es' ? 'Media' : 'Medium';
+               case 'low': return language === 'es' ? 'Baja' : 'Low';
+               default: return language === 'es' ? 'Normal' : 'Normal';
           }
      };
 
@@ -114,12 +117,12 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                          <div>
                               <CardTitle className="text-lg flex items-center gap-2">
                                    <ShoppingCart className="w-5 h-5" />
-                                   Pedidos Sugeridos
+                                   {language === 'es' ? 'Pedidos Sugeridos' : 'Suggested Orders'}
                               </CardTitle>
-                              <CardDescription>Basado en proyecciones de demanda</CardDescription>
+                              <CardDescription>{language === 'es' ? 'Basado en proyecciones de demanda' : 'Based on demand projections'}</CardDescription>
                          </div>
                          <Button className="neumorphic-hover border-0" size="sm">
-                              Generar Orden de Compra
+                              {language === 'es' ? 'Generar Orden de Compra' : 'Generate Purchase Order'}
                          </Button>
                     </div>
                </CardHeader>
@@ -127,13 +130,13 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                     <Table>
                          <TableHeader>
                               <TableRow>
-                                   <TableHead>Insumo</TableHead>
-                                   <TableHead className="text-center">Stock Actual</TableHead>
-                                   <TableHead className="text-center">Necesidad Proyectada</TableHead>
-                                   <TableHead className="text-center">Cantidad Sugerida</TableHead>
-                                   <TableHead className="text-center">Prioridad</TableHead>
-                                   <TableHead className="text-center">Días Críticos</TableHead>
-                                   <TableHead className="text-right">Acción</TableHead>
+                                   <TableHead>{language === 'es' ? 'Insumo' : 'Supply'}</TableHead>
+                                   <TableHead className="text-center">{language === 'es' ? 'Stock Actual' : 'Current Stock'}</TableHead>
+                                   <TableHead className="text-center">{language === 'es' ? 'Necesidad Proyectada' : 'Projected Need'}</TableHead>
+                                   <TableHead className="text-center">{language === 'es' ? 'Cantidad Sugerida' : 'Suggested Qty'}</TableHead>
+                                   <TableHead className="text-center">{language === 'es' ? 'Prioridad' : 'Priority'}</TableHead>
+                                   <TableHead className="text-center">{language === 'es' ? 'Días Críticos' : 'Critical Days'}</TableHead>
+                                   <TableHead className="text-right">{language === 'es' ? 'Acción' : 'Action'}</TableHead>
                               </TableRow>
                          </TableHeader>
                          <TableBody>
@@ -168,7 +171,7 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                                                   size="sm"
                                                   className="neumorphic border-0 bg-background/50 hover:bg-background/80 focus:outline-none focus:ring-0 focus-visible:ring-0"
                                              >
-                                                  Agregar
+                                                  {language === 'es' ? 'Agregar' : 'Add'}
                                              </Button>
                                         </TableCell>
                                    </TableRow>

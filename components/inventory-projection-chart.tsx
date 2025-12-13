@@ -235,7 +235,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    axisLine={false}
                                    tickLine={false}
                                    label={{
-                                        value: 'Unidades',
+                                        value: language === 'es' ? 'Unidades' : 'Units',
                                         angle: -90,
                                         position: 'insideLeft',
                                         className: 'opacity-50 dark:opacity-50',
@@ -259,7 +259,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    dataKey="actual"
                                    stroke="url(#actualGradient)"
                                    strokeWidth={4}
-                                   name="Inventario Real"
+                                   name={language === 'es' ? 'Inventario Real' : 'Actual Inventory'}
                                    dot={{
                                         fill: '#4A90E2',
                                         r: 6,
@@ -285,7 +285,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    stroke="url(#projectedGradient)"
                                    strokeWidth={4}
                                    strokeDasharray="8 4"
-                                   name={`Proyección ${highSeason ? '(Temp. Alta)' : ''}`}
+                                   name={language === 'es' ? `Proyección ${highSeason ? '(Temp. Alta)' : ''}` : `Projection ${highSeason ? '(High Season)' : ''}`}
                                    dot={{
                                         fill: '#9333EA',
                                         r: 6,
@@ -311,7 +311,7 @@ export function InventoryProjectionChart({ period, highSeason }: InventoryProjec
                                    stroke="url(#criticalGradient)"
                                    strokeWidth={2}
                                    strokeDasharray="4 4"
-                                   name="Nivel Crítico"
+                                   name={language === 'es' ? 'Nivel Crítico' : 'Critical Level'}
                                    dot={false}
                                    filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.4))"
                               />
