@@ -17,17 +17,23 @@ interface SalesProjectionProps {
 interface Product {
      id: string;
      name: string;
+     menu_id: string;
 }
 
 // Función de regresión lineal
 function linearRegression(data: number[]): { slope: number; intercept: number } {
+     if (data.length === 0) return { slope: 0, intercept: 0 };
+
      const n = data.length;
      const sumX = data.reduce((sum, _, i) => sum + i, 0);
      const sumY = data.reduce((sum, y) => sum + y, 0);
      const sumXY = data.reduce((sum, y, i) => sum + i * y, 0);
      const sumX2 = data.reduce((sum, _, i) => sum + i * i, 0);
 
-     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+     const denominator = n * sumX2 - sumX * sumX;
+     if (denominator === 0) return { slope: 0, intercept: sumY / n };
+
+     const slope = (n * sumXY - sumX * sumY) / denominator;
      const intercept = (sumY - slope * sumX) / n;
 
      return { slope, intercept };
@@ -45,12 +51,13 @@ function projectFutureSales(
 
      // Patrón de ventas: Viernes y Sábado tienen 40% más ventas
      const weekendMultipliers = period === 'week'
-          ? [1.0, 1.0, 1.0, 1.0, 1.4, 1.4, 1.0] // Lun-Dom
+          ? [1.0, 1.0, 1.0, 1.0, 1.4, 1.4, 1.0] // Dom, Lun, Mar, Mie, Jue, Vie, Sab
           : [1.0, 1.0, 1.0, 1.0]; // Semanas
 
-     for (let i = historicalData.length; i < historicalData.length + futurePoints; i++) {
-          const baseProjection = slope * i + intercept;
-          const dayMultiplier = period === 'week' ? weekendMultipliers[i % 7] : 1.0;
+     for (let i = 0; i < futurePoints; i++) {
+          const baseProjection = slope * (historicalData.length + i) + intercept;
+          const dayOfWeek = (new Date().getDay() + i + 1) % 7;
+          const dayMultiplier = period === 'week' ? weekendMultipliers[dayOfWeek] : 1.0;
           const projected = baseProjection * dayMultiplier * highSeasonMultiplier;
           projections.push(Math.max(0, Math.round(projected)));
      }
@@ -73,16 +80,42 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
      }, [establishmentId]);
 
      useEffect(() => {
-          generateProjections();
-     }, [period, highSeason, selectedProduct, products, language]);
+          if (establishmentId) {
+               generateProjections();
+          }
+     }, [period, highSeason, selectedProduct, products, language, establishmentId]);
 
      const loadProducts = async () => {
           try {
                const supabase = createClient();
+
+               // First, get active menus for this establishment
+               const { data: menus, error: menuError } = await supabase
+                    .from('menus')
+                    .select('id')
+                    .eq('establishment_id', establishmentId)
+                    .or('is_active.eq.true,is_secondary_active.eq.true');
+
+               if (menuError) {
+                    console.error('Error loading menus:', menuError);
+                    setLoading(false);
+                    return;
+               }
+
+               if (!menus || menus.length === 0) {
+                    setProducts([]);
+                    setLoading(false);
+                    return;
+               }
+
+               const menuIds = menus.map(m => m.id);
+
+               // Then, get products from those menus
                const { data, error } = await supabase
                     .from('products')
-                    .select('id, name')
-                    .eq('establishment_id', establishmentId)
+                    .select('id, name, menu_id')
+                    .in('menu_id', menuIds)
+                    .eq('is_active', true)
                     .order('name', { ascending: true });
 
                if (!error && data) {
@@ -95,40 +128,117 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
           }
      };
 
-     const generateProjections = () => {
-          // Datos históricos simulados con patrón de fin de semana
-          const historicalSales = period === 'week'
-               ? [42, 48, 45, 52, 72, 85, 68] // Últimos 7 días (nota: pico Vie-Sáb)
-               : [280, 310, 340, 365]; // Últimas 4 semanas
+     const generateProjections = async () => {
+          try {
+               const supabase = createClient();
 
-          // Multiplicador de temporada alta (40% más de ventas)
-          const seasonMultiplier = highSeason ? 1.4 : 1.0;
+               // Calculate date range based on period
+               const now = new Date();
+               const startDate = new Date();
 
-          // Proyectar ventas futuras (mismo número de puntos para superposición)
-          const futurePoints = historicalSales.length;
-          const projectedSales = projectFutureSales(historicalSales, futurePoints, seasonMultiplier, period);
+               if (period === 'week') {
+                    startDate.setDate(now.getDate() - 6); // Last 7 days
+               } else {
+                    startDate.setDate(now.getDate() - 27); // Last 4 weeks (28 days)
+               }
+               startDate.setHours(0, 0, 0, 0);
 
-          // Generar datos para la gráfica
-          const labels = period === 'week'
-               ? language === 'es'
-                    ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-                    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-               : language === 'es'
-                    ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
-                    : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+               // Fetch sales from Supabase
+               const { data: salesData, error } = await supabase
+                    .from('sales')
+                    .select('id, total, created_at, items')
+                    .eq('establishment_id', establishmentId)
+                    .gte('created_at', startDate.toISOString())
+                    .order('created_at', { ascending: true });
 
-          const data = [];
+               if (error) {
+                    console.error('Error fetching sales:', error);
+                    return;
+               }
 
-          // Superponer ventas reales y proyectadas en la misma temporalidad
-          for (let i = 0; i < historicalSales.length; i++) {
-               data.push({
-                    day: labels[i],
-                    ventas: historicalSales[i],
-                    proyectado: projectedSales[i]
+               // Group sales by day or week
+               const salesByPeriod: Record<string, number> = {};
+
+               (salesData || []).forEach((sale: any) => {
+                    const saleDate = new Date(sale.created_at);
+                    let key: string;
+
+                    if (period === 'week') {
+                         key = saleDate.toISOString().split('T')[0];
+                    } else {
+                         const weekNumber = Math.floor((saleDate.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+                         key = `week-${weekNumber}`;
+                    }
+
+                    if (!salesByPeriod[key]) {
+                         salesByPeriod[key] = 0;
+                    }
+
+                    // Filter by selected product if needed
+                    const items = sale.items || [];
+                    let itemCount = 0;
+
+                    if (selectedProduct === 'all') {
+                         itemCount = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+                    } else {
+                         const selectedProductData = products.find(p => p.id === selectedProduct);
+                         if (selectedProductData) {
+                              items.forEach((item: any) => {
+                                   // Handle different field names: productName (from sales) or name
+                                   const itemName = item.productName || item.name || item.product_name || '';
+                                   if (itemName === selectedProductData.name) {
+                                        itemCount += item.quantity || 1;
+                                   }
+                              });
+                         }
+                    }
+
+                    salesByPeriod[key] += itemCount;
                });
-          }
 
-          setChartData(data);
+               // Build historical sales array
+               const historicalSales: number[] = [];
+               const numPeriods = period === 'week' ? 7 : 4;
+
+               for (let i = 0; i < numPeriods; i++) {
+                    if (period === 'week') {
+                         const date = new Date(startDate);
+                         date.setDate(startDate.getDate() + i);
+                         const dateKey = date.toISOString().split('T')[0];
+                         historicalSales.push(salesByPeriod[dateKey] || 0);
+                    } else {
+                         historicalSales.push(salesByPeriod[`week-${i}`] || 0);
+                    }
+               }
+
+               // Project future sales
+               const seasonMultiplier = highSeason ? 1.4 : 1.0;
+               const projectedSales = projectFutureSales(historicalSales, numPeriods, seasonMultiplier, period);
+
+               // Generate labels
+               const labels = period === 'week'
+                    ? language === 'es'
+                         ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+                         : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    : language === 'es'
+                         ? ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
+                         : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+
+               // Build chart data - overlay actual and projected on same time periods
+               const data = [];
+
+               for (let i = 0; i < numPeriods; i++) {
+                    data.push({
+                         day: labels[i],
+                         ventas: historicalSales[i],
+                         proyectado: projectedSales[i]
+                    });
+               }
+
+               setChartData(data);
+          } catch (error) {
+               console.error('Error generating projections:', error);
+          }
      };
 
      return (
@@ -142,8 +252,8 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                               </CardTitle>
                               <CardDescription>
                                    {language === 'es'
-                                        ? `Comparación superpuesta: Real (verde) vs Proyección (morado) ${highSeason ? '(Temporada Alta)' : ''}`
-                                        : `Overlaid comparison: Actual (green) vs Projection (purple) ${highSeason ? '(High Season)' : ''}`}
+                                        ? `Real (verde) vs Proyección (naranja) ${highSeason ? '(Temporada Alta)' : ''}`
+                                        : `Actual (green) vs Projection (orange) ${highSeason ? '(High Season)' : ''}`}
                               </CardDescription>
                          </div>
                          <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={loading}>
@@ -159,19 +269,19 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                                    {products.length > 0 && (
                                         <>
                                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                                                  🔥 {language === 'es' ? 'Top 10 Más Vendidos' : 'Top 10 Best Sellers'}
+                                                  🔥 {language === 'es' ? 'Productos' : 'Products'}
                                              </div>
-                                             {products.slice(0, 10).map(product => (
+                                             {products.slice(0, 15).map(product => (
                                                   <SelectItem key={product.id} value={product.id}>
                                                        {product.name}
                                                   </SelectItem>
                                              ))}
-                                             {products.length > 10 && (
+                                             {products.length > 15 && (
                                                   <>
                                                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
                                                             {language === 'es' ? 'Otros Productos' : 'Other Products'}
                                                        </div>
-                                                       {products.slice(10).map(product => (
+                                                       {products.slice(15).map(product => (
                                                             <SelectItem key={product.id} value={product.id}>
                                                                  {product.name}
                                                             </SelectItem>
@@ -185,119 +295,122 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
                     </div>
                </CardHeader>
                <CardContent className="px-3 pb-2">
-                    <ResponsiveContainer width="100%" height={160}>
-                         <LineChart data={chartData}>
-                              <defs>
-                                   {/* Gradiente para línea de ventas reales - VERDE */}
-                                   <linearGradient id="salesActualGradient" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
-                                        <stop offset="50%" stopColor="#22c55e" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#4ade80" stopOpacity={1} />
-                                   </linearGradient>
+                    {loading ? (
+                         <div className="h-[160px] w-full animate-pulse bg-muted/20 rounded-lg flex items-center justify-center">
+                              <span className="text-xs text-muted-foreground">
+                                   {language === 'es' ? 'Cargando proyecciones...' : 'Loading projections...'}
+                              </span>
+                         </div>
+                    ) : (
+                         <ResponsiveContainer width="100%" height={160}>
+                              <LineChart data={chartData}>
+                                   <defs>
+                                        <linearGradient id="salesActualGradient" x1="0" y1="0" x2="1" y2="0">
+                                             <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+                                             <stop offset="50%" stopColor="#22c55e" stopOpacity={1} />
+                                             <stop offset="100%" stopColor="#4ade80" stopOpacity={1} />
+                                        </linearGradient>
+                                        <linearGradient id="salesProjectedGradient" x1="0" y1="0" x2="1" y2="0">
+                                             <stop offset="0%" stopColor="#ea580c" stopOpacity={1} />
+                                             <stop offset="50%" stopColor="#f97316" stopOpacity={1} />
+                                             <stop offset="100%" stopColor="#fb923c" stopOpacity={1} />
+                                        </linearGradient>
+                                   </defs>
 
-                                   {/* Gradiente para línea proyectada - NARANJA */}
-                                   <linearGradient id="salesProjectedGradient" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="0%" stopColor="#ea580c" stopOpacity={1} />
-                                        <stop offset="50%" stopColor="#f97316" stopOpacity={1} />
-                                        <stop offset="100%" stopColor="#fb923c" stopOpacity={1} />
-                                   </linearGradient>
-                              </defs>
+                                   <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="currentColor"
+                                        className="opacity-10 dark:opacity-5"
+                                        vertical={false}
+                                   />
+                                   <XAxis
+                                        dataKey="day"
+                                        stroke="currentColor"
+                                        className="opacity-50 dark:opacity-30"
+                                        style={{ fontSize: '11px', fontWeight: '500' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                   />
+                                   <YAxis
+                                        stroke="currentColor"
+                                        className="opacity-50 dark:opacity-30"
+                                        style={{ fontSize: '11px', fontWeight: '500' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        label={{
+                                             value: language === 'es' ? 'Ventas' : 'Sales',
+                                             angle: -90,
+                                             position: 'insideLeft',
+                                             className: 'opacity-50 dark:opacity-50',
+                                             style: { fontSize: '11px' }
+                                        }}
+                                   />
+                                   <Tooltip
+                                        contentStyle={{
+                                             backgroundColor: 'rgba(0,0,0,0.9)',
+                                             border: '1px solid rgba(34, 197, 94, 0.3)',
+                                             borderRadius: '12px',
+                                             boxShadow: '0 0 20px rgba(34, 197, 94, 0.2)'
+                                        }}
+                                        formatter={(value: any) => [value ? `${value} ${language === 'es' ? 'ventas' : 'sales'}` : '0', '']}
+                                        labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}
+                                   />
+                                   <Legend
+                                        wrapperStyle={{ paddingTop: '20px' }}
+                                        iconType="circle"
+                                   />
 
-                              <CartesianGrid
-                                   strokeDasharray="3 3"
-                                   stroke="currentColor"
-                                   className="opacity-10 dark:opacity-5"
-                                   vertical={false}
-                              />
-                              <XAxis
-                                   dataKey="day"
-                                   stroke="currentColor"
-                                   className="opacity-50 dark:opacity-30"
-                                   style={{ fontSize: '11px', fontWeight: '500' }}
-                                   axisLine={false}
-                                   tickLine={false}
-                              />
-                              <YAxis
-                                   stroke="currentColor"
-                                   className="opacity-50 dark:opacity-30"
-                                   style={{ fontSize: '11px', fontWeight: '500' }}
-                                   axisLine={false}
-                                   tickLine={false}
-                                   label={{
-                                        value: language === 'es' ? 'Ventas' : 'Sales',
-                                        angle: -90,
-                                        position: 'insideLeft',
-                                        className: 'opacity-50 dark:opacity-50',
-                                        style: { fontSize: '11px' }
-                                   }}
-                              />
-                              <Tooltip
-                                   contentStyle={{
-                                        backgroundColor: 'rgba(0,0,0,0.9)',
-                                        border: '1px solid rgba(34, 197, 94, 0.3)',
-                                        borderRadius: '12px',
-                                        boxShadow: '0 0 20px rgba(34, 197, 94, 0.2)'
-                                   }}
-                                   formatter={(value: any) => [value ? `${value} ${language === 'es' ? 'ventas' : 'sales'}` : 'N/A', '']}
-                                   labelStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}
-                              />
-                              <Legend
-                                   wrapperStyle={{ paddingTop: '20px' }}
-                                   iconType="circle"
-                              />
+                                   <Line
+                                        type="monotone"
+                                        dataKey="ventas"
+                                        stroke="url(#salesActualGradient)"
+                                        strokeWidth={4}
+                                        name={language === 'es' ? 'Ventas Reales' : 'Actual Sales'}
+                                        dot={{
+                                             fill: '#22c55e',
+                                             r: 6,
+                                             strokeWidth: 2,
+                                             stroke: '#fff',
+                                             filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))'
+                                        }}
+                                        activeDot={{
+                                             r: 8,
+                                             fill: '#22c55e',
+                                             stroke: '#fff',
+                                             strokeWidth: 2,
+                                             filter: 'drop-shadow(0 0 12px rgba(34, 197, 94, 1))'
+                                        }}
+                                        connectNulls={false}
+                                        filter="drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))"
+                                   />
 
-                              {/* Línea de ventas reales con efecto neon - VERDE */}
-                              <Line
-                                   type="monotone"
-                                   dataKey="ventas"
-                                   stroke="url(#salesActualGradient)"
-                                   strokeWidth={4}
-                                   name={language === 'es' ? 'Ventas Reales' : 'Actual Sales'}
-                                   dot={{
-                                        fill: '#22c55e',
-                                        r: 6,
-                                        strokeWidth: 2,
-                                        stroke: '#fff',
-                                        filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.8))'
-                                   }}
-                                   activeDot={{
-                                        r: 8,
-                                        fill: '#22c55e',
-                                        stroke: '#fff',
-                                        strokeWidth: 2,
-                                        filter: 'drop-shadow(0 0 12px rgba(34, 197, 94, 1))'
-                                   }}
-                                   connectNulls={false}
-                                   filter="drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))"
-                              />
-
-                              {/* Línea proyectada con efecto neon - NARANJA */}
-                              <Line
-                                   type="monotone"
-                                   dataKey="proyectado"
-                                   stroke="url(#salesProjectedGradient)"
-                                   strokeWidth={4}
-                                   strokeDasharray="8 4"
-                                   name={language === 'es' ? `Proyección ${highSeason ? '(Temp. Alta)' : ''}` : `Projection ${highSeason ? '(High Season)' : ''}`}
-                                   dot={{
-                                        fill: '#f97316',
-                                        r: 6,
-                                        strokeWidth: 2,
-                                        stroke: '#fff',
-                                        filter: 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.8))'
-                                   }}
-                                   activeDot={{
-                                        r: 8,
-                                        fill: '#f97316',
-                                        stroke: '#fff',
-                                        strokeWidth: 2,
-                                        filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 1))'
-                                   }}
-                                   connectNulls={false}
-                                   filter="drop-shadow(0 0 8px rgba(249, 115, 22, 0.6))"
-                              />
-                         </LineChart>
-                    </ResponsiveContainer>
+                                   <Line
+                                        type="monotone"
+                                        dataKey="proyectado"
+                                        stroke="url(#salesProjectedGradient)"
+                                        strokeWidth={4}
+                                        strokeDasharray="8 4"
+                                        name={language === 'es' ? `Proyección ${highSeason ? '(Temp. Alta)' : ''}` : `Projection ${highSeason ? '(High Season)' : ''}`}
+                                        dot={{
+                                             fill: '#f97316',
+                                             r: 6,
+                                             strokeWidth: 2,
+                                             stroke: '#fff',
+                                             filter: 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.8))'
+                                        }}
+                                        activeDot={{
+                                             r: 8,
+                                             fill: '#f97316',
+                                             stroke: '#fff',
+                                             strokeWidth: 2,
+                                             filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 1))'
+                                        }}
+                                        connectNulls={false}
+                                        filter="drop-shadow(0 0 8px rgba(249, 115, 22, 0.6))"
+                                   />
+                              </LineChart>
+                         </ResponsiveContainer>
+                    )}
 
                     <div className="mt-6 grid grid-cols-2 gap-4 text-xs">
                          <div className="flex items-center gap-2">
@@ -323,7 +436,7 @@ export function SalesProjectionChart({ period, highSeason }: SalesProjectionProp
 
                     <div className="mt-3 p-2 rounded bg-muted/30 border border-muted/50">
                          <p className="text-xs text-muted-foreground">
-                              💡 <strong>{language === 'es' ? 'Patrón de fin de semana:' : 'Weekend pattern:'}</strong> {language === 'es' ? 'Viernes y Sábado tienen +40% más ventas' : 'Friday and Saturday have +40% more sales'}
+                              💡 <strong>{language === 'es' ? 'Basado en ventas reales:' : 'Based on real sales:'}</strong> {language === 'es' ? 'Proyecciones calculadas a partir del historial de ventas de tu establecimiento' : 'Projections calculated from your establishment sales history'}
                          </p>
                     </div>
                </CardContent>
