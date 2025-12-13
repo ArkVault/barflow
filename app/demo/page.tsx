@@ -53,7 +53,7 @@ interface TopProduct {
 
 export default function DemoPage() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { establishmentId, loading: authLoading, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [supplies, setSupplies] = useState<Supply[]>([]);
@@ -80,8 +80,20 @@ export default function DemoPage() {
       setLoading(true);
       const supabase = createClient();
 
+      // First, get active menus (primary and secondary)
+      const { data: activeMenus, error: menusError } = await supabase
+        .from('menus')
+        .select('id, name, is_active, is_secondary_active')
+        .eq('establishment_id', establishmentId)
+        .or('is_active.eq.true,is_secondary_active.eq.true');
+
+      if (menusError) throw menusError;
+
+      const menuIds = (activeMenus || []).map(m => m.id);
+      const primaryMenu = activeMenus?.find(m => m.is_active);
+
       // Carga paralela de todos los datos para mayor velocidad
-      const [suppliesRes, productsRes, activeMenuRes, salesRes] = await Promise.all([
+      const [suppliesRes, productsRes, salesRes] = await Promise.all([
         // 1. Insumos
         supabase
           .from('supplies')
@@ -89,24 +101,17 @@ export default function DemoPage() {
           .eq('establishment_id', establishmentId)
           .order('name', { ascending: true }),
 
-        // 2. Productos (solo activos)
-        supabase
-          .from('products')
-          .select('id, updated_at, menu_id')
-          .eq('establishment_id', establishmentId)
-          .eq('is_active', true)
-          .order('updated_at', { ascending: false }),
+        // 2. Productos de menús activos (primary + secondary)
+        menuIds.length > 0
+          ? supabase
+            .from('products')
+            .select('id, name, updated_at, menu_id')
+            .in('menu_id', menuIds)
+            .eq('is_active', true)
+            .order('updated_at', { ascending: false })
+          : Promise.resolve({ data: [], error: null }),
 
-        // 3. Menú Activo
-        supabase
-          .from('menus')
-          .select('id, name')
-          .eq('establishment_id', establishmentId)
-          .eq('is_active', true)
-          .single(),
-
-
-        // 4. Ventas (última semana) - Get items from JSONB
+        // 3. Ventas (última semana) - Get items from JSONB
         supabase
           .from('sales')
           .select('id, items, total, created_at')
@@ -140,11 +145,11 @@ export default function DemoPage() {
       setTotalProducts(productsData.length);
 
       // Procesar Menú Activo y sus productos
-      if (activeMenuRes.data) {
-        setActiveMenuName(activeMenuRes.data.name);
-        // Contar productos del menú activo
-        const activeMenuProducts = productsData.filter(p => p.menu_id === activeMenuRes.data.id);
-        setActiveMenuProductsCount(activeMenuProducts.length);
+      if (primaryMenu) {
+        setActiveMenuName(primaryMenu.name);
+        // Contar productos del menú primario
+        const primaryMenuProducts = productsData.filter(p => p.menu_id === primaryMenu.id);
+        setActiveMenuProductsCount(primaryMenuProducts.length);
       } else {
         setActiveMenuName("Sin menú activo");
         setActiveMenuProductsCount(0);
@@ -168,14 +173,15 @@ export default function DemoPage() {
           (month >= 8 && month <= 10) ? "Otoño" : "Invierno";
       setMenuName(`${season} ${new Date().getFullYear()}`);
 
-      // Procesar Ventas - Parse items from JSONB
+      // Procesar Ventas - Parse items from JSONB (field is 'productName' from sales records)
       const salesData = salesRes.data || [];
       const salesByProduct: Record<string, { name: string; total: number }> = {};
 
       salesData.forEach((sale: any) => {
         const items = sale.items || [];
         items.forEach((item: any) => {
-          const productName = item.name || item.product_name || 'Producto Desconocido';
+          // Handle different field names: productName (from sales) or name/product_name
+          const productName = item.productName || item.name || item.product_name || 'Producto Desconocido';
           const quantity = item.quantity || 1;
           if (!salesByProduct[productName]) {
             salesByProduct[productName] = { name: productName, total: 0 };
@@ -328,51 +334,75 @@ export default function DemoPage() {
 
                 {/* 2. PRODUCTOS - Large Number Display */}
                 <Card className="neumorphic border-0 bg-gradient-to-br from-background to-muted/20">
-                  <CardHeader className="pb-1 px-3 pt-2">
+                  <CardHeader className="pb-0 px-3 pt-2">
                     <CardTitle className="text-xs font-bold">{t('products')}</CardTitle>
                     <CardDescription className="text-[10px]">{t('currentMenu')}</CardDescription>
                   </CardHeader>
-                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
-                    <div className="flex items-start justify-between w-full">
-                      <div className="flex flex-col">
-                        <p className="text-4xl font-black text-primary leading-none" style={{
+                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col overflow-hidden">
+                    {/* Stats Row - Compact */}
+                    <div className="flex items-center justify-between w-full mb-1.5 pb-1 border-b border-border/30">
+                      <div className="flex items-center gap-2">
+                        <p className="text-2xl font-black text-primary leading-none" style={{
                           fontFamily: 'Satoshi, sans-serif',
-                          textShadow: '0 0 20px rgba(var(--primary-rgb), 0.5)'
+                          textShadow: '0 0 12px rgba(var(--primary-rgb), 0.4)'
                         }}>
                           {totalProducts}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">{t('inMenu')}</p>
+                        <span className="text-[9px] text-muted-foreground">{t('inMenu')}</span>
                       </div>
-
-                      <div className="text-right space-y-0.5">
-                        <div className="text-[10px] text-muted-foreground">{t('activeMenu')}: <span className="font-medium text-foreground">{activeMenuName}</span></div>
-                        <div className="text-[10px] text-muted-foreground">{t('products')}: <span className="font-medium text-foreground">{activeMenuProductsCount}</span></div>
-                        <div className="text-[10px] text-muted-foreground">{t('modified')}: <span className="font-medium text-foreground">{menuLastModified}</span></div>
+                      <div className="text-right text-[8px] text-muted-foreground leading-tight">
+                        <div>{activeMenuName}</div>
+                        <div className="opacity-70">{menuLastModified}</div>
                       </div>
                     </div>
 
-                    {/* Top 5 Selling Products - Clean List */}
-                    {topProducts.length > 0 && (
-                      <div className="w-full mt-2 flex-1 overflow-hidden">
-                        <p className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">{t('topSelling')}</p>
-                        <div className="space-y-1">
+                    {/* Top 5 Selling Products - Compact Centered List */}
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <p className="text-[10px] font-bold text-center mb-1 text-foreground">
+                        🔥 {t('topSelling')}
+                      </p>
+                      {topProducts.length > 0 ? (
+                        <div className="space-y-0.5 flex-1 overflow-hidden">
                           {topProducts.slice(0, 5).map((product, index) => (
-                            <div key={index} className="flex items-center justify-between text-[10px] border-b border-border/40 last:border-0 pb-0.5">
-                              <div className="flex items-center gap-2 overflow-hidden">
-                                <span className={`font-bold w-3 ${index === 0 ? 'text-amber-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-700' : 'text-muted-foreground'}`}>
-                                  #{index + 1}
+                            <div
+                              key={index}
+                              className={`flex items-center justify-between px-2 py-0.5 rounded text-[9px] ${index === 0
+                                  ? 'bg-amber-500/10 border border-amber-500/20'
+                                  : index === 1
+                                    ? 'bg-slate-400/10 border border-slate-400/15'
+                                    : index === 2
+                                      ? 'bg-amber-700/10 border border-amber-700/15'
+                                      : 'bg-muted/20'
+                                }`}
+                            >
+                              <div className="flex items-center gap-1.5 overflow-hidden flex-1 min-w-0">
+                                <span className={`font-bold flex-shrink-0 ${index === 0 ? 'text-amber-500' :
+                                    index === 1 ? 'text-slate-400' :
+                                      index === 2 ? 'text-amber-700' :
+                                        'text-muted-foreground'
+                                  }`}>
+                                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                 </span>
                                 <span className="font-medium truncate">{product.product_name}</span>
                               </div>
-                              <span className="text-muted-foreground whitespace-nowrap">{product.total_sales} u.</span>
+                              <span className={`font-bold whitespace-nowrap ml-1 ${index === 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
+                                }`}>
+                                {product.total_sales}
+                              </span>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                          <p className="text-[10px] text-muted-foreground text-center">
+                            {language === 'es' ? 'Sin ventas registradas' : 'No sales recorded'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
-                    <Link href="/demo/productos" className="mt-auto pt-2">
-                      <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
+                    <Link href="/demo/productos" className="mt-1 flex-shrink-0">
+                      <Button variant="ghost" size="sm" className="w-full text-[9px] h-5 hover:bg-primary/10 hover:text-primary">
                         {t('viewAllProducts')} →
                       </Button>
                     </Link>
