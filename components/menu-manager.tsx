@@ -321,7 +321,7 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                         <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
                                              {/* Menú Secundario Badge */}
                                              <div className="flex justify-end mb-1">
-                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #C7B9DE 0%, #BAC8E0 100%)' }}>
+                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #B4A0D8 0%, #A8B0D8 100%)' }}>
                                                        {language === 'es' ? 'Secundario' : 'Secondary'}
                                                   </span>
                                              </div>
