@@ -321,7 +321,7 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                         <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
                                              {/* Menú Secundario Badge */}
                                              <div className="flex justify-end mb-1">
-                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-400 to-violet-500 text-white shadow-lg">
+                                                  <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #C7B9DE 0%, #BAC8E0 100%)' }}>
                                                        {language === 'es' ? 'Secundario' : 'Secondary'}
                                                   </span>
                                              </div>
@@ -340,7 +340,8 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                              <Button
                                                   size="sm"
                                                   variant="ghost"
-                                                  className="w-full h-7 text-xs text-purple-600 hover:text-purple-800 hover:bg-purple-100"
+                                                  className="w-full h-7 text-xs hover:bg-slate-100"
+                                                  style={{ color: '#7c6b9e' }}
                                                   onClick={() => deactivateSecondaryMenu(secondaryActiveMenu.id)}
                                              >
                                                   {language === 'es' ? 'Desactivar' : 'Deactivate'}

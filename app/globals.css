@@ -515,27 +515,27 @@ aside button[class*="neumorphic-hover"] {
   }
 }
 
-/* Secondary Active Menu Card - Purple/Violet Theme */
+/* Secondary Active Menu Card - Soft Lavender/Sky Theme */
 .secondary-menu-card {
   position: relative !important;
   background: linear-gradient(135deg,
-      rgba(168, 85, 247, 0.25) 0%,
-      /* Purple */
-      rgba(139, 92, 246, 0.25) 25%,
-      /* Violet */
-      rgba(124, 58, 237, 0.2) 50%,
-      /* Deep Violet */
-      rgba(167, 139, 250, 0.25) 75%,
-      /* Light Violet */
-      rgba(168, 85, 247, 0.25) 100%) !important;
-  /* Purple */
+      rgba(216, 191, 234, 0.3) 0%,
+      /* Soft Lavender */
+      rgba(199, 210, 232, 0.3) 25%,
+      /* Lavender-Blue */
+      rgba(186, 200, 224, 0.3) 50%,
+      /* Soft Sky */
+      rgba(199, 185, 222, 0.3) 75%,
+      /* Light Lavender */
+      rgba(216, 191, 234, 0.3) 100%) !important;
+  /* Soft Lavender */
   background-size: 200% 200% !important;
   box-shadow:
     8px 8px 16px var(--shadow-dark),
     -8px -8px 16px var(--shadow-light),
-    0 0 20px rgba(168, 85, 247, 0.3),
-    inset 0 0 40px rgba(167, 139, 250, 0.1) !important;
-  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+    0 0 20px rgba(199, 185, 222, 0.3),
+    inset 0 0 40px rgba(216, 191, 234, 0.1) !important;
+  border: 1.5px solid rgba(199, 185, 222, 0.4) !important;
   animation: secondary-menu-pulse 2.5s ease-in-out infinite, secondary-gradient-shift 6s ease-in-out infinite !important;
   will-change: transform, box-shadow, background-position !important;
   overflow: visible !important;
@@ -557,8 +557,8 @@ aside button[class*="neumorphic-hover"] {
     box-shadow:
       8px 8px 16px var(--shadow-dark),
       -8px -8px 16px var(--shadow-light),
-      0 0 20px rgba(168, 85, 247, 0.3),
-      inset 0 0 40px rgba(167, 139, 250, 0.1);
+      0 0 20px rgba(199, 185, 222, 0.3),
+      inset 0 0 40px rgba(216, 191, 234, 0.1);
   }
 
   50% {
@@ -566,8 +566,8 @@ aside button[class*="neumorphic-hover"] {
     box-shadow:
       10px 10px 20px var(--shadow-dark),
       -10px -10px 20px var(--shadow-light),
-      0 0 30px rgba(168, 85, 247, 0.5),
-      inset 0 0 50px rgba(167, 139, 250, 0.15);
+      0 0 30px rgba(199, 185, 222, 0.4),
+      inset 0 0 50px rgba(216, 191, 234, 0.15);
   }
 }
 
