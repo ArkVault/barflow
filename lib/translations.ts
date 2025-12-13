@@ -81,7 +81,7 @@ export const translations = {
     quantityPlaceholder: "Cantidad",
 
     // Dashboard
-    dashboardDemo: "Panel de control demo",
+    dashboardDemo: "Panel de Control",
     totalSupplies: "Total Insumos",
     configuredInPlan: "Configurados en tu plan",
     salesToday: "Ventas Hoy",
@@ -426,7 +426,7 @@ export const translations = {
     quantityPlaceholder: "Quantity",
 
     // Dashboard
-    dashboardDemo: "Demo dashboard",
+    dashboardDemo: "Dashboard",
     totalSupplies: "Total Supplies",
     configuredInPlan: "Configured in your plan",
     salesToday: "Sales Today",
