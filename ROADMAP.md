@@ -624,3 +624,241 @@
 **Última revisión**: Diciembre 2024  
 **Próxima revisión**: Enero 2025  
 **Versión del documento**: 2.0
+
+---
+
+## 🏆 HITOS ALCANZADOS (Diciembre 2024)
+
+### ✅ Módulo POS Implementado
+- **Punto de Venta** (`/demo/punto-de-venta`) con 3 tabs:
+  - **Mesas**: Editor visual con canvas drag-drop, grid de puntos, secciones al 70% centradas
+  - **Comandas**: Grid de productos con imagen de fondo, controles de cantidad
+  - **Historial**: Vista de ventas completadas
+- **Contexto POS** (`pos-context.tsx`): Gestión de cuentas, timers, órdenes
+- **Layout persistence**: Guardado automático en Supabase (operations_layout)
+
+### ✅ Generación de PDF para Órdenes de Compra
+- **jsPDF integrado** para descarga de lista de compras
+- PDF incluye: Logo Barmode, nombre establecimiento, fecha/hora, items, instrucciones
+- Campo `name` agregado a establishments (editable en Mi Cuenta)
+
+### ✅ Mejoras de UI/UX
+- Botones hollow en productos (Editar: blanco, Eliminar: rojo)
+- Productos con imagen de fondo y overlay gradient
+- Version `v0.1` en sidebar
+- Canvas con grid de puntos para referencia visual
+
+### ✅ Integración Proyecciones → Insumos
+- Botón "Abastecer" en Pedidos Sugeridos navega a `/insumos?restock={id}`
+- Auto-apertura del popup de restock al llegar
+
+---
+
+## 🔐 AUDITORÍA DE SEGURIDAD (Diciembre 2024)
+
+### ✅ Lo que está BIEN (Listo para Producción)
+
+| Aspecto | Estado | Detalles |
+|---------|--------|----------|
+| **Row Level Security (RLS)** | ✅ Excelente | Habilitado en TODAS las tablas principales |
+| **Políticas CRUD** | ✅ Completas | SELECT, INSERT, UPDATE, DELETE basadas en `auth.uid()` |
+| **Aislamiento de datos** | ✅ Correcto | Usuarios solo ven datos de SU establecimiento |
+| **Middleware Auth** | ✅ Activo | `/demo/*` protegidas, redirect a login sin sesión |
+| **Webhook Stripe** | ✅ Seguro | Validación de firma con `constructEvent()` |
+| **Variables secretas** | ✅ Protegidas | `STRIPE_SECRET_KEY` y `WEBHOOK_SECRET` solo server-side |
+| **Supabase client** | ✅ Seguro | Usa anon key (no service_role expuesto) |
+
+### Tablas con RLS Habilitado
+```
+✅ establishments      ✅ supplies           ✅ products
+✅ menus               ✅ product_ingredients ✅ sales
+✅ inventory_logs      ✅ ticket_counter      ✅ operations_layout
+✅ product_categories
+```
+
+### ⚠️ Mejoras Recomendadas (No bloqueadoras)
+
+| Aspecto | Riesgo | Acción Sugerida |
+|---------|--------|-----------------|
+| Rate limiting | Medio | Agregar límites en API routes |
+| Input validation | Bajo | Implementar Zod en parse-menu, save-supplies |
+| CORS headers | Bajo | Configurar en next.config.js |
+| CSP Headers | Bajo | Content-Security-Policy headers |
+
+---
+
+## 📊 ESCALABILIDAD DE BASE DE DATOS
+
+### Estructura de Datos por Establecimiento
+```
+establishment (1)
+├── supplies (~50-200)
+├── menus (~1-5)
+│   └── products (~20-100 por menú)
+│       └── product_ingredients (~2-10 por producto)
+├── sales (~10-500 por día)
+├── operations_layout (1)
+├── inventory_logs (variable)
+└── ticket_counter (1)
+```
+
+### Capacidad Estimada por Tier
+
+| Tier Supabase | Precio | Usuarios | Establecimientos | Rows/Año |
+|---------------|--------|----------|------------------|----------|
+| **Free** | $0 | 10-50 | 10-50 | ~50K-100K |
+| **Pro** | $25/mo | 100-500 | 100-500 | ~1M-5M |
+| **Team** | $599/mo | 1,000+ | 1,000+ | ~10M+ |
+
+### Cálculo de Filas (por establecimiento/año)
+- Sales: ~36,500 (100/día × 365)
+- Inventory logs: ~5,000
+- Supplies: ~100
+- Products: ~50
+- **Total: ~42,000 filas/establecimiento/año**
+
+### Optimizaciones Recomendadas
+1. **Índices a agregar**: `sales.created_at`, `supplies(establishment_id, name)`, `products(menu_id, active)`
+2. **Archivado**: Sales > 1 año → tabla archive
+3. **Caché**: Stats dashboard con SWR (ya implementado ✅)
+
+---
+
+## 💰 ESTRUCTURA DE COSTOS Y PRICING
+
+### Costos de Infraestructura (Mensuales)
+
+| Servicio | Free Tier | Pro Tier | Enterprise |
+|----------|-----------|----------|------------|
+| **Supabase** | $0 | $25 | $599+ |
+| **Vercel** | $0 | $20 | $400+ |
+| **Stripe** | 3.6% + $3 MXN/tx | 3.6% + $3 MXN/tx | Negociable |
+| **Dominio** | - | ~$15/año | ~$15/año |
+| **Email (Resend)** | $0 (3K/mo) | $20 | $89+ |
+| **Total Infra** | **$0** | **~$45/mo** | **~$1,100/mo** |
+
+### Costos Administrativos
+
+| Concepto | Mensual |
+|----------|---------|
+| Soporte básico (1 persona parcial) | $5,000 MXN |
+| Contabilidad | $1,500 MXN |
+| Legal/Cumplimiento | $500 MXN |
+| Marketing mínimo | $2,000 MXN |
+| **Total Admin** | **~$9,000 MXN (~$500 USD)** |
+
+---
+
+## 📊 ESCENARIOS DE PRICING
+
+### Escenario A: Precio Conservador (Competir por precio)
+
+| Plan | Precio MXN | USD | Margen | Target |
+|------|------------|-----|--------|--------|
+| **Bar Mensual** | $599/mes | ~$35 | 65% | Bares pequeños |
+| **Bar Anual** | $499/mes ($5,988/año) | ~$30 | 70% | Bares establecidos |
+| **Cadena** | $1,999/mes | ~$115 | 60% | Multi-sucursal |
+
+**Break-even**: ~15 clientes en Plan Bar
+**Target Year 1**: 50 clientes = ~$30K MXN MRR
+
+### Escenario B: Precio Premium (Valor percibido)
+
+| Plan | Precio MXN | USD | Margen | Target |
+|------|------------|-----|--------|--------|
+| **Bar Mensual** | $899/mes | ~$52 | 75% | Bares profesionales |
+| **Bar Anual** | $700/mes ($8,400/año) | ~$41 | 78% | Bares en crecimiento |
+| **Cadena** | $2,999/mes | ~$175 | 72% | Grupos restauranteros |
+
+**Break-even**: ~10 clientes en Plan Bar
+**Target Year 1**: 30 clientes = ~$27K MXN MRR
+
+---
+
+## 🏪 ANÁLISIS DE COMPETIDORES
+
+### Competidores Directos (México/LATAM)
+
+| Competidor | Precio Básico | Precio Completo | Fortalezas | Debilidades |
+|------------|--------------|-----------------|------------|-------------|
+| **Poster POS** | $799 MXN/mes | $1,499+ MXN/mes | UI moderna, integraciones | Sin proyecciones IA |
+| **Softrestaurant** | $599 MXN/mes | $2,500+ MXN/mes | Muy establecido, facturación | UI anticuada, instalación |
+| **Toast** | $1,500+ MXN/mes | $3,000+ MXN/mes | Hardware incluido | Muy caro para MX |
+| **Square for Restaurants** | $0 + comisiones | 2.6% + $0.10/tx | Fácil setup | Funciones limitadas |
+| **Aloha (NCR)** | $2,000+ MXN/mes | $5,000+ MXN/mes | Enterprise, robusto | Precio prohibitivo |
+
+### Competidores de Inventario
+
+| Competidor | Precio | Enfoque |
+|------------|--------|---------|
+| **MarketMan** | $239 USD/mes | Solo inventario F&B |
+| **BlueCart** | $99 USD/mes | Pedidos proveedores |
+| **Orderly** | Gratis (básico) | Inventario básico |
+
+### Diferenciadores de Barmode
+
+| Característica | Barmode | Competidores |
+|----------------|---------|--------------|
+| **Proyecciones con IA** | ✅ Incluido | ❌ No disponible |
+| **Multi-idioma ES/EN** | ✅ Nativo | ⚠️ Limitado |
+| **Diseño moderno** | ✅ Neumórfico | ⚠️ Anticuado |
+| **SaaS puro (sin instalación)** | ✅ Web app | ⚠️ Instalación local |
+| **Precio competitivo** | ✅ Desde $599 | ⚠️ Más caros |
+| **Trial 30 días** | ✅ Sin tarjeta | ⚠️ Trial corto |
+
+---
+
+## 🎯 RECOMENDACIÓN DE PRICING
+
+**Pricing recomendado (Escenario B modificado)**:
+
+| Plan | Precio | Justificación |
+|------|--------|---------------|
+| **Bar Sucursal Mensual** | **$899 MXN** | Competitivo vs Poster, incluye IA |
+| **Bar Sucursal Anual** | **$700 MXN/mes** ($8,400/año) | 22% descuento, lock-in |
+| **Cadena (hasta 5)** | **$2,999 MXN** | < Softrestaurant multi |
+| **Enterprise** | Cotización | Personalizado |
+
+### Proyección Financiera (Año 1)
+
+| Métrica | Conservador | Optimista |
+|---------|-------------|-----------|
+| Clientes totales | 30 | 80 |
+| MRR promedio | $25K MXN | $60K MXN |
+| ARR | $300K MXN | $720K MXN |
+| Costos anuales | ~$120K MXN | ~$200K MXN |
+| **Profit** | **$180K MXN** | **$520K MXN** |
+
+---
+
+## 📋 CHECKLIST PRE-PRODUCCIÓN
+
+### Seguridad ✅
+- [x] RLS habilitado en todas las tablas
+- [x] Políticas CRUD completas
+- [x] Middleware de autenticación
+- [x] Webhook Stripe con validación de firma
+- [ ] Rate limiting en API routes
+- [ ] Headers de seguridad (CSP, CORS)
+
+### Infraestructura
+- [x] Supabase configurado
+- [x] Stripe configurado (modo test)
+- [ ] Dominio de producción
+- [ ] Vercel deployment
+- [ ] Variables de entorno producción
+- [ ] Stripe modo live
+
+### Funcionalidades
+- [x] MVP completo
+- [x] Sistema de pagos
+- [x] Módulo POS básico
+- [ ] Email transaccional (welcome, trial ending)
+- [ ] Onboarding flow
+
+---
+
+**Última revisión**: 13 Diciembre 2024  
+**Próxima revisión**: Enero 2025  
+**Versión del documento**: 3.0
+

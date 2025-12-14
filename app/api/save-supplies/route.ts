@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { z } from 'zod';
+
+// Zod schema for supply validation
+const SupplySchema = z.object({
+     name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+     category: z.string().min(1, 'Category is required'),
+     unit: z.string().min(1, 'Unit is required'),
+     quantity: z.number().min(0, 'Quantity must be non-negative').optional().default(0),
+     existingSupplyId: z.string().uuid().optional(),
+     matchedExisting: z.boolean().optional(),
+});
+
+const SaveSuppliesRequestSchema = z.object({
+     supplies: z.array(SupplySchema).min(1, 'At least one supply is required'),
+     period: z.string().optional(),
+     establishmentId: z.string().uuid().optional(),
+});
 
 export async function POST(request: NextRequest) {
      try {
@@ -32,14 +49,22 @@ export async function POST(request: NextRequest) {
                }
           );
 
-          const { supplies, period, establishmentId } = await request.json();
+          // Parse and validate request body with Zod
+          const body = await request.json();
+          const validationResult = SaveSuppliesRequestSchema.safeParse(body);
 
-          if (!supplies || !Array.isArray(supplies)) {
+          if (!validationResult.success) {
+               const errors = validationResult.error.errors.map(e => ({
+                    path: e.path.join('.'),
+                    message: e.message
+               }));
                return NextResponse.json(
-                    { error: 'Invalid supplies data' },
+                    { error: 'Validation failed', details: errors },
                     { status: 400 }
                );
           }
+
+          const { supplies, establishmentId } = validationResult.data;
 
           // Get authenticated user
           const { data: { user }, error: authError } = await supabase.auth.getUser();

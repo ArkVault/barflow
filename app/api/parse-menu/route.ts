@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
+import { z } from 'zod';
+
+// Zod schema for AI response validation
+const AISupplySchema = z.object({
+     name: z.string().min(1),
+     quantity: z.number().positive(),
+     unit: z.string().min(1),
+     category: z.string().min(1),
+     matched_existing: z.boolean().optional().default(false),
+     existing_id: z.string().uuid().nullable().optional(),
+     confidence: z.number().min(0).max(1).optional().default(0),
+});
+
+const AIResponseSchema = z.array(AISupplySchema);
+
+// Allowed file extensions
+const ALLOWED_EXTENSIONS = ['csv', 'xlsx', 'xls'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
      try {
@@ -12,15 +30,28 @@ export async function POST(request: NextRequest) {
                return NextResponse.json({ error: 'No file provided' }, { status: 400 });
           }
 
-          // Read file content
+          // Validate file size
+          if (file.size > MAX_FILE_SIZE) {
+               return NextResponse.json(
+                    { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+                    { status: 400 }
+               );
+          }
+
+          // Validate file extension
+          const fileType = file.name.split('.').pop()?.toLowerCase();
+          if (!fileType || !ALLOWED_EXTENSIONS.includes(fileType)) {
+               return NextResponse.json(
+                    { error: `Invalid file type. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}` },
+                    { status: 400 }
+               );
+          }
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           let fileContent = '';
           let detectedSheet = '';
 
-          // Parse based on file type
-          const fileType = file.name.split('.').pop()?.toLowerCase();
-
+          // Parse based on file type (fileType already validated above)
           if (fileType === 'csv') {
                fileContent = buffer.toString('utf-8');
           } else if (fileType === 'xlsx' || fileType === 'xls') {
@@ -193,8 +224,31 @@ Return the JSON array now:`;
                const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
                console.log('Cleaned JSON text preview:', jsonText.substring(0, 200));
 
-               parsedData = JSON.parse(jsonText);
-               console.log('✅ Successfully parsed', parsedData.length, 'items');
+               const rawData = JSON.parse(jsonText);
+               console.log('✅ JSON parsed, validating with Zod...');
+
+               // Validate with Zod schema
+               const validationResult = AIResponseSchema.safeParse(rawData);
+
+               if (!validationResult.success) {
+                    console.error('❌ Zod validation failed:', validationResult.error.errors);
+                    // Try to use raw data with defaults instead of failing completely
+                    parsedData = rawData.map((item: any) => ({
+                         name: item.name || 'Unknown',
+                         quantity: Number(item.quantity) || 1,
+                         unit: item.unit || 'units',
+                         category: item.category || 'Otros',
+                         matched_existing: item.matched_existing || false,
+                         existing_id: item.existing_id || null,
+                         confidence: item.confidence || 0,
+                    }));
+                    console.log('⚠️ Using fallback data with defaults');
+               } else {
+                    parsedData = validationResult.data;
+                    console.log('✅ Zod validation passed');
+               }
+
+               console.log('✅ Successfully processed', parsedData.length, 'items');
           } catch (error) {
                console.error('❌ Error parsing AI response:', error);
                console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
