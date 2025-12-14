@@ -17,18 +17,13 @@ export default function SignUpSuccessPage() {
             <p className="text-sm text-muted-foreground">
               Te has registrado exitosamente. Por favor, verifica tu correo electrónico para confirmar tu cuenta antes de iniciar sesión.
             </p>
-            
+
             <div className="pt-4 border-t border-border space-y-3">
               <p className="text-sm font-medium">
-                Mientras tanto, puedes:
+                Una vez verificado, puedes:
               </p>
-              <Link href="/demo" className="block">
-                <Button className="w-full neumorphic-hover border-0" variant="default">
-                  Ver Demo del Sistema
-                </Button>
-              </Link>
               <Link href="/auth/login" className="block">
-                <Button className="w-full neumorphic-hover border-0" variant="outline">
+                <Button className="w-full neumorphic-hover border-0" variant="default">
                   Ir a Iniciar Sesión
                 </Button>
               </Link>

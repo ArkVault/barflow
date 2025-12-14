@@ -29,6 +29,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
 
   const navItems = [
     { href: "/dashboard", label: t('dashboard'), icon: "🏠" },
+    { href: "/dashboard/operaciones", label: t('operations'), icon: "🎯" },
     { href: "/dashboard/planner", label: t('planner'), icon: "📋" },
     { href: "/dashboard/insumos", label: t('supplies'), icon: "📦" },
     { href: "/dashboard/productos", label: t('products'), icon: "🛒" },

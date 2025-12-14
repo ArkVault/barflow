@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { SidebarNav } from "@/components/sidebar-nav";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, X, Grid3x3, Square, Minus, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -101,7 +101,7 @@ const barStatusColors = {
 };
 
 export default function OperacionesPage() {
-     const { establishmentId } = useAuth();
+     const { establishmentId, user, establishmentName } = useAuth();
      const { t, language } = useLanguage();
 
      // Translated status labels (short versions for UI elements)
@@ -1130,11 +1130,11 @@ export default function OperacionesPage() {
 
      return (
           <div className="min-h-svh bg-background">
-               <DemoSidebar />
+               <SidebarNav userName={user?.email || ''} establishmentName={establishmentName || 'Mi Bar'} />
                <nav className="border-b neumorphic-inset">
                     <div className="container mx-auto px-6 py-4">
                          <div className="flex items-center justify-between">
-                              <Link href="/demo" className="block">
+                              <Link href="/dashboard" className="block">
                                    <img
                                         src="/modoclaro.png"
                                         alt="Barmode"
