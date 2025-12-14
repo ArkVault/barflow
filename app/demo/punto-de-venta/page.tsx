@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { SidebarNav } from "@/components/sidebar-nav";
+import { DemoSidebar } from "@/components/demo-sidebar";
 import { useLanguage } from "@/hooks/use-language";
-import { useAuth } from "@/contexts/auth-context";
 import { LayoutGrid, FileText, History } from "lucide-react";
 
 // Import POS components following Dependency Inversion Principle
@@ -22,15 +21,14 @@ type TabId = typeof TABS[number]['id'];
 function POSContent() {
      const { t, language } = useLanguage();
      const { activeTab, setActiveTab } = usePOS();
-     const { user, establishmentName } = useAuth();
 
      return (
           <div className="min-h-svh bg-background">
-               <SidebarNav userName={user?.email || ''} establishmentName={establishmentName || 'Mi Bar'} />
+               <DemoSidebar />
                <nav className="border-b neumorphic-inset">
                     <div className="container mx-auto px-6 py-4">
                          <div className="flex items-center justify-between">
-                              <Link href="/dashboard" className="block">
+                              <Link href="/demo" className="block">
                                    <img
                                         src="/modoclaro.png"
                                         alt="Barmode"
@@ -71,8 +69,8 @@ function POSContent() {
                                                   type="button"
                                                   onClick={() => setActiveTab(tab.id)}
                                                   className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                                       ? 'bg-background text-foreground shadow-sm font-medium'
-                                                       : 'text-muted-foreground hover:text-foreground'
+                                                            ? 'bg-background text-foreground shadow-sm font-medium'
+                                                            : 'text-muted-foreground hover:text-foreground'
                                                        }`}
                                              >
                                                   <Icon className="w-4 h-4" />

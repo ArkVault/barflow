@@ -239,7 +239,7 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                                                   </div>
                                              </TableCell>
                                              <TableCell className="text-right">
-                                                  <Link href={`/dashboard/insumos?restock=${suggestion.supplyId}`}>
+                                                  <Link href={`/demo/insumos?restock=${suggestion.supplyId}`}>
                                                        <Button
                                                             variant="ghost"
                                                             size="sm"
