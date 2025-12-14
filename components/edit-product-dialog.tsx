@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,8 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { optimizeImage, isValidImageFile } from "@/lib/image-optimizer";
 
 interface Supply {
   id: string;
@@ -38,6 +40,7 @@ interface Product {
   price: number;
   description: string | null;
   is_active: boolean;
+  image_url?: string | null;
   product_ingredients: ProductIngredient[];
 }
 
@@ -57,7 +60,12 @@ interface EditProductDialogProps {
 
 export function EditProductDialog({ product, supplies, open, onOpenChange, onProductUpdated }: EditProductDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   const [formData, setFormData] = useState({
     name: product.name,
@@ -74,6 +82,121 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
       quantity_needed: ing.quantity_needed.toString(),
     }))
   );
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("La imagen debe ser menor a 10MB");
+        return;
+      }
+      if (!isValidImageFile(file)) {
+        toast.error("Solo se permiten archivos de imagen (JPG, PNG, WebP, GIF)");
+        return;
+      }
+
+      try {
+        setIsOptimizing(true);
+        toast.info("Optimizando imagen...");
+
+        // Optimize image for products (larger than thumbnails)
+        const optimizedFile = await optimizeImage(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 800, // Good size for product images
+          fileType: 'image/webp'
+        });
+
+        setSelectedFile(optimizedFile);
+        setRemoveImage(false);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(optimizedFile);
+
+        const originalSizeKB = Math.round(file.size / 1024);
+        const optimizedSizeKB = Math.round(optimizedFile.size / 1024);
+        toast.success(`Imagen optimizada: ${originalSizeKB}KB → ${optimizedSizeKB}KB`);
+      } catch (error) {
+        console.error("Error optimizing image:", error);
+        toast.error("Error al optimizar la imagen");
+      } finally {
+        setIsOptimizing(false);
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setRemoveImage(true);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Helper to extract file path from Supabase storage URL
+  const getStoragePathFromUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    try {
+      const match = url.match(/\/products\/(product-images\/[^?]+)/);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Delete image from Supabase storage
+  const deleteOldImage = async (imageUrl: string | null | undefined): Promise<void> => {
+    if (!imageUrl) return;
+
+    const filePath = getStoragePathFromUrl(imageUrl);
+    if (!filePath) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.storage
+        .from('products')
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Error deleting old image:', error);
+      } else {
+        console.log('Old image deleted:', filePath);
+      }
+    } catch (error) {
+      console.error('Error deleting old image:', error);
+    }
+  };
+
+  const uploadImage = async (file: File, oldImageUrl?: string | null): Promise<string | null> => {
+    const supabase = createClient();
+
+    // Delete old image first if it exists
+    if (oldImageUrl) {
+      await deleteOldImage(oldImageUrl);
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${product.id}-${Date.now()}.${fileExt}`;
+    const filePath = `product-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      throw new Error("Error al subir la imagen");
+    }
+
+    const { data } = supabase.storage
+      .from('products')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
 
   const addIngredient = () => {
     setIngredients([...ingredients, { supply_id: "", quantity_needed: "" }]);
@@ -105,6 +228,20 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
         throw new Error("Debes tener al menos un ingrediente");
       }
 
+      // Handle image upload/removal
+      let imageUrl = product.image_url;
+
+      if (removeImage) {
+        // Delete old image from storage when removing
+        if (product.image_url) {
+          await deleteOldImage(product.image_url);
+        }
+        imageUrl = null;
+      } else if (selectedFile) {
+        // Upload new image (will delete old one automatically)
+        imageUrl = await uploadImage(selectedFile, product.image_url);
+      }
+
       const { error: productError } = await supabase
         .from("products")
         .update({
@@ -113,6 +250,7 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
           price: parseFloat(formData.price),
           description: formData.description || null,
           is_active: formData.is_active,
+          image_url: imageUrl,
         })
         .eq("id", product.id);
 
@@ -154,6 +292,7 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
         .single();
 
       if (updatedProduct) onProductUpdated(updatedProduct);
+      toast.success("Producto actualizado correctamente");
       onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al actualizar producto");
@@ -173,6 +312,78 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
+            {/* Image Upload Section */}
+            <div className="space-y-3">
+              <Label>Imagen del Producto</Label>
+              <div className="flex items-start gap-4">
+                {/* Preview */}
+                <div
+                  className="relative w-32 h-32 rounded-xl neumorphic-inset flex items-center justify-center overflow-hidden cursor-pointer group"
+                  onClick={() => !isOptimizing && fileInputRef.current?.click()}
+                >
+                  {isOptimizing ? (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                      <span className="text-xs">Optimizando...</span>
+                    </div>
+                  ) : imagePreview ? (
+                    <>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Upload className="h-6 w-6 text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <ImageIcon className="h-8 w-8" />
+                      <span className="text-xs">Sin imagen</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isOptimizing}
+                    className="neumorphic-hover border-0 gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {imagePreview ? "Cambiar" : "Subir"} Imagen
+                  </Button>
+                  {imagePreview && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      className="neumorphic-hover border-0 gap-2 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Eliminar
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    JPG, PNG o WebP. Se optimiza automáticamente.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="edit-name">Nombre del Producto *</Label>
@@ -326,3 +537,4 @@ export function EditProductDialog({ product, supplies, open, onOpenChange, onPro
     </Dialog>
   );
 }
+

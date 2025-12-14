@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar"
-import { Plus, Edit, Trash2, X } from "lucide-react"
+import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Loader2 } from "lucide-react"
 import { GlowButton } from "@/components/glow-button"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -16,7 +16,7 @@ import { MenuManager } from "@/components/menu-manager"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
-import { ProductImageUpload } from "@/components/product-image-upload"
+import { optimizeImage, isValidImageFile } from "@/lib/image-optimizer"
 
 
 interface Product {
@@ -241,6 +241,17 @@ export default function ProductosPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editForm, setEditForm] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+
+  // Image upload states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editSelectedImageFile, setEditSelectedImageFile] = useState<File | null>(null);
+  const [isEditOptimizing, setIsEditOptimizing] = useState(false);
+
   const [newProduct, setNewProduct] = useState<Product>({
     id: 0,
     name: '',
@@ -248,7 +259,8 @@ export default function ProductosPage() {
     price: 0,
     ingredients: [{ name: '', quantity: 0, unit: '' }],
     active: true,
-    description: ''
+    description: '',
+    image_url: null
   });
 
   // Load categories from Supabase
@@ -363,20 +375,136 @@ export default function ProductosPage() {
     }
   }, [activeMenuId]);
 
+  // === STORAGE HELPER FUNCTIONS ===
+
+  // Helper to extract file path from Supabase storage URL
+  const getStoragePathFromUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    try {
+      // URL format: https://xxx.supabase.co/storage/v1/object/public/products/product-images/filename.webp
+      const match = url.match(/\/products\/(product-images\/[^?]+)/);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Delete image from Supabase storage
+  const deleteProductImage = async (imageUrl: string | null | undefined): Promise<void> => {
+    if (!imageUrl) return;
+
+    const filePath = getStoragePathFromUrl(imageUrl);
+    if (!filePath) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.storage
+        .from('products')
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Error deleting old image:', error);
+      } else {
+        console.log('Old image deleted:', filePath);
+      }
+    } catch (error) {
+      console.error('Error deleting old image:', error);
+    }
+  };
+
+  // Upload image to Supabase (deletes old one first if exists)
+  const uploadProductImage = async (file: File, productId: string, oldImageUrl?: string | null): Promise<string | null> => {
+    const supabase = createClient();
+
+    // Delete old image first if it exists
+    if (oldImageUrl) {
+      await deleteProductImage(oldImageUrl);
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${productId}-${Date.now()}.${fileExt}`;
+    const filePath = `product-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      throw new Error(language === 'es' ? 'Error al subir la imagen' : 'Error uploading image');
+    }
+
+    const { data } = supabase.storage
+      .from('products')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  // === END STORAGE HELPER FUNCTIONS ===
+
 
   const handleEdit = (productId: string | number) => {
     const product = products.find(p => p.id === productId);
     if (product) {
       setEditingProduct(product);
       setEditForm({ ...product });
+      // Reset edit image states
+      setEditImagePreview(null);
+      setEditSelectedImageFile(null);
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editForm) {
-      setProducts(products.map(p => p.id === editForm.id ? editForm : p));
-      setEditingProduct(null);
-      setEditForm(null);
+      try {
+        const supabase = createClient();
+        let finalImageUrl = editForm.image_url;
+
+        // Upload new image if selected (will delete old one automatically)
+        if (editSelectedImageFile) {
+          finalImageUrl = await uploadProductImage(editSelectedImageFile, String(editForm.id), editingProduct?.image_url);
+        }
+        // If image was removed (was set to null but original had an image), delete it
+        else if (editForm.image_url === null && editingProduct?.image_url) {
+          await deleteProductImage(editingProduct.image_url);
+        }
+
+        // Update in database
+        const { error } = await supabase
+          .from('products')
+          .update({
+            name: editForm.name,
+            category: editForm.category,
+            price: editForm.price,
+            description: editForm.description,
+            image_url: finalImageUrl,
+            ingredients: editForm.ingredients.filter(ing => ing.name && ing.quantity > 0)
+          })
+          .eq('id', editForm.id);
+
+        if (error) {
+          toast.error(language === 'es' ? 'Error al guardar cambios' : 'Error saving changes');
+          console.error('Error saving product:', error);
+          return;
+        }
+
+        // Update local state
+        const updatedProduct = { ...editForm, image_url: finalImageUrl };
+        setProducts(products.map(p => p.id === editForm.id ? updatedProduct : p));
+        setAllProducts(allProducts.map(p => p.id === editForm.id ? updatedProduct : p));
+
+        toast.success(language === 'es' ? 'Producto actualizado' : 'Product updated');
+
+        // Reset states
+        setEditingProduct(null);
+        setEditForm(null);
+        setEditImagePreview(null);
+        setEditSelectedImageFile(null);
+      } catch (error) {
+        console.error('Error saving product:', error);
+        toast.error(language === 'es' ? 'Error al guardar cambios' : 'Error saving changes');
+      }
     }
   };
 
@@ -458,11 +586,29 @@ export default function ProductosPage() {
         }
 
         if (response.data) {
+          // Upload image if selected
+          let finalImageUrl = null;
+          if (selectedImageFile) {
+            try {
+              finalImageUrl = await uploadProductImage(selectedImageFile, response.data.id);
+
+              // Update product with image URL
+              await supabase
+                .from('products')
+                .update({ image_url: finalImageUrl })
+                .eq('id', response.data.id);
+            } catch (imgError) {
+              console.error('Error uploading image:', imgError);
+              // Product was created, but image failed - still show success
+            }
+          }
+
           // Add to local state
           const productToAdd = {
             ...newProduct,
             id: response.data.id,
             menu_id: activeMenuId,
+            image_url: finalImageUrl,
             ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
           };
 
@@ -482,8 +628,16 @@ export default function ProductosPage() {
           price: 0,
           ingredients: [{ name: '', quantity: 0, unit: '' }],
           active: true,
-          description: ''
+          description: '',
+          image_url: null
         });
+
+        // Reset image states
+        setSelectedImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       } catch (error) {
         console.error('💥 Unexpected error:', error);
         toast.error(language === 'es' ? 'Error inesperado al agregar producto' : 'Unexpected error adding product');
@@ -507,6 +661,111 @@ export default function ProductosPage() {
       ...newProduct,
       ingredients: newProduct.ingredients.filter((_, idx) => idx !== index)
     });
+  };
+
+  // Image handlers for Add Product
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(language === 'es' ? 'La imagen debe ser menor a 10MB' : 'Image must be less than 10MB');
+        return;
+      }
+      if (!isValidImageFile(file)) {
+        toast.error(language === 'es' ? 'Solo se permiten archivos de imagen' : 'Only image files are allowed');
+        return;
+      }
+
+      try {
+        setIsOptimizing(true);
+        toast.info(language === 'es' ? 'Optimizando imagen...' : 'Optimizing image...');
+
+        const optimizedFile = await optimizeImage(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 800,
+          fileType: 'image/webp'
+        });
+
+        setSelectedImageFile(optimizedFile);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(optimizedFile);
+
+        const originalSizeKB = Math.round(file.size / 1024);
+        const optimizedSizeKB = Math.round(optimizedFile.size / 1024);
+        toast.success(`${language === 'es' ? 'Imagen optimizada' : 'Image optimized'}: ${originalSizeKB}KB → ${optimizedSizeKB}KB`);
+      } catch (error) {
+        console.error("Error optimizing image:", error);
+        toast.error(language === 'es' ? 'Error al optimizar la imagen' : 'Error optimizing image');
+      } finally {
+        setIsOptimizing(false);
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Image handlers for Edit Product
+  const handleEditImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(language === 'es' ? 'La imagen debe ser menor a 10MB' : 'Image must be less than 10MB');
+        return;
+      }
+      if (!isValidImageFile(file)) {
+        toast.error(language === 'es' ? 'Solo se permiten archivos de imagen' : 'Only image files are allowed');
+        return;
+      }
+
+      try {
+        setIsEditOptimizing(true);
+        toast.info(language === 'es' ? 'Optimizando imagen...' : 'Optimizing image...');
+
+        const optimizedFile = await optimizeImage(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 800,
+          fileType: 'image/webp'
+        });
+
+        setEditSelectedImageFile(optimizedFile);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setEditImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(optimizedFile);
+
+        const originalSizeKB = Math.round(file.size / 1024);
+        const optimizedSizeKB = Math.round(optimizedFile.size / 1024);
+        toast.success(`${language === 'es' ? 'Imagen optimizada' : 'Image optimized'}: ${originalSizeKB}KB → ${optimizedSizeKB}KB`);
+      } catch (error) {
+        console.error("Error optimizing image:", error);
+        toast.error(language === 'es' ? 'Error al optimizar la imagen' : 'Error optimizing image');
+      } finally {
+        setIsEditOptimizing(false);
+      }
+    }
+  };
+
+  const handleRemoveEditImage = () => {
+    setEditSelectedImageFile(null);
+    setEditImagePreview(null);
+    if (editForm) {
+      setEditForm({ ...editForm, image_url: null });
+    }
+    if (editFileInputRef.current) {
+      editFileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -695,6 +954,80 @@ export default function ProductosPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Image Upload Section */}
+                  <div className="space-y-2">
+                    <Label>{language === 'es' ? 'Imagen del Producto' : 'Product Image'}</Label>
+                    <div className="flex items-start gap-4">
+                      {/* Preview */}
+                      <div
+                        className="relative w-28 h-28 rounded-xl bg-muted flex items-center justify-center overflow-hidden cursor-pointer group border-2 border-dashed border-border hover:border-primary transition-colors"
+                        onClick={() => !isOptimizing && fileInputRef.current?.click()}
+                      >
+                        {isOptimizing ? (
+                          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span className="text-xs">{language === 'es' ? 'Optimizando...' : 'Optimizing...'}</span>
+                          </div>
+                        ) : imagePreview ? (
+                          <>
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Upload className="h-5 w-5 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                            <ImageIcon className="h-6 w-6" />
+                            <span className="text-xs">{language === 'es' ? 'Sin imagen' : 'No image'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="flex flex-col gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isOptimizing}
+                          className="neumorphic-hover border-0 gap-2"
+                        >
+                          <Upload className="h-4 w-4" />
+                          {imagePreview
+                            ? (language === 'es' ? 'Cambiar' : 'Change')
+                            : (language === 'es' ? 'Subir' : 'Upload')} {language === 'es' ? 'Imagen' : 'Image'}
+                        </Button>
+                        {imagePreview && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRemoveImage}
+                            className="neumorphic-hover border-0 gap-2 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                            {language === 'es' ? 'Eliminar' : 'Remove'}
+                          </Button>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'es' ? 'Se optimiza automáticamente' : 'Automatically optimized'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="new-name">{t('productName')} *</Label>
@@ -844,6 +1177,80 @@ export default function ProductosPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Image Upload Section for Edit */}
+                  <div className="space-y-2">
+                    <Label>{language === 'es' ? 'Imagen del Producto' : 'Product Image'}</Label>
+                    <div className="flex items-start gap-4">
+                      {/* Preview */}
+                      <div
+                        className="relative w-28 h-28 rounded-xl bg-muted flex items-center justify-center overflow-hidden cursor-pointer group border-2 border-dashed border-border hover:border-primary transition-colors"
+                        onClick={() => !isEditOptimizing && editFileInputRef.current?.click()}
+                      >
+                        {isEditOptimizing ? (
+                          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span className="text-xs">{language === 'es' ? 'Optimizando...' : 'Optimizing...'}</span>
+                          </div>
+                        ) : (editImagePreview || editForm.image_url) ? (
+                          <>
+                            <img
+                              src={editImagePreview || editForm.image_url || ''}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Upload className="h-5 w-5 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                            <ImageIcon className="h-6 w-6" />
+                            <span className="text-xs">{language === 'es' ? 'Sin imagen' : 'No image'}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Buttons */}
+                      <div className="flex flex-col gap-2">
+                        <input
+                          ref={editFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleEditImageSelect}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => editFileInputRef.current?.click()}
+                          disabled={isEditOptimizing}
+                          className="neumorphic-hover border-0 gap-2"
+                        >
+                          <Upload className="h-4 w-4" />
+                          {(editImagePreview || editForm.image_url)
+                            ? (language === 'es' ? 'Cambiar' : 'Change')
+                            : (language === 'es' ? 'Subir' : 'Upload')} {language === 'es' ? 'Imagen' : 'Image'}
+                        </Button>
+                        {(editImagePreview || editForm.image_url) && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRemoveEditImage}
+                            className="neumorphic-hover border-0 gap-2 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                            {language === 'es' ? 'Eliminar' : 'Remove'}
+                          </Button>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'es' ? 'Se optimiza automáticamente' : 'Automatically optimized'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">{t('name')}</Label>
