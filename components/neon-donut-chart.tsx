@@ -17,11 +17,11 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
      const lowPercent = total > 0 ? (low / total) * 100 : 0;
      const optimalPercent = total > 0 ? (optimal / total) * 100 : 0;
 
-     // Half donut chart (semicircle) - COMPACT SIZE
-     const radius = 65; // Reduced from 95
-     const strokeWidth = 20; // Reduced from 28
-     const centerX = 100; // Adjusted for compact size
-     const centerY = 100; // Adjusted for compact size
+     // Half donut chart (semicircle) - LARGER SIZE
+     const radius = 80; // Increased from 65
+     const strokeWidth = 24; // Increased from 20
+     const centerX = 110; // Adjusted for larger size with glow padding
+     const centerY = 105; // Adjusted for larger size
 
      // Calculate arc lengths for half circle (180 degrees)
      const circumference = Math.PI * radius; // Half circle
@@ -32,8 +32,8 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
 
      return (
           <div className="relative w-full flex flex-col items-center">
-               {/* Half Donut Chart - COMPACT */}
-               <svg width="200" height="110" viewBox="0 0 200 110" className="mb-1">
+               {/* Half Donut Chart - LARGER with glow padding */}
+               <svg width="220" height="120" viewBox="0 0 220 120" className="mb-1">
                     {/* Background arc */}
                     <path
                          d={`M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 0 1 ${centerX + radius} ${centerY}`}
@@ -93,18 +93,18 @@ export function NeonDonutChart({ critical, low, optimal }: NeonDonutChartProps) 
                     {/* Total in center */}
                     <text
                          x={centerX}
-                         y={centerY - 5}
+                         y={centerY - 10}
                          textAnchor="middle"
-                         className="fill-foreground font-black text-2xl"
+                         className="fill-foreground font-black text-3xl"
                          style={{ fontFamily: 'Satoshi, sans-serif' }}
                     >
                          {total}
                     </text>
                     <text
                          x={centerX}
-                         y={centerY + 10}
+                         y={centerY + 8}
                          textAnchor="middle"
-                         className="fill-muted-foreground text-[9px]"
+                         className="fill-muted-foreground text-[10px]"
                     >
                          {t('supplies')}
                     </text>

@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-     apiVersion: "2024-11-20.acacia",
+     apiVersion: "2025-11-17.clover",
 });
 
 export async function POST(req: NextRequest) {
@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
                },
           });
 
-          return NextResponse.json({ sessionId: session.id });
+          return NextResponse.json({
+               sessionId: session.id,
+               url: session.url
+          });
      } catch (error: any) {
           console.error("Error creating checkout session:", error);
           return NextResponse.json(

@@ -3,6 +3,7 @@
 import { SidebarNav } from "@/components/sidebar-nav";
 import { PageHeader } from "@/components/page-header";
 import { AccountButton } from "@/components/account-button";
+import { TrialExpiredOverlay } from "@/components/trial-expired-overlay";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -41,6 +42,9 @@ export function DashboardLayout({
           {children}
         </div>
       </div>
+
+      {/* Trial Expired Overlay - blocks content when trial ends */}
+      <TrialExpiredOverlay />
     </div>
   );
 }

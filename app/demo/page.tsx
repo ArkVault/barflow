@@ -340,9 +340,9 @@ export default function DemoPage() {
                   </CardHeader>
                   <CardContent className="px-3 pb-2 h-[190px] flex flex-col overflow-hidden">
                     {/* Stats Row - Compact */}
-                    <div className="flex items-center justify-between w-full mb-1.5 pb-1 border-b border-border/30">
+                    <div className="flex items-center justify-between w-full mb-1 pb-1 border-b border-border/30">
                       <div className="flex items-center gap-2">
-                        <p className="text-2xl font-black text-primary leading-none" style={{
+                        <p className="text-xl font-black text-primary leading-none" style={{
                           fontFamily: 'Satoshi, sans-serif',
                           textShadow: '0 0 12px rgba(var(--primary-rgb), 0.4)'
                         }}>
@@ -356,30 +356,30 @@ export default function DemoPage() {
                       </div>
                     </div>
 
-                    {/* Top 5 Selling Products - Compact Centered List */}
+                    {/* Top 5 Selling Products - Optimized for 190px */}
                     <div className="flex-1 flex flex-col min-h-0">
                       <p className="text-[10px] font-bold text-center mb-1 text-foreground">
                         🔥 {t('topSelling')}
                       </p>
                       {topProducts.length > 0 ? (
-                        <div className="space-y-0.5 flex-1 overflow-hidden">
+                        <div className="space-y-[3px] flex-1 overflow-hidden">
                           {topProducts.slice(0, 5).map((product, index) => (
                             <div
                               key={index}
-                              className={`flex items-center justify-between px-2 py-0.5 rounded text-[9px] ${index === 0
-                                  ? 'bg-amber-500/10 border border-amber-500/20'
-                                  : index === 1
-                                    ? 'bg-slate-400/10 border border-slate-400/15'
-                                    : index === 2
-                                      ? 'bg-amber-700/10 border border-amber-700/15'
-                                      : 'bg-muted/20'
+                              className={`flex items-center justify-between px-2 py-[3px] rounded text-[10px] ${index === 0
+                                ? 'bg-amber-500/10 border border-amber-500/20'
+                                : index === 1
+                                  ? 'bg-slate-400/10 border border-slate-400/15'
+                                  : index === 2
+                                    ? 'bg-amber-700/10 border border-amber-700/15'
+                                    : 'bg-muted/20'
                                 }`}
                             >
                               <div className="flex items-center gap-1.5 overflow-hidden flex-1 min-w-0">
                                 <span className={`font-bold flex-shrink-0 ${index === 0 ? 'text-amber-500' :
-                                    index === 1 ? 'text-slate-400' :
-                                      index === 2 ? 'text-amber-700' :
-                                        'text-muted-foreground'
+                                  index === 1 ? 'text-slate-400' :
+                                    index === 2 ? 'text-amber-700' :
+                                      'text-muted-foreground'
                                   }`}>
                                   {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                                 </span>

@@ -19,7 +19,7 @@ CREATE INDEX IF NOT EXISTS idx_supplies_establishment_category
 
 -- Index for products by menu + active status (common filter)
 CREATE INDEX IF NOT EXISTS idx_products_menu_active 
-    ON public.products (menu_id, active);
+    ON public.products (menu_id, is_active);
 
 -- Index for products by category (for filtering in UI)
 CREATE INDEX IF NOT EXISTS idx_products_menu_category 

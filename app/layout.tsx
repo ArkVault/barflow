@@ -16,22 +16,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Barmode - Sistema de Inventario para Bares',
+  title: 'Barflow - Sistema de Inventario para Bares',
   description: 'Sistema inteligente de gestión de inventario y proyecciones para bares y restaurantes',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
         url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        sizes: '32x32',
+        type: 'image/png',
       },
     ],
     apple: '/apple-icon.png',

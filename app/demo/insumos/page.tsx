@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useLanguage } from "@/hooks/use-language"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
@@ -35,7 +35,7 @@ interface Supply {
 
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
-export default function InsumosPage() {
+function InsumosPageContent() {
   const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const searchParams = useSearchParams();
@@ -665,3 +665,21 @@ export default function InsumosPage() {
     </div>
   )
 }
+
+// Wrap the page in Suspense to handle useSearchParams
+export default function InsumosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-svh bg-background flex items-center justify-center">
+        <DemoSidebar />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <InsumosPageContent />
+    </Suspense>
+  )
+}
+

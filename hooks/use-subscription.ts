@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
 
+// Dev accounts that bypass trial restrictions
+const DEV_EMAILS = [
+     "gibrann@gmail.com",
+     "dev@barflow.mx",
+     // Add more dev emails as needed
+];
+
 export interface SubscriptionData {
      isActive: boolean;
      isTrialing: boolean;
@@ -12,6 +19,7 @@ export interface SubscriptionData {
      trialEndDate: Date | null;
      daysRemaining: number;
      subscriptionStatus: string | null;
+     isDevAccount: boolean;
 }
 
 export function useSubscription() {
@@ -24,6 +32,7 @@ export function useSubscription() {
           trialEndDate: null,
           daysRemaining: 0,
           subscriptionStatus: null,
+          isDevAccount: false,
      });
      const [loading, setLoading] = useState(true);
 
@@ -61,14 +70,20 @@ export function useSubscription() {
                          data.subscription_status === "active" ||
                          data.subscription_status === "trialing";
 
+                    // Check if this is a dev account
+                    const isDevAccount = user?.email ? DEV_EMAILS.includes(user.email) : false;
+
                     setSubscription({
-                         isActive: hasActiveSubscription || isTrialing,
+                         // Dev accounts are always active
+                         isActive: isDevAccount || hasActiveSubscription || isTrialing,
                          isTrialing,
-                         trialEnded: trialEnded && !hasActiveSubscription,
+                         // Dev accounts never show trial ended
+                         trialEnded: isDevAccount ? false : (trialEnded && !hasActiveSubscription),
                          planType: data.plan_type,
                          trialEndDate,
                          daysRemaining,
                          subscriptionStatus: data.subscription_status,
+                         isDevAccount,
                     });
                }
 
