@@ -233,7 +233,7 @@ export function OrdersTab() {
                                                        <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-8 w-8 bg-white/90 hover:bg-white border-0 text-black"
+                                                            className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-black/70 dark:hover:bg-black/90 border-0 text-black dark:text-white"
                                                             onClick={() => updateProductQuantity(product.id, quantity - 1)}
                                                             disabled={quantity === 0}
                                                        >
@@ -245,7 +245,7 @@ export function OrdersTab() {
                                                        <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-8 w-8 bg-white/90 hover:bg-white border-0 text-black"
+                                                            className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-black/70 dark:hover:bg-black/90 border-0 text-black dark:text-white"
                                                             onClick={() => updateProductQuantity(product.id, quantity + 1)}
                                                        >
                                                             <Plus className="w-4 h-4" />
@@ -253,7 +253,7 @@ export function OrdersTab() {
                                                        {quantity > 0 && (
                                                             <Button
                                                                  size="sm"
-                                                                 className="ml-1 h-8 px-3 bg-white hover:bg-white/90 text-black font-semibold"
+                                                                 className="ml-1 h-8 px-3 bg-white hover:bg-white/90 dark:bg-black/70 dark:hover:bg-black/90 text-black dark:text-white font-semibold"
                                                                  onClick={() => addProductToOrder(product, quantity)}
                                                             >
                                                                  {language === 'es' ? 'Añadir' : 'Add'}
@@ -306,7 +306,7 @@ export function OrdersTab() {
                                                        <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-6 w-6"
+                                                            className="h-6 w-6 dark:text-white"
                                                             onClick={() => updateOrderQuantity(item.id, -1)}
                                                        >
                                                             <Minus className="w-3 h-3" />
@@ -315,7 +315,7 @@ export function OrdersTab() {
                                                        <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className="h-6 w-6"
+                                                            className="h-6 w-6 dark:text-white"
                                                             onClick={() => updateOrderQuantity(item.id, 1)}
                                                        >
                                                             <Plus className="w-3 h-3" />
