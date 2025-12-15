@@ -89,6 +89,11 @@ export default function AccountContent() {
      });
      const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+     // OpenTable integration state
+     const [openTableConnected, setOpenTableConnected] = useState(false);
+     const [isConnectingOpenTable, setIsConnectingOpenTable] = useState(false);
+     const [openTableRestaurantName, setOpenTableRestaurantName] = useState("");
+
      useEffect(() => {
           if (user && establishmentId) {
                fetchProfile();
@@ -124,6 +129,18 @@ export default function AccountContent() {
                establishment_name: establishment?.name || "",
                phone: establishment?.phone || "",
           });
+
+          // Check OpenTable integration status
+          const { data: integration } = await supabase
+               .from("opentable_integrations")
+               .select("is_active, opentable_restaurant_name")
+               .eq("establishment_id", establishmentId)
+               .single();
+
+          if (integration?.is_active) {
+               setOpenTableConnected(true);
+               setOpenTableRestaurantName(integration.opentable_restaurant_name || "");
+          }
      };
 
      const handleSaveProfile = async () => {
@@ -224,6 +241,80 @@ export default function AccountContent() {
                toast.error(language === 'es' ? "Error al enviar la solicitud" : "Error sending request");
           } finally {
                setIsSendingQuote(false);
+          }
+     };
+
+     const handleConnectOpenTable = async () => {
+          setIsConnectingOpenTable(true);
+          try {
+               const supabase = createClient();
+
+               // Simular conexión de demostración
+               // En producción, esto redirigirá a OAuth de OpenTable
+               const demoRestaurantName = profile.establishment_name || "Mi Restaurante";
+
+               // Crear registro de integración simulado
+               const { error } = await supabase
+                    .from("opentable_integrations")
+                    .upsert({
+                         establishment_id: establishmentId,
+                         access_token: "demo_token_encrypted",
+                         refresh_token: "demo_refresh_encrypted",
+                         token_expires_at: new Date(Date.now() + 3600000).toISOString(),
+                         opentable_restaurant_id: "demo_restaurant_id",
+                         opentable_restaurant_name: demoRestaurantName,
+                         webhook_id: "demo_webhook_id",
+                         webhook_secret: "demo_secret",
+                         is_active: true,
+                    }, {
+                         onConflict: 'establishment_id'
+                    });
+
+               if (error) throw error;
+
+               setOpenTableConnected(true);
+               setOpenTableRestaurantName(demoRestaurantName);
+               toast.success(
+                    language === 'es'
+                         ? '¡OpenTable conectado exitosamente! (Modo Demo)'
+                         : 'OpenTable connected successfully! (Demo Mode)'
+               );
+          } catch (error) {
+               console.error("Error connecting OpenTable:", error);
+               toast.error(
+                    language === 'es'
+                         ? 'Error al conectar OpenTable'
+                         : 'Error connecting OpenTable'
+               );
+          } finally {
+               setIsConnectingOpenTable(false);
+          }
+     };
+
+     const handleDisconnectOpenTable = async () => {
+          try {
+               const supabase = createClient();
+               const { error } = await supabase
+                    .from("opentable_integrations")
+                    .update({ is_active: false })
+                    .eq("establishment_id", establishmentId);
+
+               if (error) throw error;
+
+               setOpenTableConnected(false);
+               setOpenTableRestaurantName("");
+               toast.success(
+                    language === 'es'
+                         ? 'OpenTable desconectado'
+                         : 'OpenTable disconnected'
+               );
+          } catch (error) {
+               console.error("Error disconnecting OpenTable:", error);
+               toast.error(
+                    language === 'es'
+                         ? 'Error al desconectar'
+                         : 'Error disconnecting'
+               );
           }
      };
 
@@ -865,13 +956,22 @@ export default function AccountContent() {
                                              </div>
 
                                              {/* Connection Status Badge */}
-                                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted">
-                                                  <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                                                  <span className="text-xs font-medium text-muted-foreground">
-                                                       {language === 'es' ? 'No conectado' : 'Not connected'}
+                                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${openTableConnected ? 'bg-green-500/10' : 'bg-muted'}`}>
+                                                  <span className={`w-2 h-2 rounded-full ${openTableConnected ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                                                  <span className={`text-xs font-medium ${openTableConnected ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+                                                       {openTableConnected
+                                                            ? (language === 'es' ? 'Conectado' : 'Connected')
+                                                            : (language === 'es' ? 'No conectado' : 'Not connected')}
                                                   </span>
                                              </div>
                                         </div>
+
+                                        {openTableConnected && openTableRestaurantName && (
+                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                                  <span>{openTableRestaurantName}</span>
+                                             </div>
+                                        )}
 
                                         <p className="text-sm text-muted-foreground">
                                              {language === 'es'
@@ -880,22 +980,45 @@ export default function AccountContent() {
                                         </p>
 
                                         <div className="flex flex-col gap-2">
-                                             <GlowButton
-                                                  onClick={() => window.location.href = '/api/integrations/opentable/connect'}
-                                                  className="w-full"
-                                             >
-                                                  <img
-                                                       src="/opentable-icon.png"
-                                                       alt="OpenTable"
-                                                       className="w-5 h-5"
-                                                  />
-                                                  <span>{language === 'es' ? 'Conectar OpenTable' : 'Connect OpenTable'}</span>
-                                             </GlowButton>
-                                             <p className="text-xs text-center text-muted-foreground">
-                                                  {language === 'es'
-                                                       ? 'Serás redirigido a OpenTable para autorizar la conexión'
-                                                       : 'You will be redirected to OpenTable to authorize the connection'}
-                                             </p>
+                                             {!openTableConnected ? (
+                                                  <>
+                                                       <GlowButton
+                                                            onClick={handleConnectOpenTable}
+                                                            disabled={isConnectingOpenTable}
+                                                            className="w-full bg-gradient-to-r from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 hover:from-gray-50 hover:to-gray-200 dark:hover:from-gray-700 dark:hover:to-gray-600 text-foreground"
+                                                       >
+                                                            {isConnectingOpenTable ? (
+                                                                 <>
+                                                                      <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
+                                                                      <span>{language === 'es' ? 'Conectando...' : 'Connecting...'}</span>
+                                                                 </>
+                                                            ) : (
+                                                                 <>
+                                                                      <img
+                                                                           src="/opentable-icon.png"
+                                                                           alt="OpenTable"
+                                                                           className="w-5 h-5"
+                                                                      />
+                                                                      <span>{language === 'es' ? 'Conectar OpenTable' : 'Connect OpenTable'}</span>
+                                                                 </>
+                                                            )}
+                                                       </GlowButton>
+                                                       <p className="text-xs text-center text-muted-foreground">
+                                                            {language === 'es'
+                                                                 ? 'Modo demostración - Simula conexión con OpenTable'
+                                                                 : 'Demo mode - Simulates OpenTable connection'}
+                                                       </p>
+                                                  </>
+                                             ) : (
+                                                  <Button
+                                                       onClick={handleDisconnectOpenTable}
+                                                       variant="outline"
+                                                       className="w-full border-red-500/50 hover:bg-red-500/10 hover:border-red-500 text-red-600 dark:text-red-400"
+                                                  >
+                                                       <Plug className="mr-2 h-4 w-4" />
+                                                       {language === 'es' ? 'Desconectar' : 'Disconnect'}
+                                                  </Button>
+                                             )}
                                         </div>
 
                                         {/* Features List */}
