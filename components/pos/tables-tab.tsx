@@ -699,7 +699,7 @@ export function TablesTab() {
                                                   if (reservation) {
                                                        return (
                                                             <Badge
-                                                                 className="absolute -top-1 -left-1 h-5 px-1.5 text-[9px] bg-blue-500 text-white flex items-center gap-0.5 cursor-pointer hover:bg-blue-600"
+                                                                 className="absolute -top-1 -left-1 h-5 px-1.5 text-[9px] bg-orange-500 text-white flex items-center gap-0.5 cursor-pointer hover:bg-orange-600"
                                                                  onClick={(e) => {
                                                                       e.stopPropagation();
                                                                       setSelectedReservation(reservation);
