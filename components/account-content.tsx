@@ -847,10 +847,12 @@ export default function AccountContent() {
                                         <div className="flex items-start justify-between">
                                              <div className="flex items-center gap-4">
                                                   {/* OpenTable Logo */}
-                                                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
-                                                       <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-                                                       </svg>
+                                                  <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg">
+                                                       <img
+                                                            src="/opentable-icon.png"
+                                                            alt="OpenTable"
+                                                            className="w-full h-full object-cover"
+                                                       />
                                                   </div>
                                                   <div>
                                                        <h4 className="text-lg font-semibold">OpenTable</h4>
@@ -925,11 +927,6 @@ export default function AccountContent() {
                                                   {language === 'es' ? 'Más integraciones próximamente' : 'More integrations coming soon'}
                                              </p>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">
-                                             {language === 'es'
-                                                  ? 'Uber Eats, Rappi, DiDi Food y más...'
-                                                  : 'Uber Eats, Rappi, DiDi Food and more...'}
-                                        </p>
                                    </div>
                               </div>
                          </div>
