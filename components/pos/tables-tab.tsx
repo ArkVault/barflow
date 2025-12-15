@@ -9,17 +9,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import {
      Plus, Trash2, Move, Edit2, Check, X,
      LayoutGrid, Users, Clock, DollarSign,
-     ChevronRight
+     ChevronRight, Calendar
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
 import { usePOS } from './pos-context';
 import { Section, TableItem, BarItem, Status, statusColors, barStatusColors } from './types';
 import { GlowButton } from '@/components/glow-button';
+import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/hooks/use-auth';
 
 // Single Responsibility: Only handles table/bar layout management
 export function TablesTab() {
      const { t, language } = useLanguage();
+     const { establishmentId } = useAuth();
      const {
           sections,
           setSections,
@@ -45,6 +48,11 @@ export function TablesTab() {
      const [hasMoved, setHasMoved] = useState(false);
      const [resizingSection, setResizingSection] = useState<{ id: string, startX: number, startY: number, startWidth: number, startHeight: number } | null>(null);
      const [tableCounter, setTableCounter] = useState(1);
+
+     // Reservations state
+     const [reservations, setReservations] = useState<any[]>([]);
+     const [selectedReservation, setSelectedReservation] = useState<any | null>(null);
+     const [showReservationModal, setShowReservationModal] = useState(false);
 
      // Ref to track if we just finished dragging (prevents click after drop)
      const justDroppedRef = useRef(false);
@@ -81,6 +89,39 @@ export function TablesTab() {
           if (name.startsWith('Barra ')) return 'Bar ' + name.substring(6);
           if (name.startsWith('Sección ')) return 'Section ' + name.substring(8);
           return name;
+     };
+
+     // Fetch today's reservations
+     useEffect(() => {
+          if (!establishmentId) return;
+
+          const fetchReservations = async () => {
+               const supabase = createClient();
+               const today = new Date().toISOString().split('T')[0];
+
+               const { data, error } = await supabase
+                    .from('reservations')
+                    .select('*')
+                    .eq('establishment_id', establishmentId)
+                    .eq('reservation_date', today)
+                    .in('status', ['confirmed', 'seated'])
+                    .order('reservation_time', { ascending: true });
+
+               if (!error && data) {
+                    setReservations(data);
+               }
+          };
+
+          fetchReservations();
+
+          // Refresh every minute
+          const interval = setInterval(fetchReservations, 60000);
+          return () => clearInterval(interval);
+     }, [establishmentId]);
+
+     // Get reservation for a table
+     const getTableReservation = (tableName: string) => {
+          return reservations.find(r => r.table_id === tableName || r.table_id === tableName.replace('Mesa ', '').replace('Table ', ''));
      };
 
      // Renumber tables
@@ -632,6 +673,27 @@ export function TablesTab() {
                                                        {table.accounts.length} {language === 'es' ? 'ctas' : 'accs'}
                                                   </Badge>
                                              )}
+
+                                             {/* Reservation badge */}
+                                             {(() => {
+                                                  const reservation = getTableReservation(table.name);
+                                                  if (reservation) {
+                                                       return (
+                                                            <Badge
+                                                                 className="absolute -top-1 -left-1 h-5 px-1.5 text-[9px] bg-blue-500 text-white flex items-center gap-0.5 cursor-pointer hover:bg-blue-600"
+                                                                 onClick={(e) => {
+                                                                      e.stopPropagation();
+                                                                      setSelectedReservation(reservation);
+                                                                      setShowReservationModal(true);
+                                                                 }}
+                                                            >
+                                                                 <Calendar className="w-2.5 h-2.5" />
+                                                                 {reservation.customer_name.split(' ')[0]}
+                                                            </Badge>
+                                                       );
+                                                  }
+                                                  return null;
+                                             })()}
                                         </div>
                                    </div>
                               ))}
@@ -891,6 +953,137 @@ export function TablesTab() {
                                              {language === 'es' ? 'Ir a Comandas' : 'Go to Orders'}
                                         </Button>
                                    </div>
+                              </div>
+                         )}
+                    </DialogContent>
+               </Dialog>
+
+               {/* Reservation Details Modal */}
+               <Dialog open={showReservationModal} onOpenChange={setShowReservationModal}>
+                    <DialogContent className="max-w-md">
+                         <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                   <Calendar className="w-5 h-5 text-blue-500" />
+                                   {language === 'es' ? 'Detalles de Reservación' : 'Reservation Details'}
+                              </DialogTitle>
+                         </DialogHeader>
+
+                         {selectedReservation && (
+                              <div className="space-y-4">
+                                   {/* Customer Info */}
+                                   <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                             <span className="text-sm text-muted-foreground">
+                                                  {language === 'es' ? 'Cliente:' : 'Customer:'}
+                                             </span>
+                                             <span className="font-semibold">{selectedReservation.customer_name}</span>
+                                        </div>
+
+                                        {selectedReservation.customer_phone && (
+                                             <div className="flex items-center justify-between">
+                                                  <span className="text-sm text-muted-foreground">
+                                                       {language === 'es' ? 'Teléfono:' : 'Phone:'}
+                                                  </span>
+                                                  <span>{selectedReservation.customer_phone}</span>
+                                             </div>
+                                        )}
+
+                                        {selectedReservation.customer_email && (
+                                             <div className="flex items-center justify-between">
+                                                  <span className="text-sm text-muted-foreground">Email:</span>
+                                                  <span className="text-sm">{selectedReservation.customer_email}</span>
+                                             </div>
+                                        )}
+                                   </div>
+
+                                   <div className="border-t pt-4 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                             <span className="text-sm text-muted-foreground">
+                                                  {language === 'es' ? 'Mesa:' : 'Table:'}
+                                             </span>
+                                             <span className="font-semibold">{selectedReservation.table_id}</span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                             <span className="text-sm text-muted-foreground">
+                                                  {language === 'es' ? 'Personas:' : 'Party Size:'}
+                                             </span>
+                                             <Badge variant="secondary">
+                                                  <Users className="w-3 h-3 mr-1" />
+                                                  {selectedReservation.party_size}
+                                             </Badge>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                             <span className="text-sm text-muted-foreground">
+                                                  {language === 'es' ? 'Hora:' : 'Time:'}
+                                             </span>
+                                             <Badge variant="secondary">
+                                                  <Clock className="w-3 h-3 mr-1" />
+                                                  {selectedReservation.reservation_time.substring(0, 5)}
+                                             </Badge>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                             <span className="text-sm text-muted-foreground">
+                                                  {language === 'es' ? 'Estado:' : 'Status:'}
+                                             </span>
+                                             <Badge className={selectedReservation.status === 'seated' ? 'bg-green-500' : 'bg-blue-500'}>
+                                                  {selectedReservation.status === 'confirmed'
+                                                       ? (language === 'es' ? 'Confirmada' : 'Confirmed')
+                                                       : (language === 'es' ? 'Sentados' : 'Seated')}
+                                             </Badge>
+                                        </div>
+                                   </div>
+
+                                   {(selectedReservation.notes || selectedReservation.special_requests) && (
+                                        <div className="border-t pt-4 space-y-2">
+                                             {selectedReservation.notes && (
+                                                  <div>
+                                                       <span className="text-sm text-muted-foreground block mb-1">
+                                                            {language === 'es' ? 'Notas:' : 'Notes:'}
+                                                       </span>
+                                                       <p className="text-sm bg-muted p-2 rounded">{selectedReservation.notes}</p>
+                                                  </div>
+                                             )}
+                                             {selectedReservation.special_requests && (
+                                                  <div>
+                                                       <span className="text-sm text-muted-foreground block mb-1">
+                                                            {language === 'es' ? 'Solicitudes especiales:' : 'Special Requests:'}
+                                                       </span>
+                                                       <p className="text-sm bg-muted p-2 rounded">{selectedReservation.special_requests}</p>
+                                                  </div>
+                                             )}
+                                        </div>
+                                   )}
+
+                                   {selectedReservation.status === 'confirmed' && (
+                                        <Button
+                                             className="w-full"
+                                             onClick={async () => {
+                                                  const supabase = createClient();
+                                                  await supabase
+                                                       .from('reservations')
+                                                       .update({ status: 'seated' })
+                                                       .eq('id', selectedReservation.id);
+
+                                                  setShowReservationModal(false);
+                                                  // Refresh reservations
+                                                  const today = new Date().toISOString().split('T')[0];
+                                                  const { data } = await supabase
+                                                       .from('reservations')
+                                                       .select('*')
+                                                       .eq('establishment_id', establishmentId)
+                                                       .eq('reservation_date', today)
+                                                       .in('status', ['confirmed', 'seated'])
+                                                       .order('reservation_time', { ascending: true });
+                                                  if (data) setReservations(data);
+                                             }}
+                                        >
+                                             <Check className="w-4 h-4 mr-2" />
+                                             {language === 'es' ? 'Marcar como Sentados' : 'Mark as Seated'}
+                                        </Button>
+                                   )}
                               </div>
                          )}
                     </DialogContent>
