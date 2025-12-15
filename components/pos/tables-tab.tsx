@@ -17,7 +17,8 @@ import { usePOS } from './pos-context';
 import { Section, TableItem, BarItem, Status, statusColors, barStatusColors } from './types';
 import { GlowButton } from '@/components/glow-button';
 import { createClient } from '@/lib/supabase/client';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/auth-context';
+import { toast } from 'sonner';
 
 // Single Responsibility: Only handles table/bar layout management
 export function TablesTab() {
@@ -53,6 +54,18 @@ export function TablesTab() {
      const [reservations, setReservations] = useState<any[]>([]);
      const [selectedReservation, setSelectedReservation] = useState<any | null>(null);
      const [showReservationModal, setShowReservationModal] = useState(false);
+     const [showNewReservationModal, setShowNewReservationModal] = useState(false);
+     const [newReservation, setNewReservation] = useState({
+          customer_name: '',
+          customer_phone: '',
+          customer_email: '',
+          table_id: '',
+          party_size: 2,
+          reservation_date: new Date().toISOString().split('T')[0],
+          reservation_time: '19:00',
+          notes: '',
+          special_requests: '',
+     });
 
      // Ref to track if we just finished dragging (prevents click after drop)
      const justDroppedRef = useRef(false);
@@ -516,6 +529,12 @@ export function TablesTab() {
                               <LayoutGrid className="w-3.5 h-3.5 text-white" />
                          </div>
                          <span className="hidden sm:inline">{language === 'es' ? 'Agregar Sección' : 'Add Section'}</span>
+                    </GlowButton>
+                    <GlowButton onClick={() => setShowNewReservationModal(true)}>
+                         <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-inner">
+                              <Calendar className="w-3.5 h-3.5 text-white" />
+                         </div>
+                         <span className="hidden sm:inline">{language === 'es' ? 'Nueva Reservación' : 'New Reservation'}</span>
                     </GlowButton>
                </div>
 
@@ -1086,6 +1105,227 @@ export function TablesTab() {
                                    )}
                               </div>
                          )}
+                    </DialogContent>
+               </Dialog>
+
+               {/* New Reservation Modal */}
+               <Dialog open={showNewReservationModal} onOpenChange={setShowNewReservationModal}>
+                    <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+                         <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                   <Calendar className="w-5 h-5 text-blue-500" />
+                                   {language === 'es' ? 'Nueva Reservación' : 'New Reservation'}
+                              </DialogTitle>
+                              <DialogDescription>
+                                   {language === 'es'
+                                        ? 'Crea una reservación manual para una mesa'
+                                        : 'Create a manual reservation for a table'}
+                              </DialogDescription>
+                         </DialogHeader>
+
+                         <div className="space-y-4">
+                              {/* Customer Name */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Nombre del Cliente *' : 'Customer Name *'}
+                                   </label>
+                                   <Input
+                                        value={newReservation.customer_name}
+                                        onChange={(e) => setNewReservation({ ...newReservation, customer_name: e.target.value })}
+                                        placeholder={language === 'es' ? 'Juan Pérez' : 'John Doe'}
+                                   />
+                              </div>
+
+                              {/* Phone */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Teléfono' : 'Phone'}
+                                   </label>
+                                   <Input
+                                        value={newReservation.customer_phone}
+                                        onChange={(e) => setNewReservation({ ...newReservation, customer_phone: e.target.value })}
+                                        placeholder="+52 55 1234 5678"
+                                   />
+                              </div>
+
+                              {/* Email */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">Email</label>
+                                   <Input
+                                        type="email"
+                                        value={newReservation.customer_email}
+                                        onChange={(e) => setNewReservation({ ...newReservation, customer_email: e.target.value })}
+                                        placeholder="cliente@email.com"
+                                   />
+                              </div>
+
+                              {/* Table Selection */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Mesa *' : 'Table *'}
+                                   </label>
+                                   <select
+                                        value={newReservation.table_id}
+                                        onChange={(e) => setNewReservation({ ...newReservation, table_id: e.target.value })}
+                                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                                   >
+                                        <option value="">{language === 'es' ? 'Seleccionar mesa...' : 'Select table...'}</option>
+                                        {sections.flatMap(section =>
+                                             section.tables.map(table => (
+                                                  <option key={table.id} value={table.name}>
+                                                       {translateName(table.name)}
+                                                  </option>
+                                             ))
+                                        )}
+                                   </select>
+                              </div>
+
+                              {/* Party Size and Date/Time Row */}
+                              <div className="grid grid-cols-2 gap-4">
+                                   <div className="space-y-2">
+                                        <label className="text-sm font-medium">
+                                             {language === 'es' ? 'Personas *' : 'Party Size *'}
+                                        </label>
+                                        <Input
+                                             type="number"
+                                             min="1"
+                                             max="20"
+                                             value={newReservation.party_size}
+                                             onChange={(e) => setNewReservation({ ...newReservation, party_size: parseInt(e.target.value) || 1 })}
+                                        />
+                                   </div>
+
+                                   <div className="space-y-2">
+                                        <label className="text-sm font-medium">
+                                             {language === 'es' ? 'Fecha *' : 'Date *'}
+                                        </label>
+                                        <Input
+                                             type="date"
+                                             value={newReservation.reservation_date}
+                                             onChange={(e) => setNewReservation({ ...newReservation, reservation_date: e.target.value })}
+                                        />
+                                   </div>
+                              </div>
+
+                              {/* Time */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Hora *' : 'Time *'}
+                                   </label>
+                                   <Input
+                                        type="time"
+                                        value={newReservation.reservation_time}
+                                        onChange={(e) => setNewReservation({ ...newReservation, reservation_time: e.target.value })}
+                                   />
+                              </div>
+
+                              {/* Notes */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Notas' : 'Notes'}
+                                   </label>
+                                   <Input
+                                        value={newReservation.notes}
+                                        onChange={(e) => setNewReservation({ ...newReservation, notes: e.target.value })}
+                                        placeholder={language === 'es' ? 'Información adicional...' : 'Additional information...'}
+                                   />
+                              </div>
+
+                              {/* Special Requests */}
+                              <div className="space-y-2">
+                                   <label className="text-sm font-medium">
+                                        {language === 'es' ? 'Solicitudes Especiales' : 'Special Requests'}
+                                   </label>
+                                   <Input
+                                        value={newReservation.special_requests}
+                                        onChange={(e) => setNewReservation({ ...newReservation, special_requests: e.target.value })}
+                                        placeholder={language === 'es' ? 'Alergias, preferencias, etc.' : 'Allergies, preferences, etc.'}
+                                   />
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2 pt-4">
+                                   <Button
+                                        variant="outline"
+                                        className="flex-1"
+                                        onClick={() => {
+                                             setShowNewReservationModal(false);
+                                             setNewReservation({
+                                                  customer_name: '',
+                                                  customer_phone: '',
+                                                  customer_email: '',
+                                                  table_id: '',
+                                                  party_size: 2,
+                                                  reservation_date: new Date().toISOString().split('T')[0],
+                                                  reservation_time: '19:00',
+                                                  notes: '',
+                                                  special_requests: '',
+                                             });
+                                        }}
+                                   >
+                                        {language === 'es' ? 'Cancelar' : 'Cancel'}
+                                   </Button>
+                                   <Button
+                                        className="flex-1"
+                                        disabled={!newReservation.customer_name || !newReservation.table_id}
+                                        onClick={async () => {
+                                             const supabase = createClient();
+                                             const { error } = await supabase
+                                                  .from('reservations')
+                                                  .insert({
+                                                       establishment_id: establishmentId,
+                                                       table_id: newReservation.table_id,
+                                                       source: 'manual',
+                                                       customer_name: newReservation.customer_name,
+                                                       customer_phone: newReservation.customer_phone || null,
+                                                       customer_email: newReservation.customer_email || null,
+                                                       party_size: newReservation.party_size,
+                                                       reservation_date: newReservation.reservation_date,
+                                                       reservation_time: newReservation.reservation_time + ':00',
+                                                       status: 'confirmed',
+                                                       notes: newReservation.notes || null,
+                                                       special_requests: newReservation.special_requests || null,
+                                                  });
+
+                                             if (error) {
+                                                  toast.error(language === 'es' ? 'Error al crear reservación' : 'Error creating reservation');
+                                                  console.error(error);
+                                                  return;
+                                             }
+
+                                             toast.success(language === 'es' ? '¡Reservación creada!' : 'Reservation created!');
+                                             setShowNewReservationModal(false);
+
+                                             // Reset form
+                                             setNewReservation({
+                                                  customer_name: '',
+                                                  customer_phone: '',
+                                                  customer_email: '',
+                                                  table_id: '',
+                                                  party_size: 2,
+                                                  reservation_date: new Date().toISOString().split('T')[0],
+                                                  reservation_time: '19:00',
+                                                  notes: '',
+                                                  special_requests: '',
+                                             });
+
+                                             // Refresh reservations
+                                             const today = new Date().toISOString().split('T')[0];
+                                             const { data } = await supabase
+                                                  .from('reservations')
+                                                  .select('*')
+                                                  .eq('establishment_id', establishmentId)
+                                                  .eq('reservation_date', today)
+                                                  .in('status', ['confirmed', 'seated'])
+                                                  .order('reservation_time', { ascending: true });
+                                             if (data) setReservations(data);
+                                        }}
+                                   >
+                                        <Check className="w-4 h-4 mr-2" />
+                                        {language === 'es' ? 'Crear Reservación' : 'Create Reservation'}
+                                   </Button>
+                              </div>
+                         </div>
                     </DialogContent>
                </Dialog>
           </div>
