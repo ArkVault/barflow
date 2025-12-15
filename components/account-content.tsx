@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
      Crown,
      CheckCircle,
@@ -980,45 +981,24 @@ export default function AccountContent() {
                                         </p>
 
                                         <div className="flex flex-col gap-2">
-                                             {!openTableConnected ? (
-                                                  <>
-                                                       <GlowButton
-                                                            onClick={handleConnectOpenTable}
-                                                            disabled={isConnectingOpenTable}
-                                                            className="w-full bg-gradient-to-r from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 hover:from-gray-50 hover:to-gray-200 dark:hover:from-gray-700 dark:hover:to-gray-600 text-foreground"
-                                                       >
-                                                            {isConnectingOpenTable ? (
-                                                                 <>
-                                                                      <span className="h-4 w-4 rounded-full border-2 border-foreground/30 border-t-foreground animate-spin" />
-                                                                      <span>{language === 'es' ? 'Conectando...' : 'Connecting...'}</span>
-                                                                 </>
-                                                            ) : (
-                                                                 <>
-                                                                      <img
-                                                                           src="/opentable-icon.png"
-                                                                           alt="OpenTable"
-                                                                           className="w-5 h-5"
-                                                                      />
-                                                                      <span>{language === 'es' ? 'Conectar OpenTable' : 'Connect OpenTable'}</span>
-                                                                 </>
-                                                            )}
-                                                       </GlowButton>
-                                                       <p className="text-xs text-center text-muted-foreground">
-                                                            {language === 'es'
-                                                                 ? 'Modo demostración - Simula conexión con OpenTable'
-                                                                 : 'Demo mode - Simulates OpenTable connection'}
-                                                       </p>
-                                                  </>
-                                             ) : (
-                                                  <Button
-                                                       onClick={handleDisconnectOpenTable}
-                                                       variant="outline"
-                                                       className="w-full border-red-500/50 hover:bg-red-500/10 hover:border-red-500 text-red-600 dark:text-red-400"
-                                                  >
-                                                       <Plug className="mr-2 h-4 w-4" />
-                                                       {language === 'es' ? 'Desconectar' : 'Disconnect'}
-                                                  </Button>
-                                             )}
+                                             <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-muted/50 border border-border">
+                                                  <img
+                                                       src="/opentable-icon.png"
+                                                       alt="OpenTable"
+                                                       className="w-5 h-5 opacity-50"
+                                                  />
+                                                  <span className="text-muted-foreground font-medium">
+                                                       {language === 'es' ? 'Conexión Automática' : 'Auto Connection'}
+                                                  </span>
+                                                  <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">
+                                                       {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+                                                  </Badge>
+                                             </div>
+                                             <p className="text-xs text-center text-muted-foreground">
+                                                  {language === 'es'
+                                                       ? 'Mientras tanto, puedes crear reservaciones manuales desde la pestaña "Mesas" en el Punto de Venta'
+                                                       : 'Meanwhile, you can create manual reservations from the "Tables" tab in the Point of Sale'}
+                                             </p>
                                         </div>
 
                                         {/* Features List */}

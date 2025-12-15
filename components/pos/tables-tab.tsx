@@ -1293,6 +1293,29 @@ export function TablesTab() {
                                                   return;
                                              }
 
+                                             // Update table status to 'reservada' if reservation is for today
+                                             const today = new Date().toISOString().split('T')[0];
+                                             if (newReservation.reservation_date === today) {
+                                                  setSections(prev => prev.map(section => ({
+                                                       ...section,
+                                                       tables: section.tables.map(table =>
+                                                            table.name === newReservation.table_id
+                                                                 ? { ...table, status: 'reservada' as Status }
+                                                                 : table
+                                                       )
+                                                  })));
+                                                  // Save layout with updated status
+                                                  const updatedSections = sections.map(section => ({
+                                                       ...section,
+                                                       tables: section.tables.map(table =>
+                                                            table.name === newReservation.table_id
+                                                                 ? { ...table, status: 'reservada' as Status }
+                                                                 : table
+                                                       )
+                                                  }));
+                                                  saveLayout(updatedSections);
+                                             }
+
                                              toast.success(language === 'es' ? '¡Reservación creada!' : 'Reservation created!');
                                              setShowNewReservationModal(false);
 
@@ -1310,7 +1333,6 @@ export function TablesTab() {
                                              });
 
                                              // Refresh reservations
-                                             const today = new Date().toISOString().split('T')[0];
                                              const { data } = await supabase
                                                   .from('reservations')
                                                   .select('*')
