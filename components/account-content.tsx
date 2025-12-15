@@ -27,6 +27,7 @@ import {
      Phone,
      User,
      MessageSquare,
+     Plug,
 } from "lucide-react";
 import { GlowButton } from "./glow-button";
 import { useLanguage } from "@/hooks/use-language";
@@ -60,7 +61,7 @@ export default function AccountContent() {
      const [isEditing, setIsEditing] = useState(false);
      const [isSaving, setIsSaving] = useState(false);
      const [isUpgrading, setIsUpgrading] = useState(false);
-     const [activeTab, setActiveTab] = useState<"profile" | "security" | "subscription">("profile");
+     const [activeTab, setActiveTab] = useState<"profile" | "security" | "subscription" | "connections">("profile");
      const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
      const [showQuoteModal, setShowQuoteModal] = useState(false);
      const [isSendingQuote, setIsSendingQuote] = useState(false);
@@ -310,6 +311,15 @@ export default function AccountContent() {
                          {language === 'es' ? 'Suscripción' : 'Subscription'}
                          {activeTab === "subscription" && (
                               <span className="absolute bottom-0 left-0 h-0.5 w-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.6)]" />
+                         )}
+                    </button>
+                    <button
+                         onClick={() => setActiveTab("connections")}
+                         className={`relative pb-4 text-sm font-medium transition-colors ${activeTab === "connections" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                         {language === 'es' ? 'Conexiones' : 'Connections'}
+                         {activeTab === "connections" && (
+                              <span className="absolute bottom-0 left-0 h-0.5 w-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)]" />
                          )}
                     </button>
                </div>
@@ -809,6 +819,115 @@ export default function AccountContent() {
                                         </p>
                                    </div>
                               )}
+                         </div>
+                    )}
+
+                    {/* Connections Tab */}
+                    {activeTab === "connections" && (
+                         <div className="space-y-8">
+                              <div className="neumorphic rounded-2xl p-8 space-y-6">
+                                   <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 rounded-full bg-orange-500/10">
+                                             <Plug className="h-5 w-5 text-orange-500" />
+                                        </div>
+                                        <div>
+                                             <h3 className="text-lg font-semibold">
+                                                  {language === 'es' ? 'Integraciones' : 'Integrations'}
+                                             </h3>
+                                             <p className="text-sm text-muted-foreground">
+                                                  {language === 'es'
+                                                       ? 'Conecta servicios externos para automatizar tu negocio'
+                                                       : 'Connect external services to automate your business'}
+                                             </p>
+                                        </div>
+                                   </div>
+
+                                   {/* OpenTable Integration Card */}
+                                   <div className="border border-border rounded-xl p-6 space-y-4 hover:border-orange-500/50 transition-colors">
+                                        <div className="flex items-start justify-between">
+                                             <div className="flex items-center gap-4">
+                                                  {/* OpenTable Logo */}
+                                                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg">
+                                                       <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                                                       </svg>
+                                                  </div>
+                                                  <div>
+                                                       <h4 className="text-lg font-semibold">OpenTable</h4>
+                                                       <p className="text-sm text-muted-foreground">
+                                                            {language === 'es'
+                                                                 ? 'Sincroniza reservaciones automáticamente'
+                                                                 : 'Sync reservations automatically'}
+                                                       </p>
+                                                  </div>
+                                             </div>
+
+                                             {/* Connection Status Badge */}
+                                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted">
+                                                  <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                                                  <span className="text-xs font-medium text-muted-foreground">
+                                                       {language === 'es' ? 'No conectado' : 'Not connected'}
+                                                  </span>
+                                             </div>
+                                        </div>
+
+                                        <p className="text-sm text-muted-foreground">
+                                             {language === 'es'
+                                                  ? 'Conecta tu cuenta de OpenTable para que las reservaciones se reflejen automáticamente en tus mesas del Punto de Venta.'
+                                                  : 'Connect your OpenTable account so reservations automatically reflect on your POS tables.'}
+                                        </p>
+
+                                        <div className="flex flex-col gap-2">
+                                             <Button
+                                                  onClick={() => window.location.href = '/api/integrations/opentable/connect'}
+                                                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold"
+                                             >
+                                                  <Plug className="mr-2 h-4 w-4" />
+                                                  {language === 'es' ? 'Conectar OpenTable' : 'Connect OpenTable'}
+                                             </Button>
+                                             <p className="text-xs text-center text-muted-foreground">
+                                                  {language === 'es'
+                                                       ? 'Serás redirigido a OpenTable para autorizar la conexión'
+                                                       : 'You will be redirected to OpenTable to authorize the connection'}
+                                             </p>
+                                        </div>
+
+                                        {/* Features List */}
+                                        <div className="pt-4 border-t border-border">
+                                             <p className="text-xs font-medium text-muted-foreground mb-3">
+                                                  {language === 'es' ? 'Características:' : 'Features:'}
+                                             </p>
+                                             <ul className="space-y-2">
+                                                  {[
+                                                       language === 'es' ? 'Sincronización en tiempo real' : 'Real-time synchronization',
+                                                       language === 'es' ? 'Actualización automática de estado de mesas' : 'Automatic table status updates',
+                                                       language === 'es' ? 'Detalles de cliente y reservación' : 'Customer and reservation details',
+                                                       language === 'es' ? 'Notificaciones de cambios' : 'Change notifications',
+                                                  ].map((feature, i) => (
+                                                       <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                            <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                                            {feature}
+                                                       </li>
+                                                  ))}
+                                             </ul>
+                                        </div>
+                                   </div>
+
+                                   {/* Coming Soon Integrations */}
+                                   <div className="border border-dashed border-border rounded-xl p-6 text-center space-y-3 opacity-60">
+                                        <div className="flex items-center justify-center gap-2">
+                                             <Sparkles className="h-5 w-5 text-muted-foreground" />
+                                             <p className="text-sm font-medium text-muted-foreground">
+                                                  {language === 'es' ? 'Más integraciones próximamente' : 'More integrations coming soon'}
+                                             </p>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                             {language === 'es'
+                                                  ? 'Uber Eats, Rappi, DiDi Food y más...'
+                                                  : 'Uber Eats, Rappi, DiDi Food and more...'}
+                                        </p>
+                                   </div>
+                              </div>
                          </div>
                     )}
                </div>
