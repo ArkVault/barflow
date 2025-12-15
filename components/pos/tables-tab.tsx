@@ -1078,7 +1078,7 @@ export function TablesTab() {
 
                                    {selectedReservation.status === 'confirmed' && (
                                         <Button
-                                             className="w-full"
+                                             className="w-full bg-green-600 hover:bg-green-700"
                                              onClick={async () => {
                                                   const supabase = createClient();
                                                   await supabase
@@ -1086,7 +1086,31 @@ export function TablesTab() {
                                                        .update({ status: 'seated' })
                                                        .eq('id', selectedReservation.id);
 
+                                                  // Update table status to 'ocupada'
+                                                  const tableName = selectedReservation.table_id;
+                                                  setSections(prev => prev.map(section => ({
+                                                       ...section,
+                                                       tables: section.tables.map(table =>
+                                                            table.name === tableName
+                                                                 ? { ...table, status: 'ocupada' as Status }
+                                                                 : table
+                                                       )
+                                                  })));
+
+                                                  // Save layout with updated status
+                                                  const updatedSections = sections.map(section => ({
+                                                       ...section,
+                                                       tables: section.tables.map(table =>
+                                                            table.name === tableName
+                                                                 ? { ...table, status: 'ocupada' as Status }
+                                                                 : table
+                                                       )
+                                                  }));
+                                                  saveLayout(updatedSections);
+
+                                                  toast.success(language === 'es' ? '¡Cliente sentado!' : 'Customer seated!');
                                                   setShowReservationModal(false);
+
                                                   // Refresh reservations
                                                   const today = new Date().toISOString().split('T')[0];
                                                   const { data } = await supabase
@@ -1100,7 +1124,7 @@ export function TablesTab() {
                                              }}
                                         >
                                              <Check className="w-4 h-4 mr-2" />
-                                             {language === 'es' ? 'Marcar como Sentados' : 'Mark as Seated'}
+                                             {language === 'es' ? '¡Llegó! Sentar Cliente' : 'Arrived! Seat Customer'}
                                         </Button>
                                    )}
                               </div>
