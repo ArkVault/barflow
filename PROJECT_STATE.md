@@ -1,4 +1,4 @@
-# BarFlow - Project State Documentation
+# Barmode - Project State Documentation
 
 **Last Updated:** November 15, 2025  
 **Status:** Development - Basic functionality tested  
@@ -484,8 +484,8 @@ npm run lint     # Run ESLint
 - [shadcn/ui Docs](https://ui.shadcn.com)
 
 ### Project Links
-- **Deployment:** https://vercel.com/arkvaults-projects-d96cac84/v0-bar-inventory-saa-s
-- **v0 Chat:** https://v0.app/chat/ePYSwNAlcmo
+- **Production:** https://barflow-686958505968.us-central1.run.app
+- **GitHub:** https://github.com/gibrann/barmode
 
 ---
 

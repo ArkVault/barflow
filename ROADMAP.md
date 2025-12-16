@@ -731,11 +731,11 @@ establishment (1)
 | Servicio | Free Tier | Pro Tier | Enterprise |
 |----------|-----------|----------|------------|
 | **Supabase** | $0 | $25 | $599+ |
-| **Vercel** | $0 | $20 | $400+ |
+| **Google Cloud Run** | $0 (scale to zero) | ~$5-10 | $50+ |
 | **Stripe** | 3.6% + $3 MXN/tx | 3.6% + $3 MXN/tx | Negociable |
 | **Dominio** | - | ~$15/año | ~$15/año |
 | **Email (Resend)** | $0 (3K/mo) | $20 | $89+ |
-| **Total Infra** | **$0** | **~$45/mo** | **~$1,100/mo** |
+| **Total Infra** | **$0** | **~$35/mo** | **~$700/mo** |
 
 ### Costos Administrativos
 
@@ -844,9 +844,9 @@ establishment (1)
 ### Infraestructura
 - [x] Supabase configurado
 - [x] Stripe configurado (modo test)
-- [ ] Dominio de producción
-- [ ] Vercel deployment
-- [ ] Variables de entorno producción
+- [x] Google Cloud Run deployment
+- [ ] Dominio de producción personalizado
+- [x] Variables de entorno producción
 - [ ] Stripe modo live
 
 ### Funcionalidades
