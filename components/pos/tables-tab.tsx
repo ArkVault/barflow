@@ -7,6 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
+     AlertDialog,
+     AlertDialogAction,
+     AlertDialogCancel,
+     AlertDialogContent,
+     AlertDialogDescription,
+     AlertDialogFooter,
+     AlertDialogHeader,
+     AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
      Plus, Trash2, Move, Edit2, Check, X,
      LayoutGrid, Users, Clock, DollarSign,
      ChevronRight, Calendar
@@ -48,7 +58,7 @@ export function TablesTab() {
      const [isDragging, setIsDragging] = useState(false);
      const [hasMoved, setHasMoved] = useState(false);
      const [resizingSection, setResizingSection] = useState<{ id: string, startX: number, startY: number, startWidth: number, startHeight: number } | null>(null);
-     const [tableCounter, setTableCounter] = useState(1);
+     const [confirmFinalize, setConfirmFinalize] = useState<{ sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar' } | null>(null);
 
      // Reservations state
      const [reservations, setReservations] = useState<any[]>([]);
@@ -137,16 +147,13 @@ export function TablesTab() {
           return reservations.find(r => r.table_id === tableName || r.table_id === tableName.replace('Mesa ', '').replace('Table ', ''));
      };
 
-     // Renumber tables
-     const renumberTables = (updatedSections: Section[]): Section[] => {
-          let counter = 1;
-          return updatedSections.map(section => ({
-               ...section,
-               tables: section.tables.map(table => ({
-                    ...table,
-                    name: `Mesa ${counter++}`,
-               })),
-          }));
+     // Helper function to get the next available table number (total tables + 1)
+     const getNextTableNumber = (): number => {
+          let totalTables = 0;
+          sections.forEach(section => {
+               totalTables += section.tables.length;
+          });
+          return totalTables + 1;
      };
 
      // Section management
@@ -200,18 +207,18 @@ export function TablesTab() {
 
      // Table management
      const addTable = (sectionId: string) => {
+          const nextNumber = getNextTableNumber();
           const updated = sections.map(section => {
                if (section.id === sectionId) {
                     const newTable: TableItem = {
                          id: `table-${Date.now()}`,
-                         name: language === 'es' ? `Mesa ${tableCounter}` : `Table ${tableCounter}`,
+                         name: language === 'es' ? `Mesa ${nextNumber}` : `Table ${nextNumber}`,
                          x: 50 + (section.tables.length % 3) * 150,
                          y: 50 + Math.floor(section.tables.length / 3) * 120,
                          status: 'libre',
                          accounts: [],
                          currentAccountId: undefined,
                     };
-                    setTableCounter(tableCounter + 1);
                     return { ...section, tables: [...section.tables, newTable] };
                }
                return section;
@@ -226,7 +233,18 @@ export function TablesTab() {
                }
                return section;
           });
-          setSections(renumberTables(updated));
+
+          // Renumber all tables sequentially (1, 2, 3...)
+          let counter = 1;
+          const renumbered = updated.map(section => ({
+               ...section,
+               tables: section.tables.map(table => ({
+                    ...table,
+                    name: language === 'es' ? `Mesa ${counter++}` : `Table ${counter++}`,
+               })),
+          }));
+
+          setSections(renumbered);
      };
 
      // Bar management
@@ -901,11 +919,11 @@ export function TablesTab() {
                                                        )}
 
                                                        {/* Account actions */}
-                                                       <div className="flex gap-2 mt-3 pt-3 border-t">
+                                                       <div className="flex gap-4 mt-3 pt-3 border-t justify-between">
                                                             <Button
                                                                  size="sm"
                                                                  variant="outline"
-                                                                 className="flex-1 h-8 text-xs"
+                                                                 className="flex-1 h-9 text-xs"
                                                                  onClick={() => {
                                                                       goToOrdersTab(selectedItem.sectionId, selectedItem.itemId, selectedItem.type);
                                                                       setIsModalOpen(false);
@@ -916,25 +934,30 @@ export function TablesTab() {
                                                             </Button>
                                                             <Button
                                                                  size="sm"
-                                                                 className="flex-1 h-8 text-xs bg-green-600 hover:bg-green-700"
-                                                                 onClick={() => {
-                                                                      closeAccount(selectedItem.sectionId, selectedItem.itemId, account.id, selectedItem.type);
-                                                                 }}
-                                                                 disabled={account.items.length === 0}
-                                                            >
-                                                                 <Check className="w-3 h-3 mr-1" />
-                                                                 {language === 'es' ? 'Finalizar' : 'Finalize'}
-                                                            </Button>
-                                                            <Button
-                                                                 size="sm"
                                                                  variant="destructive"
-                                                                 className="flex-1 h-8 text-xs"
+                                                                 className="flex-1 h-9 text-xs"
                                                                  onClick={() => {
                                                                       cancelAccount(selectedItem.sectionId, selectedItem.itemId, account.id, selectedItem.type);
                                                                  }}
                                                             >
                                                                  <X className="w-3 h-3 mr-1" />
                                                                  {language === 'es' ? 'Cancelar' : 'Cancel'}
+                                                            </Button>
+                                                            <Button
+                                                                 size="sm"
+                                                                 className="flex-1 h-9 text-xs bg-green-600 hover:bg-green-700"
+                                                                 onClick={() => {
+                                                                      setConfirmFinalize({
+                                                                           sectionId: selectedItem.sectionId,
+                                                                           itemId: selectedItem.itemId,
+                                                                           accountId: account.id,
+                                                                           type: selectedItem.type
+                                                                      });
+                                                                 }}
+                                                                 disabled={account.items.length === 0}
+                                                            >
+                                                                 <Check className="w-3 h-3 mr-1" />
+                                                                 {language === 'es' ? 'Finalizar' : 'Finalize'}
                                                             </Button>
                                                        </div>
                                                   </Card>
@@ -1374,6 +1397,44 @@ export function TablesTab() {
                          </div>
                     </DialogContent>
                </Dialog>
+
+               {/* Confirmation Dialog for Finalizing Account */}
+               <AlertDialog open={!!confirmFinalize} onOpenChange={(open) => !open && setConfirmFinalize(null)}>
+                    <AlertDialogContent>
+                         <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                   {language === 'es' ? 'Confirmar Mesa Pagada' : 'Confirm Table Paid'}
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                   {language === 'es'
+                                        ? '¿Estás seguro de que deseas finalizar esta cuenta? Esta acción registrará la venta y liberará la mesa.'
+                                        : 'Are you sure you want to finalize this account? This will record the sale and free the table.'}
+                              </AlertDialogDescription>
+                         </AlertDialogHeader>
+                         <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                   {language === 'es' ? 'Cancelar' : 'Cancel'}
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                   className="bg-green-600 hover:bg-green-700"
+                                   onClick={() => {
+                                        if (confirmFinalize) {
+                                             closeAccount(
+                                                  confirmFinalize.sectionId,
+                                                  confirmFinalize.itemId,
+                                                  confirmFinalize.accountId,
+                                                  confirmFinalize.type
+                                             );
+                                             setConfirmFinalize(null);
+                                        }
+                                   }}
+                              >
+                                   <Check className="w-4 h-4 mr-2" />
+                                   {language === 'es' ? 'Confirmar' : 'Confirm'}
+                              </AlertDialogAction>
+                         </AlertDialogFooter>
+                    </AlertDialogContent>
+               </AlertDialog>
           </div>
      );
 }

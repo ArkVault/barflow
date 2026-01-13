@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-     apiVersion: "2025-11-17.clover",
-});
+// Lazy initialization to avoid build-time errors
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+     if (!stripe) {
+          if (!process.env.STRIPE_SECRET_KEY) {
+               throw new Error("STRIPE_SECRET_KEY is not configured");
+          }
+          stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+               apiVersion: "2025-11-17.clover",
+          });
+     }
+     return stripe;
+}
 
 export async function POST(req: NextRequest) {
      try {
@@ -30,7 +41,7 @@ export async function POST(req: NextRequest) {
 
           // Create customer if doesn't exist
           if (!customerId) {
-               const customer = await stripe.customers.create({
+               const customer = await getStripe().customers.create({
                     email: userEmail,
                     metadata: {
                          user_id: userId,
@@ -47,7 +58,7 @@ export async function POST(req: NextRequest) {
           }
 
           // Create Checkout Session
-          const session = await stripe.checkout.sessions.create({
+          const session = await getStripe().checkout.sessions.create({
                customer: customerId,
                mode: "subscription",
                payment_method_types: ["card"],

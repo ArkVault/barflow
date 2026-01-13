@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/dashboard-layout";
-import { ProductsTable } from "@/components/products-table";
-import { AddProductDialog } from "@/components/add-product-dialog";
+import { ProductsPageClient } from "@/components/products-page-client";
 import { GlowButton } from "@/components/glow-button";
 import { ArrowLeft } from "lucide-react";
 
@@ -25,6 +24,7 @@ export default async function ProductosPage() {
     redirect("/auth/login");
   }
 
+  // Fetch all products initially (will be filtered by menu on client)
   const { data: products } = await supabase
     .from("products")
     .select(`
@@ -65,12 +65,15 @@ export default async function ProductosPage() {
               <span className="hidden sm:inline">Dashboard</span>
             </GlowButton>
           </Link>
-          <AddProductDialog establishmentId={establishment.id} supplies={supplies || []} />
         </div>
       }
     >
       <main className="container mx-auto p-6">
-        <ProductsTable products={products || []} supplies={supplies || []} />
+        <ProductsPageClient
+          initialProducts={products || []}
+          supplies={supplies || []}
+          establishmentId={establishment.id}
+        />
       </main>
     </DashboardLayout>
   );

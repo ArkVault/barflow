@@ -6,7 +6,13 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "lint:fix": "eslint . --fix",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "test:ci": "echo \"No tests configured yet\" && exit 0",
+    "validate": "pnpm lint && pnpm typecheck && pnpm build",
+    "prepare": "echo 'Ready for CI/CD'"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",

@@ -234,6 +234,7 @@ export default function ProductosPage() {
   const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const [activeMenuId, setActiveMenuId] = useState<string>("");
+  const [secondaryMenuId, setSecondaryMenuId] = useState<string | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; icon: string }>>([]);
@@ -297,25 +298,40 @@ export default function ProductosPage() {
     return categoryMap[category] || category;
   };
 
-  // Load products from Supabase when menu changes
+  // Load products from Supabase when menu changes (handles single menu for backward compatibility)
   const handleMenuChange = async (menuId: string) => {
     console.log('ProductosPage - Menu changed to:', menuId);
     setActiveMenuId(menuId);
+    // Load products for both menus if secondary is set
+    loadProductsForMenus(menuId, secondaryMenuId);
+  };
 
-    if (!menuId) {
-      console.log('ProductosPage - No menu selected, clearing products');
+  // Handle both primary and secondary menu changes
+  const handleActiveMenusChange = async (primaryMenuId: string | null, secondaryMenuIdNew: string | null) => {
+    console.log('ProductosPage - Active menus changed:', { primaryMenuId, secondaryMenuIdNew });
+    setActiveMenuId(primaryMenuId || "");
+    setSecondaryMenuId(secondaryMenuIdNew);
+    loadProductsForMenus(primaryMenuId, secondaryMenuIdNew);
+  };
+
+  // Load products for one or both menus
+  const loadProductsForMenus = async (primaryId: string | null, secondaryId: string | null) => {
+    const menuIds = [primaryId, secondaryId].filter(Boolean) as string[];
+
+    if (menuIds.length === 0) {
+      console.log('ProductosPage - No menus selected, clearing products');
       setProducts([]);
       return;
     }
 
     try {
-      console.log('ProductosPage - Loading products from Supabase for menu:', menuId);
+      console.log('ProductosPage - Loading products from Supabase for menus:', menuIds);
       const supabase = createClient();
 
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('menu_id', menuId)
+        .in('menu_id', menuIds)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -323,7 +339,7 @@ export default function ProductosPage() {
         console.error('Error loading products:', error);
         toast.error(language === 'es' ? 'Error al cargar productos' : 'Error loading products');
         // Fallback to mock data
-        const mockFiltered = initialProducts.filter(p => p.menu_id === menuId);
+        const mockFiltered = initialProducts.filter(p => p.menu_id && menuIds.includes(p.menu_id));
         setProducts(mockFiltered);
         return;
       }
@@ -348,7 +364,7 @@ export default function ProductosPage() {
     } catch (error) {
       console.error('Error loading products:', error);
       // Fallback to mock data
-      const mockFiltered = initialProducts.filter(p => p.menu_id === menuId);
+      const mockFiltered = initialProducts.filter(p => p.menu_id && menuIds.includes(p.menu_id));
       setProducts(mockFiltered);
     }
   };
@@ -364,16 +380,17 @@ export default function ProductosPage() {
     console.log('ProductosPage - Products with los-clasicos menu_id:',
       initialProducts.filter(p => p.menu_id === 'los-clasicos').length);
 
-    // If there's an active menu, filter products
-    if (activeMenuId) {
-      const filtered = initialProducts.filter(p => p.menu_id === activeMenuId);
-      console.log('ProductosPage - Filtering for active menu:', activeMenuId, 'Found:', filtered.length);
+    // If there's an active menu, filter products (also check secondary)
+    const menuIds = [activeMenuId, secondaryMenuId].filter(Boolean) as string[];
+    if (menuIds.length > 0) {
+      const filtered = initialProducts.filter(p => p.menu_id && menuIds.includes(p.menu_id));
+      console.log('ProductosPage - Filtering for active menus:', menuIds, 'Found:', filtered.length);
       setProducts(filtered);
     } else {
       console.log('ProductosPage - No active menu, showing empty state');
       setProducts([]);
     }
-  }, [activeMenuId]);
+  }, [activeMenuId, secondaryMenuId]);
 
   // === STORAGE HELPER FUNCTIONS ===
 
@@ -801,7 +818,7 @@ export default function ProductosPage() {
 
           {/* Menu Manager */}
           <div className="mb-8">
-            <MenuManager onMenuChange={handleMenuChange} />
+            <MenuManager onMenuChange={handleMenuChange} onActiveMenusChange={handleActiveMenusChange} />
           </div>
 
           {/* Botón Diseñar Menú */}

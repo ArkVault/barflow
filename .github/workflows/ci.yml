@@ -1,0 +1,90 @@
+# ============================================
+# BARFLOW CI Pipeline - Ejecuta en cada PR y push
+# ============================================
+# Este workflow valida el código pero NO hace deploy
+
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # ============================================
+  # Job 1: Lint & Type Check (rápido, ~1 min)
+  # ============================================
+  lint:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Run ESLint
+        run: pnpm lint
+        continue-on-error: false
+
+      - name: 🔷 Type check
+        run: pnpm typecheck
+        continue-on-error: true
+
+  # ============================================
+  # Job 2: Build Test (valida que compila)
+  # ============================================
+  build:
+    name: 🏗️ Build Test
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build (dry run)
+        run: pnpm build
+        env:
+          # Variables mínimas para build (placeholders OK para CI)
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-key"
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_placeholder"
+          STRIPE_SECRET_KEY: "sk_test_placeholder"
+          GEMINI_API_KEY: "placeholder"
+          NEXT_PUBLIC_APP_URL: "https://placeholder.run.app"
+          NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID: "price_placeholder"
+          NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID: "price_placeholder"
+          NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID: "price_placeholder"

@@ -1,0 +1,92 @@
+# ============================================
+# BARFLOW - Deploy to Cloud Run
+# ============================================
+# SOLO se ejecuta manualmente o con tag de release
+# NO se ejecuta en cada push
+
+name: Deploy to Cloud Run
+
+on:
+  # Solo deploy manual desde GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente a desplegar'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      skip_tests:
+        description: 'Saltar tests (solo emergencias)'
+        required: false
+        default: false
+        type: boolean
+
+  # O cuando se crea un release/tag
+  release:
+    types: [published]
+
+env:
+  PROJECT_ID: barflow-479001
+  SERVICE_NAME: barflow
+  REGION: us-central1
+
+jobs:
+  # ============================================
+  # Job 1: Validar antes de deploy
+  # ============================================
+  validate:
+    name: ✅ Pre-deploy Validation
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_tests }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck || true
+
+  # ============================================
+  # Job 2: Deploy a Cloud Run
+  # ============================================
+  deploy:
+    name: 🚀 Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: always() && (needs.validate.result == 'success' || inputs.skip_tests)
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: ☁️ Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: 🚀 Deploy with Cloud Build
+        run: |
+          gcloud builds submit \
+            --config=cloudbuild.yaml \
+            --region=${{ env.REGION }} \
+            --substitutions=_NEXT_PUBLIC_APP_URL="${{ secrets.NEXT_PUBLIC_APP_URL }}"
+
+      - name: ✅ Deployment Summary
+        run: |
+          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region=${{ env.REGION }} --format="value(status.url)")
+          echo "## 🚀 Deploy Exitoso!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $URL" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

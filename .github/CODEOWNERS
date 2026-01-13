@@ -1,0 +1,24 @@
+# ============================================
+# CODEOWNERS - Barflow
+# ============================================
+# Define code ownership for better PR reviews
+
+# Default owners for everything in the repo
+* @gibrann
+
+# Critical infrastructure files require review
+/.github/ @gibrann
+/Dockerfile @gibrann
+/.dockerignore @gibrann
+/next.config.mjs @gibrann
+
+# Database migrations require careful review
+/supabase/migrations/ @gibrann
+
+# API routes and middleware
+/app/api/ @gibrann
+/middleware.ts @gibrann
+
+# Security-sensitive files
+/lib/supabase/ @gibrann
+/lib/stripe.ts @gibrann

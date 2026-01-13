@@ -37,6 +37,11 @@ yarn-error.log*
 secrets.json
 credentials.json
 
+# GCP service account keys - NEVER COMMIT
+gcp-key.json
+*-sa-key.json
+service-account*.json
+
 # Supabase
 .supabase/
 
@@ -89,3 +94,4 @@ temp/
 id_rsa
 id_rsa.pub
 *.ppk
+cloudbuild.substitutions*.yaml

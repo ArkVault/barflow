@@ -1,0 +1,84 @@
+steps:
+  # Build the Docker image with build args
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL}'
+      - '--build-arg'
+      - 'STRIPE_SECRET_KEY=${_STRIPE_SECRET_KEY}'
+      - '--build-arg'
+      - 'GEMINI_API_KEY=${_GEMINI_API_KEY}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID=${_NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID=${_NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID=${_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:latest'
+      - '.'
+
+  # Push the image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'barflow'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '2'
+      - '--memory'
+      - '256Mi'
+      - '--cpu'
+      - '1'
+      - '--port'
+      - '3000'
+      - '--cpu-throttling'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL},NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY},GEMINI_API_KEY=${_GEMINI_API_KEY},NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY},STRIPE_SECRET_KEY=${_STRIPE_SECRET_KEY},STRIPE_WEBHOOK_SECRET=${_STRIPE_WEBHOOK_SECRET},NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID=${_NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID},NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID=${_NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID},NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID=${_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID},NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL}'
+
+substitutions:
+  # These values should be set via gcloud builds submit --substitutions or in Cloud Build Triggers
+  # DO NOT commit actual secret values here
+  _NEXT_PUBLIC_SUPABASE_URL: '${NEXT_PUBLIC_SUPABASE_URL}'
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: '${NEXT_PUBLIC_SUPABASE_ANON_KEY}'
+  _NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: '${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}'
+  _STRIPE_SECRET_KEY: '${STRIPE_SECRET_KEY}'
+  _STRIPE_WEBHOOK_SECRET: '${STRIPE_WEBHOOK_SECRET}'
+  _GEMINI_API_KEY: '${GEMINI_API_KEY}'
+  _NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID: '${NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID}'
+  _NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID: '${NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID}'
+  _NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID: '${NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID}'
+  _NEXT_PUBLIC_APP_URL: '${NEXT_PUBLIC_APP_URL}'
+
+images:
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

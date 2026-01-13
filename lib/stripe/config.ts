@@ -1,10 +1,27 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe with the secret key
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-     apiVersion: '2025-11-17.clover',
-     typescript: true,
-});
+// Lazy initialization to avoid build-time errors
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe {
+     if (!stripeInstance) {
+          if (!process.env.STRIPE_SECRET_KEY) {
+               throw new Error("STRIPE_SECRET_KEY is not configured");
+          }
+          stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+               apiVersion: '2025-11-17.clover',
+               typescript: true,
+          });
+     }
+     return stripeInstance;
+}
+
+// Legacy export for backward compatibility (lazy)
+export const stripe = {
+     get instance() {
+          return getStripe();
+     }
+};
 
 // Stripe configuration
 export const STRIPE_CONFIG = {

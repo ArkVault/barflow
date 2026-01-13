@@ -2,9 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Lazy initialization to avoid build-time errors
+let stripe: Stripe | null = null;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function getStripe(): Stripe {
+     if (!stripe) {
+          if (!process.env.STRIPE_SECRET_KEY) {
+               throw new Error("STRIPE_SECRET_KEY is not configured");
+          }
+          stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+     }
+     return stripe;
+}
+
+function getWebhookSecret(): string {
+     if (!process.env.STRIPE_WEBHOOK_SECRET) {
+          throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
+     }
+     return process.env.STRIPE_WEBHOOK_SECRET;
+}
 
 // Helper function to find establishment by subscription ID
 async function findEstablishmentBySubscription(supabase: any, subscriptionId: string) {
@@ -43,7 +59,7 @@ export async function POST(req: NextRequest) {
           let event: Stripe.Event;
 
           try {
-               event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+               event = getStripe().webhooks.constructEvent(body, signature, getWebhookSecret());
           } catch (err: any) {
                console.error("Webhook signature verification failed:", err.message);
                return NextResponse.json(
@@ -64,7 +80,7 @@ export async function POST(req: NextRequest) {
 
                     if (establishmentId && subscriptionId) {
                          // Get price ID to determine plan type
-                         const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId);
+                         const subscriptionData = await getStripe().subscriptions.retrieve(subscriptionId);
                          const priceId = subscriptionData.items.data[0]?.price.id;
                          const planType = getPlanTypeFromPriceId(priceId);
 

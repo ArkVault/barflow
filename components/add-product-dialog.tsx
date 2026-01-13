@@ -37,9 +37,10 @@ interface Ingredient {
 interface AddProductDialogProps {
   establishmentId: string;
   supplies: Supply[];
+  menuId?: string;
 }
 
-export function AddProductDialog({ establishmentId, supplies }: AddProductDialogProps) {
+export function AddProductDialog({ establishmentId, supplies, menuId }: AddProductDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -168,6 +169,7 @@ export function AddProductDialog({ establishmentId, supplies }: AddProductDialog
         .from("products")
         .insert({
           establishment_id: establishmentId,
+          menu_id: menuId || null,
           name: formData.name,
           category: formData.category,
           price: parseFloat(formData.price),

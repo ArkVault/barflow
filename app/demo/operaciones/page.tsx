@@ -577,23 +577,34 @@ export default function OperacionesPage() {
           setSections([...sections, newSection]);
      };
 
-     // Renumber tables sequentially
+     // Get the next available table number (total tables + 1)
+     const getNextTableNumber = (): number => {
+          let totalTables = 0;
+          sections.forEach(section => {
+               totalTables += section.tables.length;
+          });
+          return totalTables + 1;
+     };
+
+     // Renumber all tables sequentially (1, 2, 3...)
      const renumberTables = (updatedSections: Section[]) => {
+          let counter = 1;
           return updatedSections.map(section => ({
                ...section,
-               tables: section.tables.map((table, index) => ({
+               tables: section.tables.map(table => ({
                     ...table,
-                    name: `Mesa ${index + 1}`
+                    name: `Mesa ${counter++}`
                }))
           }));
      };
 
      const addTable = (sectionId: string) => {
+          const nextNumber = getNextTableNumber();
           const updated = sections.map(section => {
                if (section.id === sectionId) {
                     const newTable: Table = {
                          id: `table-${Date.now()}`,
-                         name: `Mesa ${section.tables.length + 1}`, // Temporary name
+                         name: `Mesa ${nextNumber}`,
                          x: 20,
                          y: 20,
                          status: 'libre',
@@ -603,7 +614,7 @@ export default function OperacionesPage() {
                }
                return section;
           });
-          setSections(renumberTables(updated));
+          setSections(updated);
      };
 
      const addBar = (sectionId: string) => {
