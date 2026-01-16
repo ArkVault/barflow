@@ -7,16 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
-     AlertDialog,
-     AlertDialogAction,
-     AlertDialogCancel,
-     AlertDialogContent,
-     AlertDialogDescription,
-     AlertDialogFooter,
-     AlertDialogHeader,
-     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
      Plus, Trash2, Move, Edit2, Check, X,
      LayoutGrid, Users, Clock, DollarSign,
      ChevronRight, Calendar
@@ -29,11 +19,12 @@ import { GlowButton } from '@/components/glow-button';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
+import { ReceiptGenerator, ReceiptData } from './receipt-generator';
 
 // Single Responsibility: Only handles table/bar layout management
 export function TablesTab() {
      const { t, language } = useLanguage();
-     const { establishmentId } = useAuth();
+     const { establishmentId, establishmentName } = useAuth();
      const {
           sections,
           setSections,
@@ -59,6 +50,7 @@ export function TablesTab() {
      const [hasMoved, setHasMoved] = useState(false);
      const [resizingSection, setResizingSection] = useState<{ id: string, startX: number, startY: number, startWidth: number, startHeight: number } | null>(null);
      const [confirmFinalize, setConfirmFinalize] = useState<{ sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar' } | null>(null);
+     const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
 
      // Reservations state
      const [reservations, setReservations] = useState<any[]>([]);
@@ -947,6 +939,32 @@ export function TablesTab() {
                                                                  size="sm"
                                                                  className="flex-1 h-9 text-xs bg-green-600 hover:bg-green-700"
                                                                  onClick={() => {
+                                                                      // Generate receipt data
+                                                                      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+                                                                      const subtotal = account.total;
+                                                                      const tax = subtotal * 0.16;
+                                                                      const total = subtotal + tax;
+
+                                                                      const tableName = account.seatLabel
+                                                                           ? `${selectedItemData.name} - ${account.seatLabel}`
+                                                                           : selectedItemData.name;
+
+                                                                      setReceiptData({
+                                                                           orderNumber,
+                                                                           tableName,
+                                                                           items: account.items.map(item => ({
+                                                                                productName: item.productName,
+                                                                                quantity: item.quantity,
+                                                                                unitPrice: item.unitPrice,
+                                                                                total: item.total,
+                                                                           })),
+                                                                           subtotal,
+                                                                           tax,
+                                                                           total,
+                                                                           date: new Date(),
+                                                                           establishmentName: establishmentName || 'Barflow',
+                                                                      });
+
                                                                       setConfirmFinalize({
                                                                            sectionId: selectedItem.sectionId,
                                                                            itemId: selectedItem.itemId,
@@ -1398,43 +1416,29 @@ export function TablesTab() {
                     </DialogContent>
                </Dialog>
 
-               {/* Confirmation Dialog for Finalizing Account */}
-               <AlertDialog open={!!confirmFinalize} onOpenChange={(open) => !open && setConfirmFinalize(null)}>
-                    <AlertDialogContent>
-                         <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                   {language === 'es' ? 'Confirmar Mesa Pagada' : 'Confirm Table Paid'}
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                   {language === 'es'
-                                        ? '¿Estás seguro de que deseas finalizar esta cuenta? Esta acción registrará la venta y liberará la mesa.'
-                                        : 'Are you sure you want to finalize this account? This will record the sale and free the table.'}
-                              </AlertDialogDescription>
-                         </AlertDialogHeader>
-                         <AlertDialogFooter>
-                              <AlertDialogCancel>
-                                   {language === 'es' ? 'Cancelar' : 'Cancel'}
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                   className="bg-green-600 hover:bg-green-700"
-                                   onClick={() => {
-                                        if (confirmFinalize) {
-                                             closeAccount(
-                                                  confirmFinalize.sectionId,
-                                                  confirmFinalize.itemId,
-                                                  confirmFinalize.accountId,
-                                                  confirmFinalize.type
-                                             );
-                                             setConfirmFinalize(null);
-                                        }
-                                   }}
-                              >
-                                   <Check className="w-4 h-4 mr-2" />
-                                   {language === 'es' ? 'Confirmar' : 'Confirm'}
-                              </AlertDialogAction>
-                         </AlertDialogFooter>
-                    </AlertDialogContent>
-               </AlertDialog>
+               {/* Receipt Generator Dialog with Print Option */}
+               <ReceiptGenerator
+                    open={!!confirmFinalize}
+                    onOpenChange={(open) => {
+                         if (!open) {
+                              setConfirmFinalize(null);
+                              setReceiptData(null);
+                         }
+                    }}
+                    receiptData={receiptData}
+                    onConfirm={() => {
+                         if (confirmFinalize) {
+                              closeAccount(
+                                   confirmFinalize.sectionId,
+                                   confirmFinalize.itemId,
+                                   confirmFinalize.accountId,
+                                   confirmFinalize.type
+                              );
+                              setConfirmFinalize(null);
+                              setReceiptData(null);
+                         }
+                    }}
+               />
           </div>
      );
 }
