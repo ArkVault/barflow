@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DemoSidebar } from "@/components/demo-sidebar"
-import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Loader2, ArrowLeft } from "lucide-react"
 import { GlowButton } from "@/components/glow-button"
 import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLanguage } from "@/hooks/use-language"
-import { MenuManager } from "@/components/menu-manager"
+import { MenuManager, MenuData } from "@/components/menu-manager"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "sonner"
@@ -243,6 +243,9 @@ export default function ProductosPage() {
   const [editForm, setEditForm] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
 
+  // State for viewing products of a specific menu
+  const [selectedMenu, setSelectedMenu] = useState<MenuData | null>(null);
+
   // Image upload states
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -311,7 +314,68 @@ export default function ProductosPage() {
     console.log('ProductosPage - Active menus changed:', { primaryMenuId, secondaryMenuIdNew });
     setActiveMenuId(primaryMenuId || "");
     setSecondaryMenuId(secondaryMenuIdNew);
-    loadProductsForMenus(primaryMenuId, secondaryMenuIdNew);
+    // Only load products if we're not viewing a specific menu
+    if (!selectedMenu) {
+      loadProductsForMenus(primaryMenuId, secondaryMenuIdNew);
+    }
+  };
+
+  // Handle click on a menu card to view its products
+  const handleMenuClick = async (menu: MenuData) => {
+    console.log('ProductosPage - Menu clicked:', menu.name, menu.id);
+    setSelectedMenu(menu);
+
+    // Load products for this specific menu
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('menu_id', menu.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading products for menu:', error);
+        // Fallback to mock data for demo
+        const mockFiltered = initialProducts.filter(p => p.menu_id === menu.id);
+        setProducts(mockFiltered);
+        return;
+      }
+
+      // Convert Supabase data to Product format
+      const loadedProducts = (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category || 'Cócteles',
+        price: parseFloat(p.price) || 0,
+        description: p.description || '',
+        active: p.is_active,
+        menu_id: p.menu_id,
+        image_url: p.image_url,
+        ingredients: []
+      }));
+
+      setProducts(loadedProducts);
+
+      // If no products from DB, try mock data for demo
+      if (loadedProducts.length === 0) {
+        const mockFiltered = initialProducts.filter(p => p.menu_id === menu.id);
+        setProducts(mockFiltered);
+      }
+    } catch (error) {
+      console.error('Error loading products for menu:', error);
+      // Fallback to mock data
+      const mockFiltered = initialProducts.filter(p => p.menu_id === menu.id);
+      setProducts(mockFiltered);
+    }
+  };
+
+  // Handle going back to menu management view
+  const handleBackToMenus = () => {
+    setSelectedMenu(null);
+    // Reset products to show based on active menus
+    loadProductsForMenus(activeMenuId, secondaryMenuId);
   };
 
   // Load products for one or both menus
@@ -543,10 +607,13 @@ export default function ProductosPage() {
 
   const handleAddProduct = async () => {
     if (newProduct.name && newProduct.category && newProduct.price > 0) {
-      if (!activeMenuId) {
+      // Use selectedMenu.id if viewing a specific menu, otherwise use activeMenuId
+      const targetMenuId = selectedMenu?.id || activeMenuId;
+
+      if (!targetMenuId) {
         toast.error(language === 'es'
-          ? 'Por favor selecciona un menú activo primero'
-          : 'Please select an active menu first');
+          ? 'Por favor selecciona un menú primero'
+          : 'Please select a menu first');
         return;
       }
 
@@ -564,10 +631,10 @@ export default function ProductosPage() {
 
         console.log('✅ Current user:', user.id);
         console.log('✅ Establishment ID:', establishmentId);
-        console.log('✅ Active Menu ID:', activeMenuId);
+        console.log('✅ Target Menu ID:', targetMenuId);
 
         const productData = {
-          menu_id: activeMenuId,
+          menu_id: targetMenuId,
           name: newProduct.name,
           category: newProduct.category,
           price: newProduct.price,
@@ -624,7 +691,7 @@ export default function ProductosPage() {
           const productToAdd = {
             ...newProduct,
             id: response.data.id,
-            menu_id: activeMenuId,
+            menu_id: targetMenuId,
             image_url: finalImageUrl,
             ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0)
           };
@@ -794,13 +861,13 @@ export default function ProductosPage() {
             <Link href="/demo" className="block">
               <img
                 src="/modoclaro.png"
-                alt="Barmode"
+                alt="Flowstock"
                 className="h-8 dark:hidden object-contain"
               />
               <img
-                src="/modoscuro.png"
-                alt="Barmode"
-                className="h-8 hidden dark:block object-contain"
+                src="/modoclaro.png"
+                alt="Flowstock"
+                className="h-8 hidden dark:block object-contain dark:invert"
               />
             </Link>
           </div>
@@ -809,19 +876,62 @@ export default function ProductosPage() {
 
       <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
         <div className="max-w-5xl mx-auto">
+          {/* Header - changes based on whether viewing specific menu products */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
-              <p className="text-muted-foreground">{t('menuRecipes')}</p>
+              {selectedMenu ? (
+                <>
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBackToMenus}
+                      className="gap-3 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 hover:from-violet-500/20 hover:via-purple-500/20 hover:to-fuchsia-500/20 border border-violet-500/30 hover:border-violet-500/50 transition-all duration-300 shadow-sm hover:shadow-md text-violet-700 dark:text-violet-300 font-medium"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                      {language === 'es' ? '← Volver a Gestión de Menús' : '← Back to Menu Management'}
+                    </Button>
+                  </div>
+                  <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                    {selectedMenu.name}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <p className="text-muted-foreground">
+                      {language === 'es' ? 'Productos del menú' : 'Menu products'}
+                    </p>
+                    {selectedMenu.is_active && (
+                      <Badge className="bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs">
+                        {language === 'es' ? 'Principal' : 'Primary'}
+                      </Badge>
+                    )}
+                    {selectedMenu.is_secondary_active && (
+                      <Badge className="text-white text-xs" style={{ background: 'linear-gradient(135deg, #B4A0D8 0%, #A8B0D8 100%)' }}>
+                        {language === 'es' ? 'Secundario' : 'Secondary'}
+                      </Badge>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('productManagement')}</h2>
+                  <p className="text-muted-foreground">{t('menuRecipes')}</p>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Menu Manager */}
-          <div className="mb-8">
-            <MenuManager onMenuChange={handleMenuChange} onActiveMenusChange={handleActiveMenusChange} />
-          </div>
+          {/* Menu Manager - only show when not viewing specific menu products */}
+          {!selectedMenu && (
+            <div className="mb-8">
+              <MenuManager
+                onMenuChange={handleMenuChange}
+                onActiveMenusChange={handleActiveMenusChange}
+                onMenuClick={handleMenuClick}
+              />
+            </div>
+          )}
 
-          {/* Botón Diseñar Menú */}
+          {/* Add Product Button */}
           <div className="mb-8">
             <GlowButton onClick={() => setIsAddingProduct(true)}>
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-inner">
@@ -834,14 +944,16 @@ export default function ProductosPage() {
           {products.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg mb-2">
-                {activeMenuId
-                  ? (language === 'es' ? 'No hay productos en este menú' : 'No products in this menu')
-                  : (language === 'es' ? 'No hay menú activo' : 'No active menu')}
+                {selectedMenu
+                  ? (language === 'es' ? `No hay productos en "${selectedMenu.name}"` : `No products in "${selectedMenu.name}"`)
+                  : activeMenuId
+                    ? (language === 'es' ? 'No hay productos en este menú' : 'No products in this menu')
+                    : (language === 'es' ? 'Selecciona un menú para ver sus productos' : 'Select a menu to view its products')}
               </p>
               <p className="text-sm text-muted-foreground">
-                {activeMenuId
+                {selectedMenu || activeMenuId
                   ? (language === 'es' ? 'Usa el botón "Agregar Producto" para crear productos en este menú' : 'Use the "Add Product" button to create products in this menu')
-                  : (language === 'es' ? 'Activa "Los Clásicos" o crea un nuevo menú para comenzar' : 'Activate "Los Clásicos" or create a new menu to begin')}
+                  : (language === 'es' ? 'Haz clic en un menú para ver y agregar productos' : 'Click on a menu to view and add products')}
               </p>
             </div>
           ) : (

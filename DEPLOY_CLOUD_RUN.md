@@ -1,4 +1,4 @@
-# 🚀 GUÍA DE DEPLOYMENT A GOOGLE CLOUD RUN - Barmode
+# 🚀 GUÍA DE DEPLOYMENT A GOOGLE CLOUD RUN - Flowstock
 
 ## Paso 1: Verificar Build Local (5 min)
 
@@ -30,7 +30,7 @@ gcloud auth login
 ## Paso 3: Configurar Proyecto en Google Cloud
 
 ```bash
-# Establecer proyecto activo (Barmode usa barflow-479001)
+# Establecer proyecto activo (Flowstock usa barflow-479001)
 gcloud config set project barflow-479001
 
 # Verificar billing (debe usar WithCredits para trial)

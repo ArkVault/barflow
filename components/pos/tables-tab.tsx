@@ -962,7 +962,7 @@ export function TablesTab() {
                                                                            tax,
                                                                            total,
                                                                            date: new Date(),
-                                                                           establishmentName: establishmentName || 'Barflow',
+                                                                           establishmentName: establishmentName || 'Flowstock',
                                                                       });
 
                                                                       setConfirmFinalize({

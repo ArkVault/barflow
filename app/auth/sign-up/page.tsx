@@ -82,7 +82,7 @@ export default function SignUpPage() {
           <CardHeader>
             <CardTitle className="text-2xl text-balance">Crear Cuenta</CardTitle>
             <CardDescription>
-              Regístrate para comenzar con Barmode
+              Regístrate para comenzar con Flowstock
             </CardDescription>
           </CardHeader>
           <CardContent>

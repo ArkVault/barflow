@@ -31,9 +31,18 @@ interface Menu {
 interface MenuManagerProps {
      onMenuChange?: (menuId: string) => void;
      onActiveMenusChange?: (primaryMenuId: string | null, secondaryMenuId: string | null) => void;
+     onMenuClick?: (menu: Menu) => void;
 }
 
-export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerProps) {
+export interface MenuData {
+     id: string;
+     name: string;
+     is_active: boolean;
+     is_secondary_active?: boolean;
+     created_at: string;
+}
+
+export function MenuManager({ onMenuChange, onActiveMenusChange, onMenuClick }: MenuManagerProps) {
      const { establishmentId } = useAuth();
      const { t, language } = useLanguage();
 
@@ -287,7 +296,8 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                               {activeMenu && (
                                    <div
                                         key={activeMenu.id}
-                                        className="group relative rounded-lg p-3 active-menu-card overflow-hidden"
+                                        className="group relative rounded-lg p-3 active-menu-card overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+                                        onClick={() => onMenuClick?.(activeMenu)}
                                    >
                                         <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
                                              {/* Menú Principal Badge */}
@@ -308,6 +318,9 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                                        })}
                                                   </p>
                                              </div>
+                                             <p className="text-xs text-muted-foreground/70 italic">
+                                                  {language === 'es' ? 'Clic para ver productos' : 'Click to view products'}
+                                             </p>
                                         </div>
                                    </div>
                               )}
@@ -316,7 +329,8 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                               {secondaryActiveMenu && (
                                    <div
                                         key={secondaryActiveMenu.id}
-                                        className="group relative rounded-lg p-3 secondary-menu-card overflow-hidden"
+                                        className="group relative rounded-lg p-3 secondary-menu-card overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+                                        onClick={() => onMenuClick?.(secondaryActiveMenu)}
                                    >
                                         <div className="space-y-2" style={{ position: 'relative', zIndex: 1 }}>
                                              {/* Menú Secundario Badge */}
@@ -337,12 +351,18 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                                        })}
                                                   </p>
                                              </div>
+                                             <p className="text-xs text-muted-foreground/70 italic">
+                                                  {language === 'es' ? 'Clic para ver productos' : 'Click to view products'}
+                                             </p>
                                              <Button
                                                   size="sm"
                                                   variant="ghost"
                                                   className="w-full h-7 text-xs hover:bg-slate-100"
                                                   style={{ color: '#7c6b9e' }}
-                                                  onClick={() => deactivateSecondaryMenu(secondaryActiveMenu.id)}
+                                                  onClick={(e) => {
+                                                       e.stopPropagation();
+                                                       deactivateSecondaryMenu(secondaryActiveMenu.id);
+                                                  }}
                                              >
                                                   {language === 'es' ? 'Desactivar' : 'Deactivate'}
                                              </Button>
@@ -355,7 +375,8 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                               {inactiveMenus.map((menu) => (
                                    <div
                                         key={menu.id}
-                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02]"
+                                        className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
+                                        onClick={() => onMenuClick?.(menu)}
                                    >
                                         <div className="space-y-2">
                                              <div>
@@ -370,6 +391,9 @@ export function MenuManager({ onMenuChange, onActiveMenusChange }: MenuManagerPr
                                                        })}
                                                   </p>
                                              </div>
+                                             <p className="text-xs text-muted-foreground/70 italic">
+                                                  {language === 'es' ? 'Clic para ver productos' : 'Click to view products'}
+                                             </p>
 
                                              <div className="flex gap-1.5 items-center">
                                                   <Button

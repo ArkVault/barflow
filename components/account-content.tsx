@@ -690,7 +690,7 @@ export default function AccountContent() {
                                         </div>
 
                                         <div className="grid gap-6 lg:grid-cols-3">
-                                             {/* Plan 1: Barmode - 1 Bar */}
+                                             {/* Plan 1: Flowstock - 1 Bar */}
                                              <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5">
                                                   <div className="absolute -top-3 left-4">
                                                        <div className="inline-flex rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
@@ -703,7 +703,7 @@ export default function AccountContent() {
                                                             <Building2 className="h-6 w-6 text-white" />
                                                        </div>
                                                        <div>
-                                                            <h5 className="text-xl font-bold">Barmode - 1 Bar</h5>
+                                                            <h5 className="text-xl font-bold">Flowstock - 1 Bar</h5>
                                                             <p className="text-sm text-muted-foreground">
                                                                  {language === 'es' ? 'Una ubicación' : 'One location'}
                                                             </p>
@@ -761,7 +761,7 @@ export default function AccountContent() {
                                                   </Button>
                                              </div>
 
-                                             {/* Plan 2: Barmode - Cadena (5 sucursales) */}
+                                             {/* Plan 2: Flowstock - Cadena (5 sucursales) */}
                                              <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5">
                                                   <div className="absolute -top-3 left-4">
                                                        <div className="inline-flex rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
@@ -774,7 +774,7 @@ export default function AccountContent() {
                                                             <Zap className="h-6 w-6 text-white" />
                                                        </div>
                                                        <div>
-                                                            <h5 className="text-xl font-bold">Barmode - Cadena</h5>
+                                                            <h5 className="text-xl font-bold">Flowstock - Cadena</h5>
                                                             <p className="text-sm text-muted-foreground">
                                                                  {language === 'es' ? 'Hasta 5 sucursales' : 'Up to 5 branches'}
                                                             </p>
@@ -830,7 +830,7 @@ export default function AccountContent() {
                                                   </Button>
                                              </div>
 
-                                             {/* Plan 3: Barmode - Cadena Enterprise (+5 sucursales) */}
+                                             {/* Plan 3: Flowstock - Cadena Enterprise (+5 sucursales) */}
                                              <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5">
                                                   <div className="absolute -top-3 left-4">
                                                        <div className="inline-flex rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold text-black uppercase tracking-wider shadow-lg">
@@ -843,7 +843,7 @@ export default function AccountContent() {
                                                             <Crown className="h-6 w-6 text-white" />
                                                        </div>
                                                        <div>
-                                                            <h5 className="text-xl font-bold">Barmode - Cadena+</h5>
+                                                            <h5 className="text-xl font-bold">Flowstock - Cadena+</h5>
                                                             <p className="text-sm text-muted-foreground">
                                                                  {language === 'es' ? 'Más de 5 sucursales' : 'More than 5 branches'}
                                                             </p>
@@ -906,8 +906,8 @@ export default function AccountContent() {
                                         </h4>
                                         <p className="text-muted-foreground">
                                              {language === 'es'
-                                                  ? 'Tienes acceso a todas las funcionalidades exclusivas de Barflow.'
-                                                  : 'You have access to all exclusive Barflow features.'}
+                                                  ? 'Tienes acceso a todas las funcionalidades exclusivas de Flowstock.'
+                                                  : 'You have access to all exclusive Flowstock features.'}
                                         </p>
                                    </div>
                               )}

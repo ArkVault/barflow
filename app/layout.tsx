@@ -16,17 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Barflow - Sistema de Inventario para Bares',
+  title: 'Flowstock - Sistema de Inventario para Bares',
   description: 'Sistema inteligente de gestión de inventario y proyecciones para bares y restaurantes',
   icons: {
-    icon: [
-      {
-        url: '/icon-dark-32x32.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
 }
 

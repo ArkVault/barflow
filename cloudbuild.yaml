@@ -22,9 +22,9 @@ steps:
       - '--build-arg'
       - 'NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID=${_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID}'
       - '-t'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock:${BUILD_ID}'
       - '-t'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:latest'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock:latest'
       - '.'
 
   # Push the image
@@ -32,7 +32,7 @@ steps:
     args:
       - 'push'
       - '--all-tags'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -40,9 +40,9 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'barflow'
+      - 'flowstock'
       - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock:${BUILD_ID}'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -77,8 +77,8 @@ substitutions:
   _NEXT_PUBLIC_APP_URL: '${NEXT_PUBLIC_APP_URL}'
 
 images:
-  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:${BUILD_ID}'
-  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/barflow:latest'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock:${BUILD_ID}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/flowstock:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY

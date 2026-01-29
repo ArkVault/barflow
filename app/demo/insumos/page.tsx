@@ -319,13 +319,13 @@ function InsumosPageContent() {
             <Link href="/demo" className="block">
               <img
                 src="/modoclaro.png"
-                alt="Barmode"
+                alt="Flowstock"
                 className="h-8 dark:hidden object-contain"
               />
               <img
-                src="/modoscuro.png"
-                alt="Barmode"
-                className="h-8 hidden dark:block object-contain"
+                src="/modoclaro.png"
+                alt="Flowstock"
+                className="h-8 hidden dark:block object-contain dark:invert"
               />
             </Link>
           </div>

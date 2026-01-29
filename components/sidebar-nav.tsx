@@ -72,18 +72,18 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
             <Link href="/dashboard" className="block">
               <img
                 src="/modoclaro.png"
-                alt="Barmode"
+                alt="Flowstock"
                 className={cn(
                   "dark:hidden transition-all object-contain",
-                  isCollapsed ? "h-4 mx-auto" : "h-5"
+                  isCollapsed ? "h-5" : "h-7"
                 )}
               />
               <img
-                src="/modoscuro.png"
-                alt="Barmode"
+                src="/modoclaro.png"
+                alt="Flowstock"
                 className={cn(
-                  "hidden dark:block transition-all object-contain",
-                  isCollapsed ? "h-4 mx-auto" : "h-5"
+                  "hidden dark:block transition-all object-contain dark:invert",
+                  isCollapsed ? "h-5" : "h-7"
                 )}
               />
             </Link>

@@ -1,4 +1,4 @@
-# Barmode - Control de Tareas y Funcionalidades
+# Flowstock - Control de Tareas y Funcionalidades
 
 **Proyecto**: Sistema de Inventario Inteligente para Bares  
 **Última actualización**: 2025-11-23  

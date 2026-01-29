@@ -1,4 +1,4 @@
-# Barmode - Project State Documentation
+# Flowstock - Project State Documentation
 
 **Last Updated:** November 15, 2025  
 **Status:** Development - Basic functionality tested  

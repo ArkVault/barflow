@@ -1,4 +1,4 @@
-# 🍹 Barmode - Sistema de Gestión para Bares y Restaurantes
+# 🍹 Flowstock - Sistema de Gestión para Bares y Restaurantes
 
 [![Deployed on Cloud Run](https://img.shields.io/badge/Deployed%20on-Cloud%20Run-4285F4?style=for-the-badge&logo=google-cloud)](https://barflow-686958505968.us-central1.run.app)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -10,7 +10,7 @@
 
 ## 📋 Descripción
 
-**Barmode** es una plataforma SaaS moderna y completa para la gestión inteligente de bares y restaurantes. Integra control de inventario en tiempo real, punto de venta (POS), gestión de mesas y reservaciones, análisis de ventas y proyecciones predictivas basadas en IA.
+**Flowstock** es una plataforma SaaS moderna y completa para la gestión inteligente de bares y restaurantes. Integra control de inventario en tiempo real, punto de venta (POS), gestión de mesas y reservaciones, análisis de ventas y proyecciones predictivas basadas en IA.
 
 ---
 
@@ -411,4 +411,4 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-**Hecho con ❤️ por el equipo de Barmode**
+**Hecho con ❤️ por el equipo de Flowstock**

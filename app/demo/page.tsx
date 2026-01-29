@@ -248,13 +248,13 @@ export default function DemoPage() {
               <Link href="/" className="block">
                 <img
                   src="/modoclaro.png"
-                  alt="Barmode Demo"
-                  className="h-8 dark:hidden"
+                  alt="Flowstock Demo"
+                  className="h-10 dark:hidden"
                 />
                 <img
-                  src="/modoscuro.png"
-                  alt="Barmode Demo"
-                  className="h-8 hidden dark:block"
+                  src="/modoclaro.png"
+                  alt="Flowstock Demo"
+                  className="h-10 hidden dark:block dark:invert"
                 />
               </Link>
               <div className="flex items-center gap-2">
@@ -315,7 +315,7 @@ export default function DemoPage() {
                   <CardHeader className="pb-1 px-3 pt-2">
                     <CardTitle className="text-xs font-bold">{t('inventory')}</CardTitle>
                   </CardHeader>
-                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col justify-between">
+                  <CardContent className="px-3 pb-2 h-[240px] flex flex-col justify-between">
                     <div className="flex-1 flex items-center justify-center">
                       <NeonDonutChart
                         critical={criticalSupplies}
@@ -338,7 +338,7 @@ export default function DemoPage() {
                     <CardTitle className="text-xs font-bold">{t('products')}</CardTitle>
                     <CardDescription className="text-[10px]">{t('currentMenu')}</CardDescription>
                   </CardHeader>
-                  <CardContent className="px-3 pb-2 h-[190px] flex flex-col overflow-hidden">
+                  <CardContent className="px-3 pb-2 h-[240px] flex flex-col overflow-hidden">
                     {/* Stats Row - Compact */}
                     <div className="flex items-center justify-between w-full mb-1 pb-1 border-b border-border/30">
                       <div className="flex items-center gap-2">
@@ -358,15 +358,15 @@ export default function DemoPage() {
 
                     {/* Top 5 Selling Products - Optimized for 190px */}
                     <div className="flex-1 flex flex-col min-h-0">
-                      <p className="text-[10px] font-bold text-center mb-1 text-foreground">
+                      <p className="text-xs font-bold text-center mb-1.5 text-foreground">
                         🔥 {t('topSelling')}
                       </p>
                       {topProducts.length > 0 ? (
-                        <div className="space-y-[3px] flex-1 overflow-hidden">
+                        <div className="space-y-1 flex-1 overflow-hidden">
                           {topProducts.slice(0, 5).map((product, index) => (
                             <div
                               key={index}
-                              className={`flex items-center justify-between px-2 py-[3px] rounded text-[10px] ${index === 0
+                              className={`flex items-center justify-between px-2.5 py-1 rounded text-xs ${index === 0
                                 ? 'bg-amber-500/10 border border-amber-500/20'
                                 : index === 1
                                   ? 'bg-slate-400/10 border border-slate-400/15'
@@ -375,7 +375,7 @@ export default function DemoPage() {
                                     : 'bg-muted/20'
                                 }`}
                             >
-                              <div className="flex items-center gap-1.5 overflow-hidden flex-1 min-w-0">
+                              <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
                                 <span className={`font-bold flex-shrink-0 ${index === 0 ? 'text-amber-500' :
                                   index === 1 ? 'text-slate-400' :
                                     index === 2 ? 'text-amber-700' :
@@ -394,7 +394,7 @@ export default function DemoPage() {
                         </div>
                       ) : (
                         <div className="flex-1 flex items-center justify-center">
-                          <p className="text-[10px] text-muted-foreground text-center">
+                          <p className="text-xs text-muted-foreground text-center">
                             {language === 'es' ? 'Sin ventas registradas' : 'No sales recorded'}
                           </p>
                         </div>

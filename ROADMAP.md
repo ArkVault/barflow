@@ -639,7 +639,7 @@
 
 ### ✅ Generación de PDF para Órdenes de Compra
 - **jsPDF integrado** para descarga de lista de compras
-- PDF incluye: Logo Barmode, nombre establecimiento, fecha/hora, items, instrucciones
+- PDF incluye: Logo Flowstock, nombre establecimiento, fecha/hora, items, instrucciones
 - Campo `name` agregado a establishments (editable en Mi Cuenta)
 
 ### ✅ Mejoras de UI/UX
@@ -795,9 +795,9 @@ establishment (1)
 | **BlueCart** | $99 USD/mes | Pedidos proveedores |
 | **Orderly** | Gratis (básico) | Inventario básico |
 
-### Diferenciadores de Barmode
+### Diferenciadores de Flowstock
 
-| Característica | Barmode | Competidores |
+| Característica | Flowstock | Competidores |
 |----------------|---------|--------------|
 | **Proyecciones con IA** | ✅ Incluido | ❌ No disponible |
 | **Multi-idioma ES/EN** | ✅ Nativo | ⚠️ Limitado |

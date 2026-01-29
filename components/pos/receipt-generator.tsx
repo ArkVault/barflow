@@ -159,7 +159,7 @@ export function ReceiptGenerator({ open, onOpenChange, receiptData, onConfirm }:
                </head>
                <body>
                     <div class="header">
-                         <h1>${receiptData?.establishmentName || 'Barflow'}</h1>
+                         <h1>${receiptData?.establishmentName || 'Flowstock'}</h1>
                          <p>${language === 'es' ? 'Ticket de Venta' : 'Sales Receipt'}</p>
                     </div>
                     
@@ -209,7 +209,7 @@ export function ReceiptGenerator({ open, onOpenChange, receiptData, onConfirm }:
                     
                     <div class="footer">
                          <p>¡${language === 'es' ? 'Gracias por su visita!' : 'Thank you for your visit!'}</p>
-                         <p style="margin-top: 5px; font-size: 10px;">${language === 'es' ? 'Powered by Barflow' : 'Powered by Barflow'}</p>
+                         <p style="margin-top: 5px; font-size: 10px;">${language === 'es' ? 'Powered by Flowstock' : 'Powered by Flowstock'}</p>
                     </div>
                </body>
                </html>
@@ -253,7 +253,7 @@ ${'TOTAL:'.padEnd(30)} ${formatCurrency(receiptData.total).padStart(10)}
 ═══════════════════════════════════════
 
       ${language === 'es' ? '¡Gracias por su visita!' : 'Thank you for your visit!'}
-               Powered by Barflow
+               Powered by Flowstock
           `.trim();
 
           const blob = new Blob([receiptText], { type: 'text/plain' });
@@ -286,7 +286,7 @@ ${'TOTAL:'.padEnd(30)} ${formatCurrency(receiptData.total).padStart(10)}
                     >
                          {/* Header */}
                          <div className="text-center pb-3 border-b border-dashed border-gray-400">
-                              <h2 className="font-bold text-lg">{receiptData.establishmentName || 'Barflow'}</h2>
+                              <h2 className="font-bold text-lg">{receiptData.establishmentName || 'Flowstock'}</h2>
                               <p className="text-xs text-gray-600">
                                    {language === 'es' ? 'Ticket de Venta' : 'Sales Receipt'}
                               </p>
@@ -343,7 +343,7 @@ ${'TOTAL:'.padEnd(30)} ${formatCurrency(receiptData.total).padStart(10)}
                          {/* Footer */}
                          <div className="mt-4 pt-3 border-t border-dashed border-gray-400 text-center text-xs text-gray-600">
                               <p>{language === 'es' ? '¡Gracias por su visita!' : 'Thank you for your visit!'}</p>
-                              <p className="mt-1 text-[10px]">Powered by Barflow</p>
+                              <p className="mt-1 text-[10px]">Powered by Flowstock</p>
                          </div>
                     </div>
 

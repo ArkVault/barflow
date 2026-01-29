@@ -148,7 +148,7 @@ export function SubscriptionModal({
                          <DialogTitle className="text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
                               {trialEnded
                                    ? "Tu período de prueba ha terminado"
-                                   : "Desbloquea todo el potencial de Barmode"}
+                                   : "Desbloquea todo el potencial de Flowstock"}
                          </DialogTitle>
                          <DialogDescription className="text-center text-base mt-2">
                               {trialEnded

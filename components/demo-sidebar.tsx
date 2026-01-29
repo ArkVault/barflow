@@ -70,27 +70,29 @@ export function DemoSidebar() {
         </div>
 
         {/* Logo / Title */}
-        <Link href="/demo" className="mb-8 mt-12 block">
-          <img
-            src="/modoclaro.png"
-            alt="Barmode"
-            className={cn(
-              "dark:hidden transition-all object-contain",
-              isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
-            )}
-          />
-          <img
-            src="/modoscuro.png"
-            alt="Barmode"
-            className={cn(
-              "hidden dark:block transition-all object-contain",
-              isCollapsed ? "h-3.5 mx-auto" : "h-4.5"
-            )}
-          />
+        <div className="mb-8 mt-12 flex flex-col">
+          <Link href="/demo" className="block">
+            <img
+              src="/modoclaro.png"
+              alt="Flowstock"
+              className={cn(
+                "dark:hidden transition-all object-contain",
+                isCollapsed ? "h-4" : "h-6"
+              )}
+            />
+            <img
+              src="/modoclaro.png"
+              alt="Flowstock"
+              className={cn(
+                "hidden dark:block transition-all object-contain dark:invert",
+                isCollapsed ? "h-4" : "h-6"
+              )}
+            />
+          </Link>
           {!isCollapsed && (
-            <span className="text-xs font-medium text-muted-foreground mt-2 block">v0.1</span>
+            <span className="text-xs font-medium text-muted-foreground mt-2 block">v1.0</span>
           )}
-        </Link>
+        </div>
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-2">

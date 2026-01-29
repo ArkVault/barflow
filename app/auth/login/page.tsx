@@ -174,7 +174,7 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-7xl font-bold leading-tight">
-              <span className="block text-white drop-shadow-2xl">Barmode</span>
+              <span className="block text-white drop-shadow-2xl">Flowstock</span>
               <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 drop-shadow-lg">
                 Gestión Inteligente
               </span>
@@ -233,7 +233,7 @@ export default function LoginPage() {
                 <p className="text-gray-300">
                   {isSignUp
                     ? "Comienza a optimizar tu negocio hoy"
-                    : "Ingresa a tu cuenta de Barmode"}
+                    : "Ingresa a tu cuenta de Flowstock"}
                 </p>
               </div>
 

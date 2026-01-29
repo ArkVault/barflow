@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, Fragment, useState } from 'react';
+import { useEffect, Fragment, useState, useMemo } from 'react';
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp, Loader2, Calendar } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { usePOS } from './pos-context';
+
+type PeriodFilter = 'day' | 'week' | 'month';
 
 // Single Responsibility: Only handles sales history display
 export function HistoryTab() {
      const { t, language } = useLanguage();
      const { sales, loadingSales, refreshSales } = usePOS();
      const [expandedSale, setExpandedSale] = useState<string | null>(null);
+     const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('day');
 
      useEffect(() => {
           refreshSales();
@@ -36,16 +40,66 @@ export function HistoryTab() {
           return name;
      };
 
-     // Calculate today's stats
-     const todaySales = sales.filter(s => {
-          const saleDate = new Date(s.created_at);
-          const today = new Date();
-          return saleDate.toDateString() === today.toDateString();
-     });
+     // Filter sales based on selected period
+     const filteredSales = useMemo(() => {
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-     const todayTotal = todaySales.reduce((sum, s) => sum + parseFloat(s.total.toString()), 0);
-     const todayTransactions = todaySales.length;
-     const averageTicket = todayTransactions > 0 ? todayTotal / todayTransactions : 0;
+          return sales.filter(s => {
+               const saleDate = new Date(s.created_at);
+
+               switch (periodFilter) {
+                    case 'day':
+                         return saleDate.toDateString() === now.toDateString();
+                    case 'week':
+                         // Get the start of the current week (Monday)
+                         const dayOfWeek = now.getDay();
+                         const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Adjust for Monday start
+                         const startOfWeek = new Date(today);
+                         startOfWeek.setDate(today.getDate() - diff);
+                         return saleDate >= startOfWeek;
+                    case 'month':
+                         // Get the start of the current month
+                         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                         return saleDate >= startOfMonth;
+                    default:
+                         return true;
+               }
+          });
+     }, [sales, periodFilter]);
+
+     // Calculate stats based on filtered sales
+     const totalSales = filteredSales.reduce((sum, s) => sum + parseFloat(s.total.toString()), 0);
+     const totalTransactions = filteredSales.length;
+     const averageTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
+
+     // Period labels
+     const getPeriodLabel = (period: PeriodFilter) => {
+          const labels = {
+               day: { es: 'Hoy', en: 'Today' },
+               week: { es: 'Esta Semana', en: 'This Week' },
+               month: { es: 'Este Mes', en: 'This Month' }
+          };
+          return language === 'es' ? labels[period].es : labels[period].en;
+     };
+
+     const getStatsLabel = () => {
+          const labels = {
+               day: { es: 'Ventas Hoy', en: 'Sales Today' },
+               week: { es: 'Ventas de la Semana', en: 'Weekly Sales' },
+               month: { es: 'Ventas del Mes', en: 'Monthly Sales' }
+          };
+          return language === 'es' ? labels[periodFilter].es : labels[periodFilter].en;
+     };
+
+     const getTransactionsLabel = () => {
+          const labels = {
+               day: { es: 'Transacciones Hoy', en: 'Transactions Today' },
+               week: { es: 'Transacciones de la Semana', en: 'Weekly Transactions' },
+               month: { es: 'Transacciones del Mes', en: 'Monthly Transactions' }
+          };
+          return language === 'es' ? labels[periodFilter].es : labels[periodFilter].en;
+     };
 
      if (loadingSales) {
           return (
@@ -60,22 +114,48 @@ export function HistoryTab() {
 
      return (
           <div className="space-y-4">
+               {/* Period Filter Buttons */}
+               <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground mr-2">
+                         {language === 'es' ? 'Filtrar por:' : 'Filter by:'}
+                    </span>
+                    <div className="flex gap-2">
+                         {(['day', 'week', 'month'] as PeriodFilter[]).map((period) => (
+                              <Button
+                                   key={period}
+                                   variant={periodFilter === period ? "default" : "outline"}
+                                   size="sm"
+                                   onClick={() => setPeriodFilter(period)}
+                                   className={`
+                                        transition-all duration-200
+                                        ${periodFilter === period
+                                             ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white border-0 shadow-lg shadow-orange-500/20'
+                                             : 'neumorphic hover:shadow-md'}
+                                   `}
+                              >
+                                   {getPeriodLabel(period)}
+                              </Button>
+                         ))}
+                    </div>
+               </div>
+
                {/* Stats Cards - Compact */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="neumorphic border-0 p-4">
                          <div className="text-xs text-muted-foreground mb-1">
-                              {language === 'es' ? 'Ventas Hoy' : 'Sales Today'}
+                              {getStatsLabel()}
                          </div>
                          <div className="text-2xl font-bold text-green-600">
-                              ${todayTotal.toFixed(2)}
+                              ${totalSales.toFixed(2)}
                          </div>
                     </Card>
                     <Card className="neumorphic border-0 p-4">
                          <div className="text-xs text-muted-foreground mb-1">
-                              {language === 'es' ? 'Transacciones Hoy' : 'Transactions Today'}
+                              {getTransactionsLabel()}
                          </div>
                          <div className="text-2xl font-bold">
-                              {todayTransactions}
+                              {totalTransactions}
                          </div>
                     </Card>
                     <Card className="neumorphic border-0 p-4">
@@ -92,7 +172,7 @@ export function HistoryTab() {
                <Card className="neumorphic border-0">
                     <div className="p-6">
                          <h3 className="text-xl font-bold mb-4">
-                              {language === 'es' ? 'Ventas Recientes' : 'Recent Sales'}
+                              {language === 'es' ? 'Ventas Recientes' : 'Recent Sales'} - {getPeriodLabel(periodFilter)}
                          </h3>
                          <Table>
                               <TableHeader>
@@ -107,14 +187,16 @@ export function HistoryTab() {
                                    </TableRow>
                               </TableHeader>
                               <TableBody>
-                                   {sales.length === 0 ? (
+                                   {filteredSales.length === 0 ? (
                                         <TableRow>
                                              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                                                  {language === 'es' ? 'No hay ventas registradas' : 'No sales recorded'}
+                                                  {language === 'es'
+                                                       ? `No hay ventas registradas ${periodFilter === 'day' ? 'hoy' : periodFilter === 'week' ? 'esta semana' : 'este mes'}`
+                                                       : `No sales recorded ${periodFilter === 'day' ? 'today' : periodFilter === 'week' ? 'this week' : 'this month'}`}
                                              </TableCell>
                                         </TableRow>
                                    ) : (
-                                        sales.map((sale) => (
+                                        filteredSales.map((sale) => (
                                              <Fragment key={sale.id}>
                                                   <TableRow
                                                        className="cursor-pointer hover:bg-accent/50"

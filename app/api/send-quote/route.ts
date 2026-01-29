@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
           const resend = new Resend(process.env.RESEND_API_KEY);
           
           await resend.emails.send({
-            from: 'Barflow <noreply@barflow.mx>',
+            from: 'Flowstock <noreply@barflow.mx>',
             to: [QUOTE_EMAIL],
             subject: `Nueva Solicitud de Cotización - ${businessName || name}`,
             html: `
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
               <p><strong>Sucursales:</strong> ${branches}</p>
               <p><strong>Mensaje:</strong> ${message || 'Sin mensaje adicional'}</p>
               <hr>
-              <p><em>Enviado desde Barflow el ${new Date().toLocaleDateString('es-MX')}</em></p>
+              <p><em>Enviado desde Flowstock el ${new Date().toLocaleDateString('es-MX')}</em></p>
             `,
           });
           */

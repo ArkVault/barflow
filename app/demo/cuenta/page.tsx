@@ -28,13 +28,13 @@ export default function DemoCuentaPage() {
                               <Link href="/demo" className="block">
                                    <img
                                         src="/modoclaro.png"
-                                        alt="Barmode Demo"
+                                        alt="Flowstock Demo"
                                         className="h-8 dark:hidden"
                                    />
                                    <img
-                                        src="/modoscuro.png"
-                                        alt="Barmode Demo"
-                                        className="h-8 hidden dark:block"
+                                        src="/modoclaro.png"
+                                        alt="Flowstock Demo"
+                                        className="h-8 hidden dark:block dark:invert"
                                    />
                               </Link>
                               <GlowButton onClick={handleLogout}>

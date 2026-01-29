@@ -158,7 +158,7 @@ export function PurchaseListDialog({
             y += 5;
 
             doc.setFont('helvetica', 'bold');
-            doc.text('Barmode > Insumos > Insumos a Comprar > Confirmar Recepción', 25, y);
+            doc.text('Flowstock > Insumos > Insumos a Comprar > Confirmar Recepción', 25, y);
 
             // Save PDF
             const fileName = `orden_compra_${now.toISOString().split('T')[0]}.pdf`;

@@ -35,8 +35,8 @@ export function TrialExpiredOverlay() {
                          </h2>
                          <p className="text-muted-foreground">
                               {language === 'es'
-                                   ? 'Para continuar usando Barflow, elige un plan que se adapte a tus necesidades.'
-                                   : 'To continue using Barflow, choose a plan that fits your needs.'}
+                                   ? 'Para continuar usando Flowstock, elige un plan que se adapte a tus necesidades.'
+                                   : 'To continue using Flowstock, choose a plan that fits your needs.'}
                          </p>
                     </div>
 

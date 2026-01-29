@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Eye, Plus } from 'lucide-react';
+import { Pencil, Trash2, Eye, Plus, ArrowLeft } from 'lucide-react';
 import { EditProductDialog } from "@/components/edit-product-dialog";
 import { DeleteProductDialog } from "@/components/delete-product-dialog";
 import { ViewRecipeDialog } from "@/components/view-recipe-dialog";
 import { AddProductDialog } from "@/components/add-product-dialog";
-import { MenuManager } from "@/components/menu-manager";
+import { MenuManager, MenuData } from "@/components/menu-manager";
 import { GlowButton } from "@/components/glow-button";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -57,6 +57,9 @@ export function ProductsPageClient({ initialProducts, supplies, establishmentId 
      const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
      const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
      const [isLoading, setIsLoading] = useState(false);
+
+     // State for viewing products of a specific menu
+     const [selectedMenu, setSelectedMenu] = useState<MenuData | null>(null);
 
      // Load products from Supabase for selected menus
      const loadProductsForMenus = useCallback(async (primaryId: string | null, secondaryId: string | null) => {
@@ -121,16 +124,69 @@ export function ProductsPageClient({ initialProducts, supplies, establishmentId 
      const handleMenuChange = useCallback((menuId: string) => {
           console.log('ProductsPageClient - Menu changed to:', menuId);
           setActiveMenuId(menuId);
-          loadProductsForMenus(menuId, secondaryMenuId);
-     }, [secondaryMenuId, loadProductsForMenus]);
+          if (!selectedMenu) {
+               loadProductsForMenus(menuId, secondaryMenuId);
+          }
+     }, [secondaryMenuId, loadProductsForMenus, selectedMenu]);
 
      // Handle both primary and secondary menu changes
      const handleActiveMenusChange = useCallback((primaryMenuId: string | null, secondaryMenuIdNew: string | null) => {
           console.log('ProductsPageClient - Active menus changed:', { primaryMenuId, secondaryMenuIdNew });
           setActiveMenuId(primaryMenuId || "");
           setSecondaryMenuId(secondaryMenuIdNew);
-          loadProductsForMenus(primaryMenuId, secondaryMenuIdNew);
-     }, [loadProductsForMenus]);
+          if (!selectedMenu) {
+               loadProductsForMenus(primaryMenuId, secondaryMenuIdNew);
+          }
+     }, [loadProductsForMenus, selectedMenu]);
+
+     // Handle click on a menu card to view its products
+     const handleMenuClick = useCallback(async (menu: MenuData) => {
+          console.log('ProductsPageClient - Menu clicked:', menu.name, menu.id);
+          setSelectedMenu(menu);
+          setIsLoading(true);
+
+          try {
+               const supabase = createClient();
+               const { data, error } = await supabase
+                    .from('products')
+                    .select(`
+                         *,
+                         product_ingredients (
+                              id,
+                              quantity_needed,
+                              supply_id,
+                              supplies (
+                                   id,
+                                   name,
+                                   unit
+                              )
+                         )
+                    `)
+                    .eq('menu_id', menu.id)
+                    .order('created_at', { ascending: false });
+
+               if (error) {
+                    console.error('Error loading products for menu:', error);
+                    const filtered = allProducts.filter(p => p.menu_id === menu.id);
+                    setProducts(filtered);
+                    return;
+               }
+
+               setProducts(data || []);
+          } catch (error) {
+               console.error('Error loading products for menu:', error);
+               const filtered = allProducts.filter(p => p.menu_id === menu.id);
+               setProducts(filtered);
+          } finally {
+               setIsLoading(false);
+          }
+     }, [allProducts]);
+
+     // Handle going back to menu management view
+     const handleBackToMenus = useCallback(() => {
+          setSelectedMenu(null);
+          loadProductsForMenus(activeMenuId, secondaryMenuId);
+     }, [activeMenuId, secondaryMenuId, loadProductsForMenus]);
 
      const handleProductUpdated = (updatedProduct: Product) => {
           setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
@@ -162,21 +218,57 @@ export function ProductsPageClient({ initialProducts, supplies, establishmentId 
 
      return (
           <div className="space-y-6">
-               {/* Menu Manager */}
-               <div className="mb-6">
-                    <MenuManager
-                         onMenuChange={handleMenuChange}
-                         onActiveMenusChange={handleActiveMenusChange}
-                    />
-               </div>
+               {/* Header when viewing specific menu products */}
+               {selectedMenu && (
+                    <div className="mb-6">
+                         <div className="flex items-center gap-4 mb-4">
+                              <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={handleBackToMenus}
+                                   className="gap-3 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 hover:from-violet-500/20 hover:via-purple-500/20 hover:to-fuchsia-500/20 border border-violet-500/30 hover:border-violet-500/50 transition-all duration-300 shadow-sm hover:shadow-md text-violet-700 dark:text-violet-300 font-medium"
+                              >
+                                   <ArrowLeft className="w-5 h-5" />
+                                   {language === 'es' ? '← Volver a Gestión de Menús' : '← Back to Menu Management'}
+                              </Button>
+                         </div>
+                         <h2 className="text-2xl font-bold mb-2">{selectedMenu.name}</h2>
+                         <div className="flex items-center gap-2">
+                              <p className="text-muted-foreground">
+                                   {language === 'es' ? 'Productos del menú' : 'Menu products'}
+                              </p>
+                              {selectedMenu.is_active && (
+                                   <Badge className="bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs">
+                                        {language === 'es' ? 'Principal' : 'Primary'}
+                                   </Badge>
+                              )}
+                              {selectedMenu.is_secondary_active && (
+                                   <Badge className="text-white text-xs" style={{ background: 'linear-gradient(135deg, #B4A0D8 0%, #A8B0D8 100%)' }}>
+                                        {language === 'es' ? 'Secundario' : 'Secondary'}
+                                   </Badge>
+                              )}
+                         </div>
+                    </div>
+               )}
+
+               {/* Menu Manager - only show when not viewing specific menu products */}
+               {!selectedMenu && (
+                    <div className="mb-6">
+                         <MenuManager
+                              onMenuChange={handleMenuChange}
+                              onActiveMenusChange={handleActiveMenusChange}
+                              onMenuClick={handleMenuClick}
+                         />
+                    </div>
+               )}
 
                {/* Add Product Button */}
-               {activeMenuId && (
+               {(selectedMenu || activeMenuId) && (
                     <div className="mb-4">
                          <AddProductDialog
                               establishmentId={establishmentId}
                               supplies={supplies}
-                              menuId={activeMenuId}
+                              menuId={selectedMenu?.id || activeMenuId}
                          />
                     </div>
                )}
@@ -196,15 +288,17 @@ export function ProductsPageClient({ initialProducts, supplies, establishmentId 
                     <Card className="neumorphic border-0">
                          <CardContent className="py-12 text-center">
                               <p className="text-muted-foreground mb-4">
-                                   {!activeMenuId
-                                        ? (language === 'es' ? 'Selecciona un menú para ver sus productos' : 'Select a menu to view its products')
-                                        : (language === 'es' ? 'No hay productos en este menú' : 'No products in this menu')
+                                   {selectedMenu
+                                        ? (language === 'es' ? `No hay productos en "${selectedMenu.name}"` : `No products in "${selectedMenu.name}"`)
+                                        : !activeMenuId
+                                             ? (language === 'es' ? 'Selecciona un menú para ver sus productos' : 'Select a menu to view its products')
+                                             : (language === 'es' ? 'No hay productos en este menú' : 'No products in this menu')
                                    }
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                   {!activeMenuId
-                                        ? (language === 'es' ? 'Activa un menú como principal para comenzar' : 'Activate a menu as primary to begin')
-                                        : (language === 'es' ? 'Usa el botón "Agregar Producto" para crear productos' : 'Use the "Add Product" button to create products')
+                                   {selectedMenu || activeMenuId
+                                        ? (language === 'es' ? 'Usa el botón "Agregar Producto" para crear productos' : 'Use the "Add Product" button to create products')
+                                        : (language === 'es' ? 'Haz clic en un menú para ver y agregar productos' : 'Click on a menu to view and add products')
                                    }
                               </p>
                          </CardContent>

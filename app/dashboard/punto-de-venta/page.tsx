@@ -31,13 +31,13 @@ function POSContent() {
                               <Link href="/demo" className="block">
                                    <img
                                         src="/modoclaro.png"
-                                        alt="Barmode"
+                                        alt="Flowstock"
                                         className="h-8 dark:hidden object-contain"
                                    />
                                    <img
-                                        src="/modoscuro.png"
-                                        alt="Barmode"
-                                        className="h-8 hidden dark:block object-contain"
+                                        src="/modoclaro.png"
+                                        alt="Flowstock"
+                                        className="h-8 hidden dark:block object-contain dark:invert"
                                    />
                               </Link>
                          </div>
@@ -69,8 +69,8 @@ function POSContent() {
                                                   type="button"
                                                   onClick={() => setActiveTab(tab.id)}
                                                   className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                                            ? 'bg-background text-foreground shadow-sm font-medium'
-                                                            : 'text-muted-foreground hover:text-foreground'
+                                                       ? 'bg-background text-foreground shadow-sm font-medium'
+                                                       : 'text-muted-foreground hover:text-foreground'
                                                        }`}
                                              >
                                                   <Icon className="w-4 h-4" />
