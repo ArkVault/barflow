@@ -1,9 +1,9 @@
-//import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { SuppliesTable } from "@/components/supplies-table";
-import { AddSupplyDialog } from "@/components/add-supply-dialog";
-import { GlowButton } from "@/components/glow-button";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { SuppliesTable } from "@/components/inventory/supplies-table";
+import { AddSupplyDialog } from "@/components/inventory/add-supply-dialog";
+import { GlowButton } from "@/components/layout/glow-button";
 import { ShoppingCart } from "lucide-react";
 
 export default async function InsumosPage() {

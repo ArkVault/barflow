@@ -1,0 +1,10 @@
+export { ProductsTable } from './products-table';
+export { ProductsPageClient } from './products-page-client';
+export { AddProductDialog } from './add-product-dialog';
+export { EditProductDialog } from './edit-product-dialog';
+export { DeleteProductDialog } from './delete-product-dialog';
+export { ViewRecipeDialog } from './view-recipe-dialog';
+export { ProductImage } from './product-image';
+export { ProductImageUpload } from './product-image-upload';
+export { MenuManager } from './menu-manager';
+export { MenuUpload } from './menu-upload';

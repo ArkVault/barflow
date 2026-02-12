@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
-import { GlowButton } from "@/components/glow-button";
+import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { useAuth } from '@/contexts/auth-context';
+import { GlowButton } from "@/components/layout/glow-button";
 import { Plus, X, Grid3x3, Square, Minus, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,91 +18,26 @@ import {
      DialogTitle,
 } from "@/components/ui/dialog";
 import { createClient } from '@/lib/supabase/client';
-import { ProductImage } from '@/components/product-image';
-import { useAuth } from '@/contexts/auth-context';
+import { ProductImage } from '@/components/products/product-image';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
-
-type Status = 'libre' | 'reservada' | 'ocupada' | 'por-pagar';
-
-type AccountStatus = 'abierta' | 'en-consumo' | 'lista-para-cobrar' | 'pagada';
-
-interface AccountItem {
-     id: string;
-     productName: string;
-     quantity: number;
-     unitPrice: number;
-     total: number;
-     timestamp: Date;
-}
-
-interface Account {
-     id: string;
-     status: AccountStatus;
-     openedAt: Date;
-     closedAt?: Date;
-     items: AccountItem[];
-     total: number;
-     seatLabel?: string; // For bars: "Asiento 1", "Asiento 2", etc.
-}
-
-interface Table {
-     id: string;
-     name: string;
-     x: number;
-     y: number;
-     status: Status;
-     accounts: Account[];
-     currentAccountId?: string;
-}
-
-interface Bar {
-     id: string;
-     name: string;
-     x: number;
-     y: number;
-     status: Status;
-     accounts: Account[];
-     currentAccountId?: string;
-     orientation?: 'horizontal' | 'vertical';
-}
-
-interface Section {
-     id: string;
-     name: string;
-     x: number;
-     y: number;
-     width: number;
-     height: number;
-     tables: Table[];
-     bars: Bar[];
-}
-
-interface Product {
-     id: string;
-     name: string;
-     price: number;
-     category: string;
-     menu_id: string;
-     image_url?: string | null;
-}
-
-const statusColors = {
-     libre: 'from-green-400 to-green-600',
-     reservada: 'from-yellow-400 to-yellow-600',
-     ocupada: 'from-blue-400 to-blue-600',
-     'por-pagar': 'from-orange-400 to-orange-600',
-};
-
-const barStatusColors = {
-     libre: 'from-green-600 to-green-800',
-     reservada: 'from-yellow-600 to-yellow-800',
-     ocupada: 'from-blue-600 to-blue-800',
-     'por-pagar': 'from-orange-600 to-orange-800',
-};
+import type { Product } from '@/types';
+import {
+     type Status,
+     type AccountStatus,
+     type AccountItem,
+     type Account,
+     type TableItem as Table,
+     type BarItem as Bar,
+     type Section,
+     type SelectedItem,
+     statusColors,
+     barStatusColors,
+} from '@/types/pos';
+import { formatCurrency } from '@/lib/format';
 
 export default function OperacionesPage() {
-     const { establishmentId } = useAuth();
+     const { establishmentId, user } = useAuth();
      const { t, language } = useLanguage();
 
      // Translated status labels (short versions for UI elements)
@@ -367,8 +303,8 @@ export default function OperacionesPage() {
                     id: `item-${Date.now()}`,
                     productName: product.name,
                     quantity: quantity,
-                    unitPrice: product.price,
-                    total: product.price * quantity,
+                    unitPrice: product.price ?? 0,
+                    total: (product.price ?? 0) * quantity,
                     timestamp: new Date(),
                };
                setCurrentOrder([...currentOrder, newItem]);
@@ -1141,25 +1077,7 @@ export default function OperacionesPage() {
 
      return (
           <div className="min-h-svh bg-background">
-               <DemoSidebar />
-               <nav className="border-b neumorphic-inset">
-                    <div className="container mx-auto px-6 py-4">
-                         <div className="flex items-center justify-between">
-                              <Link href="/demo" className="block">
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 dark:hidden object-contain"
-                                   />
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 hidden dark:block object-contain dark:invert"
-                                   />
-                              </Link>
-                         </div>
-                    </div>
-               </nav>
+               <SidebarNav userName={user?.email || ''} establishmentName={''} />
 
                <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
                     <div className="max-w-[1400px] mx-auto">
@@ -1282,7 +1200,7 @@ export default function OperacionesPage() {
                                                                       </div>
                                                                       <h4 className="font-semibold text-sm mb-1">{product.name}</h4>
                                                                       <Badge variant="outline" className="text-xs mb-2">{product.category}</Badge>
-                                                                      <p className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</p>
+                                                                      <p className="text-2xl font-bold text-primary">{formatCurrency(product.price)}</p>
                                                                  </div>
 
                                                                  {/* Quantity Selector */}
@@ -1361,7 +1279,7 @@ export default function OperacionesPage() {
                                                                  <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                                                                       <div className="flex-1 min-w-0">
                                                                            <p className="font-medium text-sm truncate">{item.productName}</p>
-                                                                           <p className="text-xs text-muted-foreground">${item.unitPrice.toFixed(2)}</p>
+                                                                           <p className="text-xs text-muted-foreground">{formatCurrency(item.unitPrice)}</p>
                                                                       </div>
                                                                       <div className="flex items-center gap-2">
                                                                            <Button
@@ -1397,7 +1315,7 @@ export default function OperacionesPage() {
                                                        <div className="border-t pt-4 space-y-3">
                                                             <div className="flex justify-between items-center">
                                                                  <span className="text-lg font-semibold">Total:</span>
-                                                                 <span className="text-2xl font-bold text-primary">${getOrderTotal().toFixed(2)}</span>
+                                                                 <span className="text-2xl font-bold text-primary">{formatCurrency(getOrderTotal())}</span>
                                                             </div>
 
                                                             <GlowButton
@@ -1695,7 +1613,7 @@ export default function OperacionesPage() {
                                                        <DollarSign className="w-5 h-5" />
                                                        Total:
                                                   </span>
-                                                  <span className="text-2xl font-bold text-primary">${currentAccount.total.toFixed(2)}</span>
+                                                  <span className="text-2xl font-bold text-primary">{formatCurrency(currentAccount.total)}</span>
                                              </div>
                                         </div>
 
@@ -1707,7 +1625,7 @@ export default function OperacionesPage() {
                                                        {currentAccount.items.map(item => (
                                                             <div key={item.id} className="flex justify-between text-sm">
                                                                  <span>{item.quantity}x {item.productName}</span>
-                                                                 <span className="font-medium">${item.total.toFixed(2)}</span>
+                                                                 <span className="font-medium">{formatCurrency(item.total)}</span>
                                                             </div>
                                                        ))}
                                                   </div>

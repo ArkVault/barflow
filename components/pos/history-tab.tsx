@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Loader2, Calendar } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { usePOS } from './pos-context';
+import { formatCurrency } from '@/lib/format';
 
 type PeriodFilter = 'day' | 'week' | 'month';
 
@@ -46,7 +47,7 @@ export function HistoryTab() {
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
           return sales.filter(s => {
-               const saleDate = new Date(s.created_at);
+               const saleDate = new Date(s.created_at ?? '');
 
                switch (periodFilter) {
                     case 'day':
@@ -69,7 +70,7 @@ export function HistoryTab() {
      }, [sales, periodFilter]);
 
      // Calculate stats based on filtered sales
-     const totalSales = filteredSales.reduce((sum, s) => sum + parseFloat(s.total.toString()), 0);
+     const totalSales = filteredSales.reduce((sum, s) => sum + parseFloat((s.total ?? 0).toString()), 0);
      const totalTransactions = filteredSales.length;
      const averageTicket = totalTransactions > 0 ? totalSales / totalTransactions : 0;
 
@@ -147,7 +148,7 @@ export function HistoryTab() {
                               {getStatsLabel()}
                          </div>
                          <div className="text-2xl font-bold text-green-600">
-                              ${totalSales.toFixed(2)}
+                              {formatCurrency(totalSales)}
                          </div>
                     </Card>
                     <Card className="neumorphic border-0 p-4">
@@ -163,7 +164,7 @@ export function HistoryTab() {
                               {language === 'es' ? 'Ticket Promedio' : 'Average Ticket'}
                          </div>
                          <div className="text-2xl font-bold">
-                              ${averageTicket.toFixed(2)}
+                              {formatCurrency(averageTicket)}
                          </div>
                     </Card>
                </div>
@@ -209,26 +210,26 @@ export function HistoryTab() {
                                                                  <ChevronDown className="h-4 w-4" />
                                                             )}
                                                        </TableCell>
-                                                       <TableCell className="font-medium">{sale.order_number}</TableCell>
-                                                       <TableCell>{translateTableName(sale.table_name)}</TableCell>
+                                                       <TableCell className="font-medium">{sale.order_number ?? '-'}</TableCell>
+                                                       <TableCell>{translateTableName(sale.table_name ?? null)}</TableCell>
                                                        <TableCell>
-                                                            {new Date(sale.created_at).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
+                                                            {new Date(sale.created_at ?? '').toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
                                                                  day: '2-digit',
                                                                  month: '2-digit',
                                                                  year: 'numeric'
                                                             })}
                                                        </TableCell>
                                                        <TableCell>
-                                                            {new Date(sale.created_at).toLocaleTimeString(language === 'es' ? 'es-ES' : 'en-US', {
+                                                            {new Date(sale.created_at ?? '').toLocaleTimeString(language === 'es' ? 'es-ES' : 'en-US', {
                                                                  hour: '2-digit',
                                                                  minute: '2-digit'
                                                             })}
                                                        </TableCell>
                                                        <TableCell>
-                                                            <Badge variant="secondary">{sale.items.length} items</Badge>
+                                                            <Badge variant="secondary">{(sale.items ?? []).length} items</Badge>
                                                        </TableCell>
                                                        <TableCell className="text-right font-bold text-green-600">
-                                                            ${sale.total.toFixed(2)}
+                                                            {formatCurrency(sale.total)}
                                                        </TableCell>
                                                   </TableRow>
                                                   {expandedSale === sale.id && (
@@ -239,7 +240,7 @@ export function HistoryTab() {
                                                                            {language === 'es' ? 'Detalles del Ticket:' : 'Ticket Details:'}
                                                                       </h4>
                                                                       <div className="space-y-2">
-                                                                           {sale.items.map((item, idx) => (
+                                                                           {(sale.items ?? []).map((item, idx) => (
                                                                                 <div key={idx} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
                                                                                      <div className="flex-1">
                                                                                           <span className="font-medium">{item.productName}</span>
@@ -249,10 +250,10 @@ export function HistoryTab() {
                                                                                      </div>
                                                                                      <div className="text-right">
                                                                                           <div className="text-sm text-muted-foreground">
-                                                                                               ${item.unitPrice.toFixed(2)} c/u
+                                                                                               {formatCurrency(item.unitPrice)} c/u
                                                                                           </div>
                                                                                           <div className="font-semibold">
-                                                                                               ${item.total.toFixed(2)}
+                                                                                               {formatCurrency(sale.total)}
                                                                                           </div>
                                                                                      </div>
                                                                                 </div>
@@ -261,7 +262,7 @@ export function HistoryTab() {
                                                                       <div className="mt-4 pt-3 border-t border-border flex justify-between items-center">
                                                                            <span className="font-semibold">Total:</span>
                                                                            <span className="text-lg font-bold text-green-600">
-                                                                                ${sale.total.toFixed(2)}
+                                                                                {formatCurrency(sale.total)}
                                                                            </span>
                                                                       </div>
                                                                  </div>

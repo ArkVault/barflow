@@ -1,0 +1,50 @@
+"use client";
+
+import { SidebarNav } from "./sidebar-nav";
+import { PageHeader } from "./page-header";
+import { AccountButton } from "./account-button";
+import { TrialExpiredOverlay } from "@/components/subscription/trial-expired-overlay";
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  userName: string;
+  establishmentName: string;
+  pageTitle?: string;
+  pageDescription?: string;
+  headerActions?: React.ReactNode;
+}
+
+export function DashboardLayout({
+  children,
+  userName,
+  establishmentName,
+  pageTitle,
+  pageDescription,
+  headerActions,
+}: DashboardLayoutProps) {
+  return (
+    <div className="min-h-svh bg-background">
+      <SidebarNav userName={userName} establishmentName={establishmentName} />
+
+      {/* Fixed Account Button - Top Right */}
+      <div className="fixed top-4 right-6 z-40">
+        <AccountButton />
+      </div>
+
+      {/* Main content with left margin for sidebar */}
+      <div className="ml-72 transition-all duration-300">
+        {pageTitle && (
+          <PageHeader title={pageTitle} description={pageDescription}>
+            {headerActions}
+          </PageHeader>
+        )}
+        <div className="pt-4 pr-4">
+          {children}
+        </div>
+      </div>
+
+      {/* Trial Expired Overlay - blocks content when trial ends */}
+      <TrialExpiredOverlay />
+    </div>
+  );
+}

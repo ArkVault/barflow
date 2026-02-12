@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { ProjectionView } from "@/components/projection-view";
-import { GenerateProjectionsButton } from "@/components/generate-projections-button";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { ProjectionView } from "@/components/projections/projection-view";
+import { GenerateProjectionsButton } from "@/components/projections/generate-projections-button";
 
 export default async function ProyeccionesPage() {
   const supabase = await createClient();

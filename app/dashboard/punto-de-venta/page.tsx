@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/contexts/auth-context";
 import { LayoutGrid, FileText, History } from "lucide-react";
 
 // Import POS components following Dependency Inversion Principle
@@ -21,28 +22,11 @@ type TabId = typeof TABS[number]['id'];
 function POSContent() {
      const { t, language } = useLanguage();
      const { activeTab, setActiveTab } = usePOS();
+     const { user } = useAuth();
 
      return (
           <div className="min-h-svh bg-background">
-               <DemoSidebar />
-               <nav className="border-b neumorphic-inset">
-                    <div className="container mx-auto px-6 py-4">
-                         <div className="flex items-center justify-between">
-                              <Link href="/demo" className="block">
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 dark:hidden object-contain"
-                                   />
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 hidden dark:block object-contain dark:invert"
-                                   />
-                              </Link>
-                         </div>
-                    </div>
-               </nav>
+               <SidebarNav userName={user?.email || ''} establishmentName={''} />
 
                <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
                     <div className="max-w-7xl mx-auto">

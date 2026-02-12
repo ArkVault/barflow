@@ -33,19 +33,19 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
-  const isDemoPage = request.nextUrl.pathname.startsWith('/demo')
+  const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard')
 
-  // Protect /demo routes - require authentication
-  if (isDemoPage && !user) {
+  // Protect /dashboard routes - require authentication
+  if (isDashboardPage && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)
   }
 
-  // Redirect authenticated users from auth pages to demo
+  // Redirect authenticated users from auth pages to dashboard
   if (isAuthPage && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/demo'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/demo/:path*',
+    '/dashboard/:path*',
     '/auth/:path*',
   ],
 }

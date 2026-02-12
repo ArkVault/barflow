@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const supabase = createClient()
-    
+    const supabase = await createClient()
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -46,7 +46,7 @@ export async function GET() {
       .eq('establishment_id', establishment.id)
       .gte('created_at', today)
 
-    const totalSalesToday = salesToday?.reduce((sum, sale) => sum + sale.total_price, 0) || 0
+    const totalSalesToday = salesToday?.reduce((sum, sale) => sum + (sale.total_price ?? 0), 0) || 0
 
     // Get monthly revenue
     const startOfMonth = new Date()
@@ -59,7 +59,7 @@ export async function GET() {
       .eq('establishment_id', establishment.id)
       .gte('created_at', startOfMonth.toISOString())
 
-    const monthlyRevenue = salesMonth?.reduce((sum, sale) => sum + sale.total_price, 0) || 0
+    const monthlyRevenue = salesMonth?.reduce((sum, sale) => sum + (sale.total_price ?? 0), 0) || 0
 
     return NextResponse.json({
       totalProducts: totalProducts || 0,

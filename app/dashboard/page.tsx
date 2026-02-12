@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { StatsOverview } from "@/components/stats-overview";
-import { UrgentSuppliesAlert } from "@/components/urgent-supplies-alert";
-import { StockRiskTabs } from "@/components/stock-risk-tabs";
-import { StockTrafficLight } from "@/components/stock-traffic-light";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { StatsOverview } from "@/components/dashboard/stats-overview";
+import { UrgentSuppliesAlert } from "@/components/dashboard/urgent-supplies-alert";
+import { StockRiskTabs } from "@/components/dashboard/stock-risk-tabs";
+import { StockTrafficLight } from "@/components/dashboard/stock-traffic-light";
 import { PeriodProvider } from "@/contexts/period-context";
 
 export default async function DashboardPage() {

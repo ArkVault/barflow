@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { ProductsPageClient } from "@/components/products-page-client";
-import { GlowButton } from "@/components/glow-button";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { ProductsPageClient } from "@/components/products/products-page-client";
+import { GlowButton } from "@/components/layout/glow-button";
 import { ArrowLeft } from "lucide-react";
 
 export default async function ProductosPage() {
@@ -45,7 +45,7 @@ export default async function ProductosPage() {
 
   const { data: supplies } = await supabase
     .from("supplies")
-    .select("id, name, unit, current_quantity")
+    .select("id, name, unit, current_quantity, category, min_threshold")
     .eq("establishment_id", establishment.id)
     .order("name");
 

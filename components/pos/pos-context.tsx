@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth-context';
-import { toast } from 'sonner';
 import {
      Section,
      TableItem,
@@ -16,6 +15,9 @@ import {
      Status,
      AccountStatus,
 } from './types';
+import { useLayoutManager } from './hooks/use-layout-manager';
+import { useAccountManager } from './hooks/use-account-manager';
+import { useOrderManager } from './hooks/use-order-manager';
 
 // Context interface following Interface Segregation Principle
 interface POSContextValue {
@@ -82,28 +84,8 @@ export function POSProvider({ children }: POSProviderProps) {
      // Active tab state
      const [activeTab, setActiveTab] = useState<'mesas' | 'comandas' | 'historial'>('mesas');
 
-     // Layout state
-     const [sections, setSections] = useState<Section[]>([
-          {
-               id: '1',
-               name: 'Sección 1',
-               x: 50,
-               y: 50,
-               width: 600,
-               height: 450,
-               tables: [
-                    { id: 'table-1', name: 'Mesa 1', x: 50, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
-                    { id: 'table-2', name: 'Mesa 2', x: 200, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
-                    { id: 'table-3', name: 'Mesa 3', x: 350, y: 50, status: 'libre', accounts: [], currentAccountId: undefined },
-                    { id: 'table-4', name: 'Mesa 4', x: 50, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
-                    { id: 'table-5', name: 'Mesa 5', x: 200, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
-                    { id: 'table-6', name: 'Mesa 6', x: 350, y: 180, status: 'libre', accounts: [], currentAccountId: undefined },
-               ],
-               bars: [
-                    { id: 'bar-1', name: 'Barra 1', x: 150, y: 320, status: 'libre', accounts: [], currentAccountId: undefined, orientation: 'horizontal' },
-               ],
-          },
-     ]);
+     // Layout management (load/save from Supabase)
+     const { sections, setSections, loadLayout, saveLayout } = useLayoutManager();
 
      const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
 
@@ -111,11 +93,6 @@ export function POSProvider({ children }: POSProviderProps) {
      const [products, setProducts] = useState<Product[]>([]);
      const [categories, setCategories] = useState<string[]>([]);
      const [loadingProducts, setLoadingProducts] = useState(true);
-
-     // Orders state
-     const [currentOrder, setCurrentOrder] = useState<AccountItem[]>([]);
-     const [selectedTableForOrder, setSelectedTableForOrder] = useState<string | null>(null);
-     const [productQuantities, setProductQuantities] = useState<Record<string, number>>({});
 
      // Sales state
      const [sales, setSales] = useState<Sale[]>([]);
@@ -178,112 +155,6 @@ export function POSProvider({ children }: POSProviderProps) {
           }
      };
 
-     const loadLayout = useCallback(async () => {
-          try {
-               const supabase = createClient();
-               const { data: { user } } = await supabase.auth.getUser();
-
-               if (!user) return;
-
-               const { data, error } = await supabase
-                    .from('operations_layout')
-                    .select('sections, table_counter')
-                    .eq('user_id', user.id)
-                    .single();
-
-               if (error && error.code !== 'PGRST116') {
-                    console.error('Error loading layout:', error.message);
-                    return;
-               }
-
-               if (data?.sections) {
-                    const parsedSections = data.sections.map((section: any) => ({
-                         ...section,
-                         tables: section.tables.map((table: any) => ({
-                              ...table,
-                              accounts: (table.accounts || []).map((acc: any) => ({
-                                   ...acc,
-                                   openedAt: new Date(acc.openedAt),
-                                   closedAt: acc.closedAt ? new Date(acc.closedAt) : undefined,
-                                   items: (acc.items || []).map((item: any) => ({
-                                        ...item,
-                                        timestamp: new Date(item.timestamp),
-                                   })),
-                              })),
-                         })),
-                         bars: section.bars.map((bar: any) => ({
-                              ...bar,
-                              accounts: (bar.accounts || []).map((acc: any) => ({
-                                   ...acc,
-                                   openedAt: new Date(acc.openedAt),
-                                   closedAt: acc.closedAt ? new Date(acc.closedAt) : undefined,
-                                   items: (acc.items || []).map((item: any) => ({
-                                        ...item,
-                                        timestamp: new Date(item.timestamp),
-                                   })),
-                              })),
-                         })),
-                    }));
-                    setSections(parsedSections);
-               }
-          } catch (error) {
-               console.error('Error loading layout:', error);
-          }
-     }, []);
-
-     const saveLayout = useCallback(async (sectionsToSave: Section[]) => {
-          try {
-               const supabase = createClient();
-               const { data: { user } } = await supabase.auth.getUser();
-
-               if (!user || sectionsToSave.length === 0) return;
-
-               // Serialize sections to ensure dates are ISO strings for Supabase
-               const serializedSections = sectionsToSave.map(section => ({
-                    ...section,
-                    tables: section.tables.map(table => ({
-                         ...table,
-                         accounts: table.accounts.map(acc => ({
-                              ...acc,
-                              openedAt: acc.openedAt instanceof Date ? acc.openedAt.toISOString() : acc.openedAt,
-                              closedAt: acc.closedAt instanceof Date ? acc.closedAt.toISOString() : acc.closedAt,
-                              items: acc.items.map(item => ({
-                                   ...item,
-                                   timestamp: item.timestamp instanceof Date ? item.timestamp.toISOString() : item.timestamp,
-                              })),
-                         })),
-                    })),
-                    bars: section.bars.map(bar => ({
-                         ...bar,
-                         accounts: bar.accounts.map(acc => ({
-                              ...acc,
-                              openedAt: acc.openedAt instanceof Date ? acc.openedAt.toISOString() : acc.openedAt,
-                              closedAt: acc.closedAt instanceof Date ? acc.closedAt.toISOString() : acc.closedAt,
-                              items: acc.items.map(item => ({
-                                   ...item,
-                                   timestamp: item.timestamp instanceof Date ? item.timestamp.toISOString() : item.timestamp,
-                              })),
-                         })),
-                    })),
-               }));
-
-               const { error } = await supabase
-                    .from('operations_layout')
-                    .upsert({
-                         user_id: user.id,
-                         sections: serializedSections,
-                    }, {
-                         onConflict: 'user_id'
-                    });
-
-               if (error) {
-                    console.error('Error saving layout:', error.message, error.details, error.hint);
-               }
-          } catch (error) {
-               console.error('Error saving layout (exception):', error);
-          }
-     }, []);
-
      const refreshSales = useCallback(async () => {
           if (!establishmentId) return;
 
@@ -306,274 +177,32 @@ export function POSProvider({ children }: POSProviderProps) {
           }
      }, [establishmentId]);
 
-     const openNewAccount = useCallback((sectionId: string, itemId: string, type: 'table' | 'bar') => {
-          setSections(prev => prev.map(section => {
-               if (section.id !== sectionId) return section;
+     // Account management (open/close/cancel)
+     const {
+          openNewAccount,
+          closeAccount,
+          cancelAccount,
+          removeItemFromAccount,
+     } = useAccountManager({
+          establishmentId,
+          sections,
+          setSections,
+          refreshSales,
+     });
 
-               const updateItem = (item: TableItem | BarItem) => {
-                    if (item.id !== itemId) return item;
-
-                    const newAccount: Account = {
-                         id: `acc-${Date.now()}`,
-                         status: 'abierta',
-                         openedAt: new Date(),
-                         items: [],
-                         total: 0,
-                         seatLabel: type === 'bar' ? `Asiento ${item.accounts.length + 1}` : undefined,
-                    };
-
-                    return {
-                         ...item,
-                         status: 'ocupada' as Status,
-                         accounts: [...item.accounts, newAccount],
-                         currentAccountId: newAccount.id,
-                    };
-               };
-
-               if (type === 'table') {
-                    return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-               } else {
-                    return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-               }
-          }));
-     }, []);
-
-     const closeAccount = useCallback(async (sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar') => {
-          if (!establishmentId) return;
-
-          // Find the account to get items
-          let accountToClose: Account | undefined;
-          let itemName = '';
-
-          sections.forEach(section => {
-               if (section.id === sectionId) {
-                    const items = type === 'table' ? section.tables : section.bars;
-                    const item = items.find(i => i.id === itemId);
-                    if (item) {
-                         itemName = item.name;
-                         accountToClose = item.accounts.find(a => a.id === accountId);
-                    }
-               }
-          });
-
-          if (!accountToClose || accountToClose.items.length === 0) {
-               // Just close the account without saving to sales
-               setSections(prev => prev.map(section => {
-                    if (section.id !== sectionId) return section;
-
-                    const updateItem = (item: TableItem | BarItem) => {
-                         if (item.id !== itemId) return item;
-
-                         const updatedAccounts = item.accounts.filter(a => a.id !== accountId);
-                         const hasOpenAccounts = updatedAccounts.some(a => a.status !== 'pagada');
-
-                         return {
-                              ...item,
-                              status: hasOpenAccounts ? item.status : 'libre' as Status,
-                              accounts: updatedAccounts,
-                              currentAccountId: updatedAccounts.length > 0 ? updatedAccounts[updatedAccounts.length - 1].id : undefined,
-                         };
-                    };
-
-                    if (type === 'table') {
-                         return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-                    } else {
-                         return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-                    }
-               }));
-               return;
-          }
-
-          // Save to sales
-          try {
-               const supabase = createClient();
-
-               const saleItems = accountToClose.items.map(item => ({
-                    productName: item.productName,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    total: item.total,
-               }));
-
-               const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-               const subtotal = accountToClose.total;
-               const tax = subtotal * 0.16;
-               const total = subtotal + tax;
-
-               const { error } = await supabase.from('sales').insert({
-                    establishment_id: establishmentId,
-                    order_number: orderNumber,
-                    table_name: accountToClose.seatLabel ? `${itemName} - ${accountToClose.seatLabel}` : itemName,
-                    items: saleItems,
-                    subtotal,
-                    tax,
-                    total,
-                    payment_method: 'pending',
-               });
-
-               if (error) {
-                    console.error('Error saving sale:', error);
-                    toast.error('Error al guardar la venta');
-                    return;
-               }
-
-               toast.success('Cuenta cerrada y registrada');
-
-               // Update sections
-               setSections(prev => prev.map(section => {
-                    if (section.id !== sectionId) return section;
-
-                    const updateItem = (item: TableItem | BarItem) => {
-                         if (item.id !== itemId) return item;
-
-                         const updatedAccounts = item.accounts.filter(a => a.id !== accountId);
-                         const hasOpenAccounts = updatedAccounts.some(a => a.status !== 'pagada');
-
-                         return {
-                              ...item,
-                              status: hasOpenAccounts ? item.status : 'libre' as Status,
-                              accounts: updatedAccounts,
-                              currentAccountId: updatedAccounts.length > 0 ? updatedAccounts[updatedAccounts.length - 1].id : undefined,
-                         };
-                    };
-
-                    if (type === 'table') {
-                         return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-                    } else {
-                         return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-                    }
-               }));
-
-               // Refresh sales
-               refreshSales();
-
-          } catch (error) {
-               console.error('Error closing account:', error);
-               toast.error('Error al cerrar la cuenta');
-          }
-     }, [establishmentId, sections, refreshSales]);
-
-     // Cancel account without saving to sales (just remove the account)
-     const cancelAccount = useCallback((sectionId: string, itemId: string, accountId: string, type: 'table' | 'bar') => {
-          setSections(prev => prev.map(section => {
-               if (section.id !== sectionId) return section;
-
-               const updateItem = (item: TableItem | BarItem) => {
-                    if (item.id !== itemId) return item;
-
-                    const updatedAccounts = item.accounts.filter(a => a.id !== accountId);
-                    const hasOpenAccounts = updatedAccounts.length > 0;
-
-                    return {
-                         ...item,
-                         status: hasOpenAccounts ? item.status : 'libre' as Status,
-                         accounts: updatedAccounts,
-                         currentAccountId: updatedAccounts.length > 0 ? updatedAccounts[updatedAccounts.length - 1].id : undefined,
-                    };
-               };
-
-               if (type === 'table') {
-                    return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-               } else {
-                    return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-               }
-          }));
-
-          toast.success('Cuenta cancelada');
-     }, []);
-
-     // Remove a specific item from an account
-     const removeItemFromAccount = useCallback((sectionId: string, itemId: string, accountId: string, itemToRemoveId: string, type: 'table' | 'bar') => {
-          setSections(prev => prev.map(section => {
-               if (section.id !== sectionId) return section;
-
-               const updateItem = (item: TableItem | BarItem) => {
-                    if (item.id !== itemId) return item;
-
-                    return {
-                         ...item,
-                         accounts: item.accounts.map(acc => {
-                              if (acc.id !== accountId) return acc;
-
-                              const updatedItems = acc.items.filter(i => i.id !== itemToRemoveId);
-                              const newTotal = updatedItems.reduce((sum, i) => sum + i.total, 0);
-
-                              return {
-                                   ...acc,
-                                   items: updatedItems,
-                                   total: newTotal,
-                              };
-                         }),
-                    };
-               };
-
-               if (type === 'table') {
-                    return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-               } else {
-                    return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-               }
-          }));
-     }, []);
-
-     const sendOrderToTable = useCallback(async () => {
-          if (!selectedTableForOrder || currentOrder.length === 0) return;
-
-          const [sectionId, itemId, type] = selectedTableForOrder.split('|');
-
-          setSections(prev => {
-               const updated = prev.map(section => {
-                    if (section.id !== sectionId) return section;
-
-                    const updateItem = (item: TableItem | BarItem) => {
-                         if (item.id !== itemId) return item;
-
-                         // Find or create current account
-                         let targetAccount = item.accounts.find(a => a.id === item.currentAccountId);
-
-                         if (!targetAccount) {
-                              targetAccount = {
-                                   id: `acc-${Date.now()}`,
-                                   status: 'en-consumo',
-                                   openedAt: new Date(),
-                                   items: [],
-                                   total: 0,
-                              };
-                              item.accounts.push(targetAccount);
-                              item.currentAccountId = targetAccount.id;
-                         }
-
-                         // Add items to account
-                         const updatedItems = [...targetAccount.items, ...currentOrder];
-                         const newTotal = updatedItems.reduce((sum, i) => sum + i.total, 0);
-
-                         return {
-                              ...item,
-                              status: 'ocupada' as Status,
-                              accounts: item.accounts.map(acc =>
-                                   acc.id === targetAccount!.id
-                                        ? { ...acc, items: updatedItems, total: newTotal, status: 'en-consumo' as AccountStatus }
-                                        : acc
-                              ),
-                         };
-                    };
-
-                    if (type === 'table') {
-                         return { ...section, tables: section.tables.map(updateItem) as TableItem[] };
-                    } else {
-                         return { ...section, bars: section.bars.map(updateItem) as BarItem[] };
-                    }
-               });
-
-               // Save layout
-               saveLayout(updated);
-               return updated;
-          });
-
-          toast.success('Orden enviada');
-          setCurrentOrder([]);
-          setProductQuantities({});
-          // Keep selectedTableForOrder so user can continue adding items to same table
-     }, [selectedTableForOrder, currentOrder, saveLayout]);
+     // Order management (send orders to tables)
+     const {
+          currentOrder,
+          setCurrentOrder,
+          selectedTableForOrder,
+          setSelectedTableForOrder,
+          productQuantities,
+          setProductQuantities,
+          sendOrderToTable,
+     } = useOrderManager({
+          setSections,
+          saveLayout,
+     });
 
      const getCurrentAccount = useCallback((): Account | null => {
           if (!selectedItem) return null;

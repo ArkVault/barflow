@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { SalesStats } from "@/components/sales-stats";
-import { SalesTable } from "@/components/sales-table";
-import { SalesChart } from "@/components/sales-chart";
-import { RecordSaleDialog } from "@/components/record-sale-dialog";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { SalesStats } from "@/components/sales/sales-stats";
+import { SalesTable } from "@/components/sales/sales-table";
+import { SalesChart } from "@/components/sales/sales-chart";
+import { RecordSaleDialog } from "@/components/sales/record-sale-dialog";
 
 export default async function VentasPage() {
   const supabase = await createClient();

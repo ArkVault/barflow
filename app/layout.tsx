@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/auth-context'
-import { SubscriptionGuard } from '@/components/subscription-guard'
-import { Providers } from '@/components/providers'
+import { SubscriptionGuard } from '@/components/subscription/subscription-guard'
+import { Providers } from '@/components/layout/providers'
 import { Toaster } from 'sonner'
 
 const geist = Geist({

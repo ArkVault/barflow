@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe/config';
+import { getStripe } from '@/lib/stripe/config';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
           let event: Stripe.Event;
 
           try {
-               event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+               event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
           } catch (err: any) {
                console.error('Webhook signature verification failed:', err.message);
                return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
                     const userId = subscription.metadata?.user_id;
 
                     if (userId) {
-                         const periodEnd = subscription.current_period_end;
+                         const periodEnd = (subscription as any).current_period_end;
                          await supabase
                               .from('establishments')
                               .update({
@@ -79,10 +79,10 @@ export async function POST(req: NextRequest) {
 
                case 'invoice.payment_failed': {
                     const invoice = event.data.object as Stripe.Invoice;
-                    const subscriptionId = invoice.subscription;
+                    const subscriptionId = (invoice as any).subscription;
 
                     if (subscriptionId && typeof subscriptionId === 'string') {
-                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+                         const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
                          const userId = subscription.metadata?.user_id;
 
                          if (userId) {

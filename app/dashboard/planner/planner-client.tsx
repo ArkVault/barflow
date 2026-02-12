@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { InventoryPlanner } from "@/components/inventory-planner";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { InventoryPlanner } from "@/components/inventory/inventory-planner";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 
 interface PlannerClientProps {

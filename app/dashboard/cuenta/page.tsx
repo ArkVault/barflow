@@ -1,7 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { DashboardLayout } from "@/components/dashboard-layout";
-import AccountContent from "@/components/account-content";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import AccountContent from "@/components/layout/account-content";
 
 export default async function CuentaPage() {
   const supabase = await createServerClient();
