@@ -9,9 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Minus, Trash2, Send, Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { usePOS } from './pos-context';
-import { ProductImage } from '@/components/products/product-image';
+import { ProductImage } from '@/components/product-image';
 import { AccountItem, Product } from './types';
-import { formatCurrency } from '@/lib/format';
 
 // Single Responsibility: Only handles order creation and sending to tables
 export function OrdersTab() {
@@ -72,8 +71,8 @@ export function OrdersTab() {
                id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                productName: product.name,
                quantity,
-               unitPrice: product.price ?? 0,
-               total: (product.price ?? 0) * quantity,
+               unitPrice: product.price,
+               total: product.price * quantity,
                timestamp: new Date(),
           };
 
@@ -225,7 +224,7 @@ export function OrdersTab() {
                                                             {product.name}
                                                        </h4>
                                                        <p className="text-xl font-bold text-white drop-shadow-lg">
-                                                            {formatCurrency(product.price)}
+                                                            ${product.price.toFixed(2)}
                                                        </p>
                                                   </div>
 
@@ -301,7 +300,7 @@ export function OrdersTab() {
                                              <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
                                                   <div className="flex-1 min-w-0">
                                                        <p className="font-medium text-sm truncate">{item.productName}</p>
-                                                       <p className="text-xs text-muted-foreground">{formatCurrency(item.unitPrice)} c/u</p>
+                                                       <p className="text-xs text-muted-foreground">${item.unitPrice.toFixed(2)} c/u</p>
                                                   </div>
                                                   <div className="flex items-center gap-2">
                                                        <Button
@@ -337,7 +336,7 @@ export function OrdersTab() {
                                    <div className="border-t pt-4 space-y-3">
                                         <div className="flex justify-between items-center">
                                              <span className="text-lg font-semibold">Total:</span>
-                                             <span className="text-2xl font-bold text-primary">{formatCurrency(getOrderTotal())}</span>
+                                             <span className="text-2xl font-bold text-primary">${getOrderTotal().toFixed(2)}</span>
                                         </div>
 
                                         <Button

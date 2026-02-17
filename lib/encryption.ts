@@ -7,12 +7,12 @@ const KEY_LENGTH = 32;
  * Get encryption key from environment
  * Generate with: openssl rand -hex 32
  */
-function getEncryptionKey(): Uint8Array {
+function getEncryptionKey(): Buffer {
      const key = process.env.ENCRYPTION_KEY;
      if (!key) {
           throw new Error('ENCRYPTION_KEY environment variable is not set');
      }
-     return new Uint8Array(Buffer.from(key, 'hex'));
+     return Buffer.from(key, 'hex');
 }
 
 /**
@@ -20,7 +20,7 @@ function getEncryptionKey(): Uint8Array {
  */
 export async function encryptToken(token: string): Promise<string> {
      const key = getEncryptionKey();
-     const iv = new Uint8Array(crypto.randomBytes(16));
+     const iv = crypto.randomBytes(16);
 
      const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
      let encrypted = cipher.update(token, 'utf8', 'hex');
@@ -29,7 +29,7 @@ export async function encryptToken(token: string): Promise<string> {
      const authTag = cipher.getAuthTag();
 
      // Format: iv:authTag:encryptedData
-     return `${Buffer.from(iv).toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+     return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
 }
 
 /**
@@ -44,8 +44,8 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
      }
 
      const [ivHex, authTagHex, encryptedData] = parts;
-     const iv = new Uint8Array(Buffer.from(ivHex, 'hex'));
-     const authTag = new Uint8Array(Buffer.from(authTagHex, 'hex'));
+     const iv = Buffer.from(ivHex, 'hex');
+     const authTag = Buffer.from(authTagHex, 'hex');
 
      const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
      decipher.setAuthTag(authTag);
@@ -83,7 +83,7 @@ export function verifyWebhookSignature(
 
      // Timing-safe comparison
      return crypto.timingSafeEqual(
-          new Uint8Array(Buffer.from(signature)),
-          new Uint8Array(Buffer.from(expectedSignature))
+          Buffer.from(signature),
+          Buffer.from(expectedSignature)
      );
 }

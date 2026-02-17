@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Printer, Download, X } from 'lucide-react';
 import { useLanguage } from '@/hooks/use-language';
-import { formatCurrency } from '@/lib/format';
 
 export interface ReceiptItem {
      productName: string;
@@ -36,7 +35,9 @@ export function ReceiptGenerator({ open, onOpenChange, receiptData, onConfirm }:
      const { language } = useLanguage();
      const receiptRef = useRef<HTMLDivElement>(null);
 
-     // formatCurrency imported from @/lib/format
+     const formatCurrency = (amount: number) => {
+          return `$${amount.toFixed(2)}`;
+     };
 
      const formatDate = (date: Date) => {
           return new Intl.DateTimeFormat(language === 'es' ? 'es-MX' : 'en-US', {
