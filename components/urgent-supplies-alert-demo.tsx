@@ -1,13 +1,15 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { useState, useMemo, useEffect } from "react";
 import { usePeriod } from "@/contexts/period-context";
 import { getUserPlan, convertPlanToSupplies, getSuppliesByViewPeriod } from "@/lib/planner-data";
 import { getSuppliesByPeriod, type UrgencyPeriod } from "@/lib/mock-data";
-import type { UrgentSupply } from "@/types/dashboard";
+import type { UrgentSupply, UrgencyLevel } from "@/types/dashboard";
 import { UrgencyFilterPills, type UrgencyFilter } from "@/components/presentation/urgency-filter-pills";
+import { UrgencyBadge } from "@/components/presentation/urgency-badge";
+import { StatusCardHeader } from "@/components/presentation/status-card-header";
+import { UrgentSupplyItemCard } from "@/components/presentation/urgent-supply-item-card";
 
 function getStockRatio(current: number, max: number) {
   if (max <= 0) return 1;
@@ -90,119 +92,65 @@ export function UrgentSuppliesAlertDemo() {
   if (statusFilter === 'warning') visibleSupplies = warningSupplies;
   if (statusFilter === 'optimal') visibleSupplies = optimalSupplies;
 
-  const getUrgencyBadge = (level: string, days: number, filterActive: string) => {
-    // Si hay un filtro activo que no es 'all', usar el color del filtro
-    if (filterActive === 'critical') {
-      return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
-    } else if (filterActive === 'warning') {
-      return <Badge className="neumorphic-inset bg-amber-500 text-white">Bajo ({days}d)</Badge>;
-    } else if (filterActive === 'optimal') {
-      return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
-    }
-
-    // Si no hay filtro, usar el nivel real del insumo
-    if (level === 'critical') {
-      return <Badge variant="destructive" className="neumorphic-inset">Crítico ({days}d)</Badge>;
-    } else if (level === 'warning') {
-      return <Badge className="neumorphic-inset bg-amber-500 text-white">Bajo ({days}d)</Badge>;
-    } else {
-      return <Badge className="neumorphic-inset bg-emerald-500/10 text-emerald-600">Bien ({days}d)</Badge>;
-    }
-  };
-
   return (
     <Card className="neumorphic border-0">
-      <CardHeader>
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <CardTitle className="text-xl flex items-center gap-2">
-              📦 Insumos necesarios
-            </CardTitle>
-            <CardDescription>
-              {visibleSupplies.length} insumo{visibleSupplies.length !== 1 ? 's' : ''} en el estado seleccionado para este periodo
-            </CardDescription>
-          </div>
-          <div className="flex flex-col gap-2 md:items-end">
-            <UrgencyFilterPills
-              value={statusFilter}
-              onChange={setStatusFilter}
-              counts={{
-                critical: criticalSupplies.length,
-                warning: warningSupplies.length,
-                optimal: optimalSupplies.length,
-              }}
-              labels={{
-                critical: "Crítico",
-                warning: "Bajo",
-                optimal: "Bien",
-                all: "Ver todo",
-              }}
-            />
-          </div>
-        </div>
-      </CardHeader>
+      <StatusCardHeader
+        icon="📦"
+        title="Insumos necesarios"
+        description={`${visibleSupplies.length} insumo${visibleSupplies.length !== 1 ? "s" : ""} en el estado seleccionado para este periodo`}
+        rightSlot={
+          <UrgencyFilterPills
+            value={statusFilter}
+            onChange={setStatusFilter}
+            counts={{
+              critical: criticalSupplies.length,
+              warning: warningSupplies.length,
+              optimal: optimalSupplies.length,
+            }}
+            labels={{
+              critical: "Crítico",
+              warning: "Bajo",
+              optimal: "Bien",
+              all: "Ver todo",
+            }}
+          />
+        }
+      />
       <CardContent>
         <div className="space-y-4">
           {visibleSupplies.map((supply) => (
-            <div
+            <UrgentSupplyItemCard
               key={supply.id}
-              className="neumorphic-inset p-4 rounded-lg hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold text-lg">{supply.name}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {supply.category}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-center text-xs text-muted-foreground">
-                    <SemiCircleGauge
-                      current={supply.current_quantity}
-                      max={supply.min_threshold}
-                    />
-                    <span className="mt-1">
-                      {supply.current_quantity} / {supply.min_threshold} {supply.unit}
-                    </span>
-                  </div>
-                  {getUrgencyBadge(supply.urgencyLevel, supply.daysUntilDepleted, statusFilter)}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Stock actual:</span>
-                  <span className="ml-2 font-medium">
-                    {supply.current_quantity} {supply.unit}
+              supply={supply}
+              labels={{
+                currentStock: "Stock actual",
+                minimum: "Mínimo",
+                usedIn: "Utilizado en",
+              }}
+              gaugeSlot={
+                <div className="flex flex-col items-center text-xs text-muted-foreground">
+                  <SemiCircleGauge
+                    current={supply.current_quantity}
+                    max={supply.min_threshold}
+                  />
+                  <span className="mt-1">
+                    {supply.current_quantity} / {supply.min_threshold} {supply.unit}
                   </span>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Mínimo:</span>
-                  <span className="ml-2 font-medium">
-                    {supply.min_threshold} {supply.unit}
-                  </span>
-                </div>
-              </div>
-
-              {supply.products.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Utilizado en:
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {supply.products.map((product, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="text-xs neumorphic"
-                      >
-                        {product.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              }
+              badgeSlot={
+                <UrgencyBadge
+                  level={supply.urgencyLevel}
+                  days={supply.daysUntilDepleted}
+                  overrideLevel={statusFilter === "all" ? undefined : (statusFilter as UrgencyLevel)}
+                  labels={{
+                    critical: "Crítico",
+                    warning: "Bajo",
+                    low: "Bien",
+                  }}
+                />
+              }
+            />
           ))}
         </div>
       </CardContent>
