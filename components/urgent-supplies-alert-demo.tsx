@@ -10,50 +10,11 @@ import { UrgencyFilterPills, type UrgencyFilter } from "@/components/presentatio
 import { UrgencyBadge } from "@/components/presentation/urgency-badge";
 import { StatusCardHeader } from "@/components/presentation/status-card-header";
 import { UrgentSupplyItemCard } from "@/components/presentation/urgent-supply-item-card";
+import { SemiCircleGauge } from "@/components/presentation/semi-circle-gauge";
 
 function getStockRatio(current: number, max: number) {
   if (max <= 0) return 1;
   return current / max;
-}
-
-function getGaugeColorByRatio(ratio: number) {
-  // 0-2/5 (0-40%) = Rojo (crítico)
-  if (ratio <= 0.4) return "stroke-red-500";
-  // 3/5 (40-60%) = Naranja (bajo)
-  if (ratio <= 0.6) return "stroke-amber-500";
-  // 4/5-5/5 (60-100%+) = Verde (óptimo)
-  return "stroke-emerald-500";
-}
-
-function SemiCircleGauge({ current, max }: { current: number; max: number }) {
-  const ratio = getStockRatio(current, max);
-  const clamped = Math.max(0, Math.min(ratio, 1));
-  const percent = clamped * 100;
-  const circumference = Math.PI * 50;
-  const offset = circumference - (percent / 100) * circumference;
-  const colorClass = getGaugeColorByRatio(ratio);
-
-  return (
-    <div className="flex flex-col items-center justify-center">
-      <svg viewBox="0 0 120 60" className="w-16 h-8">
-        <path
-          d="M10 50 A50 50 0 0 1 110 50"
-          className="stroke-muted/40"
-          strokeWidth={8}
-          fill="none"
-        />
-        <path
-          d="M10 50 A50 50 0 0 1 110 50"
-          className={colorClass}
-          strokeWidth={8}
-          fill="none"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  );
 }
 
 export function UrgentSuppliesAlertDemo() {
@@ -130,8 +91,8 @@ export function UrgentSuppliesAlertDemo() {
               gaugeSlot={
                 <div className="flex flex-col items-center text-xs text-muted-foreground">
                   <SemiCircleGauge
-                    current={supply.current_quantity}
-                    max={supply.min_threshold}
+                    ratio={getStockRatio(supply.current_quantity, supply.min_threshold)}
+                    variant="demo"
                   />
                   <span className="mt-1">
                     {supply.current_quantity} / {supply.min_threshold} {supply.unit}
