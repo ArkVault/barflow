@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { DemoShell } from "@/components/shells";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, X, Grid3x3, Square, Minus, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -1140,8 +1140,7 @@ export default function OperacionesPage() {
      }, [resizingSection, sections]);
 
      return (
-          <div className="min-h-svh bg-background">
-               <DemoSidebar />
+          <DemoShell>
                <nav className="border-b neumorphic-inset">
                     <div className="container mx-auto px-6 py-4">
                          <div className="flex items-center justify-between">
@@ -1663,7 +1662,7 @@ export default function OperacionesPage() {
                                                        {language === 'es' ? 'Abrir Nueva Cuenta' : 'Open New Account'}
                                                   </GlowButton>
                                              </div>
-                                        </div>
+          </DemoShell>
                                    );
                               }
 

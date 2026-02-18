@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { DemoSidebar } from "@/components/demo-sidebar";
 import { PeriodProvider } from "@/contexts/period-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -18,6 +17,9 @@ import { toast } from "sonner";
 import { calculateStockStatus } from "@/lib/stock-utils";
 import { AccountButton } from "@/components/account-button";
 import { GlowButton } from "@/components/glow-button";
+import type { SupplyWithStatus } from "@/types/supply";
+import { SuppliesService } from "@/lib/services/supplies.service";
+import { DemoShell } from "@/components/shells";
 
 import dynamic from 'next/dynamic';
 
@@ -35,17 +37,6 @@ const NeonDonutChart = dynamic(() => import("@/components/neon-donut-chart").the
   ssr: false
 });
 
-interface Supply {
-  id: string;
-  name: string;
-  category: string;
-  current_quantity: number;
-  unit: string;
-  min_threshold: number;
-  optimal_quantity?: number;
-  status: 'ok' | 'low' | 'critical';
-}
-
 interface TopProduct {
   product_name: string;
   total_sales: number;
@@ -56,7 +47,7 @@ export default function DemoPage() {
   const { t, language } = useLanguage();
   const { establishmentId, loading: authLoading, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [supplies, setSupplies] = useState<Supply[]>([]);
+  const [supplies, setSupplies] = useState<SupplyWithStatus[]>([]);
   const [totalSupplies, setTotalSupplies] = useState(0);
   const [criticalSupplies, setCriticalSupplies] = useState(0);
   const [lowSupplies, setLowSupplies] = useState(0);
@@ -95,11 +86,10 @@ export default function DemoPage() {
       // Carga paralela de todos los datos para mayor velocidad
       const [suppliesRes, productsRes, salesRes] = await Promise.all([
         // 1. Insumos
-        supabase
-          .from('supplies')
-          .select('*')
-          .eq('establishment_id', establishmentId)
-          .order('name', { ascending: true }),
+        SuppliesService.getAll(supabase as any, establishmentId, {
+          orderBy: "name",
+          ascending: true,
+        }),
 
         // 2. Productos de menús activos (primary + secondary)
         menuIds.length > 0
@@ -238,9 +228,7 @@ export default function DemoPage() {
 
   return (
     <PeriodProvider>
-      <div className="min-h-svh bg-background">
-        <DemoSidebar />
-
+      <DemoShell>
         <div className="min-h-svh flex flex-col">
           {/* Navigation */}
           <nav className="border-b neumorphic-inset bg-background/80 backdrop-blur">
@@ -437,7 +425,7 @@ export default function DemoPage() {
             </div>
           </div>
         </div>
-      </div>
+      </DemoShell>
     </PeriodProvider>
   )
 }

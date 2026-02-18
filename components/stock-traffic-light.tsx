@@ -4,14 +4,8 @@ import useSWR from "swr";
 import { Badge } from "@/components/ui/badge";
 import { usePeriod } from "@/contexts/period-context";
 import { useLanguage } from "@/hooks/use-language";
-
-type UrgencyLevel = "critical" | "warning" | "low";
-type UrgencyPeriod = "day" | "week" | "month";
-
-type UrgentSupply = {
-  id: string;
-  urgencyLevel: UrgencyLevel;
-};
+import type { UrgentSupply, UrgencyPeriod } from "@/types/dashboard";
+import { PeriodSelector } from "@/components/presentation/period-selector";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -43,21 +37,16 @@ export function StockTrafficLight() {
 
   return (
     <div className="flex flex-col gap-2 md:flex-row md:items-center">
-      <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-xs">
-        {(["day", "week", "month"] as UrgencyPeriod[]).map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => setPeriod(p)}
-            className={`px-3 py-1 rounded-full transition-colors ${period === p
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            {getPeriodLabel(p)}
-          </button>
-        ))}
-      </div>
+      <PeriodSelector
+        value={period}
+        onChange={setPeriod}
+        variant="prod"
+        labels={{
+          day: getPeriodLabel("day"),
+          week: getPeriodLabel("week"),
+          month: getPeriodLabel("month"),
+        }}
+      />
       <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-[11px]">
         <span className="mr-1 text-xs text-muted-foreground">{t('status')}</span>
         <Badge

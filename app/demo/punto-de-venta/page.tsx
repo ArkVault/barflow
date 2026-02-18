@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { DemoShell } from "@/components/shells";
 import { useLanguage } from "@/hooks/use-language";
 import { LayoutGrid, FileText, History } from "lucide-react";
 
@@ -23,8 +23,7 @@ function POSContent() {
      const { activeTab, setActiveTab } = usePOS();
 
      return (
-          <div className="min-h-svh bg-background">
-               <DemoSidebar />
+          <DemoShell>
                <nav className="border-b neumorphic-inset">
                     <div className="container mx-auto px-6 py-4">
                          <div className="flex items-center justify-between">
@@ -87,7 +86,7 @@ function POSContent() {
                          {activeTab === 'historial' && <HistoryTab />}
                     </div>
                </div>
-          </div>
+          </DemoShell>
      );
 }
 

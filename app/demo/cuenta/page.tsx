@@ -1,6 +1,6 @@
 "use client";
 
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { DemoShell } from "@/components/shells";
 import AccountContent from "@/components/account-content";
 import Link from "next/link";
 import { GlowButton } from "@/components/glow-button";
@@ -18,9 +18,7 @@ export default function DemoCuentaPage() {
      };
 
      return (
-          <div className="min-h-svh bg-background">
-               <DemoSidebar />
-
+          <DemoShell>
                <div className="min-h-svh flex flex-col">
                     {/* Navigation */}
                     <nav className="border-b neumorphic-inset bg-background/80 backdrop-blur">
@@ -51,6 +49,6 @@ export default function DemoCuentaPage() {
                          <AccountContent />
                     </div>
                </div>
-          </div>
+          </DemoShell>
      );
 }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { InventoryPlanner } from "@/components/inventory-planner";
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { DemoShell } from "@/components/shells";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/use-language";
@@ -75,9 +75,8 @@ export default function PlannerPage() {
   };
 
   return (
-    <>
-      <DemoSidebar />
+    <DemoShell>
       <InventoryPlanner onComplete={handlePlanComplete} />
-    </>
+    </DemoShell>
   );
 }

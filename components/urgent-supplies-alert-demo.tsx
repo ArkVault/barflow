@@ -6,22 +6,8 @@ import { useState, useMemo, useEffect } from "react";
 import { usePeriod } from "@/contexts/period-context";
 import { getUserPlan, convertPlanToSupplies, getSuppliesByViewPeriod } from "@/lib/planner-data";
 import { getSuppliesByPeriod, type UrgencyPeriod } from "@/lib/mock-data";
-
-interface UrgentSupply {
-  id: string;
-  name: string;
-  current_quantity: number;
-  min_threshold: number;
-  unit: string;
-  category: string;
-  daysUntilDepleted: number;
-  urgencyLevel: 'critical' | 'warning' | 'low';
-  products: {
-    name: string;
-    category: string;
-    quantityNeeded: number;
-  }[];
-}
+import type { UrgentSupply } from "@/types/dashboard";
+import { UrgencyFilterPills, type UrgencyFilter } from "@/components/presentation/urgency-filter-pills";
 
 function getStockRatio(current: number, max: number) {
   if (max <= 0) return 1;
@@ -70,7 +56,7 @@ function SemiCircleGauge({ current, max }: { current: number; max: number }) {
 
 export function UrgentSuppliesAlertDemo() {
   const { period } = usePeriod();
-  const [statusFilter, setStatusFilter] = useState<"all" | "critical" | "warning" | "optimal">("all");
+  const [statusFilter, setStatusFilter] = useState<UrgencyFilter>("all");
   const [planSupplies, setPlanSupplies] = useState<any[]>([]);
 
   useEffect(() => {
@@ -137,46 +123,21 @@ export function UrgentSuppliesAlertDemo() {
             </CardDescription>
           </div>
           <div className="flex flex-col gap-2 md:items-end">
-            <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-[11px]">
-              <button
-                type="button"
-                onClick={() => setStatusFilter('critical')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'critical' ? 'bg-destructive text-destructive-foreground' : 'hover:bg-destructive/10'
-                  }`}
-              >
-                <span className="h-2 w-2 rounded-full bg-destructive" />
-                <span>Crítico</span>
-                <span className="text-[10px] opacity-80">({criticalSupplies.length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter('warning')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'warning' ? 'bg-amber-500 text-white' : 'hover:bg-amber-500/10'
-                  }`}
-              >
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
-                <span>Bajo</span>
-                <span className="text-[10px] opacity-80">({warningSupplies.length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter('optimal')}
-                className={`px-2 py-1 rounded-full flex items-center gap-1 ${statusFilter === 'optimal' ? 'bg-emerald-500 text-white' : 'hover:bg-emerald-500/10'
-                  }`}
-              >
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span>Bien</span>
-                <span className="text-[10px] opacity-80">({optimalSupplies.length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter('all')}
-                className={`px-2 py-1 rounded-full ${statusFilter === 'all' ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/60'
-                  }`}
-              >
-                Ver todo
-              </button>
-            </div>
+            <UrgencyFilterPills
+              value={statusFilter}
+              onChange={setStatusFilter}
+              counts={{
+                critical: criticalSupplies.length,
+                warning: warningSupplies.length,
+                optimal: optimalSupplies.length,
+              }}
+              labels={{
+                critical: "Crítico",
+                warning: "Bajo",
+                optimal: "Bien",
+                all: "Ver todo",
+              }}
+            />
           </div>
         </div>
       </CardHeader>

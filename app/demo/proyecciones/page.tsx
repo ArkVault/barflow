@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { DemoSidebar } from "@/components/demo-sidebar"
+import { DemoShell } from "@/components/shells"
 import { useLanguage } from "@/hooks/use-language"
 import dynamic from 'next/dynamic';
 import { OrderSuggestionsTable } from "@/components/order-suggestions-table"
@@ -30,8 +30,7 @@ export default function ProyeccionesPage() {
 
 
   return (
-    <div className="min-h-svh bg-background">
-      <DemoSidebar />
+    <DemoShell>
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -143,6 +142,6 @@ export default function ProyeccionesPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DemoShell>
   )
 }

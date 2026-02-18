@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { StatsOverview } from "@/components/stats-overview";
 import { UrgentSuppliesAlert } from "@/components/urgent-supplies-alert";
 import { StockRiskTabs } from "@/components/stock-risk-tabs";
 import { StockTrafficLight } from "@/components/stock-traffic-light";
 import { PeriodProvider } from "@/contexts/period-context";
+import { ProdShell } from "@/components/shells";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -23,7 +23,7 @@ export default async function DashboardPage() {
     .single();
 
   return (
-    <DashboardLayout userName={data.user.email || ""} establishmentName={establishment?.name || "Mi Establecimiento"}>
+    <ProdShell userName={data.user.email || ""} establishmentName={establishment?.name || "Mi Establecimiento"}>
       <PeriodProvider>
         <main className="container mx-auto p-6">
           <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -39,6 +39,6 @@ export default async function DashboardPage() {
           </div>
         </main>
       </PeriodProvider>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

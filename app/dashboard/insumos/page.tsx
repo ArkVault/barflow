@@ -1,10 +1,11 @@
-//import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { SuppliesTable } from "@/components/supplies-table";
 import { AddSupplyDialog } from "@/components/add-supply-dialog";
 import { GlowButton } from "@/components/glow-button";
 import { ShoppingCart } from "lucide-react";
+import { SuppliesService } from "@/lib/services/supplies.service";
 
 export default async function InsumosPage() {
   const supabase = await createClient();
@@ -24,11 +25,10 @@ export default async function InsumosPage() {
     redirect("/auth/login");
   }
 
-  const { data: supplies } = await supabase
-    .from("supplies")
-    .select("*")
-    .eq("establishment_id", establishment.id)
-    .order("created_at", { ascending: false });
+  const { data: supplies } = await SuppliesService.getAll(supabase, establishment.id, {
+    orderBy: "created_at",
+    ascending: false,
+  });
 
   return (
     <DashboardLayout

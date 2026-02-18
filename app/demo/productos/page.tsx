@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { DemoSidebar } from "@/components/demo-sidebar"
+import { DemoShell } from "@/components/shells"
 import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Loader2, ArrowLeft } from "lucide-react"
 import { GlowButton } from "@/components/glow-button"
 import { useState, useEffect, useRef } from "react"
@@ -853,8 +853,7 @@ export default function ProductosPage() {
   };
 
   return (
-    <div className="min-h-svh bg-background">
-      <DemoSidebar />
+    <DemoShell>
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -1509,6 +1508,6 @@ export default function ProductosPage() {
           </div>
         )}
       </div>
-    </div>
+    </DemoShell>
   )
 }

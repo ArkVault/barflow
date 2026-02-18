@@ -3,19 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
 import useSWR from "swr";
-
-interface Stats {
-  totalProducts: number;
-  lowStockCount: number;
-  totalSalesToday: number;
-  monthlyRevenue: number;
-}
+import type { DashboardStats } from "@/types/dashboard";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function StatsOverview() {
   const { t } = useLanguage();
-  const { data, error, isLoading } = useSWR<Stats>(
+  const { data, error, isLoading } = useSWR<DashboardStats>(
     '/api/stats',
     fetcher,
     {

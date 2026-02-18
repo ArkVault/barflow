@@ -4,7 +4,7 @@ import { useState, useEffect, Fragment } from 'react';
 import Link from 'next/link';
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DemoSidebar } from "@/components/demo-sidebar";
+import { DemoShell } from "@/components/shells";
 import { useLanguage } from "@/hooks/use-language";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, Minus, Trash2, ShoppingCart, CreditCard, Banknote, X, ChevronDown, ChevronUp } from "lucide-react";
@@ -213,8 +213,7 @@ export default function VentasPage() {
   };
 
   return (
-    <div className="min-h-svh bg-background">
-      <DemoSidebar />
+    <DemoShell>
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -580,6 +579,6 @@ export default function VentasPage() {
           )}
         </div>
       </div>
-    </div>
+    </DemoShell>
   );
 }

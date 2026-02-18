@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { DemoSidebar } from "@/components/demo-sidebar"
 import { useState, useEffect, Suspense } from "react"
 import { useLanguage } from "@/hooks/use-language"
 import { useAuth } from "@/contexts/auth-context"
@@ -19,19 +18,10 @@ import { calculateStockStatus } from "@/lib/stock-utils"
 import { StockHalfCircle } from "@/components/stock-half-circle";
 import { RestockSupplyDialog, type PurchaseItem } from "@/components/restock-supply-dialog";
 import { PurchaseListDialog } from "@/components/purchase-list-dialog";
-
-interface Supply {
-  id: string;
-  name: string;
-  category: string;
-  current_quantity: number;
-  unit: string;
-  min_threshold: number;
-  optimal_quantity?: number;
-  content_per_unit?: number;
-  content_unit?: string;
-  status: 'ok' | 'low' | 'critical';
-}
+import { getDisplayQuantity, getOptimalDisplayQuantity } from "@/lib/utils/supply-display";
+import type { SupplyWithStatus } from "@/types/supply";
+import { SuppliesService } from "@/lib/services/supplies.service";
+import { DemoShell } from "@/components/shells";
 
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
@@ -40,13 +30,13 @@ function InsumosPageContent() {
   const { establishmentId } = useAuth();
   const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
-  const [supplies, setSupplies] = useState<Supply[]>([]);
+  const [supplies, setSupplies] = useState<SupplyWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
+  const [editingSupply, setEditingSupply] = useState<SupplyWithStatus | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Purchase system state
-  const [restockingSupply, setRestockingSupply] = useState<Supply | null>(null);
+  const [restockingSupply, setRestockingSupply] = useState<SupplyWithStatus | null>(null);
   const [showRestockDialog, setShowRestockDialog] = useState(false);
   const [showPurchaseListDialog, setShowPurchaseListDialog] = useState(false);
   const [purchaseList, setPurchaseList] = useState<PurchaseItem[]>([]);
@@ -95,11 +85,10 @@ function InsumosPageContent() {
       setLoading(true);
       const supabase = createClient();
 
-      const { data, error } = await supabase
-        .from('supplies')
-        .select('*')
-        .eq('establishment_id', establishmentId)
-        .order('name', { ascending: true });
+      const { data, error } = await SuppliesService.getAll(supabase, establishmentId, {
+        orderBy: "name",
+        ascending: true,
+      });
 
       if (error) throw error;
 
@@ -126,12 +115,12 @@ function InsumosPageContent() {
     }
   };
 
-  const handleEdit = (supply: Supply) => {
+  const handleEdit = (supply: SupplyWithStatus) => {
     setEditingSupply(supply);
     setShowEditDialog(true);
   };
 
-  const handleDelete = async (supply: Supply) => {
+  const handleDelete = async (supply: SupplyWithStatus) => {
     const confirmMsg = language === 'es'
       ? `¿Estás seguro de eliminar "${supply.name}"? Esta acción no se puede deshacer.`
       : `Are you sure you want to delete "${supply.name}"? This action cannot be undone.`;
@@ -164,7 +153,7 @@ function InsumosPageContent() {
   };
 
   // Purchase system handlers
-  const handleRestock = (supply: Supply) => {
+  const handleRestock = (supply: SupplyWithStatus) => {
     setRestockingSupply(supply);
     setShowRestockDialog(true);
   };
@@ -253,7 +242,8 @@ function InsumosPageContent() {
   };
 
   // Helper function to translate category
-  const translateCategory = (category: string) => {
+  const translateCategory = (category?: string | null) => {
+    if (!category) return "-";
     if (language === 'es') return category; // Keep Spanish as-is
 
     const categoryMap: Record<string, string> = {
@@ -300,19 +290,19 @@ function InsumosPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-svh bg-background flex items-center justify-center">
-        <DemoSidebar />
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">{language === 'es' ? 'Cargando insumos...' : 'Loading supplies...'}</p>
+      <DemoShell>
+        <div className="min-h-svh bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">{language === 'es' ? 'Cargando insumos...' : 'Loading supplies...'}</p>
+          </div>
         </div>
-      </div>
+      </DemoShell>
     );
   }
 
   return (
-    <div className="min-h-svh bg-background">
-      <DemoSidebar />
+    <DemoShell>
       <nav className="border-b neumorphic-inset">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -430,157 +420,25 @@ function InsumosPageContent() {
                 </TableHeader>
                 <TableBody>
                   {filteredSupplies.map((supply) => {
-                    // Calculate display quantity based on content_per_unit and category
-                    let displayValue: number;
-                    let displayUnit: string;
-
-                    if (supply.content_per_unit && supply.content_per_unit > 0) {
-                      const units = supply.current_quantity / supply.content_per_unit;
-
-                      const category = supply.category?.toLowerCase() || '';
-                      const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
-
-                      // Check category first for more accurate unit determination
-                      if (category.includes('otro') || category === 'otros') {
-                        // Otros: always show in gramos
-                        displayValue = supply.current_quantity;
-                        displayUnit = 'g';
-                      } else if (category.includes('fruta') || category.includes('fruit')) {
-                        // Frutas: always show in kg
-                        const kg = supply.current_quantity / 1000;
-                        displayValue = kg;
-                        displayUnit = 'kg';
-                      } else if (category.includes('especia') || category.includes('spice')) {
-                        // Especias: show in gramos if less than 1kg, otherwise kg
-                        const kg = supply.current_quantity / 1000;
-                        if (kg < 1) {
-                          displayValue = supply.current_quantity;
-                          displayUnit = 'g';
-                        } else {
-                          displayValue = kg;
-                          displayUnit = 'kg';
-                        }
-                      } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
-                        // Licores y bebidas alcohólicas: show in bottles
-                        displayValue = units;
-                        displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-                      } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
-                        // Refrescos y agua: show in bottles or liters
-                        if (contentUnit === 'l' || supply.content_per_unit >= 1000) {
-                          displayValue = supply.current_quantity / 1000;
-                          displayUnit = displayValue === 1 ? 'litro' : 'litros';
-                        } else {
-                          displayValue = units;
-                          displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-                        }
-                      } else if (contentUnit === 'ml' || contentUnit === 'l') {
-                        // Default for liquids: show in bottles
-                        displayValue = units;
-                        displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-                      } else if (contentUnit === 'g') {
-                        // Weight in grams: convert to kg for display
-                        const kg = supply.current_quantity / 1000;
-                        displayValue = kg;
-                        displayUnit = 'kg';
-                      } else if (contentUnit === 'kg') {
-                        displayValue = supply.current_quantity;
-                        displayUnit = 'kg';
-                      } else {
-                        displayValue = units;
-                        displayUnit = 'unidades';
-                      }
-                    } else {
-                      displayValue = supply.current_quantity;
-                      displayUnit = supply.unit;
-                    }
-
-                    // Format the display value
-                    const formattedValue = displayValue % 1 === 0
-                      ? displayValue.toFixed(0)
-                      : displayValue.toFixed(1);
-
-                    // Calculate optimal quantity with same logic as current quantity
-                    let optimalDisplayValue: number | undefined;
-                    let optimalDisplayUnit: string | undefined;
-
-                    if (supply.optimal_quantity) {
-                      if (supply.content_per_unit && supply.content_per_unit > 0) {
-                        const optimalUnits = supply.optimal_quantity / supply.content_per_unit;
-
-                        const category = supply.category?.toLowerCase() || '';
-                        const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
-
-                        // Use same logic as current quantity
-                        if (category.includes('otro') || category === 'otros') {
-                          // Otros: always show in gramos
-                          optimalDisplayValue = supply.optimal_quantity;
-                          optimalDisplayUnit = 'g';
-                        } else if (category.includes('fruta') || category.includes('fruit')) {
-                          const kg = supply.optimal_quantity / 1000;
-                          optimalDisplayValue = kg;
-                          optimalDisplayUnit = 'kg';
-                        } else if (category.includes('especia') || category.includes('spice')) {
-                          const kg = supply.optimal_quantity / 1000;
-                          if (kg < 1) {
-                            optimalDisplayValue = supply.optimal_quantity;
-                            optimalDisplayUnit = 'g';
-                          } else {
-                            optimalDisplayValue = kg;
-                            optimalDisplayUnit = 'kg';
-                          }
-                        } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
-                          optimalDisplayValue = optimalUnits;
-                          optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
-                        } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
-                          if (contentUnit === 'l' || supply.content_per_unit >= 1000) {
-                            optimalDisplayValue = supply.optimal_quantity / 1000;
-                            optimalDisplayUnit = optimalDisplayValue === 1 ? 'litro' : 'litros';
-                          } else {
-                            optimalDisplayValue = optimalUnits;
-                            optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
-                          }
-                        } else if (contentUnit === 'ml' || contentUnit === 'l') {
-                          optimalDisplayValue = optimalUnits;
-                          optimalDisplayUnit = Math.floor(optimalUnits) === 1 ? 'botella' : 'botellas';
-                        } else if (contentUnit === 'g') {
-                          const kg = supply.optimal_quantity / 1000;
-                          optimalDisplayValue = kg;
-                          optimalDisplayUnit = 'kg';
-                        } else if (contentUnit === 'kg') {
-                          optimalDisplayValue = supply.optimal_quantity;
-                          optimalDisplayUnit = 'kg';
-                        } else {
-                          optimalDisplayValue = optimalUnits;
-                          optimalDisplayUnit = 'unidades';
-                        }
-                      } else {
-                        optimalDisplayValue = supply.optimal_quantity;
-                        optimalDisplayUnit = supply.unit;
-                      }
-                    }
-
-                    const formattedOptimal = optimalDisplayValue
-                      ? (optimalDisplayValue % 1 === 0
-                        ? optimalDisplayValue.toFixed(0)
-                        : optimalDisplayValue.toFixed(1))
-                      : undefined;
+                    const displayQuantity = getDisplayQuantity(supply);
+                    const optimalQuantity = getOptimalDisplayQuantity(supply);
 
                     return (
                       <TableRow key={supply.id}>
                         <TableCell className="font-medium">{supply.name}</TableCell>
                         <TableCell>{translateCategory(supply.category)}</TableCell>
                         <TableCell>
-                          <span className="font-semibold">{formattedValue}</span>
+                          <span className="font-semibold">{displayQuantity.value % 1 === 0 ? displayQuantity.value.toFixed(0) : displayQuantity.value.toFixed(1)}</span>
                           <span className="text-xs text-muted-foreground ml-1">
-                            {translateUnit(displayUnit)}
+                            {translateUnit(displayQuantity.unit)}
                           </span>
                         </TableCell>
                         <TableCell>
-                          {formattedOptimal ? (
+                          {optimalQuantity ? (
                             <>
-                              <span className="font-semibold">{formattedOptimal}</span>
+                              <span className="font-semibold">{optimalQuantity.value % 1 === 0 ? optimalQuantity.value.toFixed(0) : optimalQuantity.value.toFixed(1)}</span>
                               <span className="text-xs text-muted-foreground ml-1">
-                                {translateUnit(optimalDisplayUnit || '')}
+                                {translateUnit(optimalQuantity.unit)}
                               </span>
                             </>
                           ) : (
@@ -662,7 +520,7 @@ function InsumosPageContent() {
           />
         </div>
       </div>
-    </div>
+    </DemoShell>
   )
 }
 
@@ -670,13 +528,14 @@ function InsumosPageContent() {
 export default function InsumosPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-svh bg-background flex items-center justify-center">
-        <DemoSidebar />
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando...</p>
+      <DemoShell>
+        <div className="min-h-svh bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
         </div>
-      </div>
+      </DemoShell>
     }>
       <InsumosPageContent />
     </Suspense>

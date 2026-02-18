@@ -6,13 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/use-language";
-
-type UrgencyPeriod = "day" | "week" | "month";
-
-type UrgentSupply = {
-  id: string;
-  urgencyLevel: "critical" | "warning" | "low";
-};
+import type { UrgentSupply, UrgencyPeriod } from "@/types/dashboard";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 

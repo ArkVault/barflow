@@ -8,96 +8,12 @@ import { Pencil, Trash2, Plus } from 'lucide-react';
 import { EditSupplyDialog } from "@/components/edit-supply-dialog";
 import { ReceiveSupplyDialog } from "@/components/receive-supply-dialog";
 import { DeleteSupplyDialog } from "@/components/delete-supply-dialog";
-
-interface Supply {
-  id: string;
-  name: string;
-  category: string | null;
-  unit: string;
-  current_quantity: number;
-  min_threshold: number;
-  cost_per_unit: number | null;
-  supplier: string | null;
-  last_received_date: string | null;
-  content_per_unit?: number;
-  content_unit?: string;
-}
+import { getDisplayQuantity } from "@/lib/utils/supply-display";
+import type { Supply } from "@/types/supply";
 
 interface SuppliesTableProps {
   supplies: Supply[];
 }
-
-// Helper function to convert quantities to display units
-const getDisplayQuantity = (supply: Supply) => {
-  // If content_per_unit is defined, show in units (bottles, kg, etc.)
-  if (supply.content_per_unit && supply.content_per_unit > 0) {
-    const units = supply.current_quantity / supply.content_per_unit;
-
-    // Determine display unit based on category and content_unit
-    let displayUnit = 'unidades';
-    let displayValue = units;
-
-    const category = supply.category?.toLowerCase() || '';
-    const contentUnit = supply.content_unit?.toLowerCase() || supply.unit?.toLowerCase() || '';
-
-    // Check category first for more accurate unit determination
-    if (category.includes('otro') || category === 'otros') {
-      // Otros: always show in gramos
-      displayValue = supply.current_quantity;
-      displayUnit = 'g';
-    } else if (category.includes('fruta') || category.includes('fruit')) {
-      // Frutas: always show in kg
-      const kg = supply.current_quantity / 1000;
-      displayValue = kg;
-      displayUnit = 'kg';
-    } else if (category.includes('especia') || category.includes('spice')) {
-      // Especias: show in gramos if less than 1kg, otherwise kg
-      const kg = supply.current_quantity / 1000;
-      if (kg < 1) {
-        displayValue = supply.current_quantity;
-        displayUnit = 'g';
-      } else {
-        displayValue = kg;
-        displayUnit = 'kg';
-      }
-    } else if (category.includes('licor') || category.includes('alcohol') || (category.includes('bebida') && contentUnit.includes('ml'))) {
-      // Licores y bebidas alcohólicas: show in bottles
-      displayValue = units;
-      displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-    } else if (category.includes('refresco') || category.includes('no alcohólica') || category.includes('agua')) {
-      // Refrescos y agua: show in bottles or liters
-      if (contentUnit === 'l' || supply.content_per_unit >= 1000) {
-        displayValue = supply.current_quantity / 1000;
-        displayUnit = displayValue === 1 ? 'litro' : 'litros';
-      } else {
-        displayValue = units;
-        displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-      }
-    } else if (contentUnit === 'ml' || contentUnit === 'l') {
-      // Default for liquids: show in bottles
-      displayValue = units;
-      displayUnit = Math.floor(units) === 1 ? 'botella' : 'botellas';
-    } else if (contentUnit === 'g') {
-      // Weight in grams: convert to kg for display
-      const kg = supply.current_quantity / 1000;
-      displayValue = kg;
-      displayUnit = 'kg';
-    } else if (contentUnit === 'kg') {
-      displayValue = supply.current_quantity;
-      displayUnit = 'kg';
-    }
-
-    // Format the display value
-    const formattedValue = displayValue % 1 === 0
-      ? displayValue.toFixed(0)
-      : displayValue.toFixed(1);
-
-    return `${formattedValue} ${displayUnit}`;
-  }
-
-  // Fallback to original quantity display
-  return `${supply.current_quantity} ${supply.unit}`;
-};
 
 export function SuppliesTable({ supplies: initialSupplies }: SuppliesTableProps) {
   const [supplies, setSupplies] = useState(initialSupplies);
@@ -162,7 +78,7 @@ export function SuppliesTable({ supplies: initialSupplies }: SuppliesTableProps)
                         {supply.category || "-"}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        {getDisplayQuantity(supply)}
+                        {getDisplayQuantity(supply).formatted}
                       </td>
                       <td className="py-3 px-4 text-right text-muted-foreground">
                         {supply.min_threshold} {supply.unit}
