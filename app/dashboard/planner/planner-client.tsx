@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { InventoryPlanner } from "@/components/inventory-planner";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 
 interface PlannerClientProps {
@@ -25,7 +25,7 @@ export function PlannerClient({ userName, establishmentName }: PlannerClientProp
   };
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={userName}
       establishmentName={establishmentName}
       pageTitle="Planner de Inventario"
@@ -34,6 +34,6 @@ export function PlannerClient({ userName, establishmentName }: PlannerClientProp
       <div className="p-6">
         <InventoryPlanner onComplete={handlePlanComplete} />
       </div>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

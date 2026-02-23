@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { isContentLengthTooLarge } from "@/lib/security/request-guards";
+import { auditLog } from "@/lib/security/audit-log";
+import { checkAndStoreReplayKey } from "@/lib/security/webhook-replay-store";
 
 // Lazy initialization to avoid build-time errors
 let stripe: Stripe | null = null;
@@ -45,6 +48,11 @@ function getPlanTypeFromPriceId(priceId: string): string {
 }
 
 export async function POST(req: NextRequest) {
+     if (isContentLengthTooLarge(req, 1024 * 1024)) {
+          auditLog("warn", "stripe_webhook_payload_too_large");
+          return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+     }
+
      try {
           const body = await req.text();
           const signature = req.headers.get("stripe-signature");
@@ -61,11 +69,28 @@ export async function POST(req: NextRequest) {
           try {
                event = getStripe().webhooks.constructEvent(body, signature, getWebhookSecret());
           } catch (err: any) {
-               console.error("Webhook signature verification failed:", err.message);
+               auditLog("warn", "stripe_webhook_invalid_signature");
                return NextResponse.json(
                     { error: `Webhook Error: ${err.message}` },
                     { status: 400 }
                );
+          }
+
+          const replay = await checkAndStoreReplayKey({
+               source: "stripe",
+               replayKey: event.id,
+               ttlSeconds: 3600,
+               metadata: { eventType: event.type },
+          });
+          if (replay.unavailable) {
+               return NextResponse.json(
+                    { error: "Replay protection unavailable" },
+                    { status: 503 }
+               );
+          }
+          if (replay.duplicate) {
+               auditLog("warn", "stripe_webhook_replay_detected", { eventId: event.id });
+               return NextResponse.json({ received: true, duplicate: true });
           }
 
           const supabase = await createClient();
@@ -326,7 +351,7 @@ export async function POST(req: NextRequest) {
 
           return NextResponse.json({ received: true });
      } catch (error: any) {
-          console.error("Webhook error:", error);
+          auditLog("error", "stripe_webhook_handler_error");
           return NextResponse.json(
                { error: "Webhook handler failed" },
                { status: 500 }

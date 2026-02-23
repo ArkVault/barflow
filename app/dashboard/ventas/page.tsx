@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import { SalesStats } from "@/components/sales-stats";
 import { SalesTable } from "@/components/sales-table";
 import { SalesChart } from "@/components/sales-chart";
@@ -56,7 +56,7 @@ export default async function VentasPage() {
     .order("sale_date", { ascending: true });
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={data.user.email || ""}
       establishmentName={establishment.name}
       pageTitle="Ventas y Contabilidad"
@@ -70,6 +70,6 @@ export default async function VentasPage() {
           <SalesTable sales={sales || []} />
         </div>
       </main>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

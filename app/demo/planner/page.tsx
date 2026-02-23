@@ -1,17 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { InventoryPlanner } from "@/components/inventory-planner";
 import { DemoShell } from "@/components/shells";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/use-language";
+import { getDemoBasePath, toDemoPath } from "@/lib/utils/demo-route";
 
 export default function PlannerPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { t, language } = useLanguage();
   const [saving, setSaving] = useState(false);
+  const demoBasePath = getDemoBasePath(pathname);
 
   const handlePlanComplete = async (supplies: SupplyPlan[], period: PlanPeriod) => {
     setSaving(true);
@@ -55,7 +58,7 @@ export default function PlannerPage() {
       }
 
       // Redirect to Insumos page
-      router.push("/demo/insumos");
+      router.push(toDemoPath(demoBasePath, "/demo/insumos"));
 
     } catch (error) {
       console.error('Error saving plan:', error);
@@ -68,7 +71,7 @@ export default function PlannerPage() {
       toast.error(language === 'es'
         ? 'Error al guardar en la base de datos. Se guardó localmente.'
         : 'Error saving to database. Saved locally.');
-      router.push("/demo/insumos");
+      router.push(toDemoPath(demoBasePath, "/demo/insumos"));
     } finally {
       setSaving(false);
     }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { getDemoBasePath, toDemoPath } from "@/lib/utils/demo-route";
 import { Boxes, Package2, BarChart3, ChevronLeft, ClipboardList, LayoutDashboard, User, ShoppingCart } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -22,6 +23,11 @@ export function DemoSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { t } = useLanguage();
+  const demoBasePath = getDemoBasePath(pathname);
+  const navItems = demoNavItems.map((item) => ({
+    ...item,
+    href: toDemoPath(demoBasePath, item.href),
+  }));
 
   return (
     <aside
@@ -55,7 +61,7 @@ export function DemoSidebar() {
             <LanguageToggle />
           </div>
           <div className="scale-90 origin-top-right">
-            <Link href="/demo/cuenta" title={t('account')}>
+            <Link href={toDemoPath(demoBasePath, "/demo/cuenta")} title={t('account')}>
               <button
                 className={cn(
                   "h-10 w-10 rounded-lg inline-flex items-center justify-center transition-colors",
@@ -71,7 +77,7 @@ export function DemoSidebar() {
 
         {/* Logo / Title */}
         <div className="mb-8 mt-12 flex flex-col">
-          <Link href="/demo" className="block">
+          <Link href={toDemoPath(demoBasePath, "/demo")} className="block">
             <img
               src="/modoclaro.png"
               alt="Flowstock"
@@ -96,7 +102,7 @@ export function DemoSidebar() {
 
         {/* Navigation Items */}
         <nav className="flex-1 space-y-2">
-          {demoNavItems.map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             const displayLabel: string = t(item.labelKey);
 

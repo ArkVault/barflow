@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface AuthContextType {
      user: User | null;
@@ -11,6 +11,7 @@ interface AuthContextType {
      signOut: () => Promise<void>;
      establishmentId: string | null;
      establishmentName: string | null;
+     isDemoPublic: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
      signOut: async () => { },
      establishmentId: null,
      establishmentName: null,
+     isDemoPublic: false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -27,9 +29,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      const [establishmentId, setEstablishmentId] = useState<string | null>(null);
      const [establishmentName, setEstablishmentName] = useState<string | null>(null);
      const router = useRouter();
+     const pathname = usePathname();
      const supabase = createClient();
 
+     const publicDemoEstablishmentId =
+          process.env.NEXT_PUBLIC_DEMO_PUBLIC_ESTABLISHMENT_ID || "demo-public";
+     const publicDemoEstablishmentName =
+          process.env.NEXT_PUBLIC_DEMO_PUBLIC_ESTABLISHMENT_NAME || "Demo Public";
+     const cookieScope =
+          typeof document !== "undefined"
+               ? document.cookie
+                    .split(";")
+                    .map((part) => part.trim())
+                    .find((part) => part.startsWith("barflow_demo_scope="))
+                    ?.split("=")[1]
+               : null;
+     const isDemoPublic =
+          pathname?.startsWith("/demo-public") === true || cookieScope === "public";
+
      useEffect(() => {
+          if (isDemoPublic) {
+               setUser(null);
+               setEstablishmentId(publicDemoEstablishmentId);
+               setEstablishmentName(publicDemoEstablishmentName);
+               setLoading(false);
+               return;
+          }
+
           // Get initial session
           supabase.auth.getSession().then(({ data: { session } }) => {
                setUser(session?.user ?? null);
@@ -54,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
 
           return () => subscription.unsubscribe();
-     }, []);
+     }, [isDemoPublic, publicDemoEstablishmentId, publicDemoEstablishmentName]);
 
      const fetchEstablishment = async (userId: string) => {
           const { data } = await supabase
@@ -70,6 +96,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      };
 
      const signOut = async () => {
+          if (isDemoPublic) {
+               router.push("/demo-public");
+               return;
+          }
+
           await supabase.auth.signOut();
           setUser(null);
           setEstablishmentId(null);
@@ -78,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      };
 
      return (
-          <AuthContext.Provider value={{ user, loading, signOut, establishmentId, establishmentName }}>
+          <AuthContext.Provider value={{ user, loading, signOut, establishmentId, establishmentName, isDemoPublic }}>
                {children}
           </AuthContext.Provider>
      );

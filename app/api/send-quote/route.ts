@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { consumeRateLimit, getRequesterIp } from '@/lib/security/rate-limit';
 
 // Email address to receive quote requests
 // TODO: Replace with actual email when ready
 const QUOTE_EMAIL = 'ventas@barflow.mx';
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX_REQUESTS = 5;
 
 export async function POST(request: NextRequest) {
      try {
+          const requesterIp = getRequesterIp(request.headers);
+          const limiter = consumeRateLimit(`send-quote:${requesterIp}`, {
+               windowMs: RATE_LIMIT_WINDOW_MS,
+               maxRequests: RATE_LIMIT_MAX_REQUESTS,
+          });
+          if (!limiter.allowed) {
+               return NextResponse.json(
+                    { error: 'Too many requests. Please try again later.' },
+                    {
+                         status: 429,
+                         headers: {
+                              'Retry-After': String(Math.ceil((limiter.resetAt - Date.now()) / 1000)),
+                         },
+                    }
+               );
+          }
+
           const body = await request.json();
           const { name, email, phone, businessName, branches, message } = body;
 
@@ -17,17 +37,13 @@ export async function POST(request: NextRequest) {
                );
           }
 
-          // For now, we'll log the quote request
-          // In production, integrate with an email service like Resend, SendGrid, etc.
-          console.log('=== NEW QUOTE REQUEST ===');
-          console.log('Name:', name);
-          console.log('Email:', email);
-          console.log('Phone:', phone);
-          console.log('Business:', businessName);
-          console.log('Branches:', branches);
-          console.log('Message:', message);
-          console.log('Timestamp:', new Date().toISOString());
-          console.log('========================');
+          // Log only minimal metadata to avoid exposing PII in server logs.
+          console.log('Quote request received', {
+               hasBusinessName: Boolean(businessName),
+               branches,
+               hasMessage: Boolean(message),
+               timestamp: new Date().toISOString(),
+          });
 
           // TODO: Implement actual email sending
           // Example with Resend:

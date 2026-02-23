@@ -15,8 +15,13 @@ export function AccountButton({ className }: AccountButtonProps) {
      const { t } = useLanguage();
 
      // Determine if we're in demo or dashboard
-     const isDemo = pathname?.startsWith("/demo");
-     const accountPath = isDemo ? "/demo/cuenta" : "/dashboard/cuenta";
+     const accountPath = pathname?.startsWith("/demo-public")
+          ? "/demo-public/cuenta"
+          : pathname?.startsWith("/demo-private")
+               ? "/demo-private/cuenta"
+               : pathname?.startsWith("/demo")
+                    ? "/demo/cuenta"
+                    : "/dashboard/cuenta";
 
      return (
           <GlowButton onClick={() => router.push(accountPath)} className={className}>

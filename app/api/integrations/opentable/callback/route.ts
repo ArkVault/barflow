@@ -25,6 +25,22 @@ export async function GET(req: NextRequest) {
 
      try {
           const supabase = await createClient();
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          if (authError || !user) {
+               return redirect('/auth/login?error=unauthorized');
+          }
+
+          // Ensure OAuth state (establishment_id) belongs to the authenticated user.
+          const { data: ownedEstablishment } = await supabase
+               .from('establishments')
+               .select('id')
+               .eq('id', state)
+               .eq('user_id', user.id)
+               .single();
+
+          if (!ownedEstablishment) {
+               return redirect('/dashboard/configuracion?error=invalid_state');
+          }
 
           // 1. Exchange authorization code for tokens
           const tokenResponse = await fetch(

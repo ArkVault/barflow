@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { PeriodProvider } from "@/contexts/period-context";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/contexts/auth-context";
@@ -19,7 +19,13 @@ import { AccountButton } from "@/components/account-button";
 import { GlowButton } from "@/components/glow-button";
 import type { SupplyWithStatus } from "@/types/supply";
 import { SuppliesService } from "@/lib/services/supplies.service";
+import { MenusService } from "@/lib/services/menus.service";
+import { ProductsService } from "@/lib/services/products.service";
+import { SalesService } from "@/lib/services/sales.service";
 import { DemoShell } from "@/components/shells";
+import { DemoTopNav } from "@/components/presentation/demo-top-nav";
+import { DemoPageContainer } from "@/components/presentation/demo-page-container";
+import { getDemoBasePath, toDemoPath } from "@/lib/utils/demo-route";
 
 import dynamic from 'next/dynamic';
 
@@ -44,6 +50,7 @@ interface TopProduct {
 
 export default function DemoPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { t, language } = useLanguage();
   const { establishmentId, loading: authLoading, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -59,6 +66,7 @@ export default function DemoPage() {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [planPeriod, setPlanPeriod] = useState<'week' | 'month'>('week');
   const [salesPeriod, setSalesPeriod] = useState<'day' | 'week' | 'month'>('week');
+  const demoBasePath = getDemoBasePath(pathname);
 
   useEffect(() => {
     if (!authLoading && establishmentId) {
@@ -67,16 +75,18 @@ export default function DemoPage() {
   }, [establishmentId, authLoading]);
 
   const loadDashboardData = async () => {
+    if (!establishmentId) return;
+
     try {
       setLoading(true);
       const supabase = createClient();
+      const currentEstablishmentId = establishmentId;
 
       // First, get active menus (primary and secondary)
-      const { data: activeMenus, error: menusError } = await supabase
-        .from('menus')
-        .select('id, name, is_active, is_secondary_active')
-        .eq('establishment_id', establishmentId)
-        .or('is_active.eq.true,is_secondary_active.eq.true');
+      const { data: activeMenus, error: menusError } = await MenusService.getActive(
+        supabase as any,
+        currentEstablishmentId
+      );
 
       if (menusError) throw menusError;
 
@@ -86,33 +96,28 @@ export default function DemoPage() {
       // Carga paralela de todos los datos para mayor velocidad
       const [suppliesRes, productsRes, salesRes] = await Promise.all([
         // 1. Insumos
-        SuppliesService.getAll(supabase as any, establishmentId, {
+        SuppliesService.getAll(supabase as any, currentEstablishmentId, {
           orderBy: "name",
           ascending: true,
         }),
 
         // 2. Productos de menús activos (primary + secondary)
         menuIds.length > 0
-          ? supabase
-            .from('products')
-            .select('id, name, updated_at, menu_id')
-            .in('menu_id', menuIds)
-            .eq('is_active', true)
-            .order('updated_at', { ascending: false })
+          ? ProductsService.getActiveDashboardProductsByMenuIds(supabase as any, menuIds)
           : Promise.resolve({ data: [], error: null }),
 
         // 3. Ventas (última semana) - Get items from JSONB
-        supabase
-          .from('sales')
-          .select('id, items, total, created_at')
-          .eq('establishment_id', establishmentId)
-          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        SalesService.getRecentForDashboard(
+          supabase as any,
+          currentEstablishmentId,
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        )
       ]);
       if (suppliesRes.error) throw suppliesRes.error;
       const suppliesData = suppliesRes.data || [];
 
       if (suppliesData.length === 0) {
-        router.push("/demo/planner");
+        router.push(toDemoPath(demoBasePath, "/demo/planner"));
         return;
       }
 
@@ -208,7 +213,7 @@ export default function DemoPage() {
         if (error) throw error;
 
         toast.success('Inventario reiniciado');
-        router.push("/demo/planner");
+        router.push(toDemoPath(demoBasePath, "/demo/planner"));
       } catch (error: any) {
         toast.error('Error: ' + error.message);
       }
@@ -231,20 +236,13 @@ export default function DemoPage() {
       <DemoShell>
         <div className="min-h-svh flex flex-col">
           {/* Navigation */}
-          <nav className="border-b neumorphic-inset bg-background/80 backdrop-blur">
-            <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-              <Link href="/" className="block">
-                <img
-                  src="/modoclaro.png"
-                  alt="Flowstock Demo"
-                  className="h-10 dark:hidden"
-                />
-                <img
-                  src="/modoclaro.png"
-                  alt="Flowstock Demo"
-                  className="h-10 hidden dark:block dark:invert"
-                />
-              </Link>
+          <DemoTopNav
+            href="/"
+            alt="Flowstock Demo"
+            variant="blur"
+            logoClassName="h-10 dark:hidden"
+            darkLogoClassName="h-10 hidden dark:block dark:invert"
+            rightSlot={
               <div className="flex items-center gap-2">
                 <AccountButton />
                 <GlowButton onClick={() => signOut()}>
@@ -254,12 +252,11 @@ export default function DemoPage() {
                   <span className="hidden sm:inline">{t('closeSession')}</span>
                 </GlowButton>
               </div>
-            </div>
-          </nav>
+            }
+          />
 
           {/* Dashboard Overview */}
-          <div className="min-h-screen bg-background p-4 ml-0 md:ml-20 lg:ml-72">
-            <div className="max-w-5xl mx-auto">
+          <DemoPageContainer paddingClassName="p-4" maxWidthClassName="max-w-5xl">
               {/* Header - Compact */}
               <div className="mb-2">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
@@ -312,7 +309,7 @@ export default function DemoPage() {
                       />
                     </div>
 
-                    <Link href="/demo/insumos" className="mt-auto pt-2">
+                    <Link href={toDemoPath(demoBasePath, "/demo/insumos")} className="mt-auto pt-2">
                       <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 hover:bg-primary/10 hover:text-primary">
                         {t('viewFullInventory')} →
                       </Button>
@@ -389,7 +386,7 @@ export default function DemoPage() {
                       )}
                     </div>
 
-                    <Link href="/demo/productos" className="mt-1 flex-shrink-0">
+                    <Link href={toDemoPath(demoBasePath, "/demo/productos")} className="mt-1 flex-shrink-0">
                       <Button variant="ghost" size="sm" className="w-full text-[9px] h-5 hover:bg-primary/10 hover:text-primary">
                         {t('viewAllProducts')} →
                       </Button>
@@ -417,13 +414,12 @@ export default function DemoPage() {
                 <p className="text-xs text-muted-foreground">
                   <strong>{t('controlPanel')}</strong> - {t('businessSummary')}.
                   {t('goToSupplies')}{' '}
-                  <Link href="/demo/insumos" className="text-primary hover:underline font-medium">
+                  <Link href={toDemoPath(demoBasePath, "/demo/insumos")} className="text-primary hover:underline font-medium">
                     {t('supplies')}
                   </Link>.
                 </p>
               </div>
-            </div>
-          </div>
+          </DemoPageContainer>
         </div>
       </DemoShell>
     </PeriodProvider>

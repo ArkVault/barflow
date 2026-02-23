@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from 'next/navigation';
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 
 export default async function ConfiguracionPage() {
   const supabase = await createServerClient();
@@ -17,7 +17,7 @@ export default async function ConfiguracionPage() {
     .single();
 
   return (
-    <DashboardLayout 
+    <ProdShell 
       userName={user.email || "Usuario"} 
       establishmentName={establishment?.name || "Mi Negocio"}
     >
@@ -140,6 +140,6 @@ export default async function ConfiguracionPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

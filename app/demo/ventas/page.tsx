@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DemoShell } from "@/components/shells";
+import { DemoTopNav } from "@/components/presentation/demo-top-nav";
+import { DemoPageContainer } from "@/components/presentation/demo-page-container";
 import { useLanguage } from "@/hooks/use-language";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, Minus, Trash2, ShoppingCart, CreditCard, Banknote, X, ChevronDown, ChevronUp } from "lucide-react";
@@ -214,27 +216,9 @@ export default function VentasPage() {
 
   return (
     <DemoShell>
-      <nav className="border-b neumorphic-inset">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/demo" className="block">
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 dark:hidden object-contain"
-              />
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 hidden dark:block object-contain dark:invert"
-              />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <DemoTopNav />
 
-      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
-        <div className="max-w-7xl mx-auto">
+      <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-7xl">
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
@@ -577,8 +561,7 @@ export default function VentasPage() {
               </Card>
             </div>
           )}
-        </div>
-      </div>
+      </DemoPageContainer>
     </DemoShell>
   );
 }

@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { DemoShell } from "@/components/shells"
+import { DemoTopNav } from "@/components/presentation/demo-top-nav"
+import { DemoPageContainer } from "@/components/presentation/demo-page-container"
 import { useLanguage } from "@/hooks/use-language"
 import dynamic from 'next/dynamic';
 import { OrderSuggestionsTable } from "@/components/order-suggestions-table"
@@ -31,27 +33,9 @@ export default function ProyeccionesPage() {
 
   return (
     <DemoShell>
-      <nav className="border-b neumorphic-inset">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/demo" className="block">
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 dark:hidden object-contain"
-              />
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 hidden dark:block object-contain dark:invert"
-              />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <DemoTopNav />
 
-      <div className="min-h-screen bg-background p-4 ml-0 md:ml-20 lg:ml-72">
-        <div className="max-w-5xl mx-auto">
+      <DemoPageContainer paddingClassName="p-4" maxWidthClassName="max-w-5xl">
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
@@ -140,8 +124,7 @@ export default function ProyeccionesPage() {
                 : 'Enable this mode during high demand periods (holidays, special events) to automatically adjust projections. Suggested orders update in real time.'}
             </p>
           </div>
-        </div>
-      </div>
+      </DemoPageContainer>
     </DemoShell>
   )
 }

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import { SuppliesTable } from "@/components/supplies-table";
 import { AddSupplyDialog } from "@/components/add-supply-dialog";
 import { GlowButton } from "@/components/glow-button";
@@ -31,7 +31,7 @@ export default async function InsumosPage() {
   });
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={data.user.email || ""}
       establishmentName={establishment.name}
       pageTitle="Gestión de Insumos"
@@ -51,6 +51,6 @@ export default async function InsumosPage() {
       <main className="container mx-auto p-6">
         <SuppliesTable supplies={supplies || []} />
       </main>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

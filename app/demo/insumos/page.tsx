@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -22,6 +22,9 @@ import { getDisplayQuantity, getOptimalDisplayQuantity } from "@/lib/utils/suppl
 import type { SupplyWithStatus } from "@/types/supply";
 import { SuppliesService } from "@/lib/services/supplies.service";
 import { DemoShell } from "@/components/shells";
+import { DemoTopNav } from "@/components/presentation/demo-top-nav";
+import { DemoPageContainer } from "@/components/presentation/demo-page-container";
+import { getDemoBasePath, toDemoPath } from "@/lib/utils/demo-route";
 
 type StatusFilter = 'all' | 'critical' | 'low' | 'ok';
 
@@ -29,6 +32,8 @@ function InsumosPageContent() {
   const { t, language } = useLanguage();
   const { establishmentId } = useAuth();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const demoBasePath = getDemoBasePath(pathname);
   const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'low' | 'ok'>('all');
   const [supplies, setSupplies] = useState<SupplyWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +78,7 @@ function InsumosPageContent() {
         setRestockingSupply(supplyToRestock);
         setShowRestockDialog(true);
         // Clear the URL param after opening
-        window.history.replaceState({}, '', '/demo/insumos');
+        window.history.replaceState({}, '', toDemoPath(demoBasePath, '/demo/insumos'));
       }
     }
   }, [searchParams, supplies, loading]);
@@ -303,27 +308,9 @@ function InsumosPageContent() {
 
   return (
     <DemoShell>
-      <nav className="border-b neumorphic-inset">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/demo" className="block">
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 dark:hidden object-contain"
-              />
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 hidden dark:block object-contain dark:invert"
-              />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <DemoTopNav />
 
-      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
-        <div className="max-w-5xl mx-auto">
+      <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-5xl">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('supplyManagement')}</h2>
@@ -344,7 +331,7 @@ function InsumosPageContent() {
                   </Badge>
                 )}
               </GlowButton>
-              <Link href="/demo/planner">
+              <Link href={toDemoPath(demoBasePath, "/demo/planner")}>
                 <GlowButton>
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-inner">
                     <Plus className="w-3.5 h-3.5 text-white" />
@@ -397,7 +384,7 @@ function InsumosPageContent() {
                   ? 'No tienes insumos registrados aún.'
                   : 'You have no registered supplies yet.'}
               </p>
-              <Link href="/demo/planner">
+              <Link href={toDemoPath(demoBasePath, "/demo/planner")}>
                 <Button>
                   {language === 'es'
                     ? 'Ir al Planner para agregar insumos'
@@ -518,8 +505,7 @@ function InsumosPageContent() {
             onMarkAsOrdered={handleMarkAsOrdered}
             onConfirmReceived={handleConfirmReceived}
           />
-        </div>
-      </div>
+      </DemoPageContainer>
     </DemoShell>
   )
 }

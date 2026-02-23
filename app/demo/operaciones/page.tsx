@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { DemoShell } from "@/components/shells";
+import { DemoTopNav } from "@/components/presentation/demo-top-nav";
+import { DemoPageContainer } from "@/components/presentation/demo-page-container";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, X, Grid3x3, Square, Minus, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -1141,27 +1142,9 @@ export default function OperacionesPage() {
 
      return (
           <DemoShell>
-               <nav className="border-b neumorphic-inset">
-                    <div className="container mx-auto px-6 py-4">
-                         <div className="flex items-center justify-between">
-                              <Link href="/demo" className="block">
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 dark:hidden object-contain"
-                                   />
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 hidden dark:block object-contain dark:invert"
-                                   />
-                              </Link>
-                         </div>
-                    </div>
-               </nav>
+               <DemoTopNav />
 
-               <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
-                    <div className="max-w-[1400px] mx-auto">
+               <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-[1400px]">
                          {/* Header */}
                          <div className="mb-6">
                               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
@@ -1630,11 +1613,10 @@ export default function OperacionesPage() {
                                    </div>
                               </div>
                          )}
-                    </div>
-               </div>
+               </DemoPageContainer>
 
                {/* Account Modal */}
-               < Dialog open={isModalOpen} onOpenChange={setIsModalOpen} >
+               <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                     <DialogContent className="max-w-md">
                          <DialogHeader>
                               <DialogTitle className="text-2xl font-bold">
@@ -1662,7 +1644,7 @@ export default function OperacionesPage() {
                                                        {language === 'es' ? 'Abrir Nueva Cuenta' : 'Open New Account'}
                                                   </GlowButton>
                                              </div>
-          </DemoShell>
+                                        </div>
                                    );
                               }
 
@@ -1738,7 +1720,7 @@ export default function OperacionesPage() {
                               );
                          })()}
                     </DialogContent>
-               </Dialog >
-          </div >
+               </Dialog>
+          </DemoShell>
      );
 }

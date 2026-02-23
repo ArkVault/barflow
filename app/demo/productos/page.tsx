@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { DemoShell } from "@/components/shells"
+import { DemoTopNav } from "@/components/presentation/demo-top-nav"
+import { DemoPageContainer } from "@/components/presentation/demo-page-container"
 import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Loader2, ArrowLeft } from "lucide-react"
 import { GlowButton } from "@/components/glow-button"
 import { useState, useEffect, useRef } from "react"
@@ -854,27 +856,9 @@ export default function ProductosPage() {
 
   return (
     <DemoShell>
-      <nav className="border-b neumorphic-inset">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/demo" className="block">
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 dark:hidden object-contain"
-              />
-              <img
-                src="/modoclaro.png"
-                alt="Flowstock"
-                className="h-8 hidden dark:block object-contain dark:invert"
-              />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <DemoTopNav />
 
-      <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
-        <div className="max-w-5xl mx-auto">
+      <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-5xl">
           {/* Header - changes based on whether viewing specific menu products */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -1027,7 +1011,7 @@ export default function ProductosPage() {
               ))}
             </div>
           )}
-        </div>
+        
 
         {/* Modal Ver Receta */}
         {viewingProduct && (
@@ -1507,7 +1491,7 @@ export default function ProductosPage() {
             </Card>
           </div>
         )}
-      </div>
+      </DemoPageContainer>
     </DemoShell>
   )
 }

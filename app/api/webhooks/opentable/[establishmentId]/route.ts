@@ -1,6 +1,10 @@
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { verifyWebhookSignature } from '@/lib/encryption';
 import { NextRequest } from 'next/server';
+import { isContentLengthTooLarge } from '@/lib/security/request-guards';
+import { auditLog } from '@/lib/security/audit-log';
+import { isFreshTimestamp } from '@/lib/security/webhook-guards';
+import { checkAndStoreReplayKey } from '@/lib/security/webhook-replay-store';
 
 /**
  * OpenTable webhook endpoint - Multi-tenant
@@ -8,13 +12,17 @@ import { NextRequest } from 'next/server';
  */
 export async function POST(
      req: NextRequest,
-     { params }: { params: { establishmentId: string } }
+     { params }: { params: Promise<{ establishmentId: string }> }
 ) {
-     const establishmentId = params.establishmentId;
+     const { establishmentId } = await params;
+     if (isContentLengthTooLarge(req, 256 * 1024)) {
+          auditLog('warn', 'opentable_webhook_payload_too_large', { establishmentId });
+          return new Response('Payload too large', { status: 413 });
+     }
 
      try {
           // 1. Get integration for this establishment
-          const supabase = createClient();
+          const supabase = await createClient();
           const { data: integration, error: integrationError } = await supabase
                .from('opentable_integrations')
                .select('webhook_secret, is_active, opentable_restaurant_id')
@@ -36,8 +44,27 @@ export async function POST(
           const timestamp = req.headers.get('x-opentable-timestamp');
           const body = await req.text();
 
+          if (!isFreshTimestamp(timestamp, 300)) {
+               auditLog('warn', 'opentable_webhook_stale_timestamp', { establishmentId });
+               return new Response('Invalid timestamp', { status: 401 });
+          }
+
+          const replay = await checkAndStoreReplayKey({
+               source: "opentable",
+               replayKey: `${establishmentId}:${timestamp}:${signature ?? 'none'}`,
+               ttlSeconds: 600,
+               metadata: { establishmentId },
+          });
+          if (replay.unavailable) {
+               return new Response('Replay protection unavailable', { status: 503 });
+          }
+          if (replay.duplicate) {
+               auditLog('warn', 'opentable_webhook_replay_detected', { establishmentId });
+               return new Response('Duplicate webhook', { status: 409 });
+          }
+
           if (!verifyWebhookSignature(body, signature, integration.webhook_secret, timestamp)) {
-               console.error('Invalid webhook signature');
+               auditLog('warn', 'opentable_webhook_invalid_signature', { establishmentId });
                return new Response('Invalid signature', { status: 401 });
           }
 
@@ -45,7 +72,7 @@ export async function POST(
           console.log('Webhook received:', payload.event_type, 'for', establishmentId);
 
           // 3. Process event based on type
-          await processReservationEvent(establishmentId, payload);
+          await processReservationEvent(supabase, establishmentId, payload);
 
           // 4. Update last sync time
           await supabase
@@ -56,7 +83,7 @@ export async function POST(
           return new Response('OK', { status: 200 });
 
      } catch (error) {
-          console.error('Webhook processing error:', error);
+          auditLog('error', 'opentable_webhook_processing_error', { establishmentId });
           return new Response('Internal server error', { status: 500 });
      }
 }
@@ -64,13 +91,12 @@ export async function POST(
 /**
  * Process reservation events from OpenTable
  */
-async function processReservationEvent(establishmentId: string, payload: any) {
-     const supabase = createClient();
+async function processReservationEvent(supabase: any, establishmentId: string, payload: any) {
      const eventType = payload.event_type;
      const data = payload.data;
 
      // Get table mapping
-     const internalTableId = await getInternalTableId(establishmentId, data.table_id);
+     const internalTableId = await getInternalTableId(supabase, establishmentId, data.table_id);
 
      switch (eventType) {
           case 'reservation.created':
@@ -101,9 +127,7 @@ async function processReservationEvent(establishmentId: string, payload: any) {
 /**
  * Get internal table ID from OpenTable table ID
  */
-async function getInternalTableId(establishmentId: string, openTableTableId: string): Promise<string> {
-     const supabase = createClient();
-
+async function getInternalTableId(supabase: any, establishmentId: string, openTableTableId: string): Promise<string> {
      const { data: integration } = await supabase
           .from('opentable_integrations')
           .select('id')

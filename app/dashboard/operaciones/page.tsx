@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { DemoSidebar } from "@/components/demo-sidebar";
 import { GlowButton } from "@/components/glow-button";
 import { Plus, X, Grid3x3, Square, Minus, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +19,7 @@ import { ProductImage } from '@/components/product-image';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
+import { ProdShell } from "@/components/shells";
 
 type Status = 'libre' | 'reservada' | 'ocupada' | 'por-pagar';
 
@@ -101,7 +100,7 @@ const barStatusColors = {
 };
 
 export default function OperacionesPage() {
-     const { establishmentId } = useAuth();
+     const { establishmentId, user, establishmentName } = useAuth();
      const { t, language } = useLanguage();
 
      // Translated status labels (short versions for UI elements)
@@ -1140,37 +1139,14 @@ export default function OperacionesPage() {
      }, [resizingSection, sections]);
 
      return (
-          <div className="min-h-svh bg-background">
-               <DemoSidebar />
-               <nav className="border-b neumorphic-inset">
-                    <div className="container mx-auto px-6 py-4">
-                         <div className="flex items-center justify-between">
-                              <Link href="/demo" className="block">
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 dark:hidden object-contain"
-                                   />
-                                   <img
-                                        src="/modoclaro.png"
-                                        alt="Flowstock"
-                                        className="h-8 hidden dark:block object-contain dark:invert"
-                                   />
-                              </Link>
-                         </div>
-                    </div>
-               </nav>
-
-               <div className="min-h-screen bg-background p-6 ml-0 md:ml-20 lg:ml-72">
+          <ProdShell
+               userName={user?.email || "Usuario"}
+               establishmentName={establishmentName || "Mi Negocio"}
+               pageTitle={t('operations')}
+               pageDescription={language === 'es' ? 'Gestión de mesas y comandas' : 'Table and order management'}
+          >
+               <div className="min-h-screen bg-background p-6">
                     <div className="max-w-[1400px] mx-auto">
-                         {/* Header */}
-                         <div className="mb-6">
-                              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                                   {t('operations')}
-                              </h2>
-                              <p className="text-muted-foreground">{language === 'es' ? 'Gestión de mesas y comandas' : 'Table and order management'}</p>
-                         </div>
-
                          {/* Tabs */}
                          <div className="mb-6">
                               <div className="inline-flex items-center gap-3 p-1.5 w-fit">
@@ -1740,6 +1716,6 @@ export default function OperacionesPage() {
                          })()}
                     </DialogContent>
                </Dialog >
-          </div >
+          </ProdShell >
      );
 }

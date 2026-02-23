@@ -30,14 +30,30 @@ export async function POST(req: NextRequest) {
 
           // Get or create Stripe customer
           const supabase = await createClient();
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          if (authError || !user || user.id !== userId) {
+               return NextResponse.json(
+                    { error: "Unauthorized" },
+                    { status: 401 }
+               );
+          }
 
-          const { data: establishment } = await supabase
+          // Ensure establishment belongs to authenticated user
+          const { data: ownedEstablishment, error: establishmentError } = await supabase
                .from("establishments")
-               .select("stripe_customer_id")
+               .select("id, stripe_customer_id")
                .eq("id", establishmentId)
+               .eq("user_id", user.id)
                .single();
 
-          let customerId = establishment?.stripe_customer_id;
+          if (establishmentError || !ownedEstablishment) {
+               return NextResponse.json(
+                    { error: "Establishment not found for user" },
+                    { status: 403 }
+               );
+          }
+
+          let customerId = ownedEstablishment.stripe_customer_id;
 
           // Create customer if doesn't exist
           if (!customerId) {

@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import AccountContent from "@/components/account-content";
 
 export default async function CuentaPage() {
@@ -22,11 +22,11 @@ export default async function CuentaPage() {
     .single();
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={user.email || "Usuario"}
       establishmentName={establishment?.name || "Mi Negocio"}
     >
       <AccountContent />
-    </DashboardLayout>
+    </ProdShell>
   );
 }

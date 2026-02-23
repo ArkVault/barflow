@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import { ProjectionView } from "@/components/projection-view";
 import { GenerateProjectionsButton } from "@/components/generate-projections-button";
 
@@ -43,7 +43,7 @@ export default async function ProyeccionesPage() {
     .order("sale_date", { ascending: false });
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={data.user.email || ""}
       establishmentName={establishment.name}
       pageTitle="Proyecciones Inteligentes"
@@ -63,6 +63,6 @@ export default async function ProyeccionesPage() {
           sales={sales || []}
         />
       </main>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

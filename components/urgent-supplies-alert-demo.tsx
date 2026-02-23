@@ -10,12 +10,7 @@ import { UrgencyFilterPills, type UrgencyFilter } from "@/components/presentatio
 import { UrgencyBadge } from "@/components/presentation/urgency-badge";
 import { StatusCardHeader } from "@/components/presentation/status-card-header";
 import { UrgentSupplyItemCard } from "@/components/presentation/urgent-supply-item-card";
-import { SemiCircleGauge } from "@/components/presentation/semi-circle-gauge";
-
-function getStockRatio(current: number, max: number) {
-  if (max <= 0) return 1;
-  return current / max;
-}
+import { SupplyStockGaugeCaption } from "@/components/presentation/supply-stock-gauge-caption";
 
 export function UrgentSuppliesAlertDemo() {
   const { period } = usePeriod();
@@ -89,15 +84,12 @@ export function UrgentSuppliesAlertDemo() {
                 usedIn: "Utilizado en",
               }}
               gaugeSlot={
-                <div className="flex flex-col items-center text-xs text-muted-foreground">
-                  <SemiCircleGauge
-                    ratio={getStockRatio(supply.current_quantity, supply.min_threshold)}
-                    variant="demo"
-                  />
-                  <span className="mt-1">
-                    {supply.current_quantity} / {supply.min_threshold} {supply.unit}
-                  </span>
-                </div>
+                <SupplyStockGaugeCaption
+                  currentQuantity={supply.current_quantity}
+                  minThreshold={supply.min_threshold}
+                  unit={supply.unit}
+                  variant="demo"
+                />
               }
               badgeSlot={
                 <UrgencyBadge

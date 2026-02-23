@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 import { z } from 'zod';
+import { createClient } from '@/lib/supabase/server';
+import { isContentLengthTooLarge } from '@/lib/security/request-guards';
 
 // Zod schema for AI response validation
 const AISupplySchema = z.object({
@@ -23,6 +25,19 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
      try {
+          if (isContentLengthTooLarge(request, 12 * 1024 * 1024)) {
+               return NextResponse.json(
+                    { error: 'Payload too large. Maximum request size is 12MB.' },
+                    { status: 413 }
+               );
+          }
+
+          const supabase = await createClient();
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          if (authError || !user) {
+               return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+          }
+
           const formData = await request.formData();
           const file = formData.get('file') as File;
 

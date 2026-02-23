@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProdShell } from "@/components/shells";
 import { ProductsPageClient } from "@/components/products-page-client";
 import { GlowButton } from "@/components/glow-button";
 import { ArrowLeft } from "lucide-react";
@@ -50,7 +50,7 @@ export default async function ProductosPage() {
     .order("name");
 
   return (
-    <DashboardLayout
+    <ProdShell
       userName={data.user.email || ""}
       establishmentName={establishment.name}
       pageTitle="Gestión de Productos"
@@ -75,6 +75,6 @@ export default async function ProductosPage() {
           establishmentId={establishment.id}
         />
       </main>
-    </DashboardLayout>
+    </ProdShell>
   );
 }

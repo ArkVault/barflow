@@ -81,9 +81,10 @@ export function verifyWebhookSignature(
           .update(data)
           .digest('hex');
 
+     const received = Buffer.from(signature);
+     const expected = Buffer.from(expectedSignature);
+     if (received.length !== expected.length) return false;
+
      // Timing-safe comparison
-     return crypto.timingSafeEqual(
-          Buffer.from(signature),
-          Buffer.from(expectedSignature)
-     );
+     return crypto.timingSafeEqual(received, expected);
 }

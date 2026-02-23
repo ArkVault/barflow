@@ -6,6 +6,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { createClient as createSupabaseAdminClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -56,6 +57,57 @@ export async function GET() {
                status: 'fail',
                message: `Missing environment variables: ${missingEnvVars.join(', ')}`
           })
+     }
+
+     // Check 2b: Optional but security-critical runtime secret for persistent replay protection.
+     const persistentReplayRequired =
+          process.env.WEBHOOK_REPLAY_REQUIRE_PERSISTENT === 'true' ||
+          process.env.WEBHOOK_REPLAY_REQUIRE_PERSISTENT === '1' ||
+          (process.env.WEBHOOK_REPLAY_REQUIRE_PERSISTENT === undefined &&
+               process.env.NODE_ENV === 'production')
+
+     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+          checks.push({
+               name: 'security_runtime',
+               status: 'pass',
+               message: 'SUPABASE_SERVICE_ROLE_KEY is configured'
+          })
+     } else {
+          checks.push({
+               name: 'security_runtime',
+               status: persistentReplayRequired ? 'fail' : 'pass',
+               message: persistentReplayRequired
+                    ? 'SUPABASE_SERVICE_ROLE_KEY missing; persistent webhook replay protection is required'
+                    : 'SUPABASE_SERVICE_ROLE_KEY missing; using non-production replay fallback'
+          })
+     }
+
+     // Check 2c: Persistent replay store table availability when runtime key is present.
+     if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+          try {
+               const admin = createSupabaseAdminClient(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL,
+                    process.env.SUPABASE_SERVICE_ROLE_KEY
+               )
+               const { error: replayTableError } = await admin
+                    .from('webhook_replay_keys')
+                    .select('replay_key')
+                    .limit(1)
+
+               checks.push({
+                    name: 'security_replay_store',
+                    status: replayTableError ? 'fail' : 'pass',
+                    message: replayTableError
+                         ? 'webhook_replay_keys table unavailable for service role'
+                         : 'webhook_replay_keys table reachable'
+               })
+          } catch {
+               checks.push({
+                    name: 'security_replay_store',
+                    status: 'fail',
+                    message: 'Failed to verify replay store availability'
+               })
+          }
      }
 
      // Check 3: Supabase connectivity (optional, lightweight check)
