@@ -1,26 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { PlannerClient } from "./planner-client";
+import { getPlannerViewModel } from "@/lib/features/dashboard/server/get-planner-view-model";
 
 export default async function PlannerPage() {
-  const supabase = await createClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    redirect("/");
-  }
-
-  const { data: establishment } = await supabase
-    .from("establishments")
-    .select("id, name")
-    .eq("user_id", user.id)
-    .single();
+  const vm = await getPlannerViewModel();
 
   return (
     <PlannerClient 
-      userName={user.email || "Usuario"}
-      establishmentName={establishment?.name || "Mi Establecimiento"}
+      userName={vm.userName}
+      establishmentName={vm.establishmentName}
     />
   );
 }

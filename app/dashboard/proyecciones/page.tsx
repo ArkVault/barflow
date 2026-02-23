@@ -1,66 +1,30 @@
-import { redirect } from 'next/navigation';
-import { createClient } from "@/lib/supabase/server";
 import { ProdShell } from "@/components/shells";
 import { ProjectionView } from "@/components/projection-view";
 import { GenerateProjectionsButton } from "@/components/generate-projections-button";
+import { getProyeccionesViewModel } from "@/lib/features/dashboard/server/get-proyecciones-view-model";
 
 export default async function ProyeccionesPage() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/auth/login");
-  }
-
-  const { data: establishment } = await supabase
-    .from("establishments")
-    .select("*")
-    .eq("user_id", data.user.id)
-    .single();
-
-  if (!establishment) {
-    redirect("/auth/login");
-  }
-
-  const { data: supplies } = await supabase
-    .from("supplies")
-    .select("*")
-    .eq("establishment_id", establishment.id)
-    .order("name");
-
-  const { data: sales } = await supabase
-    .from("sales")
-    .select(`
-      *,
-      products (
-        product_ingredients (
-          supply_id,
-          quantity_needed
-        )
-      )
-    `)
-    .eq("establishment_id", establishment.id)
-    .order("sale_date", { ascending: false });
+  const vm = await getProyeccionesViewModel();
 
   return (
     <ProdShell
-      userName={data.user.email || ""}
-      establishmentName={establishment.name}
+      userName={vm.userName}
+      establishmentName={vm.establishmentName}
       pageTitle="Proyecciones Inteligentes"
       pageDescription="Planifica tu inventario con predicciones basadas en IA"
       headerActions={
         <GenerateProjectionsButton
-          establishmentId={establishment.id}
-          supplies={supplies || []}
-          sales={sales || []}
+          establishmentId={vm.establishmentId}
+          supplies={vm.supplies}
+          sales={vm.sales}
         />
       }
     >
       <main className="container mx-auto p-6">
         <ProjectionView
-          establishmentId={establishment.id}
-          supplies={supplies || []}
-          sales={sales || []}
+          establishmentId={vm.establishmentId}
+          supplies={vm.supplies}
+          sales={vm.sales}
         />
       </main>
     </ProdShell>

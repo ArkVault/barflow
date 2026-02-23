@@ -1,39 +1,17 @@
-import { redirect } from 'next/navigation';
-import { createClient } from "@/lib/supabase/server";
 import { ProdShell } from "@/components/shells";
 import { SuppliesTable } from "@/components/supplies-table";
 import { AddSupplyDialog } from "@/components/add-supply-dialog";
 import { GlowButton } from "@/components/glow-button";
 import { ShoppingCart } from "lucide-react";
-import { SuppliesService } from "@/lib/services/supplies.service";
+import { getInsumosViewModel } from "@/lib/features/dashboard/server/get-insumos-view-model";
 
 export default async function InsumosPage() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/auth/login");
-  }
-
-  const { data: establishment } = await supabase
-    .from("establishments")
-    .select("*")
-    .eq("user_id", data.user.id)
-    .single();
-
-  if (!establishment) {
-    redirect("/auth/login");
-  }
-
-  const { data: supplies } = await SuppliesService.getAll(supabase, establishment.id, {
-    orderBy: "created_at",
-    ascending: false,
-  });
+  const vm = await getInsumosViewModel();
 
   return (
     <ProdShell
-      userName={data.user.email || ""}
-      establishmentName={establishment.name}
+      userName={vm.userName}
+      establishmentName={vm.establishmentName}
       pageTitle="Gestión de Insumos"
       pageDescription="Administra tu inventario y stock"
       headerActions={
@@ -44,12 +22,12 @@ export default async function InsumosPage() {
             </div>
             <span className="hidden sm:inline">Insumos a Comprar</span>
           </GlowButton>
-          <AddSupplyDialog establishmentId={establishment.id} />
+          <AddSupplyDialog establishmentId={vm.establishmentId} />
         </div>
       }
     >
       <main className="container mx-auto p-6">
-        <SuppliesTable supplies={supplies || []} />
+        <SuppliesTable supplies={vm.supplies} />
       </main>
     </ProdShell>
   );

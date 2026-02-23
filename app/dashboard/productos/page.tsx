@@ -1,58 +1,17 @@
-import { redirect } from 'next/navigation';
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { ProdShell } from "@/components/shells";
 import { ProductsPageClient } from "@/components/products-page-client";
 import { GlowButton } from "@/components/glow-button";
 import { ArrowLeft } from "lucide-react";
+import { getProductosViewModel } from "@/lib/features/dashboard/server/get-productos-view-model";
 
 export default async function ProductosPage() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    redirect("/auth/login");
-  }
-
-  const { data: establishment } = await supabase
-    .from("establishments")
-    .select("*")
-    .eq("user_id", data.user.id)
-    .single();
-
-  if (!establishment) {
-    redirect("/auth/login");
-  }
-
-  // Fetch all products initially (will be filtered by menu on client)
-  const { data: products } = await supabase
-    .from("products")
-    .select(`
-      *,
-      product_ingredients (
-        id,
-        quantity_needed,
-        supply_id,
-        supplies (
-          id,
-          name,
-          unit
-        )
-      )
-    `)
-    .eq("establishment_id", establishment.id)
-    .order("created_at", { ascending: false });
-
-  const { data: supplies } = await supabase
-    .from("supplies")
-    .select("id, name, unit, current_quantity")
-    .eq("establishment_id", establishment.id)
-    .order("name");
+  const vm = await getProductosViewModel();
 
   return (
     <ProdShell
-      userName={data.user.email || ""}
-      establishmentName={establishment.name}
+      userName={vm.userName}
+      establishmentName={vm.establishmentName}
       pageTitle="Gestión de Productos"
       pageDescription="Administra tu menú y recetas"
       headerActions={
@@ -70,9 +29,9 @@ export default async function ProductosPage() {
     >
       <main className="container mx-auto p-6">
         <ProductsPageClient
-          initialProducts={products || []}
-          supplies={supplies || []}
-          establishmentId={establishment.id}
+          initialProducts={vm.products}
+          supplies={vm.supplies}
+          establishmentId={vm.establishmentId}
         />
       </main>
     </ProdShell>
