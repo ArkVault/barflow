@@ -55,6 +55,7 @@ next-env.d.ts
 # IDE / Editor
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *.swn
@@ -75,7 +76,11 @@ logs
 # Temporary files
 tmp/
 temp/
+.npm-cache/
 *.tmp
+
+# Local Supabase CLI temp artifacts
+supabase/.temp/
 
 # Backup files
 *.bak
