@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
 
-// Dev accounts that bypass trial restrictions
-const DEV_EMAILS = [
-     "gibrann@gmail.com",
-     "dev@barflow.mx",
-     // Add more dev emails as needed
-];
+// Dev accounts that bypass trial restrictions — configure via DEV_EMAILS env var (comma-separated)
+const DEV_EMAILS: string[] = process.env.NEXT_PUBLIC_DEV_EMAILS
+     ? process.env.NEXT_PUBLIC_DEV_EMAILS.split(',').map(e => e.trim()).filter(Boolean)
+     : [];
 
 export interface SubscriptionData {
      isActive: boolean;
@@ -108,7 +106,11 @@ export function useSubscription() {
                          fetchSubscription();
                     }
                )
-               .subscribe();
+               .subscribe((status, err) => {
+                    if (err) {
+                         console.error("Subscription realtime error:", err);
+                    }
+               });
 
           return () => {
                channel.unsubscribe();

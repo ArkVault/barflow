@@ -6,7 +6,6 @@ import {
      Section,
      TableItem,
      BarItem,
-     Account,
      AccountItem,
      AccountStatus,
      Status,
@@ -33,6 +32,8 @@ export function useOrderManager({
           if (!selectedTableForOrder || currentOrder.length === 0) return;
 
           const [sectionId, itemId, type] = selectedTableForOrder.split('|');
+
+          let updatedSections: Section[] = [];
 
           setSections(prev => {
                const updated = prev.map(section => {
@@ -78,10 +79,12 @@ export function useOrderManager({
                     }
                });
 
-               // Save layout
-               saveLayout(updated);
+               updatedSections = updated;
                return updated;
           });
+
+          // Persist layout outside the state updater so it can be properly awaited
+          await saveLayout(updatedSections);
 
           toast.success('Orden enviada');
           setCurrentOrder([]);

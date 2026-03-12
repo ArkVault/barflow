@@ -57,11 +57,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      }, []);
 
      const fetchEstablishment = async (userId: string) => {
-          const { data } = await supabase
+          const { data, error } = await supabase
                .from("establishments")
                .select("id, name")
                .eq("user_id", userId)
                .single();
+
+          if (error && error.code !== 'PGRST116') {
+               console.error("Failed to fetch establishment:", error.message);
+          }
 
           if (data) {
                setEstablishmentId(data.id);

@@ -8,6 +8,7 @@ import { LayoutGrid, FileText, History } from "lucide-react";
 
 // Import POS components following Dependency Inversion Principle
 import { POSProvider, usePOS, TablesTab, OrdersTab, HistoryTab } from '@/components/pos';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 // Tab configuration - Open/Closed: Add new tabs without modifying existing logic
 const TABS = [
@@ -66,9 +67,11 @@ function POSContent() {
                          </div>
 
                          {/* Tab Content - Single Responsibility: Just render the active tab */}
-                         {activeTab === 'mesas' && <TablesTab />}
-                         {activeTab === 'comandas' && <OrdersTab />}
-                         {activeTab === 'historial' && <HistoryTab />}
+                         <ErrorBoundary>
+                              {activeTab === 'mesas' && <TablesTab />}
+                              {activeTab === 'comandas' && <OrdersTab />}
+                              {activeTab === 'historial' && <HistoryTab />}
+                         </ErrorBoundary>
                     </div>
                </div>
           </div>

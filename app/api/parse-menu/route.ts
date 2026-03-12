@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
@@ -23,6 +25,28 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
      try {
+          // Authenticate the request
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+          if (!supabaseUrl || !supabaseKey) {
+               return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+          }
+          const cookieStore = await cookies();
+          const supabase = createServerClient(supabaseUrl, supabaseKey, {
+               cookies: {
+                    getAll() { return cookieStore.getAll(); },
+                    setAll(cookiesToSet) {
+                         cookiesToSet.forEach(({ name, value, options }) =>
+                              cookieStore.set(name, value, options)
+                         );
+                    },
+               },
+          });
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          if (authError || !user) {
+               return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+          }
+
           const formData = await request.formData();
           const file = formData.get('file') as File;
 
