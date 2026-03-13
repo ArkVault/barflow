@@ -20,6 +20,7 @@ export interface ReceiptData {
      subtotal: number;
      tax: number;
      total: number;
+     taxRate?: number;
      date: Date;
      establishmentName?: string;
 }
@@ -198,7 +199,7 @@ export function ReceiptGenerator({ open, onOpenChange, receiptData, onConfirm }:
                               <span>${formatCurrency(receiptData?.subtotal || 0)}</span>
                          </div>
                          <div class="total-row">
-                              <span>IVA (16%):</span>
+                              <span>IVA (${receiptData?.taxRate ?? 16}%):</span>
                               <span>${formatCurrency(receiptData?.tax || 0)}</span>
                          </div>
                          <div class="total-row grand-total">
@@ -247,7 +248,7 @@ ${receiptData.items.map(item =>
           ).join('\n')}
 ───────────────────────────────────────
 ${'Subtotal:'.padEnd(30)} ${formatCurrency(receiptData.subtotal).padStart(10)}
-${'IVA (16%):'.padEnd(30)} ${formatCurrency(receiptData.tax).padStart(10)}
+${`IVA (${receiptData?.taxRate ?? 16}%):`.padEnd(30)} ${formatCurrency(receiptData.tax).padStart(10)}
 ═══════════════════════════════════════
 ${'TOTAL:'.padEnd(30)} ${formatCurrency(receiptData.total).padStart(10)}
 ═══════════════════════════════════════
@@ -331,7 +332,7 @@ ${'TOTAL:'.padEnd(30)} ${formatCurrency(receiptData.total).padStart(10)}
                                    <span>{formatCurrency(receiptData.subtotal)}</span>
                               </div>
                               <div className="flex justify-between mt-1">
-                                   <span>IVA (16%):</span>
+                                   <span>IVA ({receiptData?.taxRate ?? 16}%):</span>
                                    <span>{formatCurrency(receiptData.tax)}</span>
                               </div>
                               <div className="flex justify-between mt-2 pt-2 border-t-2 border-black font-bold text-base">

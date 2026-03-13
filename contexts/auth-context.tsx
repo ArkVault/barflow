@@ -11,6 +11,7 @@ interface AuthContextType {
      signOut: () => Promise<void>;
      establishmentId: string | null;
      establishmentName: string | null;
+     taxRate: number;
      isDemoPublic: boolean;
 }
 
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
      signOut: async () => { },
      establishmentId: null,
      establishmentName: null,
+     taxRate: 16,
      isDemoPublic: false,
 });
 
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      const [loading, setLoading] = useState(true);
      const [establishmentId, setEstablishmentId] = useState<string | null>(null);
      const [establishmentName, setEstablishmentName] = useState<string | null>(null);
+     const [taxRate, setTaxRate] = useState<number>(16);
      const router = useRouter();
      const pathname = usePathname();
      const supabase = createClient();
@@ -75,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                } else {
                     setEstablishmentId(null);
                     setEstablishmentName(null);
+                    setTaxRate(16);
                }
                setLoading(false);
           });
@@ -83,15 +87,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      }, [isDemoPublic, publicDemoEstablishmentId, publicDemoEstablishmentName]);
 
      const fetchEstablishment = async (userId: string) => {
-          const { data } = await supabase
+          const { data, error } = await supabase
                .from("establishments")
-               .select("id, name")
+               .select("id, name, tax_rate")
                .eq("user_id", userId)
                .single();
+
+          if (error && error.code !== 'PGRST116') {
+               console.error("Failed to fetch establishment:", error.message);
+          }
 
           if (data) {
                setEstablishmentId(data.id);
                setEstablishmentName(data.name || null);
+               setTaxRate(data.tax_rate ?? 16);
           }
      };
 
@@ -109,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      };
 
      return (
-          <AuthContext.Provider value={{ user, loading, signOut, establishmentId, establishmentName, isDemoPublic }}>
+          <AuthContext.Provider value={{ user, loading, signOut, establishmentId, establishmentName, taxRate, isDemoPublic }}>
                {children}
           </AuthContext.Provider>
      );

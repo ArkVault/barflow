@@ -39,6 +39,7 @@ export function TablesTab() {
           saveLayout,
           setActiveTab,
           setSelectedTableForOrder,
+          taxRate,
      } = usePOS();
 
      // Local state for drag and edit operations
@@ -942,7 +943,7 @@ export function TablesTab() {
                                                                       // Generate receipt data
                                                                       const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
                                                                       const subtotal = account.total;
-                                                                      const tax = subtotal * 0.16;
+                                                                      const tax = subtotal * (taxRate / 100);
                                                                       const total = subtotal + tax;
 
                                                                       const tableName = account.seatLabel
@@ -961,6 +962,7 @@ export function TablesTab() {
                                                                            subtotal,
                                                                            tax,
                                                                            total,
+                                                                           taxRate,
                                                                            date: new Date(),
                                                                            establishmentName: establishmentName || 'Flowstock',
                                                                       });

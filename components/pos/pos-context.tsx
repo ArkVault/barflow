@@ -67,6 +67,9 @@ interface POSContextValue {
      getAllTablesAndBars: () => Array<{ id: string; name: string; type: 'table' | 'bar'; sectionId: string; status: Status }>;
      getElapsedTime: (openedAt: Date) => string;
 
+     // Tax rate from establishment settings
+     taxRate: number;
+
      // Active tab for cross-tab navigation
      activeTab: 'mesas' | 'comandas' | 'historial';
      setActiveTab: React.Dispatch<React.SetStateAction<'mesas' | 'comandas' | 'historial'>>;
@@ -87,7 +90,7 @@ interface POSProviderProps {
 }
 
 export function POSProvider({ children }: POSProviderProps) {
-     const { establishmentId } = useAuth();
+     const { establishmentId, taxRate } = useAuth();
      const operationsRepository = useMemo(() => createSupabaseOperationsRepository(), []);
 
      // Active tab state
@@ -216,7 +219,7 @@ export function POSProvider({ children }: POSProviderProps) {
                }));
 
                const subtotal = closeCandidate.account.total;
-               const tax = subtotal * 0.16;
+               const tax = subtotal * (taxRate / 100);
                const total = subtotal + tax;
 
                await recordPosSaleUseCase(operationsRepository, {
@@ -359,6 +362,7 @@ export function POSProvider({ children }: POSProviderProps) {
           getCurrentAccount,
           getAllTablesAndBars,
           getElapsedTime,
+          taxRate,
           activeTab,
           setActiveTab,
      };
