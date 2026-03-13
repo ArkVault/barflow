@@ -27,3 +27,15 @@ Purpose: define canonical API route ownership so future refactors can remove dup
 - New code must call canonical routes only.
 - Alias routes must not contain business logic; they should re-export canonical handlers.
 - Remove aliases only after all known callers are migrated and smoke-tested.
+
+## Transactional Operations (Gate 3)
+
+Routes that use Postgres RPC functions for atomic multi-table writes:
+
+- `POST /api/supplies` → `save_supplies_batch` RPC (insert + update in one transaction)
+- `POST /api/webhooks/opentable/[id]` → `create_reservation_with_layout` / `update_reservation_status_with_layout` RPCs
+- `POST /api/stripe/checkout` → compensating action (delete Stripe customer if DB update fails)
+
+RPC functions are defined in:
+- `supabase/migrations/20260305_rpc_save_supplies_batch.sql`
+- `supabase/migrations/20260305_rpc_upsert_reservation_with_layout.sql`

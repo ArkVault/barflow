@@ -90,6 +90,7 @@ export async function POST(
 
 /**
  * Process reservation events from OpenTable
+ * Gate 3 ACID: multi-table operations use transactional RPC functions
  */
 async function processReservationEvent(supabase: any, establishmentId: string, payload: any) {
      const eventType = payload.event_type;
@@ -148,6 +149,7 @@ async function getInternalTableId(supabase: any, establishmentId: string, openTa
 
 /**
  * Handle new reservation created
+ * Gate 3 ACID: uses create_reservation_with_layout RPC for atomicity
  */
 async function handleReservationCreated(
      supabase: any,
@@ -155,27 +157,21 @@ async function handleReservationCreated(
      tableId: string,
      data: any
 ) {
-     // Create reservation record
-     await supabase.from('reservations').insert({
-          establishment_id: establishmentId,
-          table_id: tableId,
-          external_id: data.reservation_id,
-          source: 'opentable',
-          customer_name: data.customer?.name || 'Guest',
-          customer_phone: data.customer?.phone,
-          customer_email: data.customer?.email,
-          party_size: data.party_size,
-          reservation_date: data.date,
-          reservation_time: data.time,
-          status: 'confirmed',
-          notes: data.notes,
-          special_requests: data.special_requests,
-     });
-
-     // Update table status in operations_layout
-     await updateTableReservationStatus(supabase, establishmentId, tableId, {
-          status: 'reservada',
-          reservation: {
+     const { error } = await supabase.rpc('create_reservation_with_layout', {
+          p_establishment_id: establishmentId,
+          p_table_id: tableId,
+          p_external_id: data.reservation_id,
+          p_source: 'opentable',
+          p_customer_name: data.customer?.name || 'Guest',
+          p_customer_phone: data.customer?.phone || null,
+          p_customer_email: data.customer?.email || null,
+          p_party_size: data.party_size,
+          p_reservation_date: data.date,
+          p_reservation_time: data.time,
+          p_notes: data.notes || null,
+          p_special_requests: data.special_requests || null,
+          p_layout_status: 'reservada',
+          p_layout_reservation: {
                source: 'opentable',
                customerName: data.customer?.name || 'Guest',
                time: data.time,
@@ -184,11 +180,16 @@ async function handleReservationCreated(
           },
      });
 
+     if (error) {
+          console.error('Error in create_reservation_with_layout RPC:', error);
+          throw error;
+     }
+
      console.log('Reservation created:', data.reservation_id);
 }
 
 /**
- * Handle reservation updated
+ * Handle reservation updated (single-table — no transaction needed)
  */
 async function handleReservationUpdated(supabase: any, data: any) {
      await supabase
@@ -210,27 +211,19 @@ async function handleReservationUpdated(supabase: any, data: any) {
 
 /**
  * Handle reservation cancelled
+ * Gate 3 ACID: uses update_reservation_status_with_layout RPC for atomicity
  */
 async function handleReservationCancelled(supabase: any, data: any) {
-     // Update reservation status
-     await supabase
-          .from('reservations')
-          .update({ status: 'cancelled' })
-          .eq('external_id', data.reservation_id);
+     const { error } = await supabase.rpc('update_reservation_status_with_layout', {
+          p_external_id: data.reservation_id,
+          p_new_status: 'cancelled',
+          p_layout_status: 'libre',
+          p_layout_reservation: null,
+     });
 
-     // Get reservation to find table
-     const { data: reservation } = await supabase
-          .from('reservations')
-          .select('establishment_id, table_id')
-          .eq('external_id', data.reservation_id)
-          .single();
-
-     if (reservation) {
-          // Clear table reservation status
-          await updateTableReservationStatus(supabase, reservation.establishment_id, reservation.table_id, {
-               status: 'libre',
-               reservation: null,
-          });
+     if (error) {
+          console.error('Error in update_reservation_status_with_layout RPC:', error);
+          throw error;
      }
 
      console.log('Reservation cancelled:', data.reservation_id);
@@ -238,30 +231,31 @@ async function handleReservationCancelled(supabase: any, data: any) {
 
 /**
  * Handle reservation seated (guests arrived)
+ * Gate 3 ACID: uses update_reservation_status_with_layout RPC for atomicity
  */
 async function handleReservationSeated(
      supabase: any,
-     establishmentId: string,
-     tableId: string,
+     _establishmentId: string,
+     _tableId: string,
      data: any
 ) {
-     // Update reservation status
-     await supabase
-          .from('reservations')
-          .update({ status: 'seated' })
-          .eq('external_id', data.reservation_id);
-
-     // Update table to occupied
-     await updateTableReservationStatus(supabase, establishmentId, tableId, {
-          status: 'ocupada',
-          reservation: null, // Clear reservation details once seated
+     const { error } = await supabase.rpc('update_reservation_status_with_layout', {
+          p_external_id: data.reservation_id,
+          p_new_status: 'seated',
+          p_layout_status: 'ocupada',
+          p_layout_reservation: null,
      });
+
+     if (error) {
+          console.error('Error in update_reservation_status_with_layout RPC:', error);
+          throw error;
+     }
 
      console.log('Reservation seated:', data.reservation_id);
 }
 
 /**
- * Handle reservation completed
+ * Handle reservation completed (single-table — no transaction needed)
  */
 async function handleReservationCompleted(supabase: any, data: any) {
      await supabase
@@ -272,37 +266,3 @@ async function handleReservationCompleted(supabase: any, data: any) {
      console.log('Reservation completed:', data.reservation_id);
 }
 
-/**
- * Update table reservation status in operations_layout
- */
-async function updateTableReservationStatus(
-     supabase: any,
-     establishmentId: string,
-     tableId: string,
-     update: { status: string; reservation: any }
-) {
-     // Get current layout
-     const { data: layout } = await supabase
-          .from('operations_layout')
-          .select('sections')
-          .eq('establishment_id', establishmentId)
-          .single();
-
-     if (!layout) return;
-
-     // Update table in sections
-     const updatedSections = layout.sections.map((section: any) => ({
-          ...section,
-          tables: section.tables.map((table: any) =>
-               table.id === tableId
-                    ? { ...table, status: update.status, reservation: update.reservation }
-                    : table
-          ),
-     }));
-
-     // Save updated layout
-     await supabase
-          .from('operations_layout')
-          .update({ sections: updatedSections })
-          .eq('establishment_id', establishmentId);
-}

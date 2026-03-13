@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { consumeRateLimit, getRequesterIp } from '@/lib/security/rate-limit';
+import { QuoteRequestSchema } from '@/lib/dtos/schemas';
 
 // Email address to receive quote requests
 // TODO: Replace with actual email when ready
@@ -27,15 +28,16 @@ export async function POST(request: NextRequest) {
           }
 
           const body = await request.json();
-          const { name, email, phone, businessName, branches, message } = body;
+          const parsed = QuoteRequestSchema.safeParse(body);
 
-          // Validate required fields
-          if (!name || !email || !phone || !branches) {
+          if (!parsed.success) {
                return NextResponse.json(
-                    { error: 'Missing required fields' },
+                    { error: 'Missing or invalid fields', details: parsed.error.flatten().fieldErrors },
                     { status: 400 }
                );
           }
+
+          const { name, email, phone, businessName, branches, message } = parsed.data;
 
           // Log only minimal metadata to avoid exposing PII in server logs.
           console.log('Quote request received', {

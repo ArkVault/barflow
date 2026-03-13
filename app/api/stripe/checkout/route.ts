@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, STRIPE_CONFIG } from '@/lib/stripe/config';
 import { createClient } from '@/lib/supabase/server';
+import { CheckoutRequestSchema } from '@/lib/dtos/schemas';
 
 export async function POST(req: NextRequest) {
      try {
-          const { priceId, userId, userEmail, establishmentId } = await req.json();
+          const body = await req.json();
+          const parsed = CheckoutRequestSchema.safeParse(body);
 
-          if (!priceId || !userId) {
+          if (!parsed.success) {
                return NextResponse.json(
-                    { error: 'Missing required parameters' },
+                    { error: 'Missing or invalid parameters', details: parsed.error.flatten().fieldErrors },
                     { status: 400 }
                );
           }
+
+          const { priceId, userId, userEmail, establishmentId } = parsed.data;
 
           // Authenticate the request
           const supabase = await createClient();
@@ -63,12 +67,25 @@ export async function POST(req: NextRequest) {
                });
                customerId = customer.id;
 
-               // Save customer ID to database
+               // Gate 3 ACID: compensating action — delete Stripe customer if DB update fails
                if (resolvedEstablishmentId) {
-                    await supabase
+                    const { error: updateError } = await supabase
                          .from('establishments')
                          .update({ stripe_customer_id: customerId })
                          .eq('id', resolvedEstablishmentId);
+
+                    if (updateError) {
+                         // Rollback: delete the orphan Stripe customer
+                         try {
+                              await getStripe().customers.del(customerId);
+                         } catch (rollbackErr) {
+                              console.error('Failed to rollback Stripe customer:', rollbackErr);
+                         }
+                         return NextResponse.json(
+                              { error: 'Failed to link payment account' },
+                              { status: 500 }
+                         );
+                    }
                }
           }
 

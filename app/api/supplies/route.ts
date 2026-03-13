@@ -128,59 +128,46 @@ export async function POST(request: NextRequest) {
                }
           }
 
-          // Prepare supplies data for insertion/update
-          const suppliesToSave = supplies.map((supply: any) => ({
-               establishment_id: finalEstablishmentId,
-               name: supply.name,
-               category: supply.category,
-               unit: supply.unit,
-               current_quantity: supply.quantity || 0,
-               min_threshold: 0, // Can be updated later
-               // If this is a matched existing supply, we might want to update instead of insert
-               ...(supply.existingSupplyId ? { id: supply.existingSupplyId } : {})
-          }));
-
           // Separate new supplies from updates
-          const newSupplies = suppliesToSave.filter((s: any) => !s.id);
-          const updateSupplies = suppliesToSave.filter((s: any) => s.id);
+          const newSupplies = supplies
+               .filter((s) => !s.existingSupplyId)
+               .map((s) => ({
+                    name: s.name,
+                    category: s.category,
+                    unit: s.unit,
+                    current_quantity: s.quantity || 0,
+                    min_threshold: 0,
+               }));
 
-          let insertedCount = 0;
-          let updatedCount = 0;
+          const updateSupplies = supplies
+               .filter((s) => !!s.existingSupplyId)
+               .map((s) => ({
+                    id: s.existingSupplyId!,
+                    current_quantity: s.quantity || 0,
+               }));
 
-          // Insert new supplies
-          if (newSupplies.length > 0) {
-               const { data: insertedData, error: insertError } = await supabase
-                    .from('supplies')
-                    .insert(newSupplies)
-                    .select();
-
-               if (insertError) {
-                    console.error('Error inserting supplies:', insertError);
-                    return NextResponse.json(
-                         { error: 'Failed to save supplies', details: insertError.message },
-                         { status: 500 }
-                    );
+          // Gate 3 ACID: single transactional RPC call — all-or-nothing
+          const { data: rpcResult, error: rpcError } = await supabase.rpc(
+               'save_supplies_batch',
+               {
+                    p_establishment_id: finalEstablishmentId,
+                    p_new_supplies: newSupplies,
+                    p_update_supplies: updateSupplies,
                }
+          );
 
-               insertedCount = insertedData?.length || 0;
+          if (rpcError) {
+               console.error('Error in save_supplies_batch RPC:', rpcError);
+               return NextResponse.json(
+                    { error: 'Failed to save supplies', details: rpcError.message },
+                    { status: 500 }
+               );
           }
 
-          // Update existing supplies
-          for (const supply of updateSupplies) {
-               const { error: updateError } = await supabase
-                    .from('supplies')
-                    .update({
-                         current_quantity: supply.current_quantity,
-                         updated_at: new Date().toISOString()
-                    })
-                    .eq('id', supply.id);
-
-               if (updateError) {
-                    console.error('Error updating supply:', updateError);
-               } else {
-                    updatedCount++;
-               }
-          }
+          const { inserted: insertedCount, updated: updatedCount } = rpcResult as {
+               inserted: number;
+               updated: number;
+          };
 
           return NextResponse.json({
                success: true,
