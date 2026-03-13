@@ -173,9 +173,13 @@ export default function LoginPage() {
               <span className="text-sm font-medium text-purple-100">Sistema Profesional de Gestión</span>
             </div>
 
+            <img
+              src="/logo-dark.svg"
+              alt="Flowstock"
+              className="h-20 object-contain drop-shadow-2xl"
+            />
             <h1 className="text-7xl font-bold leading-tight">
-              <span className="block text-white drop-shadow-2xl">Flowstock</span>
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 drop-shadow-lg">
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-gray-200 via-white to-gray-200 drop-shadow-lg">
                 Gestión Inteligente
               </span>
             </h1>
@@ -212,7 +216,7 @@ export default function LoginPage() {
         {/* Glassmorphism Auth Card */}
         <div className="relative group">
           {/* Glow effect */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-400 to-white rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
 
           {/* Main glass card */}
           <div className="relative glass-card-premium rounded-2xl p-8 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
@@ -256,7 +260,7 @@ export default function LoginPage() {
                         setFormData({ ...formData, barName: e.target.value })
                       }
                       required
-                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-gray-300 focus:ring-white/50"
                     />
                   </div>
                 )}
@@ -274,7 +278,7 @@ export default function LoginPage() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     required
-                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-gray-300 focus:ring-white/50"
                   />
                 </div>
 
@@ -291,7 +295,7 @@ export default function LoginPage() {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     required
-                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                    className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-gray-300 focus:ring-white/50"
                   />
                 </div>
 
@@ -312,7 +316,7 @@ export default function LoginPage() {
                         })
                       }
                       required
-                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/50"
+                      className="glass-input bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-gray-300 focus:ring-white/50"
                     />
                   </div>
                 )}
@@ -320,7 +324,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold h-12 shadow-lg shadow-purple-500/50 border-0 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/60"
+                  className="w-full bg-gradient-to-r from-gray-100 to-white hover:from-white hover:to-gray-200 text-gray-900 font-semibold h-12 shadow-lg shadow-white/30 border border-white/40 transition-all duration-300 hover:shadow-xl hover:shadow-white/40"
                 >
                   {loading ? (
                     <>
@@ -415,7 +419,7 @@ export default function LoginPage() {
           -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.18);
           box-shadow: 
-            0 8px 32px 0 rgba(31, 38, 135, 0.37),
+            0 8px 32px 0 rgba(0, 0, 0, 0.37),
             inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
             inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
         }
