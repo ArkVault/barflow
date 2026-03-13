@@ -20,7 +20,7 @@ export function DemoTopNav({
   variant = "default",
   rightSlot,
   logoClassName = "h-8 dark:hidden object-contain",
-  darkLogoClassName = "h-8 hidden dark:block object-contain dark:invert",
+  darkLogoClassName = "h-8 hidden dark:block object-contain",
 }: DemoTopNavProps) {
   const pathname = usePathname();
   const resolvedHref =
@@ -40,8 +40,8 @@ export function DemoTopNav({
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link href={resolvedHref} className="block">
-          <img src="/modoclaro.png" alt={alt} className={logoClassName} />
-          <img src="/modoclaro.png" alt={alt} className={darkLogoClassName} />
+          <img src="/logo-light.svg" alt={alt} className={logoClassName} />
+          <img src="/logo-dark.svg" alt={alt} className={darkLogoClassName} />
         </Link>
         {rightSlot}
       </div>

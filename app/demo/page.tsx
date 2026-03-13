@@ -241,7 +241,7 @@ export default function DemoPage() {
             alt="Flowstock Demo"
             variant="blur"
             logoClassName="h-10 dark:hidden"
-            darkLogoClassName="h-10 hidden dark:block dark:invert"
+            darkLogoClassName="h-10 hidden dark:block"
             rightSlot={
               <div className="flex items-center gap-2">
                 <AccountButton />

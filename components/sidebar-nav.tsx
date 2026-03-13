@@ -71,7 +71,7 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
           <div className="mb-8">
             <Link href="/dashboard" className="block">
               <img
-                src="/modoclaro.png"
+                src="/logo-light.svg"
                 alt="Flowstock"
                 className={cn(
                   "dark:hidden transition-all object-contain",
@@ -79,10 +79,10 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
                 )}
               />
               <img
-                src="/modoclaro.png"
+                src="/logo-dark.svg"
                 alt="Flowstock"
                 className={cn(
-                  "hidden dark:block transition-all object-contain dark:invert",
+                  "hidden dark:block transition-all object-contain",
                   isCollapsed ? "h-5" : "h-7"
                 )}
               />

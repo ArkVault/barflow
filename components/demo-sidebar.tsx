@@ -79,7 +79,7 @@ export function DemoSidebar() {
         <div className="mb-8 mt-12 flex flex-col">
           <Link href={toDemoPath(demoBasePath, "/demo")} className="block">
             <img
-              src="/modoclaro.png"
+              src="/logo-light.svg"
               alt="Flowstock"
               className={cn(
                 "dark:hidden transition-all object-contain",
@@ -87,10 +87,10 @@ export function DemoSidebar() {
               )}
             />
             <img
-              src="/modoclaro.png"
+              src="/logo-dark.svg"
               alt="Flowstock"
               className={cn(
-                "hidden dark:block transition-all object-contain dark:invert",
+                "hidden dark:block transition-all object-contain",
                 isCollapsed ? "h-4" : "h-6"
               )}
             />

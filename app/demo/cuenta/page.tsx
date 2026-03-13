@@ -23,7 +23,7 @@ export default function DemoCuentaPage() {
                          alt="Flowstock Demo"
                          variant="blur"
                          logoClassName="h-8 dark:hidden"
-                         darkLogoClassName="h-8 hidden dark:block dark:invert"
+                         darkLogoClassName="h-8 hidden dark:block"
                          rightSlot={
                               <GlowButton onClick={handleLogout}>
                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center shadow-inner">
