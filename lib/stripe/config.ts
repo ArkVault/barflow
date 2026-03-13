@@ -25,10 +25,11 @@ export const stripe = {
 
 // Stripe configuration
 export const STRIPE_CONFIG = {
-     // Price IDs - Replace these with your actual Stripe Price IDs
+     // Price IDs — maps to NEXT_PUBLIC_STRIPE_*_PRICE_ID env vars
      prices: {
-          monthly: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID!,
-          yearly: process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID!,
+          barMonthly: process.env.NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID!,
+          barYearly:  process.env.NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID!,
+          chain:      process.env.NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID!,
      },
      // Trial period in days
      trialPeriodDays: 30,
@@ -37,8 +38,9 @@ export const STRIPE_CONFIG = {
      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
 };
 
-// Plan types
-export type PlanType = 'free_trial' | 'monthly' | 'yearly' | 'expired';
+// Plan types — must match plan_type values stored in establishments table
+// and getPlanTypeFromPriceId() in app/api/webhooks/stripe/route.ts
+export type PlanType = 'free_trial' | 'bar_monthly' | 'bar_yearly' | 'chain' | 'expired';
 
 // Subscription status
 export type SubscriptionStatus =
