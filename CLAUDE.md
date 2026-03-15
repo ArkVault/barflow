@@ -22,7 +22,7 @@ cd /Users/gibrann/Desktop/Barflow && gcloud builds submit \
 ```
 Note: Get actual values from `.env.local`. Do NOT include `_SUPABASE_SERVICE_ROLE_KEY` (not in cloudbuild.yaml template).
 
-## Roadmap Status (as of 2026-03-14)
+## Roadmap Status (as of 2026-03-15)
 
 ### ✅ Phase 1 — Critical Fixes (ALL DONE)
 - [x] Auth check on `/api/parse-menu` (now at `/api/menu/parse`)
@@ -52,8 +52,9 @@ Note: Get actual values from `.env.local`. Do NOT include `_SUPABASE_SERVICE_ROL
 - [x] Transactional emails — Resend module at `lib/email/resend.ts` (quote, welcome, trial-ending, subscription-confirmed, payment-failed)
 - [ ] Onboarding flow — No onboarding components exist yet
 
-### 🧹 Cleanup (PENDING)
-- [ ] Delete old logo files from `public/`: `modoclaro.png`, `modoclaro.svg`, `modoscuro.png`, `modoscuro.svg`, `placeholder-logo.png`, `placeholder-logo.svg`, `placeholder-user.jpg`, `placeholder.jpg`, `placeholder.svg`
+### 🧹 Cleanup (MOSTLY DONE)
+- [x] Delete old logo files from `public/` — 9 files removed (modoclaro, modoscuro, placeholders)
+- [x] Remove stale worktree `.claude/worktrees/vigorous-lalande`
 - [ ] Apply DB migration in Supabase SQL editor: `supabase/migrations/20260312_add_tax_rate_to_establishments.sql`
 - [ ] Update Cloud Build trigger substitution variables in GCP Console (currently passed manually)
 
@@ -76,6 +77,5 @@ Note: Get actual values from `.env.local`. Do NOT include `_SUPABASE_SERVICE_ROL
 
 ## Important Notes
 - `NEXT_PUBLIC_*` vars are baked at build time — runtime-only updates don't affect client code
-- Worktree at `.claude/worktrees/vigorous-lalande` is stale — code lives at `/Users/gibrann/Desktop/Barflow`
 - `@stripe/stripe-js` v8 removed `redirectToCheckout` — use `window.location.href = url` instead
 - Node 22 requires `new Uint8Array(buffer)` for crypto operations (Buffer type mismatch)
