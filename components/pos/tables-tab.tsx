@@ -425,7 +425,7 @@ export function TablesTab() {
 
      const handleMouseUp = useCallback(() => {
           if (isDragging && hasMoved) {
-               saveLayout(sections);
+               saveLayout(sections).catch((err: unknown) => console.error('Failed to save layout:', err));
                // Mark that we just dropped to prevent click from opening popup
                justDroppedRef.current = true;
                setTimeout(() => {
@@ -502,7 +502,7 @@ export function TablesTab() {
           };
 
           const handleResizeEnd = () => {
-               saveLayout(sections);
+               saveLayout(sections).catch((err: unknown) => console.error('Failed to save layout:', err));
                setResizingSection(null);
           };
 
@@ -1149,7 +1149,7 @@ export function TablesTab() {
                                                                  : table
                                                        )
                                                   }));
-                                                  saveLayout(updatedSections);
+                                                  await saveLayout(updatedSections);
 
                                                   toast.success(language === 'es' ? '¡Cliente sentado!' : 'Customer seated!');
                                                   setShowReservationModal(false);
@@ -1380,7 +1380,7 @@ export function TablesTab() {
                                                                  : table
                                                        )
                                                   }));
-                                                  saveLayout(updatedSections);
+                                                  await saveLayout(updatedSections);
                                              }
 
                                              toast.success(language === 'es' ? '¡Reservación creada!' : 'Reservation created!');

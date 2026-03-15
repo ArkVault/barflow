@@ -138,19 +138,17 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
                     }),
                });
 
-               const { sessionId, error } = await response.json();
+               const { url, error } = await response.json();
                if (error) {
                     toast.error(error);
                     return;
                }
 
-               const stripe = await stripePromise;
-               if (!stripe) {
-                    toast.error("Error al cargar Stripe");
-                    return;
+               if (url) {
+                    window.location.href = url;
+               } else {
+                    toast.error("No se pudo obtener la URL de pago");
                }
-
-               (stripe as any).redirectToCheckout({ sessionId });
           } catch (error) {
                console.error("Error creating checkout session:", error);
                toast.error("Error al procesar el upgrade");

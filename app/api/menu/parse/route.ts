@@ -5,6 +5,10 @@ import Papa from 'papaparse';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { isContentLengthTooLarge } from '@/lib/security/request-guards';
+import { consumeRateLimit, getRequesterIp } from '@/lib/security/rate-limit';
+
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const RATE_LIMIT_MAX_REQUESTS = 10; // 10 uploads per 5 min
 
 // Zod schema for AI response validation
 const AISupplySchema = z.object({
@@ -25,6 +29,24 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
      try {
+          // Rate limit — protects expensive Gemini API calls
+          const ip = getRequesterIp(request.headers);
+          const limiter = consumeRateLimit(`parse-menu:${ip}`, {
+               windowMs: RATE_LIMIT_WINDOW_MS,
+               maxRequests: RATE_LIMIT_MAX_REQUESTS,
+          });
+          if (!limiter.allowed) {
+               return NextResponse.json(
+                    { error: 'Too many requests. Please try again later.' },
+                    {
+                         status: 429,
+                         headers: {
+                              'Retry-After': String(Math.ceil((limiter.resetAt - Date.now()) / 1000)),
+                         },
+                    }
+               );
+          }
+
           if (isContentLengthTooLarge(request, 12 * 1024 * 1024)) {
                return NextResponse.json(
                     { error: 'Payload too large. Maximum request size is 12MB.' },

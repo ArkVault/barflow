@@ -2,9 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, STRIPE_CONFIG } from '@/lib/stripe/config';
 import { createClient } from '@/lib/supabase/server';
 import { CheckoutRequestSchema } from '@/lib/dtos/schemas';
+import { consumeRateLimit, getRequesterIp } from '@/lib/security/rate-limit';
+
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_MAX_REQUESTS = 5; // 5 checkout attempts per 10 min
 
 export async function POST(req: NextRequest) {
      try {
+          // Rate limit — prevents checkout session abuse
+          const ip = getRequesterIp(req.headers);
+          const limiter = consumeRateLimit(`checkout:${ip}`, {
+               windowMs: RATE_LIMIT_WINDOW_MS,
+               maxRequests: RATE_LIMIT_MAX_REQUESTS,
+          });
+          if (!limiter.allowed) {
+               return NextResponse.json(
+                    { error: 'Too many checkout attempts. Please try again later.' },
+                    {
+                         status: 429,
+                         headers: {
+                              'Retry-After': String(Math.ceil((limiter.resetAt - Date.now()) / 1000)),
+                         },
+                    }
+               );
+          }
+
           const body = await req.json();
           const parsed = CheckoutRequestSchema.safeParse(body);
 

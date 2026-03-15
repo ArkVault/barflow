@@ -1,6 +1,6 @@
 "use client";
 
-type GaugeVariant = "demo" | "prod";
+export type GaugeVariant = "demo" | "prod";
 
 interface SemiCircleGaugeProps {
   ratio: number;

@@ -4,6 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { isContentLengthTooLarge } from "@/lib/security/request-guards";
 import { auditLog } from "@/lib/security/audit-log";
 import { checkAndStoreReplayKey } from "@/lib/security/webhook-replay-store";
+import {
+     sendSubscriptionConfirmedEmail,
+     sendTrialEndingEmail,
+     sendPaymentFailedEmail,
+} from "@/lib/email/resend";
 
 // Lazy initialization to avoid build-time errors
 let stripe: Stripe | null = null;
@@ -29,10 +34,20 @@ function getWebhookSecret(): string {
 async function findEstablishmentBySubscription(supabase: any, subscriptionId: string) {
      const { data } = await supabase
           .from("establishments")
-          .select("id, user_id")
+          .select("id, user_id, name")
           .eq("stripe_subscription_id", subscriptionId)
           .single();
      return data;
+}
+
+// Helper to get user email from Supabase auth (via service role or auth admin)
+async function getUserEmail(supabase: any, userId: string): Promise<string | null> {
+     try {
+          const { data } = await supabase.auth.admin.getUserById(userId);
+          return data?.user?.email ?? null;
+     } catch {
+          return null;
+     }
 }
 
 // Helper function to determine plan type from price ID
@@ -120,6 +135,20 @@ export async function POST(req: NextRequest) {
                               .eq("id", establishmentId);
 
                          console.log(`✅ Subscription activated: ${establishmentId} (${planType})`);
+
+                         // Send subscription confirmation email
+                         const userId = session.metadata?.user_id;
+                         if (userId) {
+                              const email = await getUserEmail(supabase, userId);
+                              if (email) {
+                                   const planNames: Record<string, string> = {
+                                        bar_monthly: "Bar Sucursal (Mensual)",
+                                        bar_yearly: "Bar Sucursal (Anual)",
+                                        chain: "Cadena Flowstock",
+                                   };
+                                   await sendSubscriptionConfirmedEmail(email, email.split("@")[0], planNames[planType] || planType);
+                              }
+                         }
                     }
                     break;
                }
@@ -206,8 +235,18 @@ export async function POST(req: NextRequest) {
 
                          console.log(`⏰ Trial ending soon: ${establishmentId} (3 days)`);
 
-                         // TODO: Send email notification to user
-                         // await sendTrialEndingEmail(establishment.user_id);
+                         // Send trial ending notification email
+                         const { data: estData } = await supabase
+                              .from("establishments")
+                              .select("user_id")
+                              .eq("id", establishmentId)
+                              .single();
+                         if (estData?.user_id) {
+                              const email = await getUserEmail(supabase, estData.user_id);
+                              if (email) {
+                                   await sendTrialEndingEmail(email, email.split("@")[0], 3);
+                              }
+                         }
                     }
                     break;
                }
@@ -291,8 +330,13 @@ export async function POST(req: NextRequest) {
 
                               console.log(`❌ Payment failed (attempt ${attemptCount}): ${establishment.id}`);
 
-                              // TODO: Send payment failed notification
-                              // await sendPaymentFailedEmail(establishment.user_id, attemptCount);
+                              // Send payment failed notification
+                              if (establishment.user_id) {
+                                   const email = await getUserEmail(supabase, establishment.user_id);
+                                   if (email) {
+                                        await sendPaymentFailedEmail(email, email.split("@")[0]);
+                                   }
+                              }
                          }
                     }
                     break;

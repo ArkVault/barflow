@@ -117,7 +117,7 @@ export function ProjectionView({ supplies, sales }: ProjectionViewProps) {
           color: 'text-warning', 
           bgColor: 'bg-warning/10',
           label: 'Atención',
-          variant: 'warning' as const
+          variant: 'outline' as const
         };
       case 'good':
         return { 

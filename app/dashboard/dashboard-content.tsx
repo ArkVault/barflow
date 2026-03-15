@@ -1,10 +1,10 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { StatsOverview } from "@/components/dashboard/stats-overview";
-import { UrgentSuppliesAlert } from "@/components/dashboard/urgent-supplies-alert";
-import { StockRiskTabs } from "@/components/dashboard/stock-risk-tabs";
-import { StockTrafficLight } from "@/components/dashboard/stock-traffic-light";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { StatsOverview } from "@/components/stats-overview";
+import { UrgentSuppliesAlert } from "@/components/urgent-supplies-alert";
+import { StockRiskTabs } from "@/components/stock-risk-tabs";
+import { StockTrafficLight } from "@/components/stock-traffic-light";
 import { PeriodProvider } from "@/contexts/period-context";
 
 interface DashboardContentProps {
@@ -18,8 +18,8 @@ export function DashboardContent({ userName, establishmentName }: DashboardConte
                <DashboardLayout
                     userName={userName}
                     establishmentName={establishmentName}
-                    pageTitleKey="businessOverview"
-                    pageDescriptionKey="establishmentSummary"
+                    pageTitle="Resumen del Negocio"
+                    pageDescription="Vista general de tu establecimiento"
                     // Pass StockTrafficLight as headerActions.
                     // Important: StockTrafficLight uses usePeriod, which is provided by PeriodProvider wrapping DashboardLayout.
                     // However, headerActions is rendered inside DashboardLayout, which is a child of PeriodProvider here.

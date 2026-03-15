@@ -64,23 +64,19 @@ export function UpgradePlanButton({ currentPlan = "bar_monthly", className }: Up
                     }),
                });
 
-               const { sessionId, error } = await response.json();
+               const { sessionId, url, error } = await response.json();
 
                if (error) {
                     toast.error(error);
                     return;
                }
 
-               // Redirect to Stripe Checkout
-               const stripe = await stripePromise;
-               if (!stripe) {
-                    toast.error("Error al cargar Stripe");
-                    return;
+               // Redirect to Stripe Checkout using session URL
+               if (url) {
+                    window.location.href = url;
+               } else {
+                    toast.error("No se pudo obtener la URL de pago");
                }
-
-               await stripe.redirectToCheckout({
-                    sessionId,
-               });
           } catch (error: any) {
                console.error("Error upgrading:", error);
                toast.error("Error al procesar el upgrade");

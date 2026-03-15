@@ -22,7 +22,7 @@ export async function encryptToken(token: string): Promise<string> {
      const key = getEncryptionKey();
      const iv = crypto.randomBytes(16);
 
-     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+     const cipher = crypto.createCipheriv(ALGORITHM, new Uint8Array(key), new Uint8Array(iv));
      let encrypted = cipher.update(token, 'utf8', 'hex');
      encrypted += cipher.final('hex');
 
@@ -47,8 +47,8 @@ export async function decryptToken(encryptedToken: string): Promise<string> {
      const iv = Buffer.from(ivHex, 'hex');
      const authTag = Buffer.from(authTagHex, 'hex');
 
-     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-     decipher.setAuthTag(authTag);
+     const decipher = crypto.createDecipheriv(ALGORITHM, new Uint8Array(key), new Uint8Array(iv));
+     decipher.setAuthTag(new Uint8Array(authTag));
 
      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
      decrypted += decipher.final('utf8');
@@ -81,8 +81,8 @@ export function verifyWebhookSignature(
           .update(data)
           .digest('hex');
 
-     const received = Buffer.from(signature);
-     const expected = Buffer.from(expectedSignature);
+     const received = new Uint8Array(Buffer.from(signature));
+     const expected = new Uint8Array(Buffer.from(expectedSignature));
      if (received.length !== expected.length) return false;
 
      // Timing-safe comparison

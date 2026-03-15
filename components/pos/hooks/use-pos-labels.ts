@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useCallback } from 'react';
-import type { Status, AccountStatus } from '@/types/pos';
+import type { Status, AccountStatus } from '@/components/pos/types';
 
 /**
  * Shared hook providing translated POS labels.

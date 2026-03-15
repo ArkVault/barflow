@@ -71,7 +71,7 @@ export const UrgentSuppliesService = {
           )
           .eq("supply_id", supply.id);
 
-        const products: UrgentSupplyProduct[] = ((ingredients || []) as IngredientRow[]).map((ing) => ({
+        const products: UrgentSupplyProduct[] = ((ingredients || []) as unknown as IngredientRow[]).map((ing) => ({
           name: ing.products.name,
           category: ing.products.category,
           quantityNeeded: ing.quantity_needed,
