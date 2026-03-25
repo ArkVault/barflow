@@ -45,48 +45,48 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
     <aside
       className={cn(
         "fixed left-0 top-0 h-full bg-background transition-all duration-300 z-50",
-        isCollapsed ? "w-20" : "w-72"
+        isCollapsed ? "w-24" : "w-76"
       )}
     >
       {/* Sidebar Panel with Neumorphism */}
       <div className="h-full p-4">
-        <div className="h-full neumorphic rounded-3xl p-6 flex flex-col relative">
+        <div className="h-full neumorphic rounded-[2.5rem] p-6 flex flex-col relative">
 
-          {/* Collapse Button */}
+          {/* Collapse Button - outside right edge */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full neumorphic flex items-center justify-center hover:scale-105 transition-transform"
+            className="absolute -right-5 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full neumorphic flex items-center justify-center hover:scale-105 transition-transform z-10"
             aria-label={isCollapsed ? t('expandSidebar') : t('collapseSidebar')}
           >
             <span className={cn("text-xl transition-transform", isCollapsed && "rotate-180")}>‹</span>
           </button>
 
-          {/* Theme and Language Toggles - Top Right */}
-          <div className={cn("absolute top-6 right-6 flex gap-2", isCollapsed && "flex-col")}>
-            <ThemeToggle />
-            <LanguageToggle />
-          </div>
-
           {/* Logo */}
-          <div className="mb-8">
+          <div className="mb-4">
             <Link href="/dashboard" className="block">
               <img
-                src="/logo-light.svg"
-                alt="Flowstock"
+                src="/logo-light.png"
+                alt="Stttock"
                 className={cn(
                   "dark:hidden transition-all object-contain",
                   isCollapsed ? "h-5" : "h-7"
                 )}
               />
               <img
-                src="/logo-dark.svg"
-                alt="Flowstock"
+                src="/logo-dark.png"
+                alt="Stttock"
                 className={cn(
                   "hidden dark:block transition-all object-contain",
                   isCollapsed ? "h-5" : "h-7"
                 )}
               />
             </Link>
+          </div>
+
+          {/* Theme and Language Toggles */}
+          <div className={cn("flex items-center gap-2 mb-4 pb-4 border-b border-border/30", isCollapsed && "flex-col")}>
+            <ThemeToggle />
+            <LanguageToggle />
           </div>
 
           {/* Main Navigation Items */}

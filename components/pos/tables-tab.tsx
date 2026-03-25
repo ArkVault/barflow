@@ -964,7 +964,7 @@ export function TablesTab() {
                                                                            total,
                                                                            taxRate,
                                                                            date: new Date(),
-                                                                           establishmentName: establishmentName || 'Flowstock',
+                                                                           establishmentName: establishmentName || 'Stttock',
                                                                       });
 
                                                                       setConfirmFinalize({

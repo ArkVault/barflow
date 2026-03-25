@@ -238,7 +238,7 @@ export default function DemoPage() {
           {/* Navigation */}
           <DemoTopNav
             href="/"
-            alt="Flowstock Demo"
+            alt="Stttock Demo"
             variant="blur"
             logoClassName="h-10 dark:hidden"
             darkLogoClassName="h-10 hidden dark:block"

@@ -37,13 +37,13 @@ export function DashboardNav({ userName, establishmentName }: DashboardNavProps)
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="block">
               <img
-                src="/logo-light.svg"
-                alt="Flowstock"
+                src="/logo-light.png"
+                alt="Stttock"
                 className="h-8 dark:hidden"
               />
               <img
-                src="/logo-dark.svg"
-                alt="Flowstock"
+                src="/logo-dark.png"
+                alt="Stttock"
                 className="h-8 hidden dark:block"
               />
             </Link>

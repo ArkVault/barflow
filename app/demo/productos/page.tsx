@@ -562,7 +562,6 @@ export default function ProductosPage() {
             price: editForm.price,
             description: editForm.description,
             image_url: finalImageUrl,
-            ingredients: editForm.ingredients.filter(ing => ing.name && ing.quantity > 0)
           })
           .eq('id', editForm.id);
 
@@ -641,7 +640,6 @@ export default function ProductosPage() {
           category: newProduct.category,
           price: newProduct.price,
           description: newProduct.description || null,
-          ingredients: newProduct.ingredients.filter(ing => ing.name && ing.quantity > 0),
           image_url: newProduct.image_url || null,
           is_active: true
         };

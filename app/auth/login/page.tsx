@@ -174,8 +174,8 @@ export default function LoginPage() {
             </div>
 
             <img
-              src="/logo-dark.svg"
-              alt="Flowstock"
+              src="/logo-dark.png"
+              alt="Stttock"
               className="h-20 object-contain drop-shadow-2xl"
             />
             <h1 className="text-7xl font-bold leading-tight">
@@ -230,8 +230,8 @@ export default function LoginPage() {
               <div className="text-center mb-8">
                 <div className="flex justify-center mb-6">
                   <img
-                    src="/logo-dark.svg"
-                    alt="Flowstock"
+                    src="/logo-dark.png"
+                    alt="Stttock"
                     className="h-10 object-contain"
                   />
                 </div>
@@ -241,7 +241,7 @@ export default function LoginPage() {
                 <p className="text-gray-300">
                   {isSignUp
                     ? "Comienza a optimizar tu negocio hoy"
-                    : "Ingresa a tu cuenta de Flowstock"}
+                    : "Ingresa a tu cuenta de Stttock"}
                 </p>
               </div>
 

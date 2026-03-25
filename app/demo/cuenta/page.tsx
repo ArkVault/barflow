@@ -20,7 +20,7 @@ export default function DemoCuentaPage() {
                <div className="min-h-svh flex flex-col">
                     {/* Navigation */}
                     <DemoTopNav
-                         alt="Flowstock Demo"
+                         alt="Stttock Demo"
                          variant="blur"
                          logoClassName="h-8 dark:hidden"
                          darkLogoClassName="h-8 hidden dark:block"

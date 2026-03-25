@@ -14,7 +14,7 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM_ADDRESS = 'Flowstock <noreply@barflow.mx>';
+const FROM_ADDRESS = 'Stttock <noreply@barflow.mx>';
 
 // ─── Quote Request Notification ───────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ export async function sendQuoteNotification(
             ${data.message ? `<tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Mensaje</td><td style="padding: 8px 0;">${data.message}</td></tr>` : ''}
           </table>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Enviado desde Flowstock el ${new Date().toLocaleDateString('es-MX')}</p>
+          <p style="font-size: 12px; color: #999;">Enviado desde Stttock el ${new Date().toLocaleDateString('es-MX')}</p>
         </div>
       `,
     });
@@ -75,10 +75,10 @@ export async function sendWelcomeEmail(
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [to],
-      subject: 'Bienvenido a Flowstock 🎉',
+      subject: 'Bienvenido a Stttock 🎉',
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #1a1a2e;">¡Bienvenido a Flowstock!</h1>
+          <h1 style="color: #1a1a2e;">¡Bienvenido a Stttock!</h1>
           <p>Hola ${userName},</p>
           <p>Tu cuenta ha sido creada exitosamente. Tienes <strong>30 días de prueba gratuita</strong> para explorar todas las funcionalidades:</p>
           <ul style="line-height: 1.8;">
@@ -95,7 +95,7 @@ export async function sendWelcomeEmail(
           </div>
           <p style="color: #666;">¿Tienes preguntas? Responde a este correo o escríbenos a soporte@barflow.mx</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Flowstock — Gestión inteligente de bares</p>
+          <p style="font-size: 12px; color: #999;">Stttock — Gestión inteligente de bares</p>
         </div>
       `,
     });
@@ -125,7 +125,7 @@ export async function sendTrialEndingEmail(
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a1a2e;">Tu prueba gratuita termina pronto</h2>
           <p>Hola ${userName},</p>
-          <p>Tu periodo de prueba en Flowstock termina en <strong>${daysLeft} días</strong>.</p>
+          <p>Tu periodo de prueba en Stttock termina en <strong>${daysLeft} días</strong>.</p>
           <p>Para seguir utilizando todas las funcionalidades sin interrupción, elige un plan que se adapte a tu negocio:</p>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="background: #f8f9fa;">
@@ -148,7 +148,7 @@ export async function sendTrialEndingEmail(
             </a>
           </div>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Flowstock — Gestión inteligente de bares</p>
+          <p style="font-size: 12px; color: #999;">Stttock — Gestión inteligente de bares</p>
         </div>
       `,
     });
@@ -178,11 +178,11 @@ export async function sendSubscriptionConfirmedEmail(
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a1a2e;">¡Suscripción activada!</h2>
           <p>Hola ${userName},</p>
-          <p>Tu plan <strong>${planName}</strong> está ahora activo. Tienes acceso completo a todas las funcionalidades de Flowstock.</p>
+          <p>Tu plan <strong>${planName}</strong> está ahora activo. Tienes acceso completo a todas las funcionalidades de Stttock.</p>
           <p>Tu factura se encuentra disponible en tu <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flowstock-686958505968.us-central1.run.app'}/dashboard/cuenta">panel de cuenta</a>.</p>
-          <p style="color: #666;">¡Gracias por confiar en Flowstock!</p>
+          <p style="color: #666;">¡Gracias por confiar en Stttock!</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Flowstock — Gestión inteligente de bares</p>
+          <p style="font-size: 12px; color: #999;">Stttock — Gestión inteligente de bares</p>
         </div>
       `,
     });
@@ -220,7 +220,7 @@ export async function sendPaymentFailedEmail(
           </div>
           <p style="color: #666;">Si necesitas ayuda, responde a este correo.</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Flowstock — Gestión inteligente de bares</p>
+          <p style="font-size: 12px; color: #999;">Stttock — Gestión inteligente de bares</p>
         </div>
       `,
     });

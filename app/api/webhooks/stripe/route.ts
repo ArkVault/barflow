@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
                                    const planNames: Record<string, string> = {
                                         bar_monthly: "Bar Sucursal (Mensual)",
                                         bar_yearly: "Bar Sucursal (Anual)",
-                                        chain: "Cadena Flowstock",
+                                        chain: "Cadena Stttock",
                                    };
                                    await sendSubscriptionConfirmedEmail(email, email.split("@")[0], planNames[planType] || planType);
                               }

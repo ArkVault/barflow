@@ -16,7 +16,7 @@ interface DemoTopNavProps {
 
 export function DemoTopNav({
   href,
-  alt = "Flowstock",
+  alt = "Stttock",
   variant = "default",
   rightSlot,
   logoClassName = "h-8 dark:hidden object-contain",
@@ -40,8 +40,8 @@ export function DemoTopNav({
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <Link href={resolvedHref} className="block">
-          <img src="/logo-light.svg" alt={alt} className={logoClassName} />
-          <img src="/logo-dark.svg" alt={alt} className={darkLogoClassName} />
+          <img src="/logo-light.png" alt={alt} className={logoClassName} />
+          <img src="/logo-dark.png" alt={alt} className={darkLogoClassName} />
         </Link>
         {rightSlot}
       </div>

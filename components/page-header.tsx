@@ -14,16 +14,16 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
                <div className="container mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                          <div className="flex items-center gap-6">
-                              {/* Logo SVG que cambia según el tema */}
+                              {/* Logo que cambia según el tema */}
                               <Link href="/dashboard" className="shrink-0">
                                    <img
-                                        src="/logo-light.svg"
-                                        alt="Flowstock"
+                                        src="/logo-light.png"
+                                        alt="Stttock"
                                         className="h-8 dark:hidden object-contain"
                                    />
                                    <img
-                                        src="/logo-dark.svg"
-                                        alt="Flowstock"
+                                        src="/logo-dark.png"
+                                        alt="Stttock"
                                         className="h-8 hidden dark:block object-contain"
                                    />
                               </Link>
