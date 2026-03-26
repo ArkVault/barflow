@@ -101,8 +101,8 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
                       className={cn(
                         "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200",
                         isActive
-                          ? "bg-primary/20 dark:bg-primary/30 text-gray-900 dark:text-gray-100 shadow-lg shadow-primary/30"
-                          : "hover:bg-accent/50 text-gray-900 dark:text-gray-100",
+                          ? "bg-muted dark:bg-muted/80 text-gray-900 dark:text-gray-100 shadow-inner shadow-black/20 border border-border/40"
+                          : "hover:bg-muted/60 text-gray-900 dark:text-gray-100",
                         isCollapsed && "justify-center px-2"
                       )}
                     >
@@ -134,8 +134,8 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
                     className={cn(
                       "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                        : "hover:bg-accent/50",
+                        ? "bg-muted dark:bg-muted/80 text-foreground shadow-inner shadow-black/20 border border-border/40"
+                        : "hover:bg-muted/60",
                       isCollapsed && "justify-center px-2"
                     )}
                   >
