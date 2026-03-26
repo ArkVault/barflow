@@ -13,7 +13,7 @@ export function LanguageToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={toggleLanguage}
       className="neumorphic-hover border-0"

@@ -118,8 +118,8 @@ export function DemoSidebar() {
                     className={cn(
                       "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                       isActive
-                        ? "bg-primary/20 dark:bg-primary/30 text-gray-900 dark:text-gray-100 shadow-lg shadow-primary/30"
-                        : "hover:bg-accent/60 text-gray-900 dark:text-gray-100",
+                        ? "bg-muted dark:bg-muted/80 text-gray-900 dark:text-gray-100 shadow-inner shadow-black/20 border border-border/40"
+                        : "hover:bg-muted/60 text-gray-900 dark:text-gray-100",
                       isCollapsed && "justify-center px-0"
                     )}
                   >
