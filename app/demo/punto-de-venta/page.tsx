@@ -28,7 +28,7 @@ function POSContent() {
           <DemoShell>
                <DemoTopNav />
 
-               <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-7xl">
+               <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-5xl">
                          {/* Header */}
                          <div className="mb-6">
                               <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
