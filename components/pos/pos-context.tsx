@@ -174,6 +174,7 @@ export function POSProvider({ children }: POSProviderProps) {
           } catch (error) {
                console.error('Error loading layout:', error);
           } finally {
+               // Mark layout as loaded so auto-save can start
                setTimeout(() => { layoutLoadedRef.current = true; }, 100);
           }
      }, [operationsRepository]);
