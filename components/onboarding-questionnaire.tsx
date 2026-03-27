@@ -381,7 +381,13 @@ function SlideInventory({
           className="flex items-start gap-4 px-4 py-4 rounded-xl text-left transition-colors duration-150"
           style={{ background: 'oklch(0.26 0.02 30)', border: '1px solid oklch(0.38 0.02 30)', color: 'oklch(0.88 0.01 60)' }}
         >
-          <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>📊</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0, marginTop: 2 }}>
+              <rect x="1" y="1" width="18" height="18" rx="2" stroke="oklch(0.55 0.02 30)" strokeWidth="1.4"/>
+              <line x1="1" y1="7" x2="19" y2="7" stroke="oklch(0.55 0.02 30)" strokeWidth="1.2"/>
+              <line x1="1" y1="13" x2="19" y2="13" stroke="oklch(0.55 0.02 30)" strokeWidth="1.2"/>
+              <line x1="7" y1="7" x2="7" y2="19" stroke="oklch(0.55 0.02 30)" strokeWidth="1.2"/>
+              <line x1="13" y1="7" x2="13" y2="19" stroke="oklch(0.55 0.02 30)" strokeWidth="1.2"/>
+            </svg>
           <div>
             <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{t.inventoryExcel}</p>
             <p style={{ color: 'oklch(0.55 0.02 30)', fontSize: '0.8125rem', marginTop: '0.2rem' }}>{t.inventoryExcelDesc}</p>
@@ -392,7 +398,10 @@ function SlideInventory({
           className="flex items-start gap-4 px-4 py-4 rounded-xl text-left transition-colors duration-150"
           style={{ background: 'oklch(0.26 0.02 30)', border: '1px solid oklch(0.38 0.02 30)', color: 'oklch(0.88 0.01 60)' }}
         >
-          <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>✏️</span>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0, marginTop: 2 }}>
+              <path d="M14.5 2.5l3 3-10 10H4.5v-3l10-10z" stroke="oklch(0.55 0.02 30)" strokeWidth="1.4" strokeLinejoin="round"/>
+              <path d="M12.5 4.5l3 3" stroke="oklch(0.55 0.02 30)" strokeWidth="1.4"/>
+            </svg>
           <div>
             <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{t.inventoryManual}</p>
             <p style={{ color: 'oklch(0.55 0.02 30)', fontSize: '0.8125rem', marginTop: '0.2rem' }}>{t.inventoryManualDesc}</p>
