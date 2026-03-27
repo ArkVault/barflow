@@ -172,7 +172,7 @@ function SlideLang({ onSelect }: { onSelect: (l: Lang) => void }) {
             color: 'oklch(0.92 0.01 60)',
           }}
         >
-          <span style={{ fontSize: '2rem' }}>🇲🇽</span>
+          <span style={{ fontSize: '1rem', letterSpacing: '0.04em', color: 'oklch(0.55 0.02 30)' }}>ES</span>
           <span>Español</span>
         </button>
         <button
@@ -184,7 +184,7 @@ function SlideLang({ onSelect }: { onSelect: (l: Lang) => void }) {
             color: 'oklch(0.92 0.01 60)',
           }}
         >
-          <span style={{ fontSize: '2rem' }}>🇺🇸</span>
+          <span style={{ fontSize: '1rem', letterSpacing: '0.04em', color: 'oklch(0.55 0.02 30)' }}>EN</span>
           <span>English</span>
         </button>
       </div>
