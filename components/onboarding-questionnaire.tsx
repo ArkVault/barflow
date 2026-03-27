@@ -16,8 +16,14 @@ const T = {
     nameNext: 'Continuar',
     // SlideTeam
     teamTitle: '¿Quiénes forman tu equipo?',
-    teamSubtitle: 'Selecciona todos los que apliquen',
-    teamRoles: ['Bartender', 'Mesero/a', 'Cajero/a', 'Cocinero/a', 'Gerente', 'Dueño/a'],
+    teamSubtitle: 'Indica cuántas personas hay en cada rol',
+    teamRoles: [
+      { key: 'meseros', label: 'Meseros' },
+      { key: 'jefePiso', label: 'Jefe de piso / Manager' },
+      { key: 'jefeBarra', label: 'Jefe de barra' },
+      { key: 'admin', label: 'Admin' },
+    ],
+    teamNone: 'Ninguno',
     teamNext: 'Continuar',
     // SlideBranches
     branchTitle: '¿Cuántas sucursales tienes?',
@@ -62,8 +68,14 @@ const T = {
     namePlaceholder: 'e.g. The Jaguar Bar',
     nameNext: 'Continue',
     teamTitle: 'Who makes up your team?',
-    teamSubtitle: 'Select all that apply',
-    teamRoles: ['Bartender', 'Server', 'Cashier', 'Cook', 'Manager', 'Owner'],
+    teamSubtitle: 'Indicate how many people are in each role',
+    teamRoles: [
+      { key: 'meseros', label: 'Servers' },
+      { key: 'jefePiso', label: 'Floor manager' },
+      { key: 'jefeBarra', label: 'Bar manager' },
+      { key: 'admin', label: 'Admin' },
+    ],
+    teamNone: 'None',
     teamNext: 'Continue',
     branchTitle: 'How many locations do you have?',
     branchOne: 'One location',
@@ -208,9 +220,14 @@ function SlideName({
 }
 
 // ─── Slide: Team ─────────────────────────────────────────────────────────────
+type TeamCounts = Record<string, number>;
+
 function SlideTeam({
-  t, selected, onToggle, onNext, onBack,
-}: { t: Translations; selected: string[]; onToggle: (r: string) => void; onNext: () => void; onBack: () => void }) {
+  t, counts, onCount, onNext, onBack,
+}: { t: Translations; counts: TeamCounts; onCount: (key: string, val: number) => void; onNext: () => void; onBack: () => void }) {
+  const hasAny = Object.values(counts).some(v => v > 0);
+  const options = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -221,36 +238,46 @@ function SlideTeam({
           {t.teamSubtitle}
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {t.teamRoles.map(role => {
-          const active = selected.includes(role);
+      <div className="flex flex-col gap-3">
+        {t.teamRoles.map(({ key, label }) => {
+          const val = counts[key] ?? 0;
           return (
-            <button
-              key={role}
-              onClick={() => onToggle(role)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150"
-              style={{
-                background: active ? 'oklch(0.65 0.14 220 / 0.18)' : 'oklch(0.26 0.02 30)',
-                border: `1px solid ${active ? 'oklch(0.65 0.14 220 / 0.5)' : 'oklch(0.32 0.02 30)'}`,
-                color: active ? 'oklch(0.80 0.10 220)' : 'oklch(0.75 0.01 60)',
-              }}
+            <div
+              key={key}
+              className="flex items-center justify-between px-4 py-3 rounded-xl"
+              style={{ background: 'oklch(0.26 0.02 30)', border: '1px solid oklch(0.32 0.02 30)' }}
             >
-              <span style={{
-                width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-                background: active ? 'oklch(0.65 0.14 220)' : 'oklch(0.30 0.02 30)',
-                border: `1px solid ${active ? 'oklch(0.65 0.14 220)' : 'oklch(0.40 0.02 30)'}`,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {active && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+              <span style={{ color: 'oklch(0.88 0.01 60)', fontSize: '0.9375rem', fontWeight: 500 }}>
+                {label}
               </span>
-              {role}
-            </button>
+              <select
+                value={val}
+                onChange={e => onCount(key, Number(e.target.value))}
+                style={{
+                  background: 'oklch(0.17 0.02 30)',
+                  border: '1px solid oklch(0.38 0.02 30)',
+                  borderRadius: '0.5rem',
+                  color: val > 0 ? 'oklch(0.80 0.10 220)' : 'oklch(0.55 0.02 30)',
+                  padding: '0.3rem 0.6rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  minWidth: '4.5rem',
+                  outline: 'none',
+                }}
+              >
+                <option value={0}>{t.teamNone}</option>
+                {options.slice(1).map(n => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
           );
         })}
       </div>
       <div className="flex justify-between">
         <button className={btnGray} onClick={onBack}>← {t.back}</button>
-        <button className={btnPrimary} disabled={selected.length === 0} onClick={onNext}>
+        <button className={btnPrimary} disabled={!hasAny} onClick={onNext}>
           {t.teamNext} →
         </button>
       </div>
@@ -421,7 +448,7 @@ function SlideExcelUpload({
         );
       }
 
-      await markOnboardingComplete(userId, supabase);
+      await markOnboardingComplete(userId, supabase, { team_counts: teamCounts });
       router.push('/demo/insumos');
     } catch (err) {
       console.error('Import failed:', err);
@@ -521,9 +548,13 @@ function SlidePayment({
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-async function markOnboardingComplete(userId: string, supabase: ReturnType<typeof createClient>) {
+async function markOnboardingComplete(
+  userId: string,
+  supabase: ReturnType<typeof createClient>,
+  extra?: Record<string, unknown>
+) {
   await supabase.auth.updateUser({
-    data: { onboarding_complete: true },
+    data: { onboarding_complete: true, ...extra },
   });
 }
 
@@ -543,7 +574,7 @@ export function OnboardingQuestionnaire({
 
   // Form state
   const [name, setName] = useState('');
-  const [teamRoles, setTeamRoles] = useState<string[]>([]);
+  const [teamCounts, setTeamCounts] = useState<TeamCounts>({});
   const [branchMode, setBranchMode] = useState<'single' | 'multiple' | null>(null);
   const [branchCount, setBranchCount] = useState('');
   const [inventoryChoice, setInventoryChoice] = useState<'excel' | 'manual' | null>(null);
@@ -590,15 +621,9 @@ export function OnboardingQuestionnaire({
     setSlide(1);
   };
 
-  const toggleRole = (role: string) => {
-    setTeamRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
-    );
-  };
-
   const handleManual = async () => {
     const supabase = createClient();
-    await markOnboardingComplete(userId, supabase);
+    await markOnboardingComplete(userId, supabase, { team_counts: teamCounts });
     setInventoryChoice('manual');
     setSlide(5);
   };
@@ -655,8 +680,8 @@ export function OnboardingQuestionnaire({
         {slide === 2 && (
           <SlideTeam
             t={t}
-            selected={teamRoles}
-            onToggle={toggleRole}
+            counts={teamCounts}
+            onCount={(key, val) => setTeamCounts(prev => ({ ...prev, [key]: val }))}
             onNext={() => setSlide(3)}
             onBack={() => setSlide(1)}
           />
