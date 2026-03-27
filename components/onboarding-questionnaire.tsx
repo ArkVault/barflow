@@ -472,8 +472,21 @@ function SlideExcelUpload({
           color: 'oklch(0.55 0.02 30)',
         }}
       >
-        <span style={{ fontSize: '2rem' }}>📂</span>
-        <p style={{ fontSize: '0.875rem' }}>
+        {/* Excel file icon */}
+        <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Page body */}
+          <rect x="1" y="1" width="30" height="38" rx="3" fill="oklch(0.17 0.02 30)" stroke={file ? 'oklch(0.65 0.14 220 / 0.6)' : 'oklch(0.36 0.02 30)'} strokeWidth="1.5"/>
+          {/* Folded corner */}
+          <path d="M24 1 L31 8 L24 8 Z" fill={file ? 'oklch(0.55 0.12 220 / 0.35)' : 'oklch(0.28 0.02 30)'} stroke={file ? 'oklch(0.65 0.14 220 / 0.6)' : 'oklch(0.36 0.02 30)'} strokeWidth="1.5" strokeLinejoin="round"/>
+          {/* Green XLS badge */}
+          <rect x="16" y="30" width="22" height="14" rx="3" fill="oklch(0.48 0.16 145)"/>
+          <text x="27" y="41" textAnchor="middle" fill="white" fontSize="7" fontWeight="700" fontFamily="system-ui, sans-serif">XLS</text>
+          {/* Spreadsheet lines */}
+          <line x1="7" y1="14" x2="24" y2="14" stroke={file ? 'oklch(0.65 0.14 220 / 0.5)' : 'oklch(0.34 0.02 30)'} strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="7" y1="19" x2="24" y2="19" stroke={file ? 'oklch(0.65 0.14 220 / 0.5)' : 'oklch(0.34 0.02 30)'} strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="7" y1="24" x2="18" y2="24" stroke={file ? 'oklch(0.65 0.14 220 / 0.5)' : 'oklch(0.34 0.02 30)'} strokeWidth="1.2" strokeLinecap="round"/>
+        </svg>
+        <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
           {file ? file.name : t.uploadBtn}
         </p>
         <input
