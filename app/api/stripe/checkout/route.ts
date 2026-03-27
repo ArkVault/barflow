@@ -129,6 +129,7 @@ export async function POST(req: NextRequest) {
                     establishment_id: resolvedEstablishmentId || '',
                },
                subscription_data: {
+                    trial_period_days: STRIPE_CONFIG.trialPeriodDays,
                     metadata: {
                          user_id: userId,
                          establishment_id: resolvedEstablishmentId || '',

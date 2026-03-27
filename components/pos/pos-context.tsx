@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef, ReactNode } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import {
@@ -121,6 +121,9 @@ export function POSProvider({ children }: POSProviderProps) {
 
      const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
 
+     // Track whether initial layout load has completed (to avoid saving on load)
+     const layoutLoadedRef = useRef(false);
+
      // Products state
      const [products, setProducts] = useState<Product[]>([]);
      const [categories, setCategories] = useState<string[]>([]);
@@ -170,6 +173,8 @@ export function POSProvider({ children }: POSProviderProps) {
                if (loadedSections) setSections(loadedSections);
           } catch (error) {
                console.error('Error loading layout:', error);
+          } finally {
+               setTimeout(() => { layoutLoadedRef.current = true; }, 100);
           }
      }, [operationsRepository]);
 
@@ -180,6 +185,19 @@ export function POSProvider({ children }: POSProviderProps) {
                console.error('Error saving layout (exception):', error);
           }
      }, [operationsRepository]);
+
+     // Auto-save sections on every change (debounced 800ms)
+     useEffect(() => {
+          if (!layoutLoadedRef.current) return;
+
+          const timeout = setTimeout(() => {
+               saveLayout(sections).catch((err: unknown) =>
+                    console.error('Auto-save layout failed:', err)
+               );
+          }, 800);
+
+          return () => clearTimeout(timeout);
+     }, [sections, saveLayout]);
 
      const refreshSales = useCallback(async () => {
           if (!establishmentId) return;
