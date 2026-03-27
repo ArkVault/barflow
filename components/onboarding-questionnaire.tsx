@@ -666,6 +666,18 @@ export function OnboardingQuestionnaire({
           transform: mounted ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
         }}
       >
+        {/* TODO: remove close button before production */}
+        {TEST_MODE && (
+          <button
+            onClick={() => setVisible(false)}
+            className="absolute top-4 right-4 flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-150"
+            style={{ background: 'oklch(0.28 0.02 30)', border: '1px solid oklch(0.36 0.02 30)', color: 'oklch(0.55 0.02 30)' }}
+            title="Close (test only)"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
+          </button>
+        )}
+
         {/* Progress bar (slides 1-5 only) */}
         {slide > 0 && (
           <div className="mb-6">
