@@ -132,28 +132,19 @@ export async function POST(request: NextRequest) {
                const worksheet = workbook.Sheets[targetSheetName];
                fileContent = XLSX.utils.sheet_to_csv(worksheet);
 
-               console.log(`📊 Excel file processed:`, {
-                    totalSheets: workbook.SheetNames.length,
-                    availableSheets: workbook.SheetNames,
-                    selectedSheet: targetSheetName,
-                    autoDetected: !!detectedSheet
-               });
-          } else if (fileType === 'pdf') {
-               // For PDF, we'll need to use a different approach
-               // For now, we'll return an error asking for CSV/Excel
-               return NextResponse.json(
-                    { error: 'PDF parsing not yet implemented. Please use CSV or Excel files.' },
-                    { status: 400 }
-               );
-          } else {
-               return NextResponse.json(
-                    { error: 'Unsupported file type. Please upload CSV, Excel, or PDF files.' },
-                    { status: 400 }
-               );
+          }
+
+          // Truncate content to avoid exceeding Gemini token limits
+          const MAX_ROWS = 500;
+          const lines = fileContent.split('\n');
+          let wasTruncated = false;
+          if (lines.length > MAX_ROWS) {
+               // Keep header + first MAX_ROWS data rows
+               fileContent = lines.slice(0, MAX_ROWS + 1).join('\n');
+               wasTruncated = true;
           }
 
           // Use Gemini AI to parse the content
-          console.log('🤖 Starting AI parsing...');
           const apiKey = process.env.GEMINI_API_KEY;
           if (!apiKey) {
                console.error('❌ GEMINI_API_KEY not configured');
@@ -163,24 +154,43 @@ export async function POST(request: NextRequest) {
                );
           }
 
-          // Fetch real schema from Supabase
+          // Query schema directly from Supabase (no self-fetch)
+          const DEFAULT_CATEGORIES = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
           let categories: string[] = [];
-          let existingSupplies: any[] = [];
+          let existingSupplies: { id: string; name: string; category: string; unit: string }[] = [];
 
           try {
-               const schemaResponse = await fetch(`${request.nextUrl.origin}/api/supplies/schema`);
-               if (schemaResponse.ok) {
-                    const schemaData = await schemaResponse.json();
-                    categories = schemaData.categories;
-                    existingSupplies = schemaData.supplies || [];
+               const { data: establishment } = await supabase
+                    .from('establishments')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
+
+               if (establishment) {
+                    const [catResult, supResult] = await Promise.all([
+                         supabase
+                              .from('supplies')
+                              .select('category')
+                              .eq('establishment_id', establishment.id)
+                              .not('category', 'is', null),
+                         supabase
+                              .from('supplies')
+                              .select('id, name, category, unit')
+                              .eq('establishment_id', establishment.id),
+                    ]);
+
+                    if (catResult.data) {
+                         const unique = [...new Set(catResult.data.map(r => r.category).filter(Boolean))].sort();
+                         categories = unique.length > 0 ? unique : DEFAULT_CATEGORIES;
+                    }
+                    existingSupplies = supResult.data ?? [];
                }
           } catch (error) {
-               console.error('Error fetching schema:', error);
-               // Fallback to default categories
-               categories = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
+               console.error('Error fetching schema from DB:', error);
           }
 
-          console.log('🔧 Initializing Google GenAI...');
+          if (categories.length === 0) categories = DEFAULT_CATEGORIES;
+
           const genAI = new GoogleGenerativeAI(apiKey);
           const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
@@ -233,42 +243,26 @@ ${fileContent}
 
 Return the JSON array now:`;
 
-          console.log('📤 Sending request to Gemini AI...');
           const result = await model.generateContent(prompt);
           const response = result.response;
-          console.log('📥 Received response from Gemini AI');
-          console.log('Response type:', typeof response);
-          console.log('Response keys:', Object.keys(response || {}));
 
           // Extract JSON from response
           let parsedData;
           try {
-               console.log('🔍 Parsing AI response...');
-
-               // The correct way to access Gemini response text with @google/generative-ai
                const responseText = response.text();
 
-               console.log('Response text length:', responseText.length);
-               console.log('Response text preview:', responseText.substring(0, 200));
-
                if (!responseText) {
-                    console.error('❌ Empty response from AI');
-                    console.error('Response structure:', JSON.stringify(response, null, 2));
                     throw new Error('Empty response from AI');
                }
 
                // Remove markdown code blocks if present
                const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-               console.log('Cleaned JSON text preview:', jsonText.substring(0, 200));
-
                const rawData = JSON.parse(jsonText);
-               console.log('✅ JSON parsed, validating with Zod...');
 
                // Validate with Zod schema
                const validationResult = AIResponseSchema.safeParse(rawData);
 
                if (!validationResult.success) {
-                    console.error('❌ Zod validation failed:', validationResult.error.errors);
                     // Try to use raw data with defaults instead of failing completely
                     parsedData = rawData.map((item: any) => ({
                          name: item.name || 'Unknown',
@@ -279,16 +273,11 @@ Return the JSON array now:`;
                          existing_id: item.existing_id || null,
                          confidence: item.confidence || 0,
                     }));
-                    console.log('⚠️ Using fallback data with defaults');
                } else {
                     parsedData = validationResult.data;
-                    console.log('✅ Zod validation passed');
                }
-
-               console.log('✅ Successfully processed', parsedData.length, 'items');
           } catch (error) {
-               console.error('❌ Error parsing AI response:', error);
-               console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+               console.error('Error parsing AI response:', error);
                return NextResponse.json(
                     { error: 'Failed to parse AI response. Please try again.' },
                     { status: 500 }
@@ -331,7 +320,8 @@ Return the JSON array now:`;
                     new: newSupplies.length,
                     matched: matchedSupplies.length,
                     categories: [...new Set(supplies.map((s: any) => s.category))],
-                    ...(detectedSheet ? { detectedSheet } : {})
+                    ...(detectedSheet ? { detectedSheet } : {}),
+                    ...(wasTruncated ? { wasTruncated: true, originalRows: lines.length } : {})
                }
           });
 
