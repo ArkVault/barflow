@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
-import Papa from 'papaparse';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { isContentLengthTooLarge } from '@/lib/security/request-guards';
@@ -192,79 +191,67 @@ export async function POST(request: NextRequest) {
           if (categories.length === 0) categories = DEFAULT_CATEGORIES;
 
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+          const model = genAI.getGenerativeModel({
+               model: 'gemini-2.5-flash',
+               generationConfig: {
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                         type: SchemaType.ARRAY,
+                         items: {
+                              type: SchemaType.OBJECT,
+                              properties: {
+                                   name: { type: SchemaType.STRING },
+                                   quantity: { type: SchemaType.NUMBER },
+                                   unit: { type: SchemaType.STRING },
+                                   category: { type: SchemaType.STRING },
+                                   matched_existing: { type: SchemaType.BOOLEAN },
+                                   existing_id: { type: SchemaType.STRING, nullable: true },
+                                   confidence: { type: SchemaType.NUMBER },
+                              },
+                              required: ['name', 'quantity', 'unit', 'category', 'matched_existing', 'confidence'],
+                         },
+                    },
+               },
+          });
 
-          const prompt = `You are a data extraction and validation assistant for a bar inventory system. 
+          const prompt = `You are a data extraction assistant for a bar inventory system.
 
-**TASK**: Parse the following menu/inventory data and extract items with proper validation.
+Parse the following inventory data and extract supply items.
 
-**REQUIRED OUTPUT STRUCTURE** (JSON array):
-[
-  {
-    "name": "string (required)",
-    "quantity": number (required, must be > 0),
-    "unit": "string (required: ml, L, g, kg, units, oz, etc.)",
-    "category": "string (required, must be one of the valid categories)",
-    "matched_existing": boolean (true if matches existing supply),
-    "existing_id": "uuid or null",
-    "confidence": number (0-1, how confident the match is)
-  }
-]
+VALID CATEGORIES (ONLY use these): ${categories.join(', ')}
 
-**VALID CATEGORIES** (ONLY use these):
-${categories.join(', ')}
+EXISTING SUPPLIES IN DATABASE (match new items to these when possible):
+${existingSupplies.map(s => `- ${s.name} (id: ${s.id}, category: ${s.category}, unit: ${s.unit})`).join('\n')}
 
-**EXISTING SUPPLIES IN DATABASE** (try to match new items to these):
-${existingSupplies.map(s => `- ${s.name} (${s.category}, unit: ${s.unit})`).join('\n')}
+RULES:
+- Name: valid supply/ingredient name
+- Quantity: positive number. Normalize compound values (e.g., "750ml" → quantity: 750, unit: "ml")
+- Unit: normalize to standard units (ml, L, g, kg, units, oz, bottles)
+- Category: MUST be one of the valid categories above. If uncertain, use "Otros"
+- Matching: if a similar name exists in the database, set matched_existing=true and existing_id to that supply's id. Set confidence 0-1 based on match quality
+- If no match, set matched_existing=false, existing_id=null, confidence=0
 
-**VALIDATION RULES**:
-1. Name: Must be a valid supply/ingredient name
-2. Quantity: Must be a positive number
-3. Unit: Normalize to standard units (ml, L, g, kg, units, oz, bottles)
-4. Category: MUST pick from the valid categories list above
-5. Matching: If a similar name exists in the database, set matched_existing=true and provide existing_id
-6. If uncertain about category, use "Otros" (Other)
-
-**MATCHING LOGIC**:
-- Check for exact name matches (case-insensitive)
-- Check for partial matches (e.g., "Ron" matches "Ron Blanco")
-- Check for common variations (e.g., "Coca" matches "Coca Cola")
-- Consider Spanish/English translations
-- Set confidence based on match quality
-
-**DATA TO PARSE**:
-${fileContent}
-
-**IMPORTANT**: 
-- Return ONLY valid JSON
-- Every item MUST have all required fields
-- Use existing supply IDs when there's a match
-- Be smart about normalization (e.g., "750ml" -> quantity: 750, unit: "ml")
-
-Return the JSON array now:`;
+DATA TO PARSE:
+${fileContent}`;
 
           const result = await model.generateContent(prompt);
           const response = result.response;
 
-          // Extract JSON from response
+          // With JSON mode + responseSchema, output is guaranteed valid JSON
           let parsedData;
           try {
                const responseText = response.text();
-
                if (!responseText) {
                     throw new Error('Empty response from AI');
                }
 
-               // Remove markdown code blocks if present
-               const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-               const rawData = JSON.parse(jsonText);
+               const rawData = JSON.parse(responseText);
 
-               // Validate with Zod schema
+               // Zod as secondary validation (schema already enforced by Gemini)
                const validationResult = AIResponseSchema.safeParse(rawData);
-
-               if (!validationResult.success) {
-                    // Try to use raw data with defaults instead of failing completely
-                    parsedData = rawData.map((item: any) => ({
+               parsedData = validationResult.success
+                    ? validationResult.data
+                    : rawData.map((item: any) => ({
                          name: item.name || 'Unknown',
                          quantity: Number(item.quantity) || 1,
                          unit: item.unit || 'units',
@@ -273,9 +260,6 @@ Return the JSON array now:`;
                          existing_id: item.existing_id || null,
                          confidence: item.confidence || 0,
                     }));
-               } else {
-                    parsedData = validationResult.data;
-               }
           } catch (error) {
                console.error('Error parsing AI response:', error);
                return NextResponse.json(
