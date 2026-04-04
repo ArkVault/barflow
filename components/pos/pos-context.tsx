@@ -187,7 +187,7 @@ export function POSProvider({ children }: POSProviderProps) {
           }
      }, [operationsRepository]);
 
-     // Auto-save sections on every change (debounced)
+     // Auto-save sections on every change (debounced 800ms)
      useEffect(() => {
           if (!layoutLoadedRef.current) return;
 

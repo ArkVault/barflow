@@ -103,9 +103,18 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   };
 
   const handleImportedSupplies = (importedSupplies: any[]) => {
-    // Merge imported supplies with existing supplies
-    const mergedSupplies = [...supplies, ...importedSupplies];
-    setSupplies(mergedSupplies);
+    // Merge imported supplies, deduplicating by name (case-insensitive)
+    const existingNames = new Set(supplies.map(s => s.name.toLowerCase()));
+    const newOnly = importedSupplies.filter(s => !existingNames.has(s.name.toLowerCase()));
+    const duplicateCount = importedSupplies.length - newOnly.length;
+
+    if (duplicateCount > 0) {
+      toast.info(
+        `${duplicateCount} item${duplicateCount > 1 ? 's' : ''} already existed and were skipped`
+      );
+    }
+
+    setSupplies([...supplies, ...newOnly]);
   };
 
   const handleComplete = () => {

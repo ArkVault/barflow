@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import * as XLSX from 'xlsx';
-import Papa from 'papaparse';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { isContentLengthTooLarge } from '@/lib/security/request-guards';
@@ -132,28 +131,19 @@ export async function POST(request: NextRequest) {
                const worksheet = workbook.Sheets[targetSheetName];
                fileContent = XLSX.utils.sheet_to_csv(worksheet);
 
-               console.log(`📊 Excel file processed:`, {
-                    totalSheets: workbook.SheetNames.length,
-                    availableSheets: workbook.SheetNames,
-                    selectedSheet: targetSheetName,
-                    autoDetected: !!detectedSheet
-               });
-          } else if (fileType === 'pdf') {
-               // For PDF, we'll need to use a different approach
-               // For now, we'll return an error asking for CSV/Excel
-               return NextResponse.json(
-                    { error: 'PDF parsing not yet implemented. Please use CSV or Excel files.' },
-                    { status: 400 }
-               );
-          } else {
-               return NextResponse.json(
-                    { error: 'Unsupported file type. Please upload CSV, Excel, or PDF files.' },
-                    { status: 400 }
-               );
+          }
+
+          // Truncate content to avoid exceeding Gemini token limits
+          const MAX_ROWS = 500;
+          const lines = fileContent.split('\n');
+          let wasTruncated = false;
+          if (lines.length > MAX_ROWS) {
+               // Keep header + first MAX_ROWS data rows
+               fileContent = lines.slice(0, MAX_ROWS + 1).join('\n');
+               wasTruncated = true;
           }
 
           // Use Gemini AI to parse the content
-          console.log('🤖 Starting AI parsing...');
           const apiKey = process.env.GEMINI_API_KEY;
           if (!apiKey) {
                console.error('❌ GEMINI_API_KEY not configured');
@@ -163,114 +153,105 @@ export async function POST(request: NextRequest) {
                );
           }
 
-          // Fetch real schema from Supabase
+          // Query schema directly from Supabase (no self-fetch)
+          const DEFAULT_CATEGORIES = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
           let categories: string[] = [];
-          let existingSupplies: any[] = [];
+          let existingSupplies: { id: string; name: string; category: string; unit: string }[] = [];
 
           try {
-               const schemaResponse = await fetch(`${request.nextUrl.origin}/api/supplies/schema`);
-               if (schemaResponse.ok) {
-                    const schemaData = await schemaResponse.json();
-                    categories = schemaData.categories;
-                    existingSupplies = schemaData.supplies || [];
+               const { data: establishment } = await supabase
+                    .from('establishments')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
+
+               if (establishment) {
+                    const [catResult, supResult] = await Promise.all([
+                         supabase
+                              .from('supplies')
+                              .select('category')
+                              .eq('establishment_id', establishment.id)
+                              .not('category', 'is', null),
+                         supabase
+                              .from('supplies')
+                              .select('id, name, category, unit')
+                              .eq('establishment_id', establishment.id),
+                    ]);
+
+                    if (catResult.data) {
+                         const unique = [...new Set(catResult.data.map(r => r.category).filter(Boolean))].sort();
+                         categories = unique.length > 0 ? unique : DEFAULT_CATEGORIES;
+                    }
+                    existingSupplies = supResult.data ?? [];
                }
           } catch (error) {
-               console.error('Error fetching schema:', error);
-               // Fallback to default categories
-               categories = ['Licores', 'Licores Dulces', 'Refrescos', 'Frutas', 'Hierbas', 'Especias', 'Otros'];
+               console.error('Error fetching schema from DB:', error);
           }
 
-          console.log('🔧 Initializing Google GenAI...');
+          if (categories.length === 0) categories = DEFAULT_CATEGORIES;
+
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+          const model = genAI.getGenerativeModel({
+               model: 'gemini-2.5-flash',
+               generationConfig: {
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                         type: SchemaType.ARRAY,
+                         items: {
+                              type: SchemaType.OBJECT,
+                              properties: {
+                                   name: { type: SchemaType.STRING },
+                                   quantity: { type: SchemaType.NUMBER },
+                                   unit: { type: SchemaType.STRING },
+                                   category: { type: SchemaType.STRING },
+                                   matched_existing: { type: SchemaType.BOOLEAN },
+                                   existing_id: { type: SchemaType.STRING, nullable: true },
+                                   confidence: { type: SchemaType.NUMBER },
+                              },
+                              required: ['name', 'quantity', 'unit', 'category', 'matched_existing', 'confidence'],
+                         },
+                    },
+               },
+          });
 
-          const prompt = `You are a data extraction and validation assistant for a bar inventory system. 
+          const prompt = `You are a data extraction assistant for a bar inventory system.
 
-**TASK**: Parse the following menu/inventory data and extract items with proper validation.
+Parse the following inventory data and extract supply items.
 
-**REQUIRED OUTPUT STRUCTURE** (JSON array):
-[
-  {
-    "name": "string (required)",
-    "quantity": number (required, must be > 0),
-    "unit": "string (required: ml, L, g, kg, units, oz, etc.)",
-    "category": "string (required, must be one of the valid categories)",
-    "matched_existing": boolean (true if matches existing supply),
-    "existing_id": "uuid or null",
-    "confidence": number (0-1, how confident the match is)
-  }
-]
+VALID CATEGORIES (ONLY use these): ${categories.join(', ')}
 
-**VALID CATEGORIES** (ONLY use these):
-${categories.join(', ')}
+EXISTING SUPPLIES IN DATABASE (match new items to these when possible):
+${existingSupplies.map(s => `- ${s.name} (id: ${s.id}, category: ${s.category}, unit: ${s.unit})`).join('\n')}
 
-**EXISTING SUPPLIES IN DATABASE** (try to match new items to these):
-${existingSupplies.map(s => `- ${s.name} (${s.category}, unit: ${s.unit})`).join('\n')}
+RULES:
+- Name: valid supply/ingredient name
+- Quantity: positive number. Normalize compound values (e.g., "750ml" → quantity: 750, unit: "ml")
+- Unit: normalize to standard units (ml, L, g, kg, units, oz, bottles)
+- Category: MUST be one of the valid categories above. If uncertain, use "Otros"
+- Matching: if a similar name exists in the database, set matched_existing=true and existing_id to that supply's id. Set confidence 0-1 based on match quality
+- If no match, set matched_existing=false, existing_id=null, confidence=0
 
-**VALIDATION RULES**:
-1. Name: Must be a valid supply/ingredient name
-2. Quantity: Must be a positive number
-3. Unit: Normalize to standard units (ml, L, g, kg, units, oz, bottles)
-4. Category: MUST pick from the valid categories list above
-5. Matching: If a similar name exists in the database, set matched_existing=true and provide existing_id
-6. If uncertain about category, use "Otros" (Other)
+DATA TO PARSE:
+${fileContent}`;
 
-**MATCHING LOGIC**:
-- Check for exact name matches (case-insensitive)
-- Check for partial matches (e.g., "Ron" matches "Ron Blanco")
-- Check for common variations (e.g., "Coca" matches "Coca Cola")
-- Consider Spanish/English translations
-- Set confidence based on match quality
-
-**DATA TO PARSE**:
-${fileContent}
-
-**IMPORTANT**: 
-- Return ONLY valid JSON
-- Every item MUST have all required fields
-- Use existing supply IDs when there's a match
-- Be smart about normalization (e.g., "750ml" -> quantity: 750, unit: "ml")
-
-Return the JSON array now:`;
-
-          console.log('📤 Sending request to Gemini AI...');
           const result = await model.generateContent(prompt);
           const response = result.response;
-          console.log('📥 Received response from Gemini AI');
-          console.log('Response type:', typeof response);
-          console.log('Response keys:', Object.keys(response || {}));
 
-          // Extract JSON from response
+          // With JSON mode + responseSchema, output is guaranteed valid JSON
           let parsedData;
           try {
-               console.log('🔍 Parsing AI response...');
-
-               // The correct way to access Gemini response text with @google/generative-ai
                const responseText = response.text();
-
-               console.log('Response text length:', responseText.length);
-               console.log('Response text preview:', responseText.substring(0, 200));
-
                if (!responseText) {
-                    console.error('❌ Empty response from AI');
-                    console.error('Response structure:', JSON.stringify(response, null, 2));
                     throw new Error('Empty response from AI');
                }
 
-               // Remove markdown code blocks if present
-               const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-               console.log('Cleaned JSON text preview:', jsonText.substring(0, 200));
+               const rawData = JSON.parse(responseText);
 
-               const rawData = JSON.parse(jsonText);
-               console.log('✅ JSON parsed, validating with Zod...');
-
-               // Validate with Zod schema
+               // Zod as secondary validation (schema already enforced by Gemini)
                const validationResult = AIResponseSchema.safeParse(rawData);
-
-               if (!validationResult.success) {
-                    console.error('❌ Zod validation failed:', validationResult.error.errors);
-                    // Try to use raw data with defaults instead of failing completely
-                    parsedData = rawData.map((item: any) => ({
+               parsedData = validationResult.success
+                    ? validationResult.data
+                    : rawData.map((item: any) => ({
                          name: item.name || 'Unknown',
                          quantity: Number(item.quantity) || 1,
                          unit: item.unit || 'units',
@@ -279,16 +260,8 @@ Return the JSON array now:`;
                          existing_id: item.existing_id || null,
                          confidence: item.confidence || 0,
                     }));
-                    console.log('⚠️ Using fallback data with defaults');
-               } else {
-                    parsedData = validationResult.data;
-                    console.log('✅ Zod validation passed');
-               }
-
-               console.log('✅ Successfully processed', parsedData.length, 'items');
           } catch (error) {
-               console.error('❌ Error parsing AI response:', error);
-               console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+               console.error('Error parsing AI response:', error);
                return NextResponse.json(
                     { error: 'Failed to parse AI response. Please try again.' },
                     { status: 500 }
@@ -331,7 +304,8 @@ Return the JSON array now:`;
                     new: newSupplies.length,
                     matched: matchedSupplies.length,
                     categories: [...new Set(supplies.map((s: any) => s.category))],
-                    ...(detectedSheet ? { detectedSheet } : {})
+                    ...(detectedSheet ? { detectedSheet } : {}),
+                    ...(wasTruncated ? { wasTruncated: true, originalRows: lines.length } : {})
                }
           });
 
