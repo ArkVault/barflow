@@ -1,0 +1,7 @@
+ ls "/Users/gibrann/.cursor/projects"
+ ls "/Users/gibrann/.cursor/projects/Users-gibrann-Desktop-Barflow"
+ pnpm dev
+ npm run dev
+ which npm && node -v && npm -v
+ command npm -v
+ command npm run dev
