@@ -5,3 +5,7 @@
  which npm && node -v && npm -v
  command npm -v
  command npm run dev
+ corepack pnpm -v && corepack pnpm dev
+ command npx pnpm -v
+ command npx pnpm dev
+ ps -p 71163 -o pid=,ppid=,command=
