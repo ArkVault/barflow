@@ -125,3 +125,6 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
  grep -r "data:" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/demo/proyecciones/ 2>/dev/null || echo "No data: found, checking layout"
  grep -r "ProjectionView\|SalesProjectionChart\|InventoryProjectionChart" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam --include="*.tsx" --include="*.ts" -l 2>/dev/null | sort -u
  grep -A5 -B5 "ProjectionView\|SalesProjection\|InventoryProjection" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/demo/page.tsx
+ export PATH="/usr/local/bin:$PATH"; cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/tsc --noEmit 2>&1 | grep -v "onboarding" | grep "error TS"
+ export PATH="/usr/local/bin:$PATH"; cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/tsc --noEmit 2>&1 | grep "^Found"
+ export PATH="/usr/local/bin:$PATH"; cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/tsc --noEmit 2>&1 | tail -3
