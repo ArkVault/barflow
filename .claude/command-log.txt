@@ -108,3 +108,20 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
  git -C /Users/gibrann/Desktop/Barflow log --oneline -3
  git -C /Users/gibrann/Desktop/Barflow push origin development
  git push origin --delete claude/wizardly-kalam
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f \( -name "*proyecc*" -o -name "*projection*" -o -name "*forecast*" \) 2>/dev/null | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type d -name "*proyecc*" -o -type d -name "*projection*" 2>/dev/null
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/dashboard/proyecciones -type f 2>/dev/null
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/demo/proyecciones -type f 2>/dev/null
+ grep -r "proyecc\|projection" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" -l 2>/dev/null | head -30
+ grep -r "proyecc\|projection" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam --include="*.ts" --include="*.tsx" -B 2 -A 2 | grep -E "server\s+action|GET|POST|fetch|supabase|query" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f -name "*order*" -o -name "*suggestion*" 2>/dev/null | grep -E "components|app"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f \( -name "*.ts" -o -name "*.tsx" \) -path "*/api/*" 2>/dev/null | grep -i "proyecc\|projection"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f -name "*.ts" -path "*/lib/*" 2>/dev/null | xargs grep -l "proyecc\|projection" 2>/dev/null
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f -name "*stock*" -o -name "*utils*" 2>/dev/null | head -15
+ grep -n -i "proyecc\|projection\|inventory" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/lib/translations.ts | head -50
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/lib/features/dashboard/server/ 2>/dev/null
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam -type f \( -name "*.sql" -o -name "schema*" \) 2>/dev/null | head -10
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/contexts/ 2>/dev/null && ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/hooks/ 2>/dev/null
+ grep -r "data:" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/demo/proyecciones/ 2>/dev/null || echo "No data: found, checking layout"
+ grep -r "ProjectionView\|SalesProjectionChart\|InventoryProjectionChart" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam --include="*.tsx" --include="*.ts" -l 2>/dev/null | sort -u
+ grep -A5 -B5 "ProjectionView\|SalesProjection\|InventoryProjection" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wizardly-kalam/app/demo/page.tsx
