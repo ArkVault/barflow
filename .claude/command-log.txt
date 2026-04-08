@@ -76,3 +76,37 @@ sleep 10 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/
  ls -la /Users/gibrann/Desktop/Barflow/lib/features/dashboard/server/
  head -30 /Users/gibrann/Desktop/Barflow/app/demo/productos/page.tsx
  head -30 /Users/gibrann/Desktop/Barflow/app/dashboard/productos/page.tsx
+ find /Users/gibrann/Desktop/Barflow -type f -name "*.tsx" -o -name "*.ts" | grep -E "(demo|dashboard)" | head -20
+ find /Users/gibrann/Desktop/Barflow -type f \( -name "*.tsx" -o -name "*.ts" \) | xargs grep -l "DemoShell\|DemoSidebar\|DemoTopNav\|DemoPageContainer\|ProdShell" | head -20
+ find /Users/gibrann/Desktop/Barflow -type f \( -name "*.tsx" -o -name "*.ts" \) -path "*/components/*" | grep -i "demo\|shell" | head -20
+ find /Users/gibrann/Desktop/Barflow/components -type f \( -name "*.tsx" -o -name "*.ts" \) 2>/dev/null | grep -E "(demo|shell|prod)" | grep -v node_modules
+ find /Users/gibrann/Desktop/Barflow -path "*/.claude" -prune -o -path "*/node_modules" -prune -o -name "layout.tsx" -print | grep dashboard
+ ls -la /Users/gibrann/Desktop/Barflow/app/dashboard/
+ ls -la /Users/gibrann/Desktop/Barflow/app/
+ find /Users/gibrann/Desktop/Barflow/components -name "*dashboard-layout*" -o -name "*layout*" | grep -v node_modules
+ find /Users/gibrann/Desktop/Barflow -name "*demo-route*" -o -name "*route*" | grep -E "lib|utils" | head -10
+ find /Users/gibrann/Desktop/Barflow/lib -name "*.ts" | grep -i demo
+ grep -r "neumorphic\|glow" /Users/gibrann/Desktop/Barflow/app --include="*.css" --include="*.tsx" | head -30
+ grep -r "@apply\|\.neumorphic\|btn-glow" /Users/gibrann/Desktop/Barflow/app --include="*.css" | head -20
+ find /Users/gibrann/Desktop/Barflow/components -name "*glow*" -o -name "*button*" | head -10
+ ls -la /Users/gibrann/Desktop/Barflow/components/ | grep -E "sidebar|nav|header|account"
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/demo/ventas/ 2>/dev/null && echo "exists" || echo "no"; ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ventas/ 2>/dev/null && echo "exists" || echo "no"; ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/punto-de-venta/ 2>/dev/null && echo "exists" || echo "no"
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep -v "onboarding" | head -20
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep -v "onboarding" | head -20
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt 2>/dev/null; git merge claude/wonderful-shaw --no-edit 2>&1
+ git log --oneline -5
+ git log --oneline --stat dc8b889 -1
+ git diff --stat HEAD
+ git add components/demo-sidebar.tsx components/shells/prod-shell.tsx app/dashboard/dashboard-content.tsx app/dashboard/insumos/page.tsx app/dashboard/operaciones/page.tsx app/dashboard/planner/planner-client.tsx app/dashboard/productos/page.tsx app/dashboard/proyecciones/page.tsx app/dashboard/punto-de-venta/page.tsx app/dashboard/ventas/page.tsx
+ git commit -m "$(cat <<'EOF'
+feat(ui): unify dashboard shell to match demo aesthetic
+
+DemoSidebar now accepts mode="dashboard" with basePath routing, user info,
+settings, upgrade, and logout. ProdShell uses the same floating neumorphic
+sidebar, glow buttons, and DemoPageContainer margins as the demo shell.
+All dashboard pages render headers inline instead of via ProdShell props.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw --no-edit 2>&1
