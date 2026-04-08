@@ -124,3 +124,15 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt 2>/dev/null; git merge claude/wonderful-shaw --no-edit 2>&1
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep -v "onboarding" | grep "error TS" | head -5
+ git add app/dashboard/planner/planner-client.tsx && git commit -m "$(cat <<'EOF'
+fix(planner): remove double sidebar margin in dashboard planner
+
+InventoryPlanner has its own ml-0 md:ml-20 lg:ml-72 margins built in.
+Using ProdShell (which also adds margins) caused double margins. Now
+uses DemoSidebar directly, matching the demo planner layout exactly.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt 2>/dev/null; git merge claude/wonderful-shaw --no-edit 2>&1
