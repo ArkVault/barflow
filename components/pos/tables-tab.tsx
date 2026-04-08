@@ -25,6 +25,7 @@ import {
   DollarSign,
   ChevronRight,
   Calendar,
+  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
@@ -56,6 +57,7 @@ export function TablesTab() {
     closeAccount,
     cancelAccount,
     removeItemFromAccount,
+    moveItemBetweenAccounts,
     getCurrentAccount,
     getElapsedTime,
     saveLayout,
@@ -97,6 +99,10 @@ export function TablesTab() {
     type: "table" | "bar";
   } | null>(null);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [movingItem, setMovingItem] = useState<{
+    accountId: string;
+    itemId: string;
+  } | null>(null);
 
   // Reservations state
   const [reservations, setReservations] = useState<any[]>([]);
@@ -1091,34 +1097,101 @@ export function TablesTab() {
                               : "Account items:"}
                           </h5>
                           {account.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-muted/50 group"
-                            >
-                              <span>
-                                {item.quantity}x {item.productName}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">
-                                  ${item.total.toFixed(2)}
+                            <div key={item.id}>
+                              <div className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-muted/50 group">
+                                <span>
+                                  {item.quantity}x {item.productName}
                                 </span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive"
-                                  onClick={() => {
-                                    removeItemFromAccount(
-                                      selectedItem.sectionId,
-                                      selectedItem.itemId,
-                                      account.id,
-                                      item.id,
-                                      selectedItem.type,
-                                    );
-                                  }}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">
+                                    ${item.total.toFixed(2)}
+                                  </span>
+                                  {selectedItemData.accounts.length > 1 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className={cn(
+                                        "h-6 w-6",
+                                        movingItem?.accountId === account.id &&
+                                          movingItem?.itemId === item.id
+                                          ? "opacity-100 text-blue-500"
+                                          : "opacity-0 group-hover:opacity-100 text-muted-foreground",
+                                      )}
+                                      onClick={() =>
+                                        setMovingItem(
+                                          movingItem?.itemId === item.id &&
+                                            movingItem?.accountId === account.id
+                                            ? null
+                                            : {
+                                                accountId: account.id,
+                                                itemId: item.id,
+                                              },
+                                        )
+                                      }
+                                      title={
+                                        language === "es"
+                                          ? "Mover a otra cuenta"
+                                          : "Move to another account"
+                                      }
+                                    >
+                                      <ArrowRightLeft className="w-3 h-3" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive"
+                                    onClick={() => {
+                                      removeItemFromAccount(
+                                        selectedItem.sectionId,
+                                        selectedItem.itemId,
+                                        account.id,
+                                        item.id,
+                                        selectedItem.type,
+                                      );
+                                    }}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </div>
+                              {/* Move target buttons */}
+                              {movingItem?.accountId === account.id &&
+                                movingItem?.itemId === item.id && (
+                                  <div className="flex gap-1 px-2 py-1 ml-4">
+                                    <span className="text-xs text-muted-foreground self-center mr-1">
+                                      {language === "es"
+                                        ? "Mover a:"
+                                        : "Move to:"}
+                                    </span>
+                                    {selectedItemData.accounts
+                                      .filter((acc) => acc.id !== account.id)
+                                      .map((targetAcc) => (
+                                        <Button
+                                          key={targetAcc.id}
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-6 text-xs px-2"
+                                          onClick={() => {
+                                            moveItemBetweenAccounts(
+                                              selectedItem.sectionId,
+                                              selectedItem.itemId,
+                                              account.id,
+                                              targetAcc.id,
+                                              item.id,
+                                              selectedItem.type,
+                                            );
+                                            setMovingItem(null);
+                                          }}
+                                        >
+                                          {targetAcc.seatLabel ||
+                                            (language === "es"
+                                              ? "Cuenta Principal"
+                                              : "Main Account")}
+                                        </Button>
+                                      ))}
+                                  </div>
+                                )}
                             </div>
                           ))}
                         </div>
