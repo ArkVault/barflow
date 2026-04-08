@@ -1,32 +1,32 @@
+"use client";
+
 import type { ReactNode } from "react";
-import { DashboardLayout } from "@/components/dashboard-layout";
+import { DemoSidebar } from "@/components/demo-sidebar";
+import { TrialExpiredOverlay } from "@/components/trial-expired-overlay";
+import { cn } from "@/lib/utils";
 
 interface ProdShellProps {
   children: ReactNode;
   userName: string;
   establishmentName: string;
-  pageTitle?: string;
-  pageDescription?: string;
-  headerActions?: ReactNode;
+  className?: string;
 }
 
 export function ProdShell({
   children,
   userName,
   establishmentName,
-  pageTitle,
-  pageDescription,
-  headerActions,
+  className,
 }: ProdShellProps) {
   return (
-    <DashboardLayout
-      userName={userName}
-      establishmentName={establishmentName}
-      pageTitle={pageTitle}
-      pageDescription={pageDescription}
-      headerActions={headerActions}
-    >
-      {children}
-    </DashboardLayout>
+    <div className={cn("min-h-svh bg-background", className)}>
+      <DemoSidebar
+        mode="dashboard"
+        userName={userName}
+        establishmentName={establishmentName}
+      />
+      <div className="min-h-screen ml-0 md:ml-20 lg:ml-72">{children}</div>
+      <TrialExpiredOverlay />
+    </div>
   );
 }

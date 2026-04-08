@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
 import { LayoutGrid, FileText, History } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useAuth } from "@/contexts/auth-context";
 import { ProdShell } from "@/components/shells";
-import { POSProvider, usePOS, TablesTab, OrdersTab, HistoryTab } from "@/components/pos";
+import {
+  POSProvider,
+  usePOS,
+  TablesTab,
+  OrdersTab,
+  HistoryTab,
+} from "@/components/pos";
 
 const TABS = [
   { id: "mesas", labelEs: "Mesas", labelEn: "Tables", icon: LayoutGrid },
@@ -23,11 +29,17 @@ function OperacionesContent() {
     <ProdShell
       userName={user?.email || "Usuario"}
       establishmentName={establishmentName || "Mi Negocio"}
-      pageTitle={t("operations")}
-      pageDescription={language === "es" ? "Gestión de mesas, comandas y ventas" : "Tables, orders and sales management"}
     >
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">{t("operations")}</h1>
+            <p className="text-muted-foreground">
+              {language === "es"
+                ? "Gestión de mesas, comandas y ventas"
+                : "Tables, orders and sales management"}
+            </p>
+          </div>
           <div className="mb-6">
             <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
               {TABS.map((tab) => {

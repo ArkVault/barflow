@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProdShell } from "@/components/shells";
 import { SalesStats } from "@/components/sales-stats";
@@ -33,14 +33,16 @@ export default async function VentasPage() {
 
   const { data: sales } = await supabase
     .from("sales")
-    .select(`
+    .select(
+      `
       *,
       products (
         id,
         name,
         category
       )
-    `)
+    `,
+    )
     .eq("establishment_id", establishment.id)
     .order("sale_date", { ascending: false })
     .limit(50);
@@ -59,11 +61,20 @@ export default async function VentasPage() {
     <ProdShell
       userName={data.user.email || ""}
       establishmentName={establishment.name}
-      pageTitle="Ventas y Contabilidad"
-      pageDescription="Gestiona tus ventas y analiza tus ingresos"
-      headerActions={<RecordSaleDialog establishmentId={establishment.id} products={products || []} />}
     >
       <main className="container mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Ventas y Contabilidad</h1>
+            <p className="text-muted-foreground">
+              Gestiona tus ventas y analiza tus ingresos
+            </p>
+          </div>
+          <RecordSaleDialog
+            establishmentId={establishment.id}
+            products={products || []}
+          />
+        </div>
         <div className="space-y-6">
           <SalesStats establishmentId={establishment.id} />
           <SalesChart data={chartData || []} />
