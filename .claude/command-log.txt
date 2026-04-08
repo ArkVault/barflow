@@ -9,3 +9,11 @@
  command npx pnpm -v
  command npx pnpm dev
  ps -p 71163 -o pid=,ppid=,command=
+ env | rg "^BROWSERSLIST|^BROWSER"
+ env
+ command -v pnpm; ls "/Users/gibrann/Library/pnpm"
+ command npx browserslist
+ curl -I "http://localhost:3000"
+ kill 71163 && command npx pnpm dev
+ curl -I "http://localhost:3000/"
+ curl -I "http://localhost:3000/auth/login"
