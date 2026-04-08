@@ -181,11 +181,12 @@ export function sendOrderToTargetInSections(
   itemId: string,
   type: PosItemType,
   currentOrder: AccountItem[],
+  targetAccountId?: string,
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => {
       let targetAccount = item.accounts.find(
-        (acc) => acc.id === item.currentAccountId,
+        (acc) => acc.id === (targetAccountId ?? item.currentAccountId),
       );
 
       if (!targetAccount) {

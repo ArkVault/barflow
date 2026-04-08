@@ -27,3 +27,7 @@
  grep -rn "CREATE TABLE.*pos\|CREATE TABLE.*orders\|CREATE TABLE.*sales" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/scripts/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/
  grep -rn "operations_layout\|CREATE TABLE.*pos\|CREATE TABLE.*order\|CREATE TABLE.*sale" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw --include="*.sql" | grep -v ".sqlite"
  find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.sql" -exec grep -l "operations_layout" {} \;
+ ln -s /Users/gibrann/Desktop/Barflow/node_modules /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules 2>/dev/null; ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules | head -3
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules
+ npx tsc --noEmit 2>&1 | head -40
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | head -40
