@@ -21,3 +21,6 @@
  cd /Users/gibrann/Desktop/Barflow && git diff README.md && git log -3 --oneline
  cd /Users/gibrann/Desktop/Barflow && git show HEAD:README.md | head -15
  cd /Users/gibrann/Desktop/Barflow && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git status && git log -1 --oneline && git diff --stat HEAD
+ cd /Users/gibrann/Desktop/Barflow && git log origin/development..HEAD --oneline && echo '---' && git log origin/development..HEAD --name-only --pretty=format:'%h %s'
+ cd /Users/gibrann/Desktop/Barflow && git diff origin/development --stat | head -40
