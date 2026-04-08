@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { InventoryPlanner } from "@/components/inventory-planner";
-import { ProdShell } from "@/components/shells";
+import { DemoSidebar } from "@/components/demo-sidebar";
 import type { SupplyPlan, PlanPeriod } from "@/lib/default-supplies";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/use-language";
@@ -91,8 +91,13 @@ export function PlannerClient({
   };
 
   return (
-    <ProdShell userName={userName} establishmentName={establishmentName}>
+    <div className="min-h-svh bg-background">
+      <DemoSidebar
+        mode="dashboard"
+        userName={userName}
+        establishmentName={establishmentName}
+      />
       <InventoryPlanner onComplete={handlePlanComplete} />
-    </ProdShell>
+    </div>
   );
 }
