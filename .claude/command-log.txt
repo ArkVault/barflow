@@ -17,10 +17,17 @@
  kill 71163 && command npx pnpm dev
  curl -I "http://localhost:3000/"
  curl -I "http://localhost:3000/auth/login"
- cd /Users/gibrann/Desktop/Barflow && git status && git branch -vv
- cd /Users/gibrann/Desktop/Barflow && git diff README.md && git log -3 --oneline
- cd /Users/gibrann/Desktop/Barflow && git show HEAD:README.md | head -15
- cd /Users/gibrann/Desktop/Barflow && git push origin development
- cd /Users/gibrann/Desktop/Barflow && git status && git log -1 --oneline && git diff --stat HEAD
- cd /Users/gibrann/Desktop/Barflow && git log origin/development..HEAD --oneline && echo '---' && git log origin/development..HEAD --name-only --pretty=format:'%h %s'
- cd /Users/gibrann/Desktop/Barflow && git diff origin/development --stat | head -40
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.tsx" -o -name "*.ts" | grep -E "(mesa|table|account|cuenta)" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "schema.ts" -o -name "index.ts" \) | grep -E "(db|types|lib)" | head -10
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/api -type f -name "*.ts" | head -30
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "*.sql" -o -name "*supabase*" \) 2>/dev/null | head -20
+ grep -r "openNewAccountInSections\|closeAccountInSections\|sendOrderToTargetInSections" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw --include="*.ts" --include="*.tsx" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/lib -type f -name "*.ts" | head -30
+ grep -n "pos_orders\|pos_sales\|menus\|accounts" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/scripts/*.sql | head -30
+ grep -rn "CREATE TABLE.*pos\|CREATE TABLE.*orders\|CREATE TABLE.*sales" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/scripts/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/
+ grep -rn "operations_layout\|CREATE TABLE.*pos\|CREATE TABLE.*order\|CREATE TABLE.*sale" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw --include="*.sql" | grep -v ".sqlite"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.sql" -exec grep -l "operations_layout" {} \;
+ ln -s /Users/gibrann/Desktop/Barflow/node_modules /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules 2>/dev/null; ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules | head -3
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules
+ npx tsc --noEmit 2>&1 | head -40
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | head -40
