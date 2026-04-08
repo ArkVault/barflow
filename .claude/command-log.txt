@@ -136,3 +136,22 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt 2>/dev/null; git merge claude/wonderful-shaw --no-edit 2>&1
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --pretty 2>&1 | head -80
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -c "error TS"
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep "insumos"
+ git status
+ git diff --stat
+ git log --oneline -5
+ git add app/dashboard/insumos/page.tsx && git commit -m "$(cat <<'EOF'
+feat(dashboard): unify Insumos page with demo UI
+
+Rewrote dashboard insumos from a simple server component to a full
+client component matching demo: status filter cards, StockHalfCircle
+indicators, inline edit/delete/restock actions, and purchase list system.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard insumos page with demo UI"
