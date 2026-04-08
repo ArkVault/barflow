@@ -463,6 +463,7 @@ export function POSProvider({ children }: POSProviderProps) {
       itemId,
       normalizedType,
       currentOrder,
+      selectedAccountForOrder ?? undefined,
     );
     setSections(updated);
     await saveLayout(updated);
@@ -471,7 +472,13 @@ export function POSProvider({ children }: POSProviderProps) {
     setCurrentOrder([]);
     setProductQuantities({});
     // Keep selectedTableForOrder so user can continue adding items to same table
-  }, [selectedTableForOrder, currentOrder, saveLayout, sections]);
+  }, [
+    selectedTableForOrder,
+    selectedAccountForOrder,
+    currentOrder,
+    saveLayout,
+    sections,
+  ]);
 
   const getCurrentAccount = useCallback((): Account | null => {
     if (!selectedItem) return null;
@@ -546,6 +553,8 @@ export function POSProvider({ children }: POSProviderProps) {
     setCurrentOrder,
     selectedTableForOrder,
     setSelectedTableForOrder,
+    selectedAccountForOrder,
+    setSelectedAccountForOrder,
     productQuantities,
     setProductQuantities,
     sales,
