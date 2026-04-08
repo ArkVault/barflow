@@ -10,13 +10,22 @@ interface PlannerClientProps {
   establishmentName: string;
 }
 
-export function PlannerClient({ userName, establishmentName }: PlannerClientProps) {
+export function PlannerClient({
+  userName,
+  establishmentName,
+}: PlannerClientProps) {
   const router = useRouter();
 
-  const handlePlanComplete = async (supplies: SupplyPlan[], period: PlanPeriod) => {
+  const handlePlanComplete = async (
+    supplies: SupplyPlan[],
+    period: PlanPeriod,
+  ) => {
     // Store the plan in localStorage
     if (typeof window !== "undefined") {
-      localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
+      localStorage.setItem(
+        "barflow_plan",
+        JSON.stringify({ supplies, period }),
+      );
     }
 
     // TODO: In production, save to Supabase database
@@ -25,13 +34,14 @@ export function PlannerClient({ userName, establishmentName }: PlannerClientProp
   };
 
   return (
-    <ProdShell
-      userName={userName}
-      establishmentName={establishmentName}
-      pageTitle="Planner de Inventario"
-      pageDescription="Configura tu plan de inventario inicial"
-    >
+    <ProdShell userName={userName} establishmentName={establishmentName}>
       <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Planner de Inventario</h1>
+          <p className="text-muted-foreground">
+            Configura tu plan de inventario inicial
+          </p>
+        </div>
         <InventoryPlanner onComplete={handlePlanComplete} />
       </div>
     </ProdShell>

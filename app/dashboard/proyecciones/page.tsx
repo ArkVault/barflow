@@ -7,20 +7,21 @@ export default async function ProyeccionesPage() {
   const vm = await getProyeccionesViewModel();
 
   return (
-    <ProdShell
-      userName={vm.userName}
-      establishmentName={vm.establishmentName}
-      pageTitle="Proyecciones Inteligentes"
-      pageDescription="Planifica tu inventario con predicciones basadas en IA"
-      headerActions={
-        <GenerateProjectionsButton
-          establishmentId={vm.establishmentId}
-          supplies={vm.supplies}
-          sales={vm.sales}
-        />
-      }
-    >
+    <ProdShell userName={vm.userName} establishmentName={vm.establishmentName}>
       <main className="container mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Proyecciones Inteligentes</h1>
+            <p className="text-muted-foreground">
+              Planifica tu inventario con predicciones basadas en IA
+            </p>
+          </div>
+          <GenerateProjectionsButton
+            establishmentId={vm.establishmentId}
+            supplies={vm.supplies}
+            sales={vm.sales}
+          />
+        </div>
         <ProjectionView
           establishmentId={vm.establishmentId}
           supplies={vm.supplies}

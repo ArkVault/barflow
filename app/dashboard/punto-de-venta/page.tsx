@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useLanguage } from "@/hooks/use-language";
 import { LayoutGrid, FileText, History } from "lucide-react";
@@ -6,70 +6,85 @@ import { useAuth } from "@/contexts/auth-context";
 import { ProdShell } from "@/components/shells";
 
 // Import POS components following Dependency Inversion Principle
-import { POSProvider, usePOS, TablesTab, OrdersTab, HistoryTab } from '@/components/pos';
+import {
+  POSProvider,
+  usePOS,
+  TablesTab,
+  OrdersTab,
+  HistoryTab,
+} from "@/components/pos";
 
 // Tab configuration - Open/Closed: Add new tabs without modifying existing logic
 const TABS = [
-     { id: 'mesas', labelEs: 'Mesas', labelEn: 'Tables', icon: LayoutGrid },
-     { id: 'comandas', labelEs: 'Comandas', labelEn: 'Orders', icon: FileText },
-     { id: 'historial', labelEs: 'Registro', labelEn: 'History', icon: History },
+  { id: "mesas", labelEs: "Mesas", labelEn: "Tables", icon: LayoutGrid },
+  { id: "comandas", labelEs: "Comandas", labelEn: "Orders", icon: FileText },
+  { id: "historial", labelEs: "Registro", labelEn: "History", icon: History },
 ] as const;
 
-type TabId = typeof TABS[number]['id'];
+type TabId = (typeof TABS)[number]["id"];
 
 // Inner component that uses the POS context
 function POSContent() {
-     const { t, language } = useLanguage();
-     const { activeTab, setActiveTab } = usePOS();
-     const { user, establishmentName } = useAuth();
+  const { t, language } = useLanguage();
+  const { activeTab, setActiveTab } = usePOS();
+  const { user, establishmentName } = useAuth();
 
-     return (
-          <ProdShell
-               userName={user?.email || "Usuario"}
-               establishmentName={establishmentName || "Mi Negocio"}
-               pageTitle={language === 'es' ? 'Punto de Venta' : 'Point of Sale'}
-               pageDescription={language === 'es' ? 'Gestión de mesas, comandas y ventas' : 'Tables, orders and sales management'}
-          >
-               <div className="min-h-screen bg-background p-6">
-                    <div className="max-w-7xl mx-auto">
-                         {/* Tabs */}
-                         <div className="mb-6">
-                              <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
-                                   {TABS.map(tab => {
-                                        const Icon = tab.icon;
-                                        return (
-                                             <button
-                                                  key={tab.id}
-                                                  type="button"
-                                                  onClick={() => setActiveTab(tab.id)}
-                                                  className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${activeTab === tab.id
-                                                       ? 'bg-background text-foreground shadow-sm font-medium'
-                                                       : 'text-muted-foreground hover:text-foreground'
-                                                       }`}
-                                             >
-                                                  <Icon className="w-4 h-4" />
-                                                  {language === 'es' ? tab.labelEs : tab.labelEn}
-                                             </button>
-                                        );
-                                   })}
-                              </div>
-                         </div>
+  return (
+    <ProdShell
+      userName={user?.email || "Usuario"}
+      establishmentName={establishmentName || "Mi Negocio"}
+    >
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">
+              {language === "es" ? "Punto de Venta" : "Point of Sale"}
+            </h1>
+            <p className="text-muted-foreground">
+              {language === "es"
+                ? "Gestión de mesas, comandas y ventas"
+                : "Tables, orders and sales management"}
+            </p>
+          </div>
+          {/* Tabs */}
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${
+                      activeTab === tab.id
+                        ? "bg-background text-foreground shadow-sm font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {language === "es" ? tab.labelEs : tab.labelEn}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-                         {/* Tab Content - Single Responsibility: Just render the active tab */}
-                         {activeTab === 'mesas' && <TablesTab />}
-                         {activeTab === 'comandas' && <OrdersTab />}
-                         {activeTab === 'historial' && <HistoryTab />}
-                    </div>
-               </div>
-          </ProdShell>
-     );
+          {/* Tab Content - Single Responsibility: Just render the active tab */}
+          {activeTab === "mesas" && <TablesTab />}
+          {activeTab === "comandas" && <OrdersTab />}
+          {activeTab === "historial" && <HistoryTab />}
+        </div>
+      </div>
+    </ProdShell>
+  );
 }
 
 // Main page component - Wraps with Provider
 export default function PuntoDeVentaPage() {
-     return (
-          <POSProvider>
-               <POSContent />
-          </POSProvider>
-     );
+  return (
+    <POSProvider>
+      <POSContent />
+    </POSProvider>
+  );
 }
