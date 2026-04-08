@@ -110,3 +110,17 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw --no-edit 2>&1
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/planner/
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep -v "onboarding" | grep "error TS" | head -10
+ git add app/dashboard/page.tsx app/dashboard/planner/planner-client.tsx && git commit -m "$(cat <<'EOF'
+feat(dashboard): unify Panel de Control and Planner with demo UI
+
+Dashboard home now uses the same rich layout as demo: NeonDonutChart gauge,
+top 5 products list, SalesChartSimple, InventoryProjectionChart, and period
+selector. Planner now saves to Supabase API (not just localStorage) and
+redirects to /dashboard/insumos after completion.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt 2>/dev/null; git merge claude/wonderful-shaw --no-edit 2>&1
