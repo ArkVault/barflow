@@ -1,0 +1,29 @@
+ ls "/Users/gibrann/.cursor/projects"
+ ls "/Users/gibrann/.cursor/projects/Users-gibrann-Desktop-Barflow"
+ pnpm dev
+ npm run dev
+ which npm && node -v && npm -v
+ command npm -v
+ command npm run dev
+ corepack pnpm -v && corepack pnpm dev
+ command npx pnpm -v
+ command npx pnpm dev
+ ps -p 71163 -o pid=,ppid=,command=
+ env | rg "^BROWSERSLIST|^BROWSER"
+ env
+ command -v pnpm; ls "/Users/gibrann/Library/pnpm"
+ command npx browserslist
+ curl -I "http://localhost:3000"
+ kill 71163 && command npx pnpm dev
+ curl -I "http://localhost:3000/"
+ curl -I "http://localhost:3000/auth/login"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.tsx" -o -name "*.ts" | grep -E "(mesa|table|account|cuenta)" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "schema.ts" -o -name "index.ts" \) | grep -E "(db|types|lib)" | head -10
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/api -type f -name "*.ts" | head -30
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "*.sql" -o -name "*supabase*" \) 2>/dev/null | head -20
+ grep -r "openNewAccountInSections\|closeAccountInSections\|sendOrderToTargetInSections" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw --include="*.ts" --include="*.tsx" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/lib -type f -name "*.ts" | head -30
+ grep -n "pos_orders\|pos_sales\|menus\|accounts" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/scripts/*.sql | head -30
+ grep -rn "CREATE TABLE.*pos\|CREATE TABLE.*orders\|CREATE TABLE.*sales" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/scripts/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/
+ grep -rn "operations_layout\|CREATE TABLE.*pos\|CREATE TABLE.*order\|CREATE TABLE.*sale" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw --include="*.sql" | grep -v ".sqlite"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.sql" -exec grep -l "operations_layout" {} \;

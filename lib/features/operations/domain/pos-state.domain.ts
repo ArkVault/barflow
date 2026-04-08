@@ -15,20 +15,24 @@ function updateTargetItem(
   sectionId: string,
   itemId: string,
   type: PosItemType,
-  updater: (item: TableItem | BarItem) => TableItem | BarItem
+  updater: (item: TableItem | BarItem) => TableItem | BarItem,
 ): Section {
   if (section.id !== sectionId) return section;
 
   if (type === "table") {
     return {
       ...section,
-      tables: section.tables.map((item) => (item.id === itemId ? (updater(item) as TableItem) : item)),
+      tables: section.tables.map((item) =>
+        item.id === itemId ? (updater(item) as TableItem) : item,
+      ),
     };
   }
 
   return {
     ...section,
-    bars: section.bars.map((item) => (item.id === itemId ? (updater(item) as BarItem) : item)),
+    bars: section.bars.map((item) =>
+      item.id === itemId ? (updater(item) as BarItem) : item,
+    ),
   };
 }
 
@@ -36,17 +40,21 @@ export function openNewAccountInSections(
   sections: Section[],
   sectionId: string,
   itemId: string,
-  type: PosItemType
+  type: PosItemType,
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => {
+      const accountNumber = item.accounts.length + 1;
       const newAccount: Account = {
         id: `acc-${Date.now()}`,
         status: "abierta",
         openedAt: new Date(),
         items: [],
         total: 0,
-        seatLabel: type === "bar" ? `Asiento ${item.accounts.length + 1}` : undefined,
+        seatLabel:
+          type === "bar"
+            ? `Asiento ${accountNumber}`
+            : `Cuenta ${accountNumber}`,
       };
 
       return {
@@ -55,7 +63,7 @@ export function openNewAccountInSections(
         accounts: [...item.accounts, newAccount],
         currentAccountId: newAccount.id,
       };
-    })
+    }),
   );
 }
 
@@ -64,7 +72,7 @@ export function findAccountToClose(
   sectionId: string,
   itemId: string,
   accountId: string,
-  type: PosItemType
+  type: PosItemType,
 ): { account: Account; itemName: string } | null {
   const targetSection = sections.find((section) => section.id === sectionId);
   if (!targetSection) return null;
@@ -84,20 +92,27 @@ export function closeAccountInSections(
   sectionId: string,
   itemId: string,
   accountId: string,
-  type: PosItemType
+  type: PosItemType,
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => {
-      const updatedAccounts = item.accounts.filter((acc) => acc.id !== accountId);
-      const hasOpenAccounts = updatedAccounts.some((acc) => acc.status !== "pagada");
+      const updatedAccounts = item.accounts.filter(
+        (acc) => acc.id !== accountId,
+      );
+      const hasOpenAccounts = updatedAccounts.some(
+        (acc) => acc.status !== "pagada",
+      );
 
       return {
         ...item,
         status: hasOpenAccounts ? item.status : ("libre" as Status),
         accounts: updatedAccounts,
-        currentAccountId: updatedAccounts.length > 0 ? updatedAccounts[updatedAccounts.length - 1].id : undefined,
+        currentAccountId:
+          updatedAccounts.length > 0
+            ? updatedAccounts[updatedAccounts.length - 1].id
+            : undefined,
       };
-    })
+    }),
   );
 }
 
@@ -106,20 +121,25 @@ export function cancelAccountInSections(
   sectionId: string,
   itemId: string,
   accountId: string,
-  type: PosItemType
+  type: PosItemType,
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => {
-      const updatedAccounts = item.accounts.filter((acc) => acc.id !== accountId);
+      const updatedAccounts = item.accounts.filter(
+        (acc) => acc.id !== accountId,
+      );
       const hasOpenAccounts = updatedAccounts.length > 0;
 
       return {
         ...item,
         status: hasOpenAccounts ? item.status : ("libre" as Status),
         accounts: updatedAccounts,
-        currentAccountId: updatedAccounts.length > 0 ? updatedAccounts[updatedAccounts.length - 1].id : undefined,
+        currentAccountId:
+          updatedAccounts.length > 0
+            ? updatedAccounts[updatedAccounts.length - 1].id
+            : undefined,
       };
-    })
+    }),
   );
 }
 
@@ -129,7 +149,7 @@ export function removeItemFromAccountInSections(
   itemId: string,
   accountId: string,
   itemToRemoveId: string,
-  type: PosItemType
+  type: PosItemType,
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => ({
@@ -137,8 +157,13 @@ export function removeItemFromAccountInSections(
       accounts: item.accounts.map((account) => {
         if (account.id !== accountId) return account;
 
-        const updatedItems = account.items.filter((accItem) => accItem.id !== itemToRemoveId);
-        const newTotal = updatedItems.reduce((sum, accItem) => sum + accItem.total, 0);
+        const updatedItems = account.items.filter(
+          (accItem) => accItem.id !== itemToRemoveId,
+        );
+        const newTotal = updatedItems.reduce(
+          (sum, accItem) => sum + accItem.total,
+          0,
+        );
 
         return {
           ...account,
@@ -146,7 +171,7 @@ export function removeItemFromAccountInSections(
           total: newTotal,
         };
       }),
-    }))
+    })),
   );
 }
 
@@ -155,11 +180,13 @@ export function sendOrderToTargetInSections(
   sectionId: string,
   itemId: string,
   type: PosItemType,
-  currentOrder: AccountItem[]
+  currentOrder: AccountItem[],
 ): Section[] {
   return sections.map((section) =>
     updateTargetItem(section, sectionId, itemId, type, (item) => {
-      let targetAccount = item.accounts.find((acc) => acc.id === item.currentAccountId);
+      let targetAccount = item.accounts.find(
+        (acc) => acc.id === item.currentAccountId,
+      );
 
       if (!targetAccount) {
         targetAccount = {
@@ -172,9 +199,14 @@ export function sendOrderToTargetInSections(
       }
 
       const updatedItems = [...targetAccount.items, ...currentOrder];
-      const newTotal = updatedItems.reduce((sum, orderItem) => sum + orderItem.total, 0);
+      const newTotal = updatedItems.reduce(
+        (sum, orderItem) => sum + orderItem.total,
+        0,
+      );
 
-      const nextAccounts = item.accounts.some((acc) => acc.id === targetAccount!.id)
+      const nextAccounts = item.accounts.some(
+        (acc) => acc.id === targetAccount!.id,
+      )
         ? item.accounts.map((acc) =>
             acc.id === targetAccount!.id
               ? {
@@ -183,7 +215,7 @@ export function sendOrderToTargetInSections(
                   total: newTotal,
                   status: "en-consumo" as AccountStatus,
                 }
-              : acc
+              : acc,
           )
         : [
             ...item.accounts,
@@ -201,6 +233,6 @@ export function sendOrderToTargetInSections(
         accounts: nextAccounts,
         currentAccountId: targetAccount.id,
       };
-    })
+    }),
   );
 }
