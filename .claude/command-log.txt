@@ -64,3 +64,15 @@ sleep 10 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/
  cd /Users/gibrann/Desktop/Barflow && git checkout -- .claude/command-log.txt && git merge claude/wonderful-shaw --no-edit 2>&1
  cd /Users/gibrann/Desktop/Barflow && git stash -- .claude/command-log.txt && git merge claude/wonderful-shaw --no-edit 2>&1
  cd /Users/gibrann/Desktop/Barflow && git stash drop 2>/dev/null; git log --oneline -3
+ find /Users/gibrann/Desktop/Barflow -type f -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" | grep -E "(demo|dashboard)" | head -30
+ ls -la /Users/gibrann/Desktop/Barflow/app/dashboard/ | head -30
+ find /Users/gibrann/Desktop/Barflow/app -maxdepth 2 -name "layout.tsx" | grep -E "(dashboard|demo)"
+ head -20 /Users/gibrann/Desktop/Barflow/app/dashboard/planner/page.tsx
+ head -20 /Users/gibrann/Desktop/Barflow/app/demo/planner/page.tsx
+ find /Users/gibrann/Desktop/Barflow/app -name "middleware*" -type f
+ ls -la /Users/gibrann/Desktop/Barflow | grep -E "(middleware|layout)"
+ grep -r "redirect\|getUser" /Users/gibrann/Desktop/Barflow/app/dashboard/page.tsx /Users/gibrann/Desktop/Barflow/app/demo/page.tsx 2>/dev/null | head -20
+ grep -n "export.*function\|const.*=" /Users/gibrann/Desktop/Barflow/lib/utils/demo-route.ts 2>/dev/null | head -10
+ ls -la /Users/gibrann/Desktop/Barflow/lib/features/dashboard/server/
+ head -30 /Users/gibrann/Desktop/Barflow/app/demo/productos/page.tsx
+ head -30 /Users/gibrann/Desktop/Barflow/app/dashboard/productos/page.tsx
