@@ -48,3 +48,12 @@ EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git stash pop 2>&1
  cd /Users/gibrann/Desktop/Barflow && git checkout --theirs .claude/command-log.txt && git add .claude/command-log.txt && git stash drop
+ cd /Users/gibrann/Desktop/Barflow && npm run dev 2>&1 &
+ sleep 5 && cat /private/tmp/claude-501/-Users-gibrann-Desktop-Barflow--claude-worktrees-wonderful-shaw/4f8c66c7-a585-4878-b9ce-a630b605f264/tasks/bopb4tw77.output 2>/dev/null | tail -20
+ cd /Users/gibrann/Desktop/Barflow && cat package.json | grep -A2 '"dev"'
+ cd /Users/gibrann/Desktop/Barflow && npx next dev --turbopack 2>&1 &
+ sleep 8 && cat /private/tmp/claude-501/-Users-gibrann-Desktop-Barflow--claude-worktrees-wonderful-shaw/4f8c66c7-a585-4878-b9ce-a630b605f264/tasks/bjbiskcpn.output 2>/dev/null | tail -15
+ /usr/local/bin/node /Users/gibrann/Desktop/Barflow/node_modules/next/dist/bin/next dev --turbopack --dir /Users/gibrann/Desktop/Barflow 2>&1 | head -20 &
+sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "not ready yet"
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/next/dist/bin/next dev --turbopack 2>&1 &
+sleep 10 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "not ready"
