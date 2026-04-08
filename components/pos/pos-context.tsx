@@ -24,6 +24,7 @@ import {
   closeAccountInSections,
   cancelAccountInSections,
   removeItemFromAccountInSections,
+  moveItemBetweenAccountsInSections,
   sendOrderToTargetInSections,
 } from "@/lib/features/operations";
 import {
@@ -93,6 +94,14 @@ interface POSContextValue {
     itemId: string,
     accountId: string,
     itemToRemoveId: string,
+    type: "table" | "bar",
+  ) => void;
+  moveItemBetweenAccounts: (
+    sectionId: string,
+    itemId: string,
+    fromAccountId: string,
+    toAccountId: string,
+    itemToMoveId: string,
     type: "table" | "bar",
   ) => void;
   sendOrderToTable: () => Promise<void>;
@@ -452,6 +461,31 @@ export function POSProvider({ children }: POSProviderProps) {
     [],
   );
 
+  const moveItemBetweenAccounts = useCallback(
+    (
+      sectionId: string,
+      itemId: string,
+      fromAccountId: string,
+      toAccountId: string,
+      itemToMoveId: string,
+      type: "table" | "bar",
+    ) => {
+      setSections((prev) =>
+        moveItemBetweenAccountsInSections(
+          prev,
+          sectionId,
+          itemId,
+          fromAccountId,
+          toAccountId,
+          itemToMoveId,
+          type,
+        ),
+      );
+      toast.success("Producto movido");
+    },
+    [],
+  );
+
   const sendOrderToTable = useCallback(async () => {
     if (!selectedTableForOrder || currentOrder.length === 0) return;
 
@@ -566,6 +600,7 @@ export function POSProvider({ children }: POSProviderProps) {
     closeAccount,
     cancelAccount,
     removeItemFromAccount,
+    moveItemBetweenAccounts,
     sendOrderToTable,
     getCurrentAccount,
     getAllTablesAndBars,

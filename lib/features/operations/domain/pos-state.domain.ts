@@ -175,6 +175,52 @@ export function removeItemFromAccountInSections(
   );
 }
 
+export function moveItemBetweenAccountsInSections(
+  sections: Section[],
+  sectionId: string,
+  itemId: string,
+  fromAccountId: string,
+  toAccountId: string,
+  itemToMoveId: string,
+  type: PosItemType,
+): Section[] {
+  return sections.map((section) =>
+    updateTargetItem(section, sectionId, itemId, type, (item) => {
+      const fromAccount = item.accounts.find((acc) => acc.id === fromAccountId);
+      if (!fromAccount) return item;
+
+      const movedItem = fromAccount.items.find((i) => i.id === itemToMoveId);
+      if (!movedItem) return item;
+
+      return {
+        ...item,
+        accounts: item.accounts.map((account) => {
+          if (account.id === fromAccountId) {
+            const updatedItems = account.items.filter(
+              (i) => i.id !== itemToMoveId,
+            );
+            return {
+              ...account,
+              items: updatedItems,
+              total: updatedItems.reduce((sum, i) => sum + i.total, 0),
+            };
+          }
+          if (account.id === toAccountId) {
+            const updatedItems = [...account.items, movedItem];
+            return {
+              ...account,
+              items: updatedItems,
+              total: updatedItems.reduce((sum, i) => sum + i.total, 0),
+              status: "en-consumo" as AccountStatus,
+            };
+          }
+          return account;
+        }),
+      };
+    }),
+  );
+}
+
 export function sendOrderToTargetInSections(
   sections: Section[],
   sectionId: string,
