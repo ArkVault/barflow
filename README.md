@@ -7,28 +7,31 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-Live-635BFF?style=for-the-badge&logo=stripe)](https://stripe.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini-2.5--flash-FF6F00?style=for-the-badge&logo=google)](https://ai.google.dev/)
+[![Gemma](https://img.shields.io/badge/Gemma-4-FF6F00?style=for-the-badge&logo=google)](https://ai.google.dev/gemma)
 
 ## Descripcion
 
-**Stttock** es una plataforma SaaS moderna para la gestion inteligente de bares y restaurantes. Integra control de inventario en tiempo real, punto de venta (POS) con drag & drop, gestion de mesas, analisis de ventas, proyecciones predictivas con IA (Gemini 2.5-flash), suscripciones con Stripe en modo live y un flujo de onboarding completo.
+**Stttock** es una plataforma SaaS moderna para la gestion inteligente de bares y restaurantes. Integra control de inventario en tiempo real, punto de venta (POS) con drag & drop, gestion de mesas, analisis de ventas, proyecciones predictivas con IA (Gemma 4), suscripciones con Stripe en modo live y un flujo de onboarding completo.
 
 ---
 
 ## Features Principales
 
 ### Sistema Multi-Establecimiento
+
 - Multiples sucursales bajo una misma cuenta
 - Configuracion independiente por establecimiento (incluyendo tasa de impuesto)
 - Dashboard consolidado para cadenas
 
 ### Dashboard Interactivo
+
 - Metricas clave en tiempo real
 - Graficos de ventas por periodo (dia/semana/mes)
 - Alertas de stock critico y bajo con semaforo visual
 - Cards con estadisticas de productos, menus e insumos
 
 ### Gestion de Insumos Avanzada
+
 - Control por unidades (botellas, items, kg)
 - Tracking de contenido (ml, g) con resta automatica en ventas
 - 7 categorias inteligentes con defaults automaticos
@@ -37,13 +40,15 @@
 - Optimo de inventario configurable
 
 ### Gestion de Productos y Menus
+
 - Creacion de productos con recetas detalladas
 - Ingredientes vinculados a insumos
 - Multiples menus (temporadas, eventos, happy hour)
-- Importacion de menus con Google Gemini 2.5-flash AI (structured JSON mode)
+- Importacion de menus con Google Gemma 4 (structured JSON mode)
 - Precios configurables por producto
 
 ### Sistema de Mesas y POS
+
 - Editor visual de layout de mesas con drag & drop
 - Configuracion de secciones (patio, bar, terraza)
 - Auto-guardado del layout (debounced 800ms)
@@ -56,18 +61,21 @@
   - Propinas
 
 ### Registro de Ventas
+
 - Historial completo de transacciones
 - Top 5 productos mas vendidos
 - Ticket promedio y ventas por periodo
 - Deduccion automatica de inventario
 
 ### Proyecciones Inteligentes con IA
-- Analisis predictivo basado en Gemini 2.5-flash
+
+- Analisis predictivo basado en Gemma 4
 - Calculo de dias hasta agotamiento
 - Recomendaciones de compra
 - Alertas tempranas de reabastecimiento
 
 ### Sistema de Suscripciones (Stripe Live)
+
 - Planes flexibles:
   - **Bar Sucursal Mensual:** $899 MXN/mes
   - **Bar Sucursal Anual:** $8,400 MXN/ano
@@ -78,17 +86,20 @@
 - Emails transaccionales via Resend (bienvenida, trial expirando, pago fallido, confirmacion)
 
 ### Onboarding
+
 - Wizard de configuracion paso a paso post-registro
 - Cuestionario interactivo con seleccion de roles por establecimiento
 - Iconos SVG limpios (sin emojis)
 - Importacion de datos inicial
 
 ### Multiidioma
+
 - Espanol (por defecto)
 - English
 - Cambio en tiempo real
 
 ### UI/UX
+
 - Rebrand completo a Stttock con nuevos logos (light/dark)
 - Tema oscuro con gradientes animados
 - Botones con efecto glow
@@ -96,6 +107,7 @@
 - Diseño 100% responsivo
 
 ### Seguridad
+
 - Rate limiting por endpoint (sliding window in-memory):
   - `/api/quotes`: 5 req / 10 min
   - `/api/menu/parse`: 10 req / 5 min
@@ -106,7 +118,9 @@
 - Webhook replay protection
 
 ### Claude Code Hooks (DX)
+
 El proyecto incluye 8 hooks automaticos para Claude Code en `.claude/settings.json`:
+
 - **PreToolUse:** bloqueo de comandos peligrosos, proteccion de archivos sensibles, tests obligatorios antes de PR, audit log de comandos
 - **PostToolUse:** auto-format con Prettier, ESLint fix con reporte de errores
 - **Stop:** auto-commit atomico al finalizar cada tarea
@@ -129,37 +143,42 @@ Prueba la aplicacion en modo demo sin necesidad de registro:
 ## Stack Tecnologico
 
 ### Frontend
-| Tecnologia | Version | Uso |
-|------------|---------|-----|
-| Next.js | 16 | Framework React con App Router |
-| React | 19 | Biblioteca UI |
-| TypeScript | 5.9 | Tipado estatico |
-| Tailwind CSS | 4.1 | Estilos utility-first |
-| shadcn/ui | Latest | Componentes base |
-| Radix UI | Latest | Primitivas accesibles |
-| Recharts | Latest | Graficos |
+
+| Tecnologia   | Version | Uso                            |
+| ------------ | ------- | ------------------------------ |
+| Next.js      | 16      | Framework React con App Router |
+| React        | 19      | Biblioteca UI                  |
+| TypeScript   | 5.9     | Tipado estatico                |
+| Tailwind CSS | 4.1     | Estilos utility-first          |
+| shadcn/ui    | Latest  | Componentes base               |
+| Radix UI     | Latest  | Primitivas accesibles          |
+| Recharts     | Latest  | Graficos                       |
 
 ### Backend & Servicios
-| Tecnologia | Uso |
-|------------|-----|
-| Supabase | PostgreSQL + Auth + Realtime |
-| Next.js API Routes | Server actions + endpoints |
-| Stripe (Live) | Pagos y suscripciones |
-| Google Gemini 2.5-flash | IA para menus y proyecciones |
-| Resend | Emails transaccionales |
+
+| Tecnologia                    | Uso                          |
+| ----------------------------- | ---------------------------- |
+| Supabase                      | PostgreSQL + Auth + Realtime |
+| Next.js API Routes            | Server actions + endpoints   |
+| Stripe (Live)                 | Pagos y suscripciones        |
+| Google Gemma 4 (Google GenAI) | IA para menus y proyecciones |
+| Resend                        | Emails transaccionales       |
 
 ### Infraestructura
-| Tecnologia | Uso |
-|------------|-----|
-| Google Cloud Run | Hosting con auto-scaling |
-| Cloud Build | CI/CD |
-| Artifact Registry | Imagenes Docker |
+
+| Tecnologia        | Uso                                                        |
+| ----------------- | ---------------------------------------------------------- |
+| Docker            | Imagen multi-stage (`Dockerfile`), despliegue en Cloud Run |
+| Google Cloud Run  | Hosting con auto-scaling                                   |
+| Cloud Build       | CI/CD                                                      |
+| Artifact Registry | Registro de imagenes Docker                                |
 
 ---
 
 ## Instalacion Local
 
 ### Prerrequisitos
+
 - Node.js 20.x+
 - pnpm 9.x
 - Cuenta de Supabase
@@ -168,28 +187,33 @@ Prueba la aplicacion en modo demo sin necesidad de registro:
 ### Pasos
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone https://github.com/ArkVault/barflow.git
 cd barflow
 ```
 
 2. **Instalar dependencias**
+
 ```bash
 pnpm install
 ```
 
 3. **Configurar variables de entorno**
+
 ```bash
 cp .env.example .env.local
 # Editar .env.local con tus credenciales
 ```
 
 4. **Ejecutar en desarrollo**
+
 ```bash
 pnpm dev
 ```
 
 5. **Abrir en el navegador**
+
 ```
 http://localhost:3000
 ```
@@ -217,7 +241,7 @@ pnpm validate     # lint + typecheck + build
 stttock/
 ├── app/
 │   ├── api/
-│   │   ├── menu/parse/            # AI menu parsing (Gemini 2.5)
+│   │   ├── menu/parse/            # AI menu parsing (Gemma 4)
 │   │   ├── quotes/                # Cotizaciones
 │   │   ├── stripe/
 │   │   │   ├── checkout/          # Checkout sessions
@@ -270,20 +294,20 @@ stttock/
 
 ### Tablas Principales
 
-| Tabla | Descripcion |
-|-------|-------------|
-| `users` | Usuarios del sistema |
-| `establishments` | Bares/restaurantes (con tax_rate) |
-| `insumos` | Inventario de insumos |
-| `products` | Productos del menu |
-| `product_ingredients` | Recetas de productos |
-| `menus` | Menus del establecimiento |
-| `menu_products` | Productos por menu |
-| `sales` | Registro de ventas |
-| `sale_items` | Items por venta |
-| `tables` | Mesas del establecimiento |
-| `sections` | Secciones del layout |
-| `bars` | Barras de servicio |
+| Tabla                 | Descripcion                       |
+| --------------------- | --------------------------------- |
+| `users`               | Usuarios del sistema              |
+| `establishments`      | Bares/restaurantes (con tax_rate) |
+| `insumos`             | Inventario de insumos             |
+| `products`            | Productos del menu                |
+| `product_ingredients` | Recetas de productos              |
+| `menus`               | Menus del establecimiento         |
+| `menu_products`       | Productos por menu                |
+| `sales`               | Registro de ventas                |
+| `sale_items`          | Items por venta                   |
+| `tables`              | Mesas del establecimiento         |
+| `sections`            | Secciones del layout              |
+| `bars`                | Barras de servicio                |
 
 ---
 
@@ -295,6 +319,7 @@ development  ← trabajo activo (merge a main via PR)
 ```
 
 ### Commits Semanticos
+
 - `feat:` Nueva funcionalidad
 - `fix:` Correccion de bug
 - `refactor:` Refactorizacion
@@ -307,10 +332,11 @@ development  ← trabajo activo (merge a main via PR)
 ## Changelog
 
 ### v2.0.0 (2026-04-04) — Stttock Unified Release
+
 - Rebrand completo: Flowstock a **Stttock** con nuevos logos (light/dark)
 - Sidebar rediseñado con estilos unificados (gris hover/active)
 - Stripe en modo **live** con precios actualizados (Bar $899/mes, Cadena $2,999/mes)
-- Migracion de Gemini 2.0-flash-exp a **Gemini 2.5-flash** con structured JSON mode
+- Integracion con **Gemma 4** (Google GenAI) con structured JSON mode para parseo de menus
 - Onboarding wizard completo (cuestionario + server actions)
 - Onboarding questionnaire con SVG icons, dropdowns por rol, sin emojis
 - Auto-save del layout POS con debounce de 800ms
@@ -333,6 +359,7 @@ development  ← trabajo activo (merge a main via PR)
 - Limpieza de branches: unificacion en `main` + `development`
 
 ### v1.1.0 (2025-12-15) — Cloud Run Release
+
 - Deploy a Google Cloud Run
 - Sistema de pagos con Stripe (test mode)
 - Editor visual de mesas drag & drop
@@ -343,6 +370,7 @@ development  ← trabajo activo (merge a main via PR)
 - UI premium con efectos neumorficos
 
 ### v1.0.0 (2025-11-28) — Initial Release
+
 - Sistema de inventario avanzado
 - Categorias inteligentes (7 categorias con defaults)
 - Sistema de menus
@@ -354,18 +382,21 @@ development  ← trabajo activo (merge a main via PR)
 ## Roadmap
 
 ### v2.1 (Proximo)
+
 - [ ] Flow de onboarding post-signup conectado a la app
 - [ ] Welcome email trigger en sign-up
 - [ ] Cloud Build trigger con substitution variables persistentes
 - [ ] Reportes en PDF exportables
 
 ### v2.2
+
 - [ ] Integracion completa con OpenTable
 - [ ] Notificaciones push
 - [ ] Sistema de roles y permisos granular
 - [ ] App movil (React Native)
 
 ### v3.0
+
 - [ ] IA para recomendaciones de menu
 - [ ] Prediccion de demanda con ML
 - [ ] Marketplace de proveedores
