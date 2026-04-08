@@ -17,3 +17,7 @@
  kill 71163 && command npx pnpm dev
  curl -I "http://localhost:3000/"
  curl -I "http://localhost:3000/auth/login"
+ cd /Users/gibrann/Desktop/Barflow && git status && git branch -vv
+ cd /Users/gibrann/Desktop/Barflow && git diff README.md && git log -3 --oneline
+ cd /Users/gibrann/Desktop/Barflow && git show HEAD:README.md | head -15
+ cd /Users/gibrann/Desktop/Barflow && git push origin development
