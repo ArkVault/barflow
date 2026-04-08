@@ -31,3 +31,20 @@
  rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/node_modules
  npx tsc --noEmit 2>&1 | head -40
  /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | head -40
+ git status
+ cd /Users/gibrann/Desktop/Barflow && git status
+ git log --oneline -5
+ git diff --stat HEAD
+ git log --oneline 278c266..HEAD --stat
+ cd /Users/gibrann/Desktop/Barflow && git stash && git merge claude/wonderful-shaw --no-edit 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git checkout --theirs .claude/command-log.txt && git checkout --theirs .claude/launch.json && git add .claude/command-log.txt .claude/launch.json
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+feat(pos): numbered account names and per-account order targeting
+
+Accounts on tables now get sequential labels (Cuenta 1, Cuenta 2) instead of all showing "Cuenta Principal". Orders can be sent to a specific account via a new account selector dropdown in the Comandas tab.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git stash pop 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git checkout --theirs .claude/command-log.txt && git add .claude/command-log.txt && git stash drop
