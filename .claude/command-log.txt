@@ -212,3 +212,9 @@ EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: remove redundant dashboard ventas page"
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && git branch --show-current
+ git status --short
+ git diff --name-only HEAD
+ git log --oneline -5
+ git show e42f75e --stat
+ cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw --no-edit 2>&1
