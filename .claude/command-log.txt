@@ -310,3 +310,56 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && git reset HEAD . && git checkout -- . 2>&1
  cd /Users/gibrann/Desktop/Barflow && git status
  cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
+ git add components/demo-sidebar.tsx && git commit -m "$(cat <<'EOF'
+fix(sidebar): restore floating centered style, make demo match dashboard
+
+- Restore original floating position (left-4 top-1/2 -translate-y-1/2) instead of full-height
+- Keep it fixed (no collapse button)
+- Demo sidebar now shows all same components as dashboard: account link, upgrade button, logout
+- Add demoBottomItems for demo-mode account navigation
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ rm /Users/gibrann/Desktop/Barflow/.git/worktrees/wonderful-shaw/index.lock 2>&1 && git add components/demo-sidebar.tsx && git commit -m "$(cat <<'EOF'
+fix(sidebar): restore floating centered style, make demo match dashboard
+
+- Restore original floating position (left-4 top-1/2 -translate-y-1/2) instead of full-height
+- Keep it fixed (no collapse button)
+- Demo sidebar now shows all same components as dashboard: account link, upgrade button, logout
+- Add demoBottomItems for demo-mode account navigation
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ ls /Users/gibrann/Desktop/Barflow/.git/worktrees/wonderful-shaw/index.lock 2>&1; ls /Users/gibrann/Desktop/Barflow/.git/index.lock 2>&1
+ git add components/demo-sidebar.tsx && git commit -m "$(cat <<'EOF'
+fix(sidebar): restore floating centered style, make demo match dashboard
+
+- Restore original floating position instead of full-height
+- Keep it fixed (no collapse button)
+- Demo sidebar now shows all same components as dashboard
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ find /Users/gibrann/Desktop/Barflow/.git -name "*.lock" 2>&1
+ sleep 2 && git status 2>&1
+ git commit -m "$(cat <<'EOF'
+fix(sidebar): restore floating centered style, make demo match dashboard
+
+- Restore original floating position instead of full-height
+- Keep it fixed (no collapse button)
+- Demo sidebar now shows all same components as dashboard
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ git push origin claude/wonderful-shaw 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "$(cat <<'EOF'
+fix(sidebar): restore floating centered style, make demo match dashboard
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1

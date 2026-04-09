@@ -167,7 +167,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6 ml-0 md:ml-72">
+      <div className="p-6 max-w-5xl mx-auto">
         <Card className="w-full max-w-5xl neumorphic border-0 p-12">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
@@ -181,7 +181,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 ml-0 md:ml-72">
+    <div className="p-6 max-w-5xl mx-auto">
       <Card className="w-full max-w-5xl neumorphic border-0">
         <CardHeader>
           <div className="flex items-start justify-between mb-6">
