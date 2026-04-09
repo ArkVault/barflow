@@ -18,7 +18,12 @@ import {
 const TABS = [
   { id: "mesas", labelEs: "Mesas", labelEn: "Tables", icon: LayoutGrid },
   { id: "comandas", labelEs: "Comandas", labelEn: "Orders", icon: FileText },
-  { id: "historial", labelEs: "Registro", labelEn: "History", icon: History },
+  {
+    id: "historial",
+    labelEs: "Registro de ventas",
+    labelEn: "Sales History",
+    icon: History,
+  },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
