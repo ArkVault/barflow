@@ -169,3 +169,16 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard productos page with demo UI"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/demo/punto-de-venta -type f 2>/dev/null; echo "---"; find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/punto-de-venta -type f 2>/dev/null
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep "punto-de-venta"
+ git add app/dashboard/punto-de-venta/page.tsx && git commit -m "$(cat <<'EOF'
+feat(dashboard): unify Punto de Venta page styling with demo UI
+
+Aligned header to text-4xl with Satoshi font, changed container from
+max-w-7xl to max-w-5xl, removed extra min-h-screen wrapper to match
+demo layout. Functional POS components were already identical.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard punto de venta page styling with demo UI"
