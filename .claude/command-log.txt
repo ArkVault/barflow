@@ -223,3 +223,7 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
  cd /Users/gibrann/Desktop/Barflow && git branch --show-current && echo "---" && lsof -i :3000 -t 2>/dev/null | head -1
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app -type f -name "page.tsx" | grep -E "(dashboard|demo)" | sort
+ grep -n "export.*Shell" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/components/shells/index.ts
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "shells*" -type f | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "*shell*" -o -name "*Shell*" | grep -E "\.(ts|tsx)$" | head -20
