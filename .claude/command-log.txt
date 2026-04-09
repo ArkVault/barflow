@@ -182,3 +182,17 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard punto de venta page styling with demo UI"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/demo/ventas -type f 2>/dev/null; echo "---"; find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ventas -type f 2>/dev/null
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep "ventas"
+ git add app/dashboard/ventas/page.tsx && git commit -m "$(cat <<'EOF'
+feat(dashboard): unify Ventas page with demo UI
+
+Rewrote dashboard ventas from server component with SalesStats/SalesTable/
+SalesChart to full client component matching demo: POS tab with product
+grid, cart, and checkout buttons, plus history tab with stats cards and
+expandable sales table with ticket details.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard ventas page with demo UI"
