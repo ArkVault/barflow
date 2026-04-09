@@ -16,15 +16,18 @@ export default function PlannerPage() {
   const [saving, setSaving] = useState(false);
   const demoBasePath = getDemoBasePath(pathname);
 
-  const handlePlanComplete = async (supplies: SupplyPlan[], period: PlanPeriod) => {
+  const handlePlanComplete = async (
+    supplies: SupplyPlan[],
+    period: PlanPeriod,
+  ) => {
     setSaving(true);
 
     try {
       // Save to Supabase
-      const response = await fetch('/api/save-supplies', {
-        method: 'POST',
+      const response = await fetch("/api/save-supplies", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ supplies, period }),
       });
@@ -34,43 +37,56 @@ export default function PlannerPage() {
       if (!response.ok) {
         // If authentication required or error, fallback to localStorage
         if (response.status === 401) {
-          console.warn('No authentication - saving locally only');
+          console.warn("No authentication - saving locally only");
           if (typeof window !== "undefined") {
-            localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
+            localStorage.setItem(
+              "barflow_plan",
+              JSON.stringify({ supplies, period }),
+            );
           }
-          toast.warning(language === 'es'
-            ? 'Plan guardado localmente. Inicia sesión para sincronizar con la base de datos.'
-            : 'Plan saved locally. Log in to sync with the database.');
+          toast.warning(
+            language === "es"
+              ? "Plan guardado localmente. Inicia sesión para sincronizar con la base de datos."
+              : "Plan saved locally. Log in to sync with the database.",
+          );
         } else {
-          throw new Error(data.error || 'Error saving plan');
+          throw new Error(data.error || "Error saving plan");
         }
       } else {
         // Successfully saved to database
-        const successMsg = language === 'es'
-          ? `Plan guardado: ${data.inserted} nuevos, ${data.updated} actualizados`
-          : `Plan saved: ${data.inserted} new, ${data.updated} updated`;
+        const successMsg =
+          language === "es"
+            ? `Plan guardado: ${data.inserted} nuevos, ${data.updated} actualizados`
+            : `Plan saved: ${data.inserted} new, ${data.updated} updated`;
         toast.success(data.message || successMsg);
 
         // Also save to localStorage as backup
         if (typeof window !== "undefined") {
-          localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
+          localStorage.setItem(
+            "barflow_plan",
+            JSON.stringify({ supplies, period }),
+          );
         }
       }
 
       // Redirect to Insumos page
       router.push(toDemoPath(demoBasePath, "/demo/insumos"));
-
     } catch (error) {
-      console.error('Error saving plan:', error);
+      console.error("Error saving plan:", error);
 
       // Fallback to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("barflow_plan", JSON.stringify({ supplies, period }));
+        localStorage.setItem(
+          "barflow_plan",
+          JSON.stringify({ supplies, period }),
+        );
       }
 
-      toast.error(language === 'es'
-        ? 'Error al guardar en la base de datos. Se guardó localmente.'
-        : 'Error saving to database. Saved locally.');
+      toast.error(
+        language === "es"
+          ? "Error al guardar en la base de datos. Se guardó localmente."
+          : "Error saving to database. Saved locally.",
+      );
       router.push(toDemoPath(demoBasePath, "/demo/insumos"));
     } finally {
       setSaving(false);
@@ -79,7 +95,9 @@ export default function PlannerPage() {
 
   return (
     <DemoShell>
-      <InventoryPlanner onComplete={handlePlanComplete} />
+      <div className="min-h-screen ml-0 md:ml-72">
+        <InventoryPlanner onComplete={handlePlanComplete} />
+      </div>
     </DemoShell>
   );
 }
