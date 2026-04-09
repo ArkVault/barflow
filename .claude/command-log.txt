@@ -271,3 +271,42 @@ EOF
  rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/page-header.tsx
  cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -v "onboarding" | head -20
  cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep "error TS" | grep -v "onboarding"
+ git status
+ git diff --stat
+ git log --oneline -5
+ git log --oneline -15
+ git log --oneline --name-only f0cc56b..HEAD
+ git diff f0cc56b..HEAD -- . ':!.claude/command-log.txt' --stat
+ git push origin claude/wonderful-shaw 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git fetch origin && git checkout development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw -m "$(cat <<'EOF'
+feat: merge Configuración into Account page, fix sidebar as full-height non-collapsible
+
+- Add Configuración as 5th tab in Account page (General, Inventario, Proyecciones e IA)
+- Redirect /dashboard/configuracion to /dashboard/cuenta
+- Remove separate Configuración sidebar link
+- Make sidebar fixed full-height (not collapsible), uniform for demo and dashboard
+- Update all content margins from md:ml-20 lg:ml-72 to md:ml-72
+- Delete unused components: settings-form, sidebar-nav, dashboard-layout, page-header
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git stash && git merge claude/wonderful-shaw -m "$(cat <<'EOF'
+feat: merge Configuración into Account page, fix sidebar as full-height non-collapsible
+
+- Add Configuración as 5th tab in Account page (General, Inventario, Proyecciones e IA)
+- Redirect /dashboard/configuracion to /dashboard/cuenta
+- Remove separate Configuración sidebar link
+- Make sidebar fixed full-height (not collapsible), uniform for demo and dashboard
+- Update all content margins from md:ml-20 lg:ml-72 to md:ml-72
+- Delete unused components: settings-form, sidebar-nav, dashboard-layout, page-header
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git stash pop 2>&1 && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- . && git stash drop 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git reset HEAD . && git checkout -- . 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git status
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
