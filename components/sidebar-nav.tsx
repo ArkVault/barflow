@@ -37,7 +37,6 @@ export function SidebarNav({ userName, establishmentName }: SidebarNavProps) {
 
   const bottomNavItems = [
     { href: "/dashboard/cuenta", label: t("account"), icon: "👤" },
-    { href: "/dashboard/configuracion", label: t("settings"), icon: "⚙️" },
   ];
 
   return (

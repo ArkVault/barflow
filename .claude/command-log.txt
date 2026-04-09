@@ -253,3 +253,17 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
+ npx tsc --noEmit --pretty 2>&1 | head -60
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ wc -l /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/account-content.tsx
+ npx tsc --noEmit 2>&1 | head -40
+ which npx && npx --version 2>&1
+ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" && which node && node -e "const ts = require('typescript'); console.log('ts ok')" 2>&1 || echo "trying npx..." && /opt/homebrew/bin/npx tsc --noEmit 2>&1 | head -40
+ node ./node_modules/.bin/tsc --noEmit 2>&1 | head -40
+ node /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --project /Users/gibrann/Desktop/Barflow/tsconfig.json 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -i "account-content\|configuracion/page\|settings-form\|demo-sidebar\|sidebar-nav"
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/settings-form.tsx && ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/ 2>&1 || echo "directory empty or removed"
+ rmdir /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion 2>&1 || echo "not empty"

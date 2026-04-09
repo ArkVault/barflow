@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   User,
   ShoppingCart,
-  Settings,
   LogOut,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -49,7 +48,6 @@ const dashboardNavItems: NavItem[] = [
 
 const dashboardBottomItems: NavItem[] = [
   { href: "/dashboard/cuenta", labelKey: "account", icon: User },
-  { href: "/dashboard/configuracion", labelKey: "settings", icon: Settings },
 ];
 
 interface DemoSidebarProps {
