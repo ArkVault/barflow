@@ -196,3 +196,18 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard ventas page with demo UI"
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ventas/page.tsx && rmdir /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ventas
+ grep -c "Receipt" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/demo-sidebar.tsx; grep -c "BarChart3" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/dashboard-nav.tsx
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep -E "ventas|demo-sidebar|dashboard-nav|sidebar-nav"
+ git add app/dashboard/ventas/ components/demo-sidebar.tsx components/dashboard-nav.tsx components/sidebar-nav.tsx && git status
+ git commit -m "$(cat <<'EOF'
+refactor(dashboard): remove redundant Ventas page
+
+Punto de Venta already covers sales functionality. Deleted the Ventas
+page and removed its nav entries from demo-sidebar, dashboard-nav,
+and sidebar-nav.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: remove redundant dashboard ventas page"
