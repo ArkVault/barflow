@@ -374,3 +374,4 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" 2>&1
  git push origin claude/wonderful-shaw 2>&1 && cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw -m "fix(planner): align spacing with standard page layout" && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git branch --show-current && git status --short
