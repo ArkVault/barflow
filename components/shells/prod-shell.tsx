@@ -25,7 +25,7 @@ export function ProdShell({
         userName={userName}
         establishmentName={establishmentName}
       />
-      <div className="min-h-screen ml-0 md:ml-20 lg:ml-72">{children}</div>
+      <div className="min-h-screen ml-0 md:ml-72">{children}</div>
       <TrialExpiredOverlay />
     </div>
   );

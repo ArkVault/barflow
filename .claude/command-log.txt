@@ -267,3 +267,7 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -i "account-content\|configuracion/page\|settings-form\|demo-sidebar\|sidebar-nav"
  rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/settings-form.tsx && ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/ 2>&1 || echo "directory empty or removed"
  rmdir /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion 2>&1 || echo "not empty"
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/sidebar-nav.tsx /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/dashboard-layout.tsx
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/page-header.tsx
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -v "onboarding" | head -20
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep "error TS" | grep -v "onboarding"
