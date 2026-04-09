@@ -212,3 +212,62 @@ EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: remove redundant dashboard ventas page"
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && git branch --show-current
+ git status --short
+ git diff --name-only HEAD
+ git log --oneline -5
+ git show e42f75e --stat
+ cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw --no-edit 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -5
+ cd /Users/gibrann/Desktop/Barflow && git status --short
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git branch --show-current && echo "---" && lsof -i :3000 -t 2>/dev/null | head -1
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app -type f -name "page.tsx" | grep -E "(dashboard|demo)" | sort
+ grep -n "export.*Shell" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/components/shells/index.ts
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "shells*" -type f | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "*shell*" -o -name "*Shell*" | grep -E "\.(ts|tsx)$" | head -20
+ ls /Users/gibrann/Desktop/Barflow/app/dashboard/planner/
+ rm /Users/gibrann/Desktop/Barflow/app/dashboard/planner/planner-client.tsx /Users/gibrann/Desktop/Barflow/lib/features/dashboard/server/get-planner-view-model.ts
+ wc -l /Users/gibrann/Desktop/Barflow/app/demo/operaciones/page.tsx
+ cp /Users/gibrann/Desktop/Barflow/app/demo/operaciones/page.tsx /Users/gibrann/Desktop/Barflow/app/dashboard/operaciones/page.tsx
+ rm -rf /Users/gibrann/Desktop/Barflow/app/demo/ventas
+ rm /Users/gibrann/Desktop/Barflow/app/demo/ventas/page.tsx && rmdir /Users/gibrann/Desktop/Barflow/app/demo/ventas
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -20
+ cd /Users/gibrann/Desktop/Barflow && git status --short
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -3
+ cd /Users/gibrann/Desktop/Barflow && git add app/dashboard/operaciones/page.tsx app/dashboard/planner/page.tsx app/dashboard/planner/planner-client.tsx app/dashboard/proyecciones/page.tsx app/demo/proyecciones/page.tsx app/demo/ventas/page.tsx lib/features/dashboard/server/get-planner-view-model.ts
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+refactor(dashboard): unify Planner, Operaciones, Proyecciones with demo
+
+- Planner: convert from SSR server component to client component with ProdShell + useAuth, remove planner-client.tsx and get-planner-view-model.ts
+- Operaciones: replace POS tab wrapper with full demo implementation (visual layout manager with drag-drop sections, tables, bars, accounts, orders)
+- Proyecciones: already unified, remove OrderSuggestionsTable from both dashboard and demo (handled in Insumos)
+- Delete /demo/ventas page (redundant, sales handled in Punto de Venta)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
+ npx tsc --noEmit --pretty 2>&1 | head -60
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ npx tsc --noEmit --pretty 2>&1 | head -80
+ wc -l /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/account-content.tsx
+ npx tsc --noEmit 2>&1 | head -40
+ which npx && npx --version 2>&1
+ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" && which node && node -e "const ts = require('typescript'); console.log('ts ok')" 2>&1 || echo "trying npx..." && /opt/homebrew/bin/npx tsc --noEmit 2>&1 | head -40
+ node ./node_modules/.bin/tsc --noEmit 2>&1 | head -40
+ node /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --project /Users/gibrann/Desktop/Barflow/tsconfig.json 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -i "account-content\|configuracion/page\|settings-form\|demo-sidebar\|sidebar-nav"
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/settings-form.tsx && ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion/ 2>&1 || echo "directory empty or removed"
+ rmdir /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/configuracion 2>&1 || echo "not empty"
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/sidebar-nav.tsx /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/dashboard-layout.tsx
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/page-header.tsx
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep -v "onboarding" | head -20
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/node node_modules/typescript/bin/tsc --noEmit 2>&1 | grep "error TS" | grep -v "onboarding"
