@@ -34,47 +34,48 @@ function POSContent() {
       userName={user?.email || "Usuario"}
       establishmentName={establishmentName || "Mi Negocio"}
     >
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">
-              {language === "es" ? "Punto de Venta" : "Point of Sale"}
-            </h1>
-            <p className="text-muted-foreground">
-              {language === "es"
-                ? "Gestión de mesas, comandas y ventas"
-                : "Tables, orders and sales management"}
-            </p>
-          </div>
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "bg-background text-foreground shadow-sm font-medium"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {language === "es" ? tab.labelEs : tab.labelEn}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tab Content - Single Responsibility: Just render the active tab */}
-          {activeTab === "mesas" && <TablesTab />}
-          {activeTab === "comandas" && <OrdersTab />}
-          {activeTab === "historial" && <HistoryTab />}
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="mb-6">
+          <h2
+            className="text-4xl font-bold mb-2"
+            style={{ fontFamily: "Satoshi, sans-serif" }}
+          >
+            {language === "es" ? "Punto de Venta" : "Point of Sale"}
+          </h2>
+          <p className="text-muted-foreground">
+            {language === "es"
+              ? "Gestión de mesas, comandas y ventas"
+              : "Tables, orders and sales management"}
+          </p>
         </div>
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-2.5 rounded-full transition-colors flex items-center gap-2 ${
+                    activeTab === tab.id
+                      ? "bg-background text-foreground shadow-sm font-medium"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {language === "es" ? tab.labelEs : tab.labelEn}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tab Content - Single Responsibility: Just render the active tab */}
+        {activeTab === "mesas" && <TablesTab />}
+        {activeTab === "comandas" && <OrdersTab />}
+        {activeTab === "historial" && <HistoryTab />}
       </div>
     </ProdShell>
   );

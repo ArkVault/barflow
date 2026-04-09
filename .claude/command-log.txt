@@ -155,3 +155,17 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard insumos page with demo UI"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/demo -path "*producto*" -type f 2>/dev/null; find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard -path "*producto*" -type f 2>/dev/null
+ /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | grep "productos"
+ git add app/dashboard/productos/page.tsx && git commit -m "$(cat <<'EOF'
+feat(dashboard): unify Productos page with demo UI
+
+Rewrote dashboard productos from server component with ProductsPageClient
+to full client component matching demo: MenuManager, product grid with
+image cards, add/edit/delete modals with image upload and optimization,
+Supabase category loading, and neumorphic styling.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git checkout development && git merge claude/wonderful-shaw -m "merge: unify dashboard productos page with demo UI"
