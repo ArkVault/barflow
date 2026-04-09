@@ -250,3 +250,4 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -10
