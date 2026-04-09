@@ -234,3 +234,19 @@ EOF
  rm -rf /Users/gibrann/Desktop/Barflow/app/demo/ventas
  rm /Users/gibrann/Desktop/Barflow/app/demo/ventas/page.tsx && rmdir /Users/gibrann/Desktop/Barflow/app/demo/ventas
  cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -20
+ cd /Users/gibrann/Desktop/Barflow && git status --short
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -3
+ cd /Users/gibrann/Desktop/Barflow && git add app/dashboard/operaciones/page.tsx app/dashboard/planner/page.tsx app/dashboard/planner/planner-client.tsx app/dashboard/proyecciones/page.tsx app/demo/proyecciones/page.tsx app/demo/ventas/page.tsx lib/features/dashboard/server/get-planner-view-model.ts
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+refactor(dashboard): unify Planner, Operaciones, Proyecciones with demo
+
+- Planner: convert from SSR server component to client component with ProdShell + useAuth, remove planner-client.tsx and get-planner-view-model.ts
+- Operaciones: replace POS tab wrapper with full demo implementation (visual layout manager with drag-drop sections, tables, bars, accounts, orders)
+- Proyecciones: already unified, remove OrderSuggestionsTable from both dashboard and demo (handled in Insumos)
+- Delete /demo/ventas page (redundant, sales handled in Punto de Venta)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
