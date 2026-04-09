@@ -16,7 +16,6 @@ import {
   ShoppingCart,
   Settings,
   LogOut,
-  Receipt,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -45,7 +44,6 @@ const dashboardNavItems: NavItem[] = [
   { href: "/dashboard/insumos", labelKey: "supplies", icon: Boxes },
   { href: "/dashboard/productos", labelKey: "products", icon: Package2 },
   { href: "/dashboard/punto-de-venta", labelKey: "pos", icon: ShoppingCart },
-  { href: "/dashboard/ventas", labelKey: "sales", icon: Receipt },
   { href: "/dashboard/proyecciones", labelKey: "projections", icon: BarChart3 },
 ];
 

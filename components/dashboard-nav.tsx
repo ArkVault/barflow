@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { Package, ShoppingCart, TrendingUp, Home, LogOut, BarChart3 } from 'lucide-react';
+import { Package, ShoppingCart, TrendingUp, Home, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DashboardNavProps {
@@ -12,7 +12,10 @@ interface DashboardNavProps {
   establishmentName: string;
 }
 
-export function DashboardNav({ userName, establishmentName }: DashboardNavProps) {
+export function DashboardNav({
+  userName,
+  establishmentName,
+}: DashboardNavProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -26,8 +29,11 @@ export function DashboardNav({ userName, establishmentName }: DashboardNavProps)
     { href: "/dashboard", label: "Inicio", icon: Home },
     { href: "/dashboard/insumos", label: "Insumos", icon: Package },
     { href: "/dashboard/productos", label: "Productos", icon: ShoppingCart },
-    { href: "/dashboard/ventas", label: "Ventas", icon: BarChart3 },
-    { href: "/dashboard/proyecciones", label: "Proyecciones", icon: TrendingUp },
+    {
+      href: "/dashboard/proyecciones",
+      label: "Proyecciones",
+      icon: TrendingUp,
+    },
   ];
 
   return (
@@ -56,7 +62,8 @@ export function DashboardNav({ userName, establishmentName }: DashboardNavProps)
                       variant="ghost"
                       className={cn(
                         "gap-2",
-                        pathname === item.href && "bg-accent text-accent-foreground"
+                        pathname === item.href &&
+                          "bg-accent text-accent-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -72,7 +79,12 @@ export function DashboardNav({ userName, establishmentName }: DashboardNavProps)
               <p className="font-medium">{establishmentName}</p>
               <p className="text-muted-foreground text-xs">{userName}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} title="Cerrar sesión">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              title="Cerrar sesión"
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
