@@ -227,3 +227,10 @@ EOF
  grep -n "export.*Shell" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/components/shells/index.ts
  find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "shells*" -type f | head -20
  find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "*shell*" -o -name "*Shell*" | grep -E "\.(ts|tsx)$" | head -20
+ ls /Users/gibrann/Desktop/Barflow/app/dashboard/planner/
+ rm /Users/gibrann/Desktop/Barflow/app/dashboard/planner/planner-client.tsx /Users/gibrann/Desktop/Barflow/lib/features/dashboard/server/get-planner-view-model.ts
+ wc -l /Users/gibrann/Desktop/Barflow/app/demo/operaciones/page.tsx
+ cp /Users/gibrann/Desktop/Barflow/app/demo/operaciones/page.tsx /Users/gibrann/Desktop/Barflow/app/dashboard/operaciones/page.tsx
+ rm -rf /Users/gibrann/Desktop/Barflow/app/demo/ventas
+ rm /Users/gibrann/Desktop/Barflow/app/demo/ventas/page.tsx && rmdir /Users/gibrann/Desktop/Barflow/app/demo/ventas
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -v "onboarding-questionnaire" | grep "error TS" | head -20
