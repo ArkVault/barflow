@@ -218,3 +218,6 @@ EOF
  git log --oneline -5
  git show e42f75e --stat
  cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw --no-edit 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -5
+ cd /Users/gibrann/Desktop/Barflow && git status --short
+ cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
