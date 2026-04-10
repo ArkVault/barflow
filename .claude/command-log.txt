@@ -363,3 +363,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" 2>&1
  cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && pnpm dev
+ cd /Users/gibrann/Desktop/Barflow && npm run dev
+ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && which node npm pnpm 2>/dev/null; cd /Users/gibrann/Desktop/Barflow && npm run dev
+ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && unalias npm 2>/dev/null; command -v npm; /usr/local/bin/npm run dev 2>/dev/null || $(dirname $(which node))/npm run dev
