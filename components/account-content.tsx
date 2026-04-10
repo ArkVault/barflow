@@ -486,9 +486,12 @@ export default function AccountContent() {
     <div className="max-w-5xl mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h2
+          className="text-4xl font-bold mb-2"
+          style={{ fontFamily: "Satoshi, sans-serif" }}
+        >
           {language === "es" ? "Mi Cuenta" : "My Account"}
-        </h1>
+        </h2>
         <p className="text-muted-foreground">
           {language === "es"
             ? "Administra tu perfil, seguridad y suscripción"

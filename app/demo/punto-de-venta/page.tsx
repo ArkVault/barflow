@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { DemoShell } from "@/components/shells";
-import { DemoTopNav } from "@/components/presentation/demo-top-nav";
 import { DemoPageContainer } from "@/components/presentation/demo-page-container";
 import { useLanguage } from "@/hooks/use-language";
 import { LayoutGrid, FileText, History } from "lucide-react";
@@ -37,8 +36,6 @@ function POSContent() {
 
   return (
     <DemoShell>
-      <DemoTopNav />
-
       <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-5xl">
         {/* Header */}
         <div className="mb-6">

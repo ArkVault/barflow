@@ -240,18 +240,18 @@ export default function DashboardPage() {
         userName={user?.email || "Usuario"}
         establishmentName={establishmentName || "Mi Negocio"}
       >
-        <div className="p-4 max-w-5xl mx-auto">
+        <div className="p-6 max-w-5xl mx-auto">
           {/* Header */}
-          <div className="mb-2">
+          <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
               <div>
                 <h2
-                  className="text-xl md:text-2xl font-bold mb-0.5"
+                  className="text-4xl font-bold mb-2"
                   style={{ fontFamily: "Satoshi, sans-serif" }}
                 >
                   {t("dashboardDemo")}
                 </h2>
-                <p className="text-xs md:text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t("businessOverviewDesc")}
                 </p>
               </div>

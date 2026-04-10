@@ -47,7 +47,7 @@ export default function ProyeccionesPage() {
       userName={user?.email || "Usuario"}
       establishmentName={establishmentName || "Mi Negocio"}
     >
-      <div className="p-4 max-w-5xl mx-auto">
+      <div className="p-6 max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <h2

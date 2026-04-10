@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DemoShell } from "@/components/shells";
-import { DemoTopNav } from "@/components/presentation/demo-top-nav";
 import { DemoPageContainer } from "@/components/presentation/demo-page-container";
 import { useLanguage } from "@/hooks/use-language";
 import dynamic from "next/dynamic";
@@ -47,9 +46,7 @@ export default function ProyeccionesPage() {
 
   return (
     <DemoShell>
-      <DemoTopNav />
-
-      <DemoPageContainer paddingClassName="p-4" maxWidthClassName="max-w-5xl">
+      <DemoPageContainer paddingClassName="p-6" maxWidthClassName="max-w-5xl">
         {/* Header */}
         <div className="mb-6">
           <h2
