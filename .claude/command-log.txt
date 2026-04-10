@@ -376,3 +376,4 @@ EOF
  git push origin claude/wonderful-shaw 2>&1 && cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw -m "fix(planner): align spacing with standard page layout" && git push origin development 2>&1
  cd /Users/gibrann/Desktop/Barflow && git branch --show-current && git status --short
  lsof -ti:3000 2>/dev/null
+ kill 20227 32016 2>&1 && rm -f /Users/gibrann/Desktop/Barflow/.next/dev/lock
