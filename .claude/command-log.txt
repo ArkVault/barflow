@@ -548,3 +548,27 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && git status
  git status && echo "---" && ls components/ | grep -i content
  pwd && git log --oneline -5 && echo "---worktrees---" && git worktree list
+ cd /Users/gibrann/Desktop/Barflow && git status --short && echo "---" && ls components/ | grep -iE "content\.tsx$" && echo "---" && wc -l app/dashboard/insumos/page.tsx app/demo/insumos/page.tsx app/dashboard/productos/page.tsx app/demo/productos/page.tsx app/dashboard/operaciones/page.tsx app/demo/operaciones/page.tsx app/dashboard/page.tsx app/demo/page.tsx
+ cd /Users/gibrann/Desktop/Barflow && diff -u app/dashboard/productos/page.tsx app/demo/productos/page.tsx | head -200
+ cd /Users/gibrann/Desktop/Barflow && diff -u app/dashboard/productos/page.tsx app/demo/productos/page.tsx | wc -l && echo "---" && diff -u app/dashboard/productos/page.tsx app/demo/productos/page.tsx | grep -E "^[+-]" | grep -vE "^[+-]{3}" | wc -l
+ cd /Users/gibrann/Desktop/Barflow && diff -u app/dashboard/productos/page.tsx app/demo/productos/page.tsx | sed -n '500,1100p'
+ cd /Users/gibrann/Desktop/Barflow && grep -n "initialProducts\|useState<Product\[\]>\|setProducts(initialProducts\|useState<Product" app/demo/productos/page.tsx | head -20
+ cd /Users/gibrann/Desktop/Barflow && diff -u app/dashboard/operaciones/page.tsx app/demo/operaciones/page.tsx | head -100
+ cp /Users/gibrann/Desktop/Barflow/app/dashboard/operaciones/page.tsx /Users/gibrann/Desktop/Barflow/components/operaciones-content.tsx
+ cd /Users/gibrann/Desktop/Barflow && grep -n "ProdShell\|max-w-\[1400px\]\|Account Modal\|return (\|^}" components/operaciones-content.tsx | head -40
+ cd /Users/gibrann/Desktop/Barflow && ls components/shells/ && echo "---" && grep -l "DemoShell\|ProdShell" components/shells/*.tsx 2>/dev/null
+ cd /Users/gibrann/Desktop/Barflow && grep -l "DialogPortal\|Portal" components/ui/dialog.tsx
+ cd /Users/gibrann/Desktop/Barflow && grep -n "user\b\|establishmentName" components/operaciones-content.tsx | head -20
+ cd /Users/gibrann/Desktop/Barflow && grep -n "ProdShell\|return (\|^}\|<div className=\"p-6 max-w" app/dashboard/productos/page.tsx | head -20
+ cp /Users/gibrann/Desktop/Barflow/app/dashboard/productos/page.tsx /Users/gibrann/Desktop/Barflow/components/productos-content.tsx
+ cd /Users/gibrann/Desktop/Barflow && grep -n "establishmentName\|user\?\.email\|ProdShell" components/productos-content.tsx
+ cd /Users/gibrann/Desktop/Barflow && grep -c "^" components/productos-content.tsx && grep -n "^export\|^function\|return (" components/productos-content.tsx | head -10
+ cd /Users/gibrann/Desktop/Barflow && grep -n "^const initialProducts\|^const LOS_CLASICOS\|^];$\|^interface Product " app/demo/productos/page.tsx
+ cd /Users/gibrann/Desktop/Barflow && grep -n "^]" app/demo/productos/page.tsx | head -3
+ cd /Users/gibrann/Desktop/Barflow && npx tsc --noEmit --skipLibCheck 2>&1 | grep -E "(insumos|productos|operaciones|home-content|dashboard/page|demo/page|insumos-content|productos-content|operaciones-content)" | head -30
+ cd /Users/gibrann/Desktop/Barflow && npx tsc --noEmit --skipLibCheck 2>&1 | tail -30
+ cd /Users/gibrann/Desktop/Barflow && which tsc; ls node_modules/.bin/tsc 2>/dev/null && node node_modules/typescript/bin/tsc --noEmit --skipLibCheck 2>&1 | tail -50
+ cd /Users/gibrann/Desktop/Barflow && grep -n "export type StaffRole\|export type Role\|StaffRole\b" lib/roles.ts 2>/dev/null | head -10
+ cd /Users/gibrann/Desktop/Barflow && grep -rn "type StaffRole\|StaffRole =" lib/ | head -5
+ cd /Users/gibrann/Desktop/Barflow && grep -n "role" contexts/staff-context.tsx | head -10
+ cd /Users/gibrann/Desktop/Barflow && node node_modules/typescript/bin/tsc --noEmit --skipLibCheck 2>&1 | tail -20
