@@ -5,7 +5,10 @@ import Link from "next/link";
 import { ClipboardList, X, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 
-const STORAGE_KEY = "demo_planner_hint_dismissed";
+/** localStorage keys */
+const KEY_COUNT = "planner_hint_count"; // number of sessions shown (0–3)
+const KEY_METHOD = "inventory_method"; // "manual" | "excel"
+const MAX_SESSIONS = 3;
 
 const T = {
   es: {
@@ -26,13 +29,16 @@ const T = {
 
 interface WelcomePlannerPopupProps {
   plannerHref: string;
-  /** If true, always shows (for demo/test mode). Uses sessionStorage so it resets each visit. */
-  testMode?: boolean;
+  /**
+   * In demo mode we simulate "manual" choice — the popup shows up to MAX_SESSIONS times.
+   * In production, pass false and rely on localStorage KEY_METHOD set by the onboarding.
+   */
+  demoMode?: boolean;
 }
 
 export function WelcomePlannerPopup({
   plannerHref,
-  testMode = false,
+  demoMode = false,
 }: WelcomePlannerPopupProps) {
   const { language } = useLanguage();
   const [visible, setVisible] = useState(false);
@@ -42,12 +48,16 @@ export function WelcomePlannerPopup({
   const t = T[(language as keyof typeof T) ?? "es"] ?? T.es;
 
   useEffect(() => {
-    const storageKey = testMode
-      ? "demo_planner_hint_dismissed_session"
-      : STORAGE_KEY;
-    const storage = testMode ? sessionStorage : localStorage;
+    // Gate 1: only show when user chose manual inventory (or demo forces it)
+    const method = localStorage.getItem(KEY_METHOD);
+    if (!demoMode && method !== "manual") return;
 
-    if (storage.getItem(storageKey)) return;
+    // Gate 2: only show for the first MAX_SESSIONS sessions
+    const count = parseInt(localStorage.getItem(KEY_COUNT) ?? "0", 10);
+    if (count >= MAX_SESSIONS) return;
+
+    // Gate 3: show at most once per browser session (sessionStorage flag)
+    if (sessionStorage.getItem("planner_hint_shown_this_session")) return;
 
     // Wait a beat so the onboarding can close first
     const timer = setTimeout(() => {
@@ -57,10 +67,13 @@ export function WelcomePlannerPopup({
       if (plannerEl) {
         const rect = plannerEl.getBoundingClientRect();
         setTargetY(rect.top + rect.height / 2);
-
-        // Add a pulsing ring to the sidebar Planner item
         plannerEl.setAttribute("data-tour-active", "true");
       }
+
+      // Increment session count and mark this session as shown
+      localStorage.setItem(KEY_COUNT, String(count + 1));
+      sessionStorage.setItem("planner_hint_shown_this_session", "1");
+
       setVisible(true);
       requestAnimationFrame(() =>
         requestAnimationFrame(() => setEntered(true)),
@@ -68,23 +81,15 @@ export function WelcomePlannerPopup({
     }, 900);
 
     return () => clearTimeout(timer);
-  }, [testMode]);
+  }, [demoMode]);
 
   const handleDismiss = () => {
-    const storageKey = testMode
-      ? "demo_planner_hint_dismissed_session"
-      : STORAGE_KEY;
-    const storage = testMode ? sessionStorage : localStorage;
-
-    // Remove highlight from sidebar
     const plannerEl = document.querySelector<HTMLElement>(
       '[data-tour="planner-link"]',
     );
     plannerEl?.removeAttribute("data-tour-active");
-
     setEntered(false);
     setTimeout(() => setVisible(false), 350);
-    storage.setItem(storageKey, "1");
   };
 
   if (!visible) return null;
