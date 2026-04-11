@@ -484,3 +484,4 @@ fix(menu-manager): responsive cards, isolated button hover, visible delete + con
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )" && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git status
