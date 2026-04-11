@@ -10,7 +10,7 @@ import {
   deleteTeamMember,
   getTeamCountsByRole,
   TeamMemberDTO,
-} from "@/app/dashboard/equipo/actions";
+} from "@/lib/team/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

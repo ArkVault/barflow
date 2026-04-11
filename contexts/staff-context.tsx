@@ -15,7 +15,7 @@ import {
   loginStaffWithPin,
   verifyApprovalPin as verifyApprovalPinAction,
   TeamMemberDTO,
-} from "@/app/dashboard/equipo/actions";
+} from "@/lib/team/actions";
 
 const STORAGE_KEY = "flowstock_staff_session";
 

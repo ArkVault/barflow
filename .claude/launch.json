@@ -6,7 +6,7 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd /Users/gibrann/Desktop/Barflow && npx next dev --turbopack"
+        "cd /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw && npx next dev --turbopack"
       ],
       "port": 3000,
       "autoPort": true
