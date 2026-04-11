@@ -363,7 +363,184 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" 2>&1
  cd /Users/gibrann/Desktop/Barflow && git push origin development 2>&1
- cd /Users/gibrann/Desktop/Barflow && pnpm dev
- cd /Users/gibrann/Desktop/Barflow && npm run dev
- export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && which node npm pnpm 2>/dev/null; cd /Users/gibrann/Desktop/Barflow && npm run dev
- export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH" && unalias npm 2>/dev/null; command -v npm; /usr/local/bin/npm run dev 2>/dev/null || $(dirname $(which node))/npm run dev
+ git add components/inventory-planner.tsx app/demo/planner/page.tsx && git commit -m "$(cat <<'EOF'
+fix(planner): align spacing with standard page layout
+
+- Replace min-h-screen flex center with p-6 max-w-5xl mx-auto
+- Remove duplicate ml-0 md:ml-72 (shell already provides it)
+- Add margin wrapper in demo planner (DemoShell doesn't provide margins)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1
+ git push origin claude/wonderful-shaw 2>&1 && cd /Users/gibrann/Desktop/Barflow && git merge claude/wonderful-shaw -m "fix(planner): align spacing with standard page layout" && git push origin development 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git branch --show-current && git status --short
+ lsof -ti:3000 2>/dev/null
+ kill 20227 32016 2>&1 && rm -f /Users/gibrann/Desktop/Barflow/.next/dev/lock
+ ls ~/.claude/ 2>/dev/null && cat ~/.claude/settings.json 2>/dev/null | head -60
+ cat ~/.claude/settings.json
+ cat ~/.claude.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(list(d.get('mcpServers',{}).keys()), indent=2))" 2>/dev/null || echo "no ~/.claude.json or no mcpServers key"
+ cat ~/.claude.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); keys=list(d.keys()); print(keys)" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+for pid, proj in projects.items():
+    mcps = proj.get('mcpServers', {})
+    if mcps:
+        print(f'Project: {pid}')
+        for name in mcps:
+            print(f'  - {name}')
+" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+print(f'Total projects: {len(projects)}')
+for pid, proj in list(projects.items())[:3]:
+    print(f'Project keys: {list(proj.keys())}')
+    break
+" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+for pid, proj in projects.items():
+    if 'Barflow' in pid or 'barflow' in pid.lower():
+        print(f'Project: {pid}')
+        print(json.dumps(proj, indent=2))
+" 2>/dev/null
+ ls ~/.claude/plugins/ 2>/dev/null && cat ~/.claude/plugins/*/mcp.json 2>/dev/null | python3 -c "import sys,json; [print(json.dumps(d, indent=2)) for d in [json.loads(l) for l in sys.stdin] if d]" 2>/dev/null | head -80
+ ls ~/.claude/plugins/marketplaces/ 2>/dev/null && ls ~/.claude/plugins/marketplaces/*/ 2>/dev/null | head -40
+ ls ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/ 2>/dev/null | head -30
+ cat ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/*/plugin.json 2>/dev/null | python3 -c "
+import sys, json
+content = sys.stdin.read()
+# Split by lines and parse each JSON object
+for line in content.split('\n'):
+    line = line.strip()
+    if line.startswith('{'):
+        try:
+            d = json.loads(line)
+            if 'mcpServers' in str(d) or 'mcp' in str(d).lower():
+                print(d.get('name','?'), '-', d.get('description','')[:60])
+        except: pass
+" 2>/dev/null | head -20
+ find ~/.claude/plugins -name "*.json" | head -20 && echo "---" && find ~/.claude -name "mcp_servers*" -o -name "mcpServers*" 2>/dev/null | head -10
+ cat /Users/gibrann/Desktop/Barflow/.mcp.json 2>/dev/null || echo "no .mcp.json in project"
+cat ~/.mcp.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'  - {k}') for k in d.get('mcpServers',{})]" 2>/dev/null || echo "no ~/.mcp.json"
+ defaults read com.anthropic.claudefordesktop 2>/dev/null | grep -i mcp | head -20 || echo "not a desktop app config"
+find ~/Library -name "*.json" -path "*claude*" 2>/dev/null | grep -v cache | grep -v logs | head -20
+ cat "/Users/gibrann/Library/Application Support/Claude/claude_desktop_config.json" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'  - {k}: {v.get(\"command\",v.get(\"url\",\"?\"))}') for k,v in d.get('mcpServers',{}).items()]"
+ cat "/Users/gibrann/Library/Application Support/Claude/claude_desktop_config.json" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d, indent=2))" | head -60
+ cd /Users/gibrann/Desktop/Barflow && git status && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git add app/demo/layout.tsx components/demo-sidebar.tsx components/welcome-planner-popup.tsx && git add components/menu-manager.tsx && git log --oneline -5
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+feat(demo): add WelcomePlannerPopup + GlowButton hierarchy for menu cards
+
+- New WelcomePlannerPopup component: animated card pointing to Planner
+  sidebar item, with pulsing ring highlight, sessionStorage dismissal,
+  and bilingual (ES/EN) copy
+- demo-sidebar: add data-tour="planner-link" to Planner nav item so
+  the popup can locate and highlight it via getBoundingClientRect
+- demo/layout: mount WelcomePlannerPopup (testMode=true for demo;
+  production will gate on user_metadata.inventory_method)
+- menu-manager: convert Principal/Secundario buttons from hardcoded
+  Button styles to GlowButton pattern with muted blue-300/slate-300
+  gradient dots (Crown + Layers icons) for visual hierarchy
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git add components/welcome-planner-popup.tsx app/demo/layout.tsx components/onboarding-questionnaire.tsx && git commit -m "$(cat <<'EOF'
+feat(onboarding): gate Planner popup to manual path, max 3 sessions
+
+- WelcomePlannerPopup: replaced testMode flag with demoMode; now checks
+  localStorage "inventory_method"="manual" (Gate 1), shows max 3 sessions
+  via "planner_hint_count" counter (Gate 2), and once per browser session
+  via sessionStorage (Gate 3)
+- onboarding-questionnaire: set localStorage "inventory_method"="manual"
+  on handleManual and "excel" on Excel import complete, plus stores the
+  value in user_metadata via markOnboardingComplete
+- demo/layout: updated prop from testMode to demoMode with comment
+  explaining production migration path
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git add components/menu-manager.tsx && git commit -m "$(cat <<'EOF'
+fix(menu-manager): responsive cards, isolated button hover, visible delete + confirm dialog
+
+- Grid: grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 so cards have room for buttons
+- Removed 'group' class from inactive menu card to isolate each GlowButton's
+  own group-hover glow (they no longer both trigger simultaneously)
+- Buttons: flex-wrap so Principal/Secundario stack gracefully on narrow cards
+- Delete button: larger (h-8 w-8), muted-foreground → destructive on hover,
+  with tooltip title attribute
+- Delete flow: replaced native window.confirm() with a proper Dialog component
+  showing the menu name, Cancel + destructive Delete buttons
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git status
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f -name "*.tsx" -o -name "*.ts" -o -name "*.json" | head -50
+ tree -L 3 /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard 2>/dev/null || find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard -type d | sort
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase -name "*.sql" -type f
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "schema*" -o -name "*schema*" | head -20
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "*onboard*" -o -name "*wizard*" \) 2>/dev/null
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/pos -type f
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/configuracion/
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -type f \( -name "*team*" -o -name "*user*" -o -name "*staff*" -o -name "*member*" \) | grep -v node_modules
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard -type f -name "*.tsx" -o -name "*.ts" | sort
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/pos/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/contexts/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/lib/
+ wc -l /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/pos/tables-tab.tsx
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/migrations/ | tail -20 && ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/planner/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/cuenta/
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/supabase/migrations/ | head -30
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/operaciones/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/configuracion/
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/lib/supabase/
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/middleware.ts 2>&1 || echo "no root middleware"
+ cat package.json | grep -E '"bcrypt|"dependencies"' | head -5
+ grep -i bcrypt package.json || echo "not found"
+ npm install bcryptjs @types/bcryptjs --legacy-peer-deps 2>&1 | tail -5
+ npm install bcryptjs @types/bcryptjs 2>&1 | tail -5
+ npm install bcryptjs @types/bcryptjs 2>&1 | tail -5
+ which pnpm; which npm; ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw
+ /Users/gibrann/.local/share/pnpm/pnpm add bcryptjs @types/bcryptjs 2>&1 | tail -5
+ type pnpm npm node 2>&1; ls /usr/local/bin/ | grep -E 'pnpm|npm|node' | head -10
+ ls /usr/local/bin/npm 2>&1; /usr/local/bin/npm install bcryptjs @types/bcryptjs --prefix /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw 2>&1 | tail -5
+ cat /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/package.json | python3 -c "import json,sys; d=json.load(sys.stdin); print('bcryptjs' in d.get('dependencies','') or 'bcryptjs' in d.get('devDependencies',''))"
+ /usr/local/bin/npm run build 2>&1 | tail -40
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm install framer-motion 2>&1 | tail -5
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ /usr/local/bin/npm run build 2>&1 | tail -50
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/equipo/
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard -type f | sort
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/middleware* 2>/dev/null || echo "no middleware"
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw -name "middleware.ts" -not -path "*/node_modules/*" -not -path "*/lib/supabase/*"
+ ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/equipo/ && cat /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/equipo/page.tsx | head -5
+ rm -rf /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.next
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.next -mindepth 1 -delete 2>/dev/null; echo "done"
+ grep -rn "notFound\(\)" /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/ /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/components/ 2>/dev/null | grep -v node_modules
+ mkdir -p /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/lib/team
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/cuenta/
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/app/dashboard/
+ rm -rf /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.next
+ find /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.next -maxdepth 0 -type d && echo "exists"
+ npx next build 2>&1 | head -60
+ node_modules/.bin/next build 2>&1 | head -80
+ ls /Users/gibrann/Desktop/Barflow/app/dashboard/equipo/ 2>/dev/null || echo "Directory does not exist"
+ ls /Users/gibrann/Desktop/Barflow/.env.local 2>/dev/null && echo "exists" || echo "missing"
+ ln -s /Users/gibrann/Desktop/Barflow/.env.local /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.env.local
+ diff /Users/gibrann/Desktop/Barflow/hooks/use-subscription.ts /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/hooks/use-subscription.ts
+ cat /Users/gibrann/.claude/projects/-Users-gibrann-Desktop-Barflow--claude-worktrees-wonderful-shaw/b2afff07-dc5a-4567-9cbc-68340a1c342d/tool-results/mcp-Claude_Preview-preview_console_logs-1775886822600.txt | python3 -c "import json,sys; logs=json.load(sys.stdin); [print(l['type']+':', l['text'][:200]) for l in logs if l['type'] in ('error','warn') or 'Error' in l.get('text','')]" 2>/dev/null | head -40

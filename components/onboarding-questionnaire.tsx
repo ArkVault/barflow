@@ -1033,7 +1033,7 @@ export function OnboardingQuestionnaire({
 
   if (!visible) return null;
 
-  const t = T[lang];
+  const t = T[lang] as Translations;
 
   const handleLangSelect = (l: Lang) => {
     setLang(l);
