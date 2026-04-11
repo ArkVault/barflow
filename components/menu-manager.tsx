@@ -67,6 +67,7 @@ export function MenuManager({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newMenuName, setNewMenuName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [menuToDelete, setMenuToDelete] = useState<Menu | null>(null);
 
   useEffect(() => {
     loadMenus();
@@ -281,7 +282,7 @@ export function MenuManager({
     }
   };
 
-  const deleteMenu = async (menuId: string) => {
+  const deleteMenu = (menuId: string) => {
     const menu = menus.find((m) => m.id === menuId);
     if (menu?.is_active) {
       toast.error(
@@ -299,23 +300,20 @@ export function MenuManager({
       );
       return;
     }
+    if (menu) setMenuToDelete(menu);
+  };
 
-    const confirmMsg =
-      language === "es"
-        ? "¿Estás seguro de eliminar este menú?"
-        : "Are you sure you want to delete this menu?";
-    if (!confirm(confirmMsg)) {
-      return;
-    }
-
+  const confirmDeleteMenu = async () => {
+    if (!menuToDelete) return;
     try {
       const supabase = createClient();
-
-      const { error } = await supabase.from("menus").delete().eq("id", menuId);
-
+      const { error } = await supabase
+        .from("menus")
+        .delete()
+        .eq("id", menuToDelete.id);
       if (error) throw error;
-
       toast.success(language === "es" ? "Menú eliminado" : "Menu deleted");
+      setMenuToDelete(null);
       loadMenus();
     } catch (error: any) {
       console.error("Error deleting menu:", error);
@@ -366,7 +364,7 @@ export function MenuManager({
           <Label className="text-sm font-medium">
             {language === "es" ? "Menús" : "Menus"}
           </Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {/* Active Menu First (if exists) */}
             {activeMenu && (
               <div
@@ -470,7 +468,7 @@ export function MenuManager({
             {inactiveMenus.map((menu) => (
               <div
                 key={menu.id}
-                className="group relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
+                className="relative overflow-hidden rounded-lg p-3 bg-gradient-to-br from-white/10 via-white/5 to-gray-500/10 border border-white/20 hover:border-white/30 transition-all hover:scale-[1.02] cursor-pointer"
                 onClick={() => onMenuClick?.(menu)}
               >
                 <div className="space-y-2">
@@ -492,9 +490,10 @@ export function MenuManager({
                       : "Click to view products"}
                   </p>
 
-                  <div className="flex gap-1.5 items-center">
+                  {/* Action buttons — each GlowButton is its own group, no shared group ancestor */}
+                  <div className="flex flex-wrap gap-1.5 items-center">
                     <GlowButton
-                      className="flex-1 !px-3 !py-1.5 text-xs"
+                      className="!px-3 !py-1.5 text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
                         activateMenu(menu.id);
@@ -505,10 +504,10 @@ export function MenuManager({
                       </div>
                       <span>{language === "es" ? "Principal" : "Primary"}</span>
                     </GlowButton>
-                    {/* Secondary activation button - only show if there's already a primary */}
+                    {/* Secondary activation button — only show if there's already a primary */}
                     {activeMenu && (
                       <GlowButton
-                        className="flex-1 !px-3 !py-1.5 text-xs"
+                        className="!px-3 !py-1.5 text-xs"
                         onClick={(e) => {
                           e.stopPropagation();
                           activateSecondaryMenu(menu.id);
@@ -525,13 +524,16 @@ export function MenuManager({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 w-7 p-0 flex-shrink-0"
+                      className="h-8 w-8 p-0 flex-shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteMenu(menu.id);
                       }}
+                      title={
+                        language === "es" ? "Eliminar menú" : "Delete menu"
+                      }
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -540,6 +542,49 @@ export function MenuManager({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={!!menuToDelete}
+        onOpenChange={(open) => !open && setMenuToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4 text-destructive" />
+              {language === "es" ? "Eliminar menú" : "Delete menu"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === "es" ? (
+                <>
+                  ¿Estás seguro de que quieres eliminar{" "}
+                  <span className="font-semibold text-foreground">
+                    {menuToDelete?.name}
+                  </span>
+                  ? Esta acción no se puede deshacer.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-foreground">
+                    {menuToDelete?.name}
+                  </span>
+                  ? This action cannot be undone.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMenuToDelete(null)}>
+              {t("cancel")}
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteMenu}>
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              {language === "es" ? "Eliminar" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Menu Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
