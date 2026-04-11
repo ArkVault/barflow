@@ -469,3 +469,18 @@ feat(onboarding): gate Planner popup to manual path, max 3 sessions
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )" && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git add components/menu-manager.tsx && git commit -m "$(cat <<'EOF'
+fix(menu-manager): responsive cards, isolated button hover, visible delete + confirm dialog
+
+- Grid: grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 so cards have room for buttons
+- Removed 'group' class from inactive menu card to isolate each GlowButton's
+  own group-hover glow (they no longer both trigger simultaneously)
+- Buttons: flex-wrap so Principal/Secundario stack gracefully on narrow cards
+- Delete button: larger (h-8 w-8), muted-foreground → destructive on hover,
+  with tooltip title attribute
+- Delete flow: replaced native window.confirm() with a proper Dialog component
+  showing the menu name, Cancel + destructive Delete buttons
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
