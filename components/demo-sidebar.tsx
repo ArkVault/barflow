@@ -151,9 +151,14 @@ export function DemoSidebar({
               item.labelKey as Parameters<typeof t>[0],
             );
 
+            const isPlanner = item.labelKey === "planner";
+
             return (
               <Link key={item.href} href={item.href} className="block">
-                <div className="relative btn-glow-wrapper">
+                <div
+                  className="relative btn-glow-wrapper"
+                  {...(isPlanner ? { "data-tour": "planner-link" } : {})}
+                >
                   <div
                     className={cn(
                       "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
