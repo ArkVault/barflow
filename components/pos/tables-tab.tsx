@@ -43,9 +43,18 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 import { ReceiptGenerator, ReceiptData } from "./receipt-generator";
+import { PinApprovalModal } from "./pin-approval-modal";
+
+interface TablesTabProps {
+  canAddSection?: boolean;
+  canCancelDirectly?: boolean;
+}
 
 // Single Responsibility: Only handles table/bar layout management
-export function TablesTab() {
+export function TablesTab({
+  canAddSection = true,
+  canCancelDirectly = true,
+}: TablesTabProps = {}) {
   const { t, language } = useLanguage();
   const { establishmentId, establishmentName } = useAuth();
   const {
@@ -102,6 +111,12 @@ export function TablesTab() {
   const [movingItem, setMovingItem] = useState<{
     accountId: string;
     itemId: string;
+  } | null>(null);
+  const [pendingCancel, setPendingCancel] = useState<{
+    sectionId: string;
+    itemId: string;
+    accountId: string;
+    type: "table" | "bar";
   } | null>(null);
 
   // Reservations state
@@ -672,14 +687,16 @@ export function TablesTab() {
     <div className="space-y-4">
       {/* Action Buttons */}
       <div className="flex gap-3 mb-6">
-        <GlowButton onClick={addSection}>
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-inner">
-            <LayoutGrid className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="hidden sm:inline">
-            {language === "es" ? "Agregar Sección" : "Add Section"}
-          </span>
-        </GlowButton>
+        {canAddSection && (
+          <GlowButton onClick={addSection}>
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-inner">
+              <LayoutGrid className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="hidden sm:inline">
+              {language === "es" ? "Agregar Sección" : "Add Section"}
+            </span>
+          </GlowButton>
+        )}
         <GlowButton onClick={() => setShowNewReservationModal(true)}>
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-inner">
             <Calendar className="w-3.5 h-3.5 text-white" />
@@ -1221,12 +1238,21 @@ export function TablesTab() {
                           variant="destructive"
                           className="flex-1 h-9 text-xs"
                           onClick={() => {
-                            cancelAccount(
-                              selectedItem.sectionId,
-                              selectedItem.itemId,
-                              account.id,
-                              selectedItem.type,
-                            );
+                            if (canCancelDirectly) {
+                              cancelAccount(
+                                selectedItem.sectionId,
+                                selectedItem.itemId,
+                                account.id,
+                                selectedItem.type,
+                              );
+                            } else {
+                              setPendingCancel({
+                                sectionId: selectedItem.sectionId,
+                                itemId: selectedItem.itemId,
+                                accountId: account.id,
+                                type: selectedItem.type,
+                              });
+                            }
                           }}
                         >
                           <X className="w-3 h-3 mr-1" />
@@ -1858,6 +1884,31 @@ export function TablesTab() {
             );
             setConfirmFinalize(null);
             setReceiptData(null);
+          }
+        }}
+      />
+
+      {/* PIN approval modal — shown when mesero tries to cancel an account */}
+      <PinApprovalModal
+        open={pendingCancel !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingCancel(null);
+        }}
+        onApproved={() => {
+          if (pendingCancel) {
+            cancelAccount(
+              pendingCancel.sectionId,
+              pendingCancel.itemId,
+              pendingCancel.accountId,
+              pendingCancel.type,
+            );
+            toast.success(
+              language === "es"
+                ? "Cancelación aprobada"
+                : "Cancellation approved",
+            );
+            setPendingCancel(null);
+            setIsModalOpen(false);
           }
         }}
       />

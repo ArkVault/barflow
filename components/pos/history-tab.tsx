@@ -502,18 +502,20 @@ export function HistoryTab() {
                     borderRadius: "8px",
                     boxShadow: "0 0 12px rgba(34, 197, 94, 0.2)",
                   }}
-                  formatter={(value: any, name: string) => {
-                    if (name === "ventas") {
-                      return [
-                        `${value} ${language === "es" ? "productos" : "products"}`,
-                        language === "es" ? "Vendidos" : "Sold",
-                      ];
-                    }
-                    if (name === "total") {
-                      return [`$${Number(value).toFixed(2)}`, "Total"];
-                    }
-                    return [value, name];
-                  }}
+                  formatter={
+                    ((value: any, name: any) => {
+                      if (name === "ventas") {
+                        return [
+                          `${value} ${language === "es" ? "productos" : "products"}`,
+                          language === "es" ? "Vendidos" : "Sold",
+                        ];
+                      }
+                      if (name === "total") {
+                        return [`$${Number(value).toFixed(2)}`, "Total"];
+                      }
+                      return [value, name];
+                    }) as any
+                  }
                   labelStyle={{
                     color: "rgba(255,255,255,0.7)",
                     fontSize: "11px",

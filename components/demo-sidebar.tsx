@@ -13,12 +13,21 @@ import {
   User,
   ShoppingCart,
   LogOut,
+  Users,
+  UserCheck,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 import { useLanguage } from "@/hooks/use-language";
 import { createClient } from "@/lib/supabase/client";
+import { useStaff } from "@/contexts/staff-context";
+import {
+  ROLE_ROUTES,
+  ROLE_LABELS,
+  canSeeAccountMenu,
+  StaffRole,
+} from "@/lib/roles";
 
 interface NavItem {
   href: string;
@@ -39,13 +48,14 @@ const demoBottomItems: NavItem[] = [
   { href: "/demo/cuenta", labelKey: "account", icon: User },
 ];
 
-const dashboardNavItems: NavItem[] = [
+const allDashboardNavItems: NavItem[] = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/dashboard/planner", labelKey: "planner", icon: ClipboardList },
   { href: "/dashboard/insumos", labelKey: "supplies", icon: Boxes },
   { href: "/dashboard/productos", labelKey: "products", icon: Package2 },
   { href: "/dashboard/punto-de-venta", labelKey: "pos", icon: ShoppingCart },
   { href: "/dashboard/proyecciones", labelKey: "projections", icon: BarChart3 },
+  { href: "/dashboard/equipo", labelKey: "team", icon: Users },
 ];
 
 const dashboardBottomItems: NavItem[] = [
@@ -65,20 +75,26 @@ export function DemoSidebar({
 }: DemoSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const isDashboard = mode === "dashboard";
   const demoBasePath = getDemoBasePath(pathname);
 
+  // Role-aware filtering (dashboard mode only)
+  const { role, staff, logoutStaff } = useStaff();
+  const allowedRoutes = new Set(ROLE_ROUTES[role]);
+
   const navItems = isDashboard
-    ? dashboardNavItems
+    ? allDashboardNavItems.filter((item) => allowedRoutes.has(item.href))
     : demoNavItems.map((item) => ({
         ...item,
         href: toDemoPath(demoBasePath, item.href),
       }));
 
   const bottomItems = isDashboard
-    ? dashboardBottomItems
+    ? canSeeAccountMenu(role)
+      ? dashboardBottomItems
+      : []
     : demoBottomItems.map((item) => ({
         ...item,
         href: toDemoPath(demoBasePath, item.href),
@@ -97,6 +113,11 @@ export function DemoSidebar({
     await supabase.auth.signOut();
     router.push("/");
   };
+
+  const roleLabel =
+    isDashboard && staff
+      ? ROLE_LABELS[role as StaffRole][language === "es" ? "es" : "en"]
+      : null;
 
   return (
     <aside className="fixed left-4 top-1/2 -translate-y-1/2 z-40 w-72 hidden md:block">
@@ -128,19 +149,21 @@ export function DemoSidebar({
           <div className="scale-90">
             <LanguageToggle />
           </div>
-          <div className="scale-90">
-            <Link href={accountHref} title={t("account")}>
-              <button
-                className={cn(
-                  "h-10 w-10 rounded-lg inline-flex items-center justify-center transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  "neumorphic-hover border-0",
-                )}
-              >
-                <User className="h-5 w-5" />
-              </button>
-            </Link>
-          </div>
+          {(!isDashboard || canSeeAccountMenu(role)) && (
+            <div className="scale-90">
+              <Link href={accountHref} title={t("account")}>
+                <button
+                  className={cn(
+                    "h-10 w-10 rounded-lg inline-flex items-center justify-center transition-colors",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    "neumorphic-hover border-0",
+                  )}
+                >
+                  <User className="h-5 w-5" />
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Main Navigation Items */}
@@ -173,23 +196,44 @@ export function DemoSidebar({
 
         {/* Bottom section */}
         <div className="space-y-1 pt-3 mt-3 border-t border-border/30">
-          {/* Establishment & User Info */}
-          {(userName || establishmentName) && (
+          {/* Staff / owner info */}
+          {isDashboard && staff ? (
             <div className="px-2 mb-2">
               {establishmentName && (
                 <p className="font-medium text-sm truncate">
                   {establishmentName}
                 </p>
               )}
-              {userName && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <UserCheck className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                 <p className="text-muted-foreground text-xs truncate">
-                  {userName}
+                  {staff.name}
+                  {roleLabel && (
+                    <span className="ml-1 text-muted-foreground/60">
+                      · {roleLabel}
+                    </span>
+                  )}
                 </p>
-              )}
+              </div>
             </div>
+          ) : (
+            (userName || establishmentName) && (
+              <div className="px-2 mb-2">
+                {establishmentName && (
+                  <p className="font-medium text-sm truncate">
+                    {establishmentName}
+                  </p>
+                )}
+                {userName && (
+                  <p className="text-muted-foreground text-xs truncate">
+                    {userName}
+                  </p>
+                )}
+              </div>
+            )
           )}
 
-          {/* Bottom nav items (Account) */}
+          {/* Bottom nav items (Account — admin only) */}
           {bottomItems.map((item) => {
             const isActive = pathname === item.href;
             const displayLabel: string = t(
@@ -213,19 +257,33 @@ export function DemoSidebar({
             );
           })}
 
-          {/* Upgrade Plan Button */}
-          <div className="px-2 my-2">
-            <UpgradePlanButton className="w-full" />
-          </div>
+          {/* Upgrade Plan — admin only */}
+          {(!isDashboard || canSeeAccountMenu(role)) && (
+            <div className="px-2 my-2">
+              <UpgradePlanButton className="w-full" />
+            </div>
+          )}
 
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium hover:bg-destructive/10 hover:text-destructive transition-all w-full"
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            <span>{t("logout")}</span>
-          </button>
+          {/* Logout / End shift */}
+          {isDashboard && staff ? (
+            <button
+              onClick={logoutStaff}
+              className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium hover:bg-amber-500/10 hover:text-amber-600 transition-all w-full"
+            >
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              <span>{language === "es" ? "Salir del turno" : "End shift"}</span>
+            </button>
+          ) : (
+            (!isDashboard || canSeeAccountMenu(role)) && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium hover:bg-destructive/10 hover:text-destructive transition-all w-full"
+              >
+                <LogOut className="h-5 w-5 flex-shrink-0" />
+                <span>{t("logout")}</span>
+              </button>
+            )
+          )}
         </div>
       </div>
     </aside>

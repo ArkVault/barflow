@@ -1,11 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLanguage } from "@/hooks/use-language";
 import { LayoutGrid, FileText, History } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useStaff } from "@/contexts/staff-context";
+import {
+  canAccessPosTab,
+  canAddSection,
+  canCancelAccountDirect,
+} from "@/lib/roles";
 import { ProdShell } from "@/components/shells";
 
-// Import POS components following Dependency Inversion Principle
 import {
   POSProvider,
   usePOS,
@@ -14,7 +20,6 @@ import {
   HistoryTab,
 } from "@/components/pos";
 
-// Tab configuration - Open/Closed: Add new tabs without modifying existing logic
 const TABS = [
   { id: "mesas", labelEs: "Mesas", labelEn: "Tables", icon: LayoutGrid },
   { id: "comandas", labelEs: "Comandas", labelEn: "Orders", icon: FileText },
@@ -28,11 +33,20 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-// Inner component that uses the POS context
 function POSContent() {
-  const { t, language } = useLanguage();
-  const { activeTab, setActiveTab } = usePOS();
+  const { language } = useLanguage();
   const { user, establishmentName } = useAuth();
+  const { role } = useStaff();
+  const { activeTab, setActiveTab } = usePOS();
+
+  const visibleTabs = TABS.filter((tab) => canAccessPosTab(role, tab.id));
+
+  // If current active tab is not allowed for this role, reset to first allowed
+  useEffect(() => {
+    if (!canAccessPosTab(role, activeTab as TabId)) {
+      setActiveTab("mesas");
+    }
+  }, [role, activeTab, setActiveTab]);
 
   return (
     <ProdShell
@@ -53,10 +67,11 @@ function POSContent() {
               : "Tables, orders and sales management"}
           </p>
         </div>
+
         {/* Tabs */}
         <div className="mb-6">
           <div className="inline-flex items-center gap-1 rounded-full bg-muted p-1 text-sm w-fit">
-            {TABS.map((tab) => {
+            {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
@@ -77,16 +92,24 @@ function POSContent() {
           </div>
         </div>
 
-        {/* Tab Content - Single Responsibility: Just render the active tab */}
-        {activeTab === "mesas" && <TablesTab />}
-        {activeTab === "comandas" && <OrdersTab />}
-        {activeTab === "historial" && <HistoryTab />}
+        {/* Tab Content */}
+        {activeTab === "mesas" && (
+          <TablesTab
+            canAddSection={canAddSection(role)}
+            canCancelDirectly={canCancelAccountDirect(role)}
+          />
+        )}
+        {activeTab === "comandas" && canAccessPosTab(role, "comandas") && (
+          <OrdersTab />
+        )}
+        {activeTab === "historial" && canAccessPosTab(role, "historial") && (
+          <HistoryTab />
+        )}
       </div>
     </ProdShell>
   );
 }
 
-// Main page component - Wraps with Provider
 export default function PuntoDeVentaPage() {
   return (
     <POSProvider>
