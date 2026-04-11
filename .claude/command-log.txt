@@ -377,3 +377,59 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && git branch --show-current && git status --short
  lsof -ti:3000 2>/dev/null
  kill 20227 32016 2>&1 && rm -f /Users/gibrann/Desktop/Barflow/.next/dev/lock
+ ls ~/.claude/ 2>/dev/null && cat ~/.claude/settings.json 2>/dev/null | head -60
+ cat ~/.claude/settings.json
+ cat ~/.claude.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(list(d.get('mcpServers',{}).keys()), indent=2))" 2>/dev/null || echo "no ~/.claude.json or no mcpServers key"
+ cat ~/.claude.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); keys=list(d.keys()); print(keys)" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+for pid, proj in projects.items():
+    mcps = proj.get('mcpServers', {})
+    if mcps:
+        print(f'Project: {pid}')
+        for name in mcps:
+            print(f'  - {name}')
+" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+print(f'Total projects: {len(projects)}')
+for pid, proj in list(projects.items())[:3]:
+    print(f'Project keys: {list(proj.keys())}')
+    break
+" 2>/dev/null
+ cat ~/.claude.json | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+projects = d.get('projects', {})
+for pid, proj in projects.items():
+    if 'Barflow' in pid or 'barflow' in pid.lower():
+        print(f'Project: {pid}')
+        print(json.dumps(proj, indent=2))
+" 2>/dev/null
+ ls ~/.claude/plugins/ 2>/dev/null && cat ~/.claude/plugins/*/mcp.json 2>/dev/null | python3 -c "import sys,json; [print(json.dumps(d, indent=2)) for d in [json.loads(l) for l in sys.stdin] if d]" 2>/dev/null | head -80
+ ls ~/.claude/plugins/marketplaces/ 2>/dev/null && ls ~/.claude/plugins/marketplaces/*/ 2>/dev/null | head -40
+ ls ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/ 2>/dev/null | head -30
+ cat ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/*/plugin.json 2>/dev/null | python3 -c "
+import sys, json
+content = sys.stdin.read()
+# Split by lines and parse each JSON object
+for line in content.split('\n'):
+    line = line.strip()
+    if line.startswith('{'):
+        try:
+            d = json.loads(line)
+            if 'mcpServers' in str(d) or 'mcp' in str(d).lower():
+                print(d.get('name','?'), '-', d.get('description','')[:60])
+        except: pass
+" 2>/dev/null | head -20
+ find ~/.claude/plugins -name "*.json" | head -20 && echo "---" && find ~/.claude -name "mcp_servers*" -o -name "mcpServers*" 2>/dev/null | head -10
+ cat /Users/gibrann/Desktop/Barflow/.mcp.json 2>/dev/null || echo "no .mcp.json in project"
+cat ~/.mcp.json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'  - {k}') for k in d.get('mcpServers',{})]" 2>/dev/null || echo "no ~/.mcp.json"
+ defaults read com.anthropic.claudefordesktop 2>/dev/null | grep -i mcp | head -20 || echo "not a desktop app config"
+find ~/Library -name "*.json" -path "*claude*" 2>/dev/null | grep -v cache | grep -v logs | head -20
+ cat "/Users/gibrann/Library/Application Support/Claude/claude_desktop_config.json" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'  - {k}: {v.get(\"command\",v.get(\"url\",\"?\"))}') for k,v in d.get('mcpServers',{}).items()]"
+ cat "/Users/gibrann/Library/Application Support/Claude/claude_desktop_config.json" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d, indent=2))" | head -60
