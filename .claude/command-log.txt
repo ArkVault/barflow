@@ -453,3 +453,19 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git add components/welcome-planner-popup.tsx app/demo/layout.tsx components/onboarding-questionnaire.tsx && git commit -m "$(cat <<'EOF'
+feat(onboarding): gate Planner popup to manual path, max 3 sessions
+
+- WelcomePlannerPopup: replaced testMode flag with demoMode; now checks
+  localStorage "inventory_method"="manual" (Gate 1), shows max 3 sessions
+  via "planner_hint_count" counter (Gate 2), and once per browser session
+  via sessionStorage (Gate 3)
+- onboarding-questionnaire: set localStorage "inventory_method"="manual"
+  on handleManual and "excel" on Excel import complete, plus stores the
+  value in user_metadata via markOnboardingComplete
+- demo/layout: updated prop from testMode to demoMode with comment
+  explaining production migration path
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
