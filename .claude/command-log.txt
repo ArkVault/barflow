@@ -633,3 +633,26 @@ a cancelled flag to prevent stale state updates after unmount.
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" && git push origin development
+ find /Users/gibrann/Desktop/Barflow -maxdepth 3 -type f \( -name "*.ts" -o -name "*.tsx" \) | grep -E "(role|auth|guard|middleware|permission)" | grep -v node_modules | head -20
+ ls -la /Users/gibrann/Desktop/Barflow/lib/ | grep -E "^d"
+ ls -la /Users/gibrann/Desktop/Barflow/lib/team/
+ ls -la /Users/gibrann/Desktop/Barflow/components/team/
+ ls -la /Users/gibrann/Desktop/Barflow/app/dashboard/equipo/
+ find /Users/gibrann/Desktop/Barflow/app/dashboard -type f -name "page.tsx" -o -name "layout.tsx" | head -15
+ find /Users/gibrann/Desktop/Barflow -name "*layout.tsx" -type f | grep -E "app/(dashboard|demo)" | grep -v node_modules
+ find /Users/gibrann/Desktop/Barflow -maxdepth 2 -name "sidebar*.tsx" -type f | grep -v node_modules | head -5
+ ls -la /Users/gibrann/Desktop/Barflow/components/ | head -30
+ ls -la /Users/gibrann/Desktop/Barflow/components/ | grep -E "(sidebar|nav)"
+ find /Users/gibrann/Desktop/Barflow -name "*staff*context*" -type f | grep -v node_modules
+ find /Users/gibrann/Desktop/Barflow -name "middleware.ts" -type f -not -path "*/node_modules/*" | head -5
+ ls -la /Users/gibrann/Desktop/Barflow/ | grep middleware
+ find /Users/gibrann/Desktop/Barflow -maxdepth 1 -name "*.ts" -type f
+ find /Users/gibrann/Desktop/Barflow -name "*.sql" -type f | head -10
+ ls /Users/gibrann/Desktop/Barflow/app/dashboard/
+ grep -r "canAccessRoute\|canManageTeam\|canSeeAccountMenu" /Users/gibrann/Desktop/Barflow --include="*.tsx" --include="*.ts" | grep -v node_modules | head -15
+ grep -r "canApproveCancellation\|canAddSection\|can_approve_cancellations" /Users/gibrann/Desktop/Barflow --include="*.tsx" --include="*.ts" | grep -v node_modules | head -20
+ head -50 /Users/gibrann/Desktop/Barflow/app/dashboard/punto-de-venta/page.tsx
+ grep -r "useStaff\|canAccessRoute\|StaffRole" /Users/gibrann/Desktop/Barflow/components --include="*.tsx" | grep -v node_modules | wc -l
+ grep -r "useStaff\|canAccessRoute\|StaffRole" /Users/gibrann/Desktop/Barflow/components --include="*.tsx" | grep -v node_modules
+ head -100 /Users/gibrann/Desktop/Barflow/components/punto-de-venta-content.tsx | tail -50
+ grep -n "ROLE_ROUTES\|ROLE_POS_TABS\|ROLE_LABELS" /Users/gibrann/Desktop/Barflow/lib/roles/index.ts
