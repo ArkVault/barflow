@@ -671,3 +671,22 @@ after both auth and staff contexts have finished loading.
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )" && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && npx next build 2>&1 | tail -60
+ cd /Users/gibrann/Desktop/Barflow && find . -type f \( -name "*.ts" -o -name "*.tsx" \) -not -path "./.claude/*" -not -path "./node_modules/*" | head -200 | xargs grep -l "process\.env\.NEXT_PUBLIC_APP_URL" | head -10
+ cd /Users/gibrann/Desktop/Barflow && find . -type f -name "cloudbuild.yaml" -o -name ".gcloudignore" 2>/dev/null | head -5
+ cd /Users/gibrann/Desktop/Barflow && grep -r "emailRedirectTo\|window.location.origin" --include="*.ts" --include="*.tsx" | head -20
+ cd /Users/gibrann/Desktop/Barflow && find . -type f -name "*.sql" | head -10
+ cd /Users/gibrann/Desktop/Barflow && find supabase/migrations -type f -name "*.sql" 2>/dev/null | sort
+ cd /Users/gibrann/Desktop/Barflow && grep -r "CREATE POLICY\|DROP POLICY" supabase/migrations/ | head -30
+ cd /Users/gibrann/Desktop/Barflow && find supabase/migrations -name "*team*" -type f 2>/dev/null
+ cd /Users/gibrann/Desktop/Barflow && grep -r "CREATE TABLE.*team_members\|CREATE TABLE.*opentable" supabase/migrations/ | head -5
+ cd /Users/gibrann/Desktop/Barflow && grep -r "team_members" supabase/migrations/ | head -3
+ cd /Users/gibrann/Desktop/Barflow && grep -r "team_members" . --include="*.sql" --include="*.ts" --include="*.tsx" | grep -i "create table\|alter table" | head -10
+ cd /Users/gibrann/Desktop/Barflow && grep -r "consumeRateLimit\|getRequesterIp" app/api --include="*.ts" | grep -v node_modules
+ cd /Users/gibrann/Desktop/Barflow && for f in app/api/*/route.ts app/api/*/*/route.ts; do if [ -f "$f" ]; then if ! grep -q "consumeRateLimit" "$f"; then echo "$f"; fi; fi; done
+ cd /Users/gibrann/Desktop/Barflow && grep -r "OPENTABLE_CLIENT_ID\|OPENTABLE_CLIENT_SECRET" --include="*.ts" --include="*.tsx" --include="*.env*" | grep -v node_modules | grep -v ".claude"
+ cd /Users/gibrann/Desktop/Barflow && grep -A5 -B5 "OPENTABLE_CLIENT_ID\|OPENTABLE_CLIENT_SECRET\|OPENTABLE_TOKEN_URL\|OPENTABLE_API_URL" app/api/integrations/opentable/connect/route.ts | head -30
+ cd /Users/gibrann/Desktop/Barflow && git ls-files .env.local .env 2>&1
+ cd /Users/gibrann/Desktop/Barflow && grep -n "env" .gitignore 2>&1 | head -10
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/npx next build 2>&1 | tail -80
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/npx next build 2>&1 | tail -80
