@@ -41,9 +41,11 @@ export function useSubscription() {
       return;
     }
 
-    const fetchSubscription = async () => {
-      const supabase = createClient();
+    let cancelled = false;
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
+    const fetchSubscription = async () => {
       const { data, error } = await supabase
         .from("establishments")
         .select(
@@ -51,6 +53,8 @@ export function useSubscription() {
         )
         .eq("id", establishmentId)
         .single();
+
+      if (cancelled) return;
 
       if (error) {
         console.error("Error fetching subscription:", error);
@@ -103,39 +107,37 @@ export function useSubscription() {
       setLoading(false);
     };
 
-    fetchSubscription();
+    // Fetch first, then set up realtime subscription AFTER the async fetch.
+    // This ensures any prior cleanup from Strict Mode's unmount completes
+    // before we register a new postgres_changes listener.
+    fetchSubscription().then(() => {
+      if (cancelled) return;
 
-    // Subscribe to changes — use a unique name per mount to avoid Strict Mode collisions.
-    // Date.now() has 1ms resolution and Strict Mode can re-mount within the same ms,
-    // so use a UUID for guaranteed uniqueness.
-    const supabase = createClient();
-    const uniqueId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const channelName = `subscription-changes-${establishmentId}-${uniqueId}`;
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "establishments",
-          filter: `id=eq.${establishmentId}`,
-        },
-        () => {
-          fetchSubscription();
-        },
-      )
-      .subscribe((status, err) => {
-        if (status === "CHANNEL_ERROR") {
-          console.error("Subscription realtime channel error:", err);
-        }
-      });
+      const channelName = `sub-${establishmentId}-${crypto.randomUUID()}`;
+      channel = supabase
+        .channel(channelName)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "establishments",
+            filter: `id=eq.${establishmentId}`,
+          },
+          () => {
+            if (!cancelled) fetchSubscription();
+          },
+        )
+        .subscribe((status, err) => {
+          if (status === "CHANNEL_ERROR") {
+            console.error("Subscription realtime channel error:", err);
+          }
+        });
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [user, establishmentId]);
 
