@@ -18,5 +18,6 @@ export {
   closeAccountInSections,
   cancelAccountInSections,
   removeItemFromAccountInSections,
+  moveItemBetweenAccountsInSections,
   sendOrderToTargetInSections,
 } from "./domain/pos-state.domain";

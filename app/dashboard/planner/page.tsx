@@ -1,13 +1,18 @@
-import { PlannerClient } from "./planner-client";
-import { getPlannerViewModel } from "@/lib/features/dashboard/server/get-planner-view-model";
+"use client";
 
-export default async function PlannerPage() {
-  const vm = await getPlannerViewModel();
+import { ProdShell } from "@/components/shells";
+import { PlannerContent } from "@/components/planner-content";
+import { useAuth } from "@/contexts/auth-context";
+
+export default function PlannerPage() {
+  const { user, establishmentName } = useAuth();
 
   return (
-    <PlannerClient 
-      userName={vm.userName}
-      establishmentName={vm.establishmentName}
-    />
+    <ProdShell
+      userName={user?.email || "Usuario"}
+      establishmentName={establishmentName || "Mi Negocio"}
+    >
+      <PlannerContent redirectAfterSave="/dashboard/insumos" />
+    </ProdShell>
   );
 }

@@ -1,32 +1,20 @@
-import { ProdShell } from "@/components/shells";
-import { ProjectionView } from "@/components/projection-view";
-import { GenerateProjectionsButton } from "@/components/generate-projections-button";
-import { getProyeccionesViewModel } from "@/lib/features/dashboard/server/get-proyecciones-view-model";
+"use client";
 
-export default async function ProyeccionesPage() {
-  const vm = await getProyeccionesViewModel();
+import { ProdShell } from "@/components/shells";
+import { ProyeccionesContent } from "@/components/proyecciones-content";
+import { useAuth } from "@/contexts/auth-context";
+
+export default function ProyeccionesPage() {
+  const { user, establishmentName } = useAuth();
 
   return (
     <ProdShell
-      userName={vm.userName}
-      establishmentName={vm.establishmentName}
-      pageTitle="Proyecciones Inteligentes"
-      pageDescription="Planifica tu inventario con predicciones basadas en IA"
-      headerActions={
-        <GenerateProjectionsButton
-          establishmentId={vm.establishmentId}
-          supplies={vm.supplies}
-          sales={vm.sales}
-        />
-      }
+      userName={user?.email || "Usuario"}
+      establishmentName={establishmentName || "Mi Negocio"}
     >
-      <main className="container mx-auto p-6">
-        <ProjectionView
-          establishmentId={vm.establishmentId}
-          supplies={vm.supplies}
-          sales={vm.sales}
-        />
-      </main>
+      <div className="p-6 max-w-5xl mx-auto">
+        <ProyeccionesContent />
+      </div>
     </ProdShell>
   );
 }

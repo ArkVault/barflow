@@ -1,34 +1,41 @@
+"use client";
+
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import { ProdShell } from "@/components/shells";
-import { SuppliesTable } from "@/components/supplies-table";
-import { AddSupplyDialog } from "@/components/add-supply-dialog";
-import { GlowButton } from "@/components/glow-button";
-import { ShoppingCart } from "lucide-react";
-import { getInsumosViewModel } from "@/lib/features/dashboard/server/get-insumos-view-model";
+import { InsumosContent } from "@/components/insumos-content";
+import { useAuth } from "@/contexts/auth-context";
 
-export default async function InsumosPage() {
-  const vm = await getInsumosViewModel();
-
+function InsumosPageInner() {
+  const { user, establishmentName } = useAuth();
   return (
     <ProdShell
-      userName={vm.userName}
-      establishmentName={vm.establishmentName}
-      pageTitle="Gestión de Insumos"
-      pageDescription="Administra tu inventario y stock"
-      headerActions={
-        <div className="flex items-center gap-3">
-          <GlowButton>
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-inner">
-              <ShoppingCart className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
-            </div>
-            <span className="hidden sm:inline">Insumos a Comprar</span>
-          </GlowButton>
-          <AddSupplyDialog establishmentId={vm.establishmentId} />
+      userName={user?.email || "Usuario"}
+      establishmentName={establishmentName || "Mi Negocio"}
+    >
+      <div className="p-6 max-w-5xl mx-auto">
+        <InsumosContent
+          plannerHref="/dashboard/planner"
+          restockCleanupUrl="/dashboard/insumos"
+        />
+      </div>
+    </ProdShell>
+  );
+}
+
+export default function InsumosPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-svh bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
         </div>
       }
     >
-      <main className="container mx-auto p-6">
-        <SuppliesTable supplies={vm.supplies} />
-      </main>
-    </ProdShell>
+      <InsumosPageInner />
+    </Suspense>
   );
 }

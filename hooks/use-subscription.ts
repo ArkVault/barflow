@@ -5,118 +5,141 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
 
 // Dev accounts that bypass trial restrictions (comma-separated in env var)
-const DEV_EMAILS: string[] = (process.env.NEXT_PUBLIC_DEV_EMAILS || '')
-     .split(',')
-     .map(e => e.trim())
-     .filter(Boolean);
+const DEV_EMAILS: string[] = (process.env.NEXT_PUBLIC_DEV_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
 
 export interface SubscriptionData {
-     isActive: boolean;
-     isTrialing: boolean;
-     trialEnded: boolean;
-     planType: string | null;
-     trialEndDate: Date | null;
-     daysRemaining: number;
-     subscriptionStatus: string | null;
-     isDevAccount: boolean;
+  isActive: boolean;
+  isTrialing: boolean;
+  trialEnded: boolean;
+  planType: string | null;
+  trialEndDate: Date | null;
+  daysRemaining: number;
+  subscriptionStatus: string | null;
+  isDevAccount: boolean;
 }
 
 export function useSubscription() {
-     const { user, establishmentId } = useAuth();
-     const [subscription, setSubscription] = useState<SubscriptionData>({
-          isActive: false,
-          isTrialing: false,
-          trialEnded: false,
-          planType: null,
-          trialEndDate: null,
-          daysRemaining: 0,
-          subscriptionStatus: null,
-          isDevAccount: false,
-     });
-     const [loading, setLoading] = useState(true);
+  const { user, establishmentId } = useAuth();
+  const [subscription, setSubscription] = useState<SubscriptionData>({
+    isActive: false,
+    isTrialing: false,
+    trialEnded: false,
+    planType: null,
+    trialEndDate: null,
+    daysRemaining: 0,
+    subscriptionStatus: null,
+    isDevAccount: false,
+  });
+  const [loading, setLoading] = useState(true);
 
-     useEffect(() => {
-          if (!user || !establishmentId) {
-               setLoading(false);
-               return;
+  useEffect(() => {
+    if (!user || !establishmentId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const fetchSubscription = async () => {
+      const { data, error } = await supabase
+        .from("establishments")
+        .select(
+          "trial_end_date, subscription_status, plan_type, stripe_subscription_id",
+        )
+        .eq("id", establishmentId)
+        .single();
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("Error fetching subscription:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        const now = new Date();
+        const trialEndDate = data.trial_end_date
+          ? new Date(data.trial_end_date)
+          : null;
+        const isTrialing = trialEndDate ? now < trialEndDate : false;
+        const trialEnded = trialEndDate ? now >= trialEndDate : false;
+        const daysRemaining = trialEndDate
+          ? Math.max(
+              0,
+              Math.ceil(
+                (trialEndDate.getTime() - now.getTime()) /
+                  (1000 * 60 * 60 * 24),
+              ),
+            )
+          : 0;
+
+        const hasActiveSubscription =
+          data.subscription_status === "active" ||
+          data.subscription_status === "trialing";
+
+        // Check if this is a dev account
+        const isDevAccount = user?.email
+          ? DEV_EMAILS.includes(user.email)
+          : false;
+
+        setSubscription({
+          // Dev accounts are always active
+          isActive: isDevAccount || hasActiveSubscription || isTrialing,
+          isTrialing,
+          // Dev accounts never show trial ended
+          trialEnded: isDevAccount
+            ? false
+            : trialEnded && !hasActiveSubscription,
+          planType: data.plan_type,
+          trialEndDate,
+          daysRemaining,
+          subscriptionStatus: data.subscription_status,
+          isDevAccount,
+        });
+      }
+
+      setLoading(false);
+    };
+
+    // Fetch first, then set up realtime subscription AFTER the async fetch.
+    // This ensures any prior cleanup from Strict Mode's unmount completes
+    // before we register a new postgres_changes listener.
+    fetchSubscription().then(() => {
+      if (cancelled) return;
+
+      const channelName = `sub-${establishmentId}-${crypto.randomUUID()}`;
+      channel = supabase
+        .channel(channelName)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "establishments",
+            filter: `id=eq.${establishmentId}`,
+          },
+          () => {
+            if (!cancelled) fetchSubscription();
+          },
+        )
+        .subscribe((status, err) => {
+          if (status === "CHANNEL_ERROR") {
+            console.error("Subscription realtime channel error:", err);
           }
+        });
+    });
 
-          const fetchSubscription = async () => {
-               const supabase = createClient();
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [user, establishmentId]);
 
-               const { data, error } = await supabase
-                    .from("establishments")
-                    .select("trial_end_date, subscription_status, plan_type, stripe_subscription_id")
-                    .eq("id", establishmentId)
-                    .single();
-
-               if (error) {
-                    console.error("Error fetching subscription:", error);
-                    setLoading(false);
-                    return;
-               }
-
-               if (data) {
-                    const now = new Date();
-                    const trialEndDate = data.trial_end_date ? new Date(data.trial_end_date) : null;
-                    const isTrialing = trialEndDate ? now < trialEndDate : false;
-                    const trialEnded = trialEndDate ? now >= trialEndDate : false;
-                    const daysRemaining = trialEndDate
-                         ? Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-                         : 0;
-
-                    const hasActiveSubscription =
-                         data.subscription_status === "active" ||
-                         data.subscription_status === "trialing";
-
-                    // Check if this is a dev account
-                    const isDevAccount = user?.email ? DEV_EMAILS.includes(user.email) : false;
-
-                    setSubscription({
-                         // Dev accounts are always active
-                         isActive: isDevAccount || hasActiveSubscription || isTrialing,
-                         isTrialing,
-                         // Dev accounts never show trial ended
-                         trialEnded: isDevAccount ? false : (trialEnded && !hasActiveSubscription),
-                         planType: data.plan_type,
-                         trialEndDate,
-                         daysRemaining,
-                         subscriptionStatus: data.subscription_status,
-                         isDevAccount,
-                    });
-               }
-
-               setLoading(false);
-          };
-
-          fetchSubscription();
-
-          // Subscribe to changes
-          const supabase = createClient();
-          const channel = supabase
-               .channel("subscription-changes")
-               .on(
-                    "postgres_changes",
-                    {
-                         event: "UPDATE",
-                         schema: "public",
-                         table: "establishments",
-                         filter: `id=eq.${establishmentId}`,
-                    },
-                    () => {
-                         fetchSubscription();
-                    }
-               )
-               .subscribe((status, err) => {
-                    if (status === 'CHANNEL_ERROR') {
-                         console.error('Subscription realtime channel error:', err);
-                    }
-               });
-
-          return () => {
-               channel.unsubscribe();
-          };
-     }, [user, establishmentId]);
-
-     return { subscription, loading };
+  return { subscription, loading };
 }

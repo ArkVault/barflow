@@ -1,5 +1,23 @@
 # Flowstock — Project Memory
 
+#General
+- Be concise in output but thorough in reasoning.
+-Prefer editing over rewriting whole files.
+-Do not re-read files you have already read unless the file may have changed.
+-Test your code before declaring done.
+-No sycophantic openers or closing fluff.
+-Keep solutions simple and direct.
+-Explicit Reasoning: Perform all logic, planning, and architectural decisions inside a <thinking> block before providing any output.
+-Minimalist Edits: Use diff blocks or specific line-based changes rather than rewriting entire files to preserve context and history.
+-Production Standards: Prioritize robust error handling, type safety, and edge-case management (e.g., null checks, timeouts).
+-Dependency Discipline: Do not suggest new libraries or packages unless the task is impossible with the current stack.
+-Consistency: Adhere strictly to the existing project’s naming conventions (e.g., camelCase vs. snake_case) and architectural patterns.
+-Functional Focus: Only refactor code if it yields a measurable improvement in performance or readability; avoid "stylistic" changes.
+-Clean Architecture & SOLID: Organize code to separate concerns (entities, use cases, adapters). Follow SOLID principles—specifically, ensure classes have a single responsibility and favor composition over inheritance.
+-KISS Principle: Keep it Simple, Stupid. Avoid over-engineering; choose the simplest solution that meets the requirement without adding unnecessary abstraction.
+-Security-First Mindset: Check for common vulnerabilities (e.g., SQL injection, XSS, insecure headers). Never hardcode secrets or API keys; always use environment variables.
+-Test-Driven Development: Write unit tests for core logic before declaring a task finished. Ensure high test coverage for edge cases.
+
 ## Project Overview
 - **Name**: Flowstock (formerly Barflow) — Bar inventory/POS SaaS
 - **Stack**: Next.js 16 (App Router) + Supabase + Stripe + Google Gemini AI + GCP Cloud Run

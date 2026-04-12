@@ -11,6 +11,7 @@ export const translations = {
     settings: "Configuración",
     operations: "Operaciones",
     pos: "Punto de Venta",
+    team: "Equipo",
 
     // Common Actions
     back: "Volver",
@@ -43,7 +44,8 @@ export const translations = {
 
     // Planner
     inventoryPlanner: "Planificador de Inventario",
-    configureInventory: "Configura tu inventario inicial seleccionando los insumos que manejas en tu bar",
+    configureInventory:
+      "Configura tu inventario inicial seleccionando los insumos que manejas en tu bar",
     planPeriod: "Periodo del plan:",
     week: "Semana",
     month: "Mes",
@@ -62,13 +64,16 @@ export const translations = {
     howToAddInventory: "¿Cómo deseas agregar tu inventario?",
     chooseMethod: "Elige el método que prefieras para configurar tu plan",
     manualEntry: "Introducir Manualmente o Editar Plan Actual",
-    manualEntryDescription: "Selecciona items de nuestro catálogo predefinido, edita tu plan existente o agrega insumos personalizados",
+    manualEntryDescription:
+      "Selecciona items de nuestro catálogo predefinido, edita tu plan existente o agrega insumos personalizados",
     importFromFile: "Importar desde Archivo",
-    importDescription: "Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente",
+    importDescription:
+      "Sube tu menú en formato CSV o Excel y nuestro AI lo parseará automáticamente",
     uploadFileAI: "Sube tu archivo y nuestro AI lo procesará",
     changeMethod: "Cambiar método",
     importedItems: "Items Importados",
-    reviewImported: "Revisa los items importados y ajusta cantidades si es necesario",
+    reviewImported:
+      "Revisa los items importados y ajusta cantidades si es necesario",
     inDatabase: "En DB",
     newItem: "Nuevo",
     confidence: "Confianza",
@@ -96,10 +101,12 @@ export const translations = {
     urgentSupplies: "Insumos urgentes",
     errorLoadingData: "Error al cargar los datos",
     noUrgentSupplies: "No hay insumos críticos para el periodo seleccionado",
-    allSuppliesSufficient: "Todos los insumos tienen stock suficiente para el periodo seleccionado.",
+    allSuppliesSufficient:
+      "Todos los insumos tienen stock suficiente para el periodo seleccionado.",
     suppliesInStatus: "insumos en el estado seleccionado para este periodo",
     stockRiskByPeriod: "Riesgo de stock por periodo",
-    visualizeStockRisk: "Visualiza cuántos insumos están en nivel crítico o bajo según el horizonte de tiempo.",
+    visualizeStockRisk:
+      "Visualiza cuántos insumos están en nivel crítico o bajo según el horizonte de tiempo.",
     critical: "Crítico",
     urgent: "Urgente",
     good: "Bien",
@@ -125,7 +132,8 @@ export const translations = {
     goToSupplies: "Para gestionar inventario, ve a",
     loadingDashboard: "Cargando dashboard...",
     inventoryReset: "Inventario reiniciado",
-    confirmReconfigure: "¿Reconfigurar el plan eliminará todo tu inventario actual. ¿Continuar?",
+    confirmReconfigure:
+      "¿Reconfigurar el plan eliminará todo tu inventario actual. ¿Continuar?",
     closeSession: "Cerrar Sesión",
 
     // Time relative
@@ -133,7 +141,6 @@ export const translations = {
     weeksAgo: "Hace {weeks} sem",
     monthsAgo: "Hace {months} mes",
     never: "Nunca",
-
 
     // Supplies
     supplyManagement: "Gestión de Insumos",
@@ -357,6 +364,7 @@ export const translations = {
     settings: "Settings",
     operations: "Operations",
     pos: "Point of Sale",
+    team: "Team",
 
     // Common Actions
     back: "Back",
@@ -389,7 +397,8 @@ export const translations = {
 
     // Planner
     inventoryPlanner: "Inventory Planner",
-    configureInventory: "Configure your initial inventory by selecting the supplies you manage in your bar",
+    configureInventory:
+      "Configure your initial inventory by selecting the supplies you manage in your bar",
     planPeriod: "Plan period:",
     week: "Week",
     month: "Month",
@@ -408,9 +417,11 @@ export const translations = {
     howToAddInventory: "How do you want to add your inventory?",
     chooseMethod: "Choose your preferred method to set up your plan",
     manualEntry: "Enter Manually or Edit Current Plan",
-    manualEntryDescription: "Select items from our predefined catalog, edit your existing plan, or add custom supplies",
+    manualEntryDescription:
+      "Select items from our predefined catalog, edit your existing plan, or add custom supplies",
     importFromFile: "Import from File",
-    importDescription: "Upload your menu in CSV or Excel format and our AI will parse it automatically",
+    importDescription:
+      "Upload your menu in CSV or Excel format and our AI will parse it automatically",
     uploadFileAI: "Upload your file and our AI will process it",
     changeMethod: "Change method",
     importedItems: "Imported Items",
@@ -442,10 +453,12 @@ export const translations = {
     urgentSupplies: "Urgent supplies",
     errorLoadingData: "Error loading data",
     noUrgentSupplies: "No critical supplies for the selected period",
-    allSuppliesSufficient: "All supplies have sufficient stock for the selected period.",
+    allSuppliesSufficient:
+      "All supplies have sufficient stock for the selected period.",
     suppliesInStatus: "supplies in selected status for this period",
     stockRiskByPeriod: "Stock risk by period",
-    visualizeStockRisk: "Visualize how many supplies are at critical or low levels based on the time horizon.",
+    visualizeStockRisk:
+      "Visualize how many supplies are at critical or low levels based on the time horizon.",
     critical: "Critical",
     urgent: "Urgent",
     good: "Good",
@@ -471,7 +484,8 @@ export const translations = {
     goToSupplies: "To manage inventory, go to",
     loadingDashboard: "Loading dashboard...",
     inventoryReset: "Inventory reset",
-    confirmReconfigure: "Reconfiguring the plan will delete all your current inventory. Continue?",
+    confirmReconfigure:
+      "Reconfiguring the plan will delete all your current inventory. Continue?",
     closeSession: "Log Out",
 
     // Time relative
@@ -689,13 +703,13 @@ export const translations = {
     language: "Language",
     spanish: "Spanish",
     english: "English",
-  }
+  },
 };
 
 export type Language = keyof typeof translations;
 
-export function getTranslation(key: string, lang: Language = 'es'): string {
-  const keys = key.split('.');
+export function getTranslation(key: string, lang: Language = "es"): string {
+  const keys = key.split(".");
   let value: any = translations[lang];
 
   for (const k of keys) {

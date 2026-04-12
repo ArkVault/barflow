@@ -19,9 +19,9 @@ export function DemoPageContainer({
   return (
     <div
       className={cn(
-        "min-h-screen bg-background ml-0 md:ml-20 lg:ml-72",
+        "min-h-screen bg-background ml-0 md:ml-72",
         paddingClassName,
-        className
+        className,
       )}
     >
       <div className={cn("mx-auto", maxWidthClassName)}>{children}</div>

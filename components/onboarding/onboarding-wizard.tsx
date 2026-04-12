@@ -3,7 +3,17 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Users, GitBranch, FileSpreadsheet, PenLine, ChevronRight, Check, Store, Network } from "lucide-react";
+import {
+  Building2,
+  Users,
+  GitBranch,
+  FileSpreadsheet,
+  PenLine,
+  ChevronRight,
+  Check,
+  Store,
+  Network,
+} from "lucide-react";
 import { saveOnboardingData } from "./onboarding-actions";
 import { toast } from "sonner";
 
@@ -53,10 +63,13 @@ export function OnboardingWizard() {
     }
   }, [currentStep]);
 
-  const goToStep = useCallback((step: number) => {
-    setDirection(step > currentStep ? 1 : -1);
-    setCurrentStep(step);
-  }, [currentStep]);
+  const goToStep = useCallback(
+    (step: number) => {
+      setDirection(step > currentStep ? 1 : -1);
+      setCurrentStep(step);
+    },
+    [currentStep],
+  );
 
   const handleNameSubmit = useCallback(() => {
     if (establishmentNameInput.trim().length >= 2) {
@@ -68,36 +81,42 @@ export function OnboardingWizard() {
     goToStep(2);
   }, [goToStep]);
 
-  const handleBranchSelect = useCallback((choice: BranchChoice) => {
-    setBranchChoice(choice);
-    setTimeout(() => goToStep(3), 400);
-  }, [goToStep]);
+  const handleBranchSelect = useCallback(
+    (choice: BranchChoice) => {
+      setBranchChoice(choice);
+      setTimeout(() => goToStep(3), 400);
+    },
+    [goToStep],
+  );
 
-  const handleInventorySelect = useCallback(async (choice: InventoryChoice) => {
-    setInventoryChoice(choice);
-    setIsSaving(true);
+  const handleInventorySelect = useCallback(
+    async (choice: InventoryChoice) => {
+      setInventoryChoice(choice);
+      setIsSaving(true);
 
-    try {
-      if (establishmentId) {
-        await saveOnboardingData({
-          establishmentId,
-          establishmentName: establishmentNameInput.trim(),
-          roles,
-          branchType: choice === "single" ? "single" : "multiple",
-          inventoryMethod: choice!,
-        });
+      try {
+        if (establishmentId) {
+          await saveOnboardingData({
+            establishmentId,
+            establishmentName: establishmentNameInput.trim(),
+            roles,
+            branchType: branchChoice === "single" ? "single" : "multiple",
+            inventoryMethod: choice!,
+          });
+        }
+        // Show completion animation
+        setTimeout(() => setIsComplete(true), 400);
+        setTimeout(() => {
+          // Reload page to reflect new establishment name and onboarding_completed
+          window.location.reload();
+        }, 2000);
+      } catch {
+        toast.error("Error al guardar. Intenta de nuevo.");
+        setIsSaving(false);
       }
-      // Show completion animation
-      setTimeout(() => setIsComplete(true), 400);
-      setTimeout(() => {
-        // Reload page to reflect new establishment name and onboarding_completed
-        window.location.reload();
-      }, 2000);
-    } catch {
-      toast.error("Error al guardar. Intenta de nuevo.");
-      setIsSaving(false);
-    }
-  }, [establishmentId, establishmentNameInput, roles]);
+    },
+    [establishmentId, establishmentNameInput, roles],
+  );
 
   // Don't show if no user (demo mode)
   if (!user) return null;
@@ -179,7 +198,11 @@ export function OnboardingWizard() {
       {/* Logo */}
       <div className="fixed top-6 left-8 z-[101]">
         <img src="/logo-light.png" alt="Stttock" className="h-8 dark:hidden" />
-        <img src="/logo-dark.png" alt="Stttock" className="h-8 hidden dark:block" />
+        <img
+          src="/logo-dark.png"
+          alt="Stttock"
+          className="h-8 hidden dark:block"
+        />
       </div>
 
       {/* Slides container */}
@@ -229,7 +252,10 @@ export function OnboardingWizard() {
                 <ChevronRight className="h-5 w-5" />
               </button>
               <p className="text-xs text-muted-foreground">
-                presiona <kbd className="px-1.5 py-0.5 rounded bg-muted text-xs font-mono">Enter ↵</kbd>
+                presiona{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-muted text-xs font-mono">
+                  Enter ↵
+                </kbd>
               </p>
             </motion.div>
           )}
@@ -258,24 +284,37 @@ export function OnboardingWizard() {
                 </p>
               </div>
               <div className="w-full max-w-md space-y-4">
-                {([
+                {[
                   { key: "meseros" as const, label: "Meseros", icon: "🍽️" },
-                  { key: "jefeDeBarra" as const, label: "Jefe de Barra", icon: "🍸" },
-                  { key: "pisoGerente" as const, label: "Piso / Gerente", icon: "👔" },
+                  {
+                    key: "jefeDeBarra" as const,
+                    label: "Jefe de Barra",
+                    icon: "🍸",
+                  },
+                  {
+                    key: "pisoGerente" as const,
+                    label: "Piso / Gerente",
+                    icon: "👔",
+                  },
                   { key: "admin" as const, label: "Admin", icon: "⚙️" },
-                ]).map((role) => (
+                ].map((role) => (
                   <div
                     key={role.key}
                     className="flex items-center justify-between p-4 rounded-2xl neumorphic bg-background/60"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{role.icon}</span>
-                      <span className="font-medium text-foreground text-lg">{role.label}</span>
+                      <span className="font-medium text-foreground text-lg">
+                        {role.label}
+                      </span>
                     </div>
                     <select
                       value={roles[role.key]}
                       onChange={(e) =>
-                        setRoles((prev) => ({ ...prev, [role.key]: parseInt(e.target.value) }))
+                        setRoles((prev) => ({
+                          ...prev,
+                          [role.key]: parseInt(e.target.value),
+                        }))
                       }
                       className="h-10 w-20 rounded-xl bg-muted text-center text-lg font-medium border-0 outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                     >
@@ -339,7 +378,9 @@ export function OnboardingWizard() {
                   }`}
                 >
                   <Store className="h-12 w-12 text-primary" />
-                  <span className="text-xl font-semibold text-foreground">Una Sucursal</span>
+                  <span className="text-xl font-semibold text-foreground">
+                    Una Sucursal
+                  </span>
                   <span className="text-sm text-muted-foreground text-center">
                     Un solo establecimiento
                   </span>
@@ -353,7 +394,9 @@ export function OnboardingWizard() {
                   }`}
                 >
                   <Network className="h-12 w-12 text-primary" />
-                  <span className="text-xl font-semibold text-foreground">Varias Sucursales</span>
+                  <span className="text-xl font-semibold text-foreground">
+                    Varias Sucursales
+                  </span>
                   <span className="text-sm text-muted-foreground text-center">
                     Cadena o franquicia
                   </span>
@@ -402,7 +445,9 @@ export function OnboardingWizard() {
                   } disabled:opacity-50`}
                 >
                   <FileSpreadsheet className="h-12 w-12 text-green-600" />
-                  <span className="text-xl font-semibold text-foreground">Importar Excel</span>
+                  <span className="text-xl font-semibold text-foreground">
+                    Importar Excel
+                  </span>
                   <span className="text-sm text-muted-foreground text-center">
                     Sube tu archivo con datos existentes
                   </span>
@@ -417,7 +462,9 @@ export function OnboardingWizard() {
                   } disabled:opacity-50`}
                 >
                   <PenLine className="h-12 w-12 text-blue-500" />
-                  <span className="text-xl font-semibold text-foreground">Llenar Después</span>
+                  <span className="text-xl font-semibold text-foreground">
+                    Llenar Después
+                  </span>
                   <span className="text-sm text-muted-foreground text-center">
                     Agrega tu inventario manualmente
                   </span>
