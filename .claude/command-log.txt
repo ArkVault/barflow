@@ -697,3 +697,89 @@ EOF
  grep -r "NEXT_PUBLIC_SUPABASE_URL\|NEXT_PUBLIC_SUPABASE_ANON_KEY\|NEXT_PUBLIC_STRIPE\|STRIPE_SECRET\|STRIPE_WEBHOOK" /Users/gibrann/Desktop/Barflow/.env.local 2>/dev/null | sed 's/=.*/=***/' | head -20
  ls -la /Users/gibrann/Desktop/Barflow/supabase/migrations/
  ls /Users/gibrann/Desktop/Barflow/supabase/migrations/ | sort
+ cd /Users/gibrann/Desktop/Barflow && git status
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -10
+ cd /Users/gibrann/Desktop/Barflow && git diff components/onboarding-questionnaire.tsx | head -40
+ cd /Users/gibrann/Desktop/Barflow && git status supabase/
+ cd /Users/gibrann/Desktop/Barflow && ls supabase/migrations/20260412* supabase/migrations/_APPLY*
+ cd /Users/gibrann/Desktop/Barflow && git status -u
+ cd /Users/gibrann/Desktop/Barflow && git check-ignore -v supabase/migrations/20260412_create_team_members_and_supply_movements.sql supabase/migrations/_APPLY_IN_SUPABASE_SQL_EDITOR.sql 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git check-ignore -v supabase/migrations/20260412_create_team_members_and_supply_movements.sql 2>&1; git status supabase/migrations/
+ cd /Users/gibrann/Desktop/Barflow && ls supabase/migrations/ | wc -l && git status supabase/migrations/ --short | wc -l
+ cd /Users/gibrann/Desktop/Barflow && git add \
+  .gitignore \
+  components/onboarding-questionnaire.tsx \
+  components/team/team-management.tsx \
+  supabase/migrations/20251210011839_create_operations_layout.sql \
+  supabase/migrations/20251210074117_add_image_url_to_products.sql \
+  supabase/migrations/20251210083156_create_product_categories.sql \
+  supabase/migrations/20251210190706_create_sales_table.sql \
+  supabase/migrations/20251210202729_create_ticket_counter.sql \
+  supabase/migrations/20251210214500_create_menus_and_products.sql \
+  supabase/migrations/20251210214501_fix_products_table.sql \
+  supabase/migrations/20251210214502_remove_establishment_from_products.sql \
+  supabase/migrations/20251213_add_name_to_establishments.sql \
+  supabase/migrations/20251213_add_secondary_menu_support.sql \
+  supabase/migrations/20251214_create_opentable_integration.sql \
+  supabase/migrations/20260223_add_webhook_replay_keys.sql \
+  supabase/migrations/20260305_rpc_save_supplies_batch.sql \
+  supabase/migrations/20260305_rpc_upsert_reservation_with_layout.sql \
+  supabase/migrations/20260327_add_onboarding_to_establishments.sql \
+  supabase/migrations/20260412_create_team_members_and_supply_movements.sql \
+  supabase/migrations/add_enhanced_subscription_fields.sql \
+  supabase/migrations/add_phone_to_establishments.sql \
+  supabase/migrations/add_subscription_fields.sql \
+  supabase/migrations/enable_rls_all_tables.sql \
+  supabase/migrations/enable_rls_all_tables_fixed.sql \
+  supabase/migrations/enable_rls_inventory_logs.sql
+ cd /Users/gibrann/Desktop/Barflow && git status
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+fix: production readiness — button consistency, build fix, DB migrations with RLS
+
+- Fix onboarding-questionnaire.tsx build error (missing teamCounts prop)
+- Update team-management.tsx buttons to use GlowButton + DialogFooter pattern
+- Track all Supabase migrations in version control (.gitignore exception)
+- Add team_members + supply_movements CREATE TABLE with full RLS policies
+- Include all historical migrations (23 files) for schema reproducibility
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && git log main..development --oneline
+ cd /Users/gibrann/Desktop/Barflow && gh pr list --base main --head development --state open 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git diff main..development --stat | tail -5
+ cd /Users/gibrann/Desktop/Barflow && gh pr create --base main --head development --title "Production release: unified UI, RBAC, DB security & migrations" --body "$(cat <<'EOF'
+## Summary
+- **Unified dashboard UI** — all dashboard pages now match the demo aesthetic (neumorphic design, GlowButton consistency, shared content components)
+- **RBAC system** — 4 roles (admin, jefe_de_piso, jefe_de_barra, mesero) with route guards, POS tab filtering, staff PIN login/session management
+- **DB security hardening** — RLS policies for team_members and supply_movements, all 23 migrations now version-controlled
+- **Bug fixes** — postgres_changes race condition, staff session lost on reload, onboarding build error
+- **Security** — rate limiting on key API routes, security headers (HSTS, CSP, X-Frame-Options), Stripe webhook replay protection
+
+## Key changes (102 files, +25k/-11k lines)
+- Unified shell styling across dashboard/demo pages
+- GlowButton + neumorphic-hover pattern on all action buttons
+- Staff session persistence via sessionStorage with auth loading guard
+- Supabase realtime channel deferred setup to avoid Strict Mode race condition
+- Full migration history tracked in repo (.gitignore exception for supabase/migrations/*.sql)
+
+## DB migrations applied
+- `team_members` CREATE TABLE + RLS (SELECT/INSERT/UPDATE/DELETE)
+- `supply_movements` CREATE TABLE + RLS (chained through supplies → establishments)
+- `tax_rate` column on establishments
+- `onboarding_completed` + `onboarding_data` columns on establishments
+
+## Test plan
+- [x] Production build passes (0 errors, 23 routes)
+- [x] All 4 RBAC roles tested (route access, POS tab filtering)
+- [x] Staff session persists through page reload
+- [x] No postgres_changes console errors
+- [x] Button styling consistent across all dashboard pages
+- [x] RLS migrations applied in Supabase SQL Editor
+- [ ] Smoke test on Cloud Run after deploy
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
