@@ -614,3 +614,22 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git push origin development
+ cd /Users/gibrann/Desktop/Barflow && npm ls bcryptjs 2>&1 | head -5
+ cd /Users/gibrann/Desktop/Barflow && cat package.json | grep -i bcrypt
+ ls /Users/gibrann/Desktop/Barflow/node_modules/bcryptjs 2>&1 | head -3
+ cd /Users/gibrann/Desktop/Barflow && npm install 2>&1 | tail -5
+ which npm && which pnpm && which yarn 2>&1; cd /Users/gibrann/Desktop/Barflow && ls package-lock.json yarn.lock pnpm-lock.yaml 2>&1
+ cd /Users/gibrann/Desktop/Barflow && /usr/local/bin/npm install 2>&1 | tail -10
+ ls /Users/gibrann/Desktop/Barflow/node_modules/bcryptjs/index.js 2>&1
+ cd /Users/gibrann/Desktop/Barflow && git diff hooks/use-subscription.ts --stat
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat hooks/use-subscription.ts
+ cd /Users/gibrann/Desktop/Barflow && git add hooks/use-subscription.ts && git commit -m "$(cat <<'EOF'
+fix: resolve postgres_changes after subscribe() error in useSubscription
+
+Defer realtime channel setup until after the initial async fetch completes,
+giving React Strict Mode cleanup time to remove the prior channel. Also add
+a cancelled flag to prevent stale state updates after unmount.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
