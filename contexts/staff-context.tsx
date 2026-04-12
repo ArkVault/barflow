@@ -52,7 +52,7 @@ const StaffContext = createContext<StaffContextType>({
 });
 
 export function StaffProvider({ children }: { children: ReactNode }) {
-  const { user, establishmentId } = useAuth();
+  const { user, establishmentId, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [staff, setStaff] = useState<TeamMemberDTO | null>(null);
@@ -120,9 +120,12 @@ export function StaffProvider({ children }: { children: ReactNode }) {
     return verifyApprovalPinAction(pin);
   }, []);
 
-  // When the owner signs out, clear any staff session too
+  // When the owner signs out, clear any staff session too.
+  // Wait for BOTH auth and staff loading to finish before deciding —
+  // otherwise a slow auth hydration (user still null) would wipe
+  // a valid staff session that was just restored from sessionStorage.
   useEffect(() => {
-    if (!user && !loading) {
+    if (!user && !loading && !authLoading) {
       try {
         sessionStorage.removeItem(STORAGE_KEY);
       } catch {
@@ -130,7 +133,7 @@ export function StaffProvider({ children }: { children: ReactNode }) {
       }
       setStaff(null);
     }
-  }, [user, loading]);
+  }, [user, loading, authLoading]);
 
   const role: StaffRole = staff?.role ?? "admin";
 
