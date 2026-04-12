@@ -70,6 +70,7 @@ logs
 
 # Database
 *.sql
+!supabase/migrations/*.sql
 *.sqlite
 *.db
 

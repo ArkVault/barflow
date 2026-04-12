@@ -12,10 +12,12 @@ import {
   TeamMemberDTO,
 } from "@/lib/team/actions";
 import { Button } from "@/components/ui/button";
+import { GlowButton } from "@/components/glow-button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -271,10 +273,14 @@ export default function TeamManagement() {
 
       {/* Add button */}
       <div className="flex justify-end">
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {es ? "Agregar miembro" : "Add member"}
-        </Button>
+        <GlowButton onClick={openCreate}>
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-inner">
+            <Plus className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="hidden sm:inline">
+            {es ? "Agregar miembro" : "Add member"}
+          </span>
+        </GlowButton>
       </div>
 
       {/* Members list */}
@@ -324,7 +330,9 @@ export default function TeamManagement() {
                 </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleToggleActive(member)}
                   title={
                     member.is_active
@@ -335,28 +343,32 @@ export default function TeamManagement() {
                         ? "Activar"
                         : "Activate"
                   }
-                  className="h-8 w-8 rounded-lg inline-flex items-center justify-center hover:bg-muted transition-colors"
+                  className="h-8 w-8"
                 >
                   {member.is_active ? (
                     <ToggleRight className="h-4 w-4 text-green-500" />
                   ) : (
                     <ToggleLeft className="h-4 w-4 text-muted-foreground" />
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => openEdit(member)}
                   title={es ? "Editar" : "Edit"}
-                  className="h-8 w-8 rounded-lg inline-flex items-center justify-center hover:bg-muted transition-colors"
+                  className="h-8 w-8"
                 >
                   <Pencil className="h-4 w-4" />
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setDeleteId(member.id)}
                   title={es ? "Eliminar" : "Delete"}
-                  className="h-8 w-8 rounded-lg inline-flex items-center justify-center hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -500,16 +512,11 @@ export default function TeamManagement() {
             )}
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setDialogOpen(false)}
-              disabled={saving}
-            >
+          <DialogFooter>
+            <GlowButton onClick={() => setDialogOpen(false)} disabled={saving}>
               {es ? "Cancelar" : "Cancel"}
-            </Button>
-            <Button className="flex-1" onClick={handleSave} disabled={saving}>
+            </GlowButton>
+            <GlowButton onClick={handleSave} disabled={saving}>
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : es ? (
@@ -517,8 +524,8 @@ export default function TeamManagement() {
               ) : (
                 "Save"
               )}
-            </Button>
-          </div>
+            </GlowButton>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -538,21 +545,11 @@ export default function TeamManagement() {
                 : "This action is permanent and cannot be undone."}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-2 pt-2">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setDeleteId(null)}
-              disabled={deleting}
-            >
+          <DialogFooter>
+            <GlowButton onClick={() => setDeleteId(null)} disabled={deleting}>
               {es ? "Cancelar" : "Cancel"}
-            </Button>
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            </GlowButton>
+            <GlowButton onClick={handleDelete} disabled={deleting}>
               {deleting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : es ? (
@@ -560,8 +557,8 @@ export default function TeamManagement() {
               ) : (
                 "Delete"
               )}
-            </Button>
-          </div>
+            </GlowButton>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

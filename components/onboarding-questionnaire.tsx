@@ -667,10 +667,12 @@ function SlideExcelUpload({
   t,
   userId,
   onBack,
+  teamCounts,
 }: {
   t: Translations;
   userId: string;
   onBack: () => void;
+  teamCounts: TeamCounts;
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -1169,7 +1171,12 @@ export function OnboardingQuestionnaire({
         )}
 
         {slide === 5 && inventoryChoice === "excel" && (
-          <SlideExcelUpload t={t} userId={userId} onBack={() => setSlide(4)} />
+          <SlideExcelUpload
+            t={t}
+            userId={userId}
+            teamCounts={teamCounts}
+            onBack={() => setSlide(4)}
+          />
         )}
 
         {slide === 5 && inventoryChoice === "manual" && (
