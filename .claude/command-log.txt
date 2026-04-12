@@ -572,3 +572,4 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && grep -rn "type StaffRole\|StaffRole =" lib/ | head -5
  cd /Users/gibrann/Desktop/Barflow && grep -n "role" contexts/staff-context.tsx | head -10
  cd /Users/gibrann/Desktop/Barflow && node node_modules/typescript/bin/tsc --noEmit --skipLibCheck 2>&1 | tail -20
+ cat /Users/gibrann/Desktop/Barflow/.claude/launch.json 2>/dev/null || echo "no launch.json in main checkout"
