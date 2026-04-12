@@ -656,3 +656,18 @@ EOF
  grep -r "useStaff\|canAccessRoute\|StaffRole" /Users/gibrann/Desktop/Barflow/components --include="*.tsx" | grep -v node_modules
  head -100 /Users/gibrann/Desktop/Barflow/components/punto-de-venta-content.tsx | tail -50
  grep -n "ROLE_ROUTES\|ROLE_POS_TABS\|ROLE_LABELS" /Users/gibrann/Desktop/Barflow/lib/roles/index.ts
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git add contexts/staff-context.tsx && git commit -m "$(cat <<'EOF'
+fix: staff session lost on full page reload due to auth loading race
+
+The StaffProvider cleanup effect cleared sessionStorage when `!user &&
+!loading`, but `loading` was only the staff loading state. On page reload,
+staff hydration finishes before auth hydration, so user is still null when
+the cleanup fires — wiping a valid staff session.
+
+Fix: also gate on `authLoading` from useAuth() so the cleanup only runs
+after both auth and staff contexts have finished loading.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)" && git push origin development
