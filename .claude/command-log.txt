@@ -573,3 +573,44 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && grep -n "role" contexts/staff-context.tsx | head -10
  cd /Users/gibrann/Desktop/Barflow && node node_modules/typescript/bin/tsc --noEmit --skipLibCheck 2>&1 | tail -20
  cat /Users/gibrann/Desktop/Barflow/.claude/launch.json 2>/dev/null || echo "no launch.json in main checkout"
+ cd /Users/gibrann/Desktop/Barflow && git status
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat
+ cd /Users/gibrann/Desktop/Barflow && git log --oneline -5
+ cd /Users/gibrann/Desktop/Barflow && git add \
+  components/home-content.tsx \
+  components/insumos-content.tsx \
+  components/operaciones-content.tsx \
+  components/planner-content.tsx \
+  components/productos-content.tsx \
+  components/proyecciones-content.tsx \
+  components/punto-de-venta-content.tsx \
+  app/dashboard/insumos/page.tsx \
+  app/dashboard/operaciones/page.tsx \
+  app/dashboard/page.tsx \
+  app/dashboard/planner/page.tsx \
+  app/dashboard/productos/page.tsx \
+  app/dashboard/proyecciones/page.tsx \
+  app/dashboard/punto-de-venta/page.tsx \
+  app/demo/insumos/page.tsx \
+  app/demo/operaciones/page.tsx \
+  app/demo/page.tsx \
+  app/demo/planner/page.tsx \
+  app/demo/productos/page.tsx \
+  app/demo/proyecciones/page.tsx \
+  app/demo/punto-de-venta/page.tsx \
+  hooks/use-subscription.ts \
+  CLAUDE.md
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+refactor: extract shared content components for dashboard/demo page pairs
+
+Eliminate ~10,400 lines of duplication by extracting 7 shared *-content.tsx
+components used by both /dashboard/* and /demo/* routes. Each page is now
+a thin wrapper (ProdShell or DemoShell) around the shared component.
+
+Components: home, insumos, operaciones, planner, productos, proyecciones,
+punto-de-venta. Also fixes StaffRole typing in punto-de-venta-content.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin development
