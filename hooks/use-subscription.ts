@@ -105,9 +105,15 @@ export function useSubscription() {
 
     fetchSubscription();
 
-    // Subscribe to changes — use a unique name per mount to avoid Strict Mode collisions
+    // Subscribe to changes — use a unique name per mount to avoid Strict Mode collisions.
+    // Date.now() has 1ms resolution and Strict Mode can re-mount within the same ms,
+    // so use a UUID for guaranteed uniqueness.
     const supabase = createClient();
-    const channelName = `subscription-changes-${establishmentId}-${Date.now()}`;
+    const uniqueId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const channelName = `subscription-changes-${establishmentId}-${uniqueId}`;
     const channel = supabase
       .channel(channelName)
       .on(
