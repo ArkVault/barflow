@@ -695,3 +695,5 @@ EOF
  find /Users/gibrann/Desktop/Barflow/app/api -name "route.ts" -type f 2>/dev/null | sort
  cd /Users/gibrann/Desktop/Barflow && git status
  grep -r "NEXT_PUBLIC_SUPABASE_URL\|NEXT_PUBLIC_SUPABASE_ANON_KEY\|NEXT_PUBLIC_STRIPE\|STRIPE_SECRET\|STRIPE_WEBHOOK" /Users/gibrann/Desktop/Barflow/.env.local 2>/dev/null | sed 's/=.*/=***/' | head -20
+ ls -la /Users/gibrann/Desktop/Barflow/supabase/migrations/
+ ls /Users/gibrann/Desktop/Barflow/supabase/migrations/ | sort
