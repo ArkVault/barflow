@@ -833,3 +833,8 @@ EOF
  find /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman -type f \( -name "*.ts" -o -name "*.tsx" \) | xargs grep -l "reservations\|opentable" | sort
  grep -r "\.from.*reservations\|\.table.*reservations" /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman --include="*.ts" --include="*.tsx" -A 3
  find /Users/gibrann/Desktop/Barflow/supabase/migrations -type f -name "*.sql" | head -20
+ git status
+ git diff
+ git log --oneline -5
+ git log --oneline -5 --stat
+ git push origin claude/upbeat-hellman
