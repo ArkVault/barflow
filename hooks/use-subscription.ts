@@ -110,7 +110,7 @@ export function useSubscription() {
     // Fetch first, then set up realtime subscription AFTER the async fetch.
     // This ensures any prior cleanup from Strict Mode's unmount completes
     // before we register a new postgres_changes listener.
-    fetchSubscription().then(() => {
+    const subscribeWithRetry = (attempt = 0) => {
       if (cancelled) return;
 
       const channelName = `sub-${establishmentId}-${crypto.randomUUID()}`;
@@ -130,10 +130,21 @@ export function useSubscription() {
         )
         .subscribe((status, err) => {
           if (status === "CHANNEL_ERROR") {
-            console.error("Subscription realtime channel error:", err);
+            if (err) {
+              console.error("Subscription realtime channel error:", err);
+            }
+            // Retry up to 3 times with exponential backoff
+            if (attempt < 3 && !cancelled) {
+              supabase.removeChannel(channel!);
+              channel = null;
+              const delay = Math.min(1000 * 2 ** attempt, 5000);
+              setTimeout(() => subscribeWithRetry(attempt + 1), delay);
+            }
           }
         });
-    });
+    };
+
+    fetchSubscription().then(() => subscribeWithRetry());
 
     return () => {
       cancelled = true;

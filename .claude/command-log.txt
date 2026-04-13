@@ -832,3 +832,4 @@ EOF
  ls -la /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/supabase/migrations/
  find /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman -type f \( -name "*.ts" -o -name "*.tsx" \) | xargs grep -l "reservations\|opentable" | sort
  grep -r "\.from.*reservations\|\.table.*reservations" /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman --include="*.ts" --include="*.tsx" -A 3
+ find /Users/gibrann/Desktop/Barflow/supabase/migrations -type f -name "*.sql" | head -20
