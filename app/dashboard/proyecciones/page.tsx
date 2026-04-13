@@ -1,6 +1,7 @@
 import { ProdShell } from "@/components/shells";
 import { ProjectionView } from "@/components/projection-view";
 import { GenerateProjectionsButton } from "@/components/generate-projections-button";
+import { ROICalculator } from "@/components/roi/roi-calculator";
 import { getProyeccionesViewModel } from "@/lib/features/dashboard/server/get-proyecciones-view-model";
 
 export default async function ProyeccionesPage() {
@@ -20,12 +21,13 @@ export default async function ProyeccionesPage() {
         />
       }
     >
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-6 space-y-10">
         <ProjectionView
           establishmentId={vm.establishmentId}
           supplies={vm.supplies}
           sales={vm.sales}
         />
+        <ROICalculator />
       </main>
     </ProdShell>
   );
