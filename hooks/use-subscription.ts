@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
+import { useSearchParams } from "next/navigation";
 
 // Dev accounts that bypass trial restrictions (comma-separated in env var)
 const DEV_EMAILS: string[] = (process.env.NEXT_PUBLIC_DEV_EMAILS || "")
@@ -23,6 +24,7 @@ export interface SubscriptionData {
 
 export function useSubscription() {
   const { user, establishmentId } = useAuth();
+  const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<SubscriptionData>({
     isActive: false,
     isTrialing: false,
@@ -35,111 +37,79 @@ export function useSubscription() {
   });
   const [loading, setLoading] = useState(true);
 
+  const fetchSubscription = useCallback(async () => {
+    if (!user || !establishmentId) return;
+
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("establishments")
+      .select(
+        "trial_end_date, subscription_status, plan_type, stripe_subscription_id",
+      )
+      .eq("id", establishmentId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching subscription:", error);
+      setLoading(false);
+      return;
+    }
+
+    if (data) {
+      const now = new Date();
+      const trialEndDate = data.trial_end_date
+        ? new Date(data.trial_end_date)
+        : null;
+      const isTrialing = trialEndDate ? now < trialEndDate : false;
+      const trialEnded = trialEndDate ? now >= trialEndDate : false;
+      const daysRemaining = trialEndDate
+        ? Math.max(
+            0,
+            Math.ceil(
+              (trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+            ),
+          )
+        : 0;
+
+      const hasActiveSubscription =
+        data.subscription_status === "active" ||
+        data.subscription_status === "trialing";
+
+      const isDevAccount = user?.email
+        ? DEV_EMAILS.includes(user.email)
+        : false;
+
+      setSubscription({
+        isActive: isDevAccount || hasActiveSubscription || isTrialing,
+        isTrialing,
+        trialEnded: isDevAccount ? false : trialEnded && !hasActiveSubscription,
+        planType: data.plan_type,
+        trialEndDate,
+        daysRemaining,
+        subscriptionStatus: data.subscription_status,
+        isDevAccount,
+      });
+    }
+
+    setLoading(false);
+  }, [user, establishmentId]);
+
+  // Fetch on mount and refetch when returning from Stripe checkout
   useEffect(() => {
     if (!user || !establishmentId) {
       setLoading(false);
       return;
     }
 
-    let cancelled = false;
-    const supabase = createClient();
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    fetchSubscription();
+  }, [user, establishmentId, fetchSubscription]);
 
-    const fetchSubscription = async () => {
-      const { data, error } = await supabase
-        .from("establishments")
-        .select(
-          "trial_end_date, subscription_status, plan_type, stripe_subscription_id",
-        )
-        .eq("id", establishmentId)
-        .single();
+  // Refetch when returning from Stripe checkout (?session_id= in URL)
+  useEffect(() => {
+    if (searchParams?.get("session_id")) {
+      fetchSubscription();
+    }
+  }, [searchParams, fetchSubscription]);
 
-      if (cancelled) return;
-
-      if (error) {
-        console.error("Error fetching subscription:", error);
-        setLoading(false);
-        return;
-      }
-
-      if (data) {
-        const now = new Date();
-        const trialEndDate = data.trial_end_date
-          ? new Date(data.trial_end_date)
-          : null;
-        const isTrialing = trialEndDate ? now < trialEndDate : false;
-        const trialEnded = trialEndDate ? now >= trialEndDate : false;
-        const daysRemaining = trialEndDate
-          ? Math.max(
-              0,
-              Math.ceil(
-                (trialEndDate.getTime() - now.getTime()) /
-                  (1000 * 60 * 60 * 24),
-              ),
-            )
-          : 0;
-
-        const hasActiveSubscription =
-          data.subscription_status === "active" ||
-          data.subscription_status === "trialing";
-
-        // Check if this is a dev account
-        const isDevAccount = user?.email
-          ? DEV_EMAILS.includes(user.email)
-          : false;
-
-        setSubscription({
-          // Dev accounts are always active
-          isActive: isDevAccount || hasActiveSubscription || isTrialing,
-          isTrialing,
-          // Dev accounts never show trial ended
-          trialEnded: isDevAccount
-            ? false
-            : trialEnded && !hasActiveSubscription,
-          planType: data.plan_type,
-          trialEndDate,
-          daysRemaining,
-          subscriptionStatus: data.subscription_status,
-          isDevAccount,
-        });
-      }
-
-      setLoading(false);
-    };
-
-    // Fetch first, then set up realtime subscription AFTER the async fetch.
-    // This ensures any prior cleanup from Strict Mode's unmount completes
-    // before we register a new postgres_changes listener.
-    fetchSubscription().then(() => {
-      if (cancelled) return;
-
-      const channelName = `sub-${establishmentId}-${crypto.randomUUID()}`;
-      channel = supabase
-        .channel(channelName)
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "establishments",
-            filter: `id=eq.${establishmentId}`,
-          },
-          () => {
-            if (!cancelled) fetchSubscription();
-          },
-        )
-        .subscribe((status, err) => {
-          if (status === "CHANNEL_ERROR" && err) {
-            console.warn("Subscription realtime channel error:", err);
-          }
-        });
-    });
-
-    return () => {
-      cancelled = true;
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [user, establishmentId]);
-
-  return { subscription, loading };
+  return { subscription, loading, refetch: fetchSubscription };
 }
