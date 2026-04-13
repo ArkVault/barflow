@@ -858,3 +858,64 @@ EOF
  cd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --pretty 2>&1 | grep -E "(error TS|roi|slider|proyecciones)" | head -20
  /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit --pretty --project /Users/gibrann/Desktop/Barflow/tsconfig.json 2>&1 | tail -20
  cat /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/app/dashboard/proyecciones/page.tsx
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/node_modules/.package-lock.json 2>/dev/null && echo "node_modules exists" || echo "no node_modules"
+ ln -sf /Users/gibrann/Desktop/Barflow/node_modules /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/node_modules
+ rm /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/node_modules
+ WORKTREE="/Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman"
+MAIN="/Users/gibrann/Desktop/Barflow"
+
+# Create directories if needed
+mkdir -p "$MAIN/lib/roi" "$MAIN/components/roi"
+
+# Copy our new/changed files
+cp "$WORKTREE/lib/roi/calculator.ts" "$MAIN/lib/roi/calculator.ts"
+cp "$WORKTREE/components/roi/roi-calculator.tsx" "$MAIN/components/roi/roi-calculator.tsx"
+cp "$WORKTREE/components/ui/slider.tsx" "$MAIN/components/ui/slider.tsx"
+cp "$WORKTREE/app/dashboard/proyecciones/page.tsx" "$MAIN/app/dashboard/proyecciones/page.tsx"
+
+echo "Files copied successfully"
+ sleep 5 && echo "done"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- lib/roi/calculator.ts components/roi/roi-calculator.tsx components/ui/slider.tsx app/dashboard/proyecciones/page.tsx 2>/dev/null; rm -rf lib/roi components/roi 2>/dev/null; git checkout -- components/ui/slider.tsx 2>/dev/null; echo "checking status..." && git status --short lib/roi components/roi components/ui/slider.tsx app/dashboard/proyecciones/page.tsx 2>/dev/null
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- lib/roi/ components/roi/ components/ui/slider.tsx app/dashboard/proyecciones/page.tsx 2>/dev/null; rm -r lib/roi components/roi 2>/dev/null; echo "done"
+ cd /Users/gibrann/Desktop/Barflow && git status --short
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- app/dashboard/proyecciones/page.tsx && rm -f components/ui/slider.tsx && echo "cleaned"
+ cd /Users/gibrann/Desktop/Barflow && npx tsc --noEmit 2>&1 | head -40
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit 2>&1 | head -40
+ WORKTREE="/Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman"
+MAIN="/Users/gibrann/Desktop/Barflow"
+
+cp "$WORKTREE/components/proyecciones-tabs.tsx" "$MAIN/components/proyecciones-tabs.tsx"
+cp "$WORKTREE/app/dashboard/proyecciones/page.tsx" "$MAIN/app/dashboard/proyecciones/page.tsx"
+# Also ensure roi files are there
+mkdir -p "$MAIN/lib/roi" "$MAIN/components/roi"
+cp "$WORKTREE/lib/roi/calculator.ts" "$MAIN/lib/roi/calculator.ts"
+cp "$WORKTREE/components/roi/roi-calculator.tsx" "$MAIN/components/roi/roi-calculator.tsx"
+cp "$WORKTREE/components/ui/slider.tsx" "$MAIN/components/ui/slider.tsx"
+
+echo "Files copied for preview"
+ sleep 5 && echo "done"
+ sleep 5 && echo "done"
+ sleep 2 && echo "done"
+ cd /Users/gibrann/Desktop/Barflow && ./node_modules/.bin/tsc --noEmit 2>&1 | head -20
+ WORKTREE="/Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman"
+MAIN="/Users/gibrann/Desktop/Barflow"
+
+# Copy all changed files
+cp "$WORKTREE/components/proyecciones-tabs.tsx" "$MAIN/components/proyecciones-tabs.tsx"
+cp "$WORKTREE/app/dashboard/proyecciones/page.tsx" "$MAIN/app/dashboard/proyecciones/page.tsx"
+cp "$WORKTREE/components/shells/prod-shell.tsx" "$MAIN/components/shells/prod-shell.tsx"
+mkdir -p "$MAIN/lib/roi" "$MAIN/components/roi"
+cp "$WORKTREE/lib/roi/calculator.ts" "$MAIN/lib/roi/calculator.ts"
+cp "$WORKTREE/components/roi/roi-calculator.tsx" "$MAIN/components/roi/roi-calculator.tsx"
+cp "$WORKTREE/components/ui/slider.tsx" "$MAIN/components/ui/slider.tsx"
+
+echo "Files copied"
+ sleep 6 && echo "done"
+ ls /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/components/dashboard-layout.tsx 2>/dev/null && echo "exists" || echo "not found"
+ cp /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/components/dashboard-layout.tsx /Users/gibrann/Desktop/Barflow/components/dashboard-layout.tsx && echo "copied"
+ sleep 6 && echo "done"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- components/shells/prod-shell.tsx && rm -f components/dashboard-layout.tsx && echo "reverted"
+ cp /Users/gibrann/Desktop/Barflow/.claude/worktrees/upbeat-hellman/components/proyecciones-tabs.tsx /Users/gibrann/Desktop/Barflow/components/proyecciones-tabs.tsx && echo "copied"
+ sleep 6 && echo "done"
+ sleep 2 && echo "done"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -- app/dashboard/proyecciones/page.tsx components/shells/prod-shell.tsx 2>/dev/null && rm -f components/proyecciones-tabs.tsx components/ui/slider.tsx && rm -f lib/roi/calculator.ts components/roi/roi-calculator.tsx && rmdir lib/roi components/roi 2>/dev/null; echo "cleaned"
