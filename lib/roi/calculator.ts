@@ -16,9 +16,9 @@ export interface CostBreakdown {
 }
 
 export interface SubscriptionCost {
-  plan: "single" | "cadena" | "enterprise";
+  plan: "starter" | "business" | "cadena" | "enterprise";
   baseCost: number;
-  extraStaffCost: number;
+  extraUsersCost: number;
   totalMonthly: number;
 }
 
@@ -31,27 +31,34 @@ export interface ROIResult {
   roiPercentage: number;
 }
 
-// ── Pricing Constants ──
+// ── Pricing Constants (MXN) ──
+// Must stay in sync with PLAN_PRICING in lib/stripe/config.ts
 
 const PRICING = {
-  single: {
-    annual: 2999,
-    monthly: 3499,
-    baseStaff: 5, // 3 meseros + 1 admin + 1 jefe de barra
+  starter: {
+    yearly: 1_499,
+    monthly: 1_899,
+    baseUsers: 5,
+  },
+  business: {
+    yearly: 2_999,
+    monthly: 3_499,
+    baseUsers: 10,
   },
   cadena: {
-    baseAnnual: 2999,
-    baseMonthly: 3499,
-    additionalAnnual: 2399,
-    additionalMonthly: 2999,
-    baseStaff: 7, // 5 meseros + 1 admin + 1 jefe por sucursal
+    // per additional branch (2-5 branches)
+    yearlyPerBranch: 2_399,
+    monthlyPerBranch: 2_999,
+    baseUsersPerBranch: 10,
   },
   enterprise: {
-    baseFee: 4500,
-    perBranch: 1800,
-    baseStaff: Infinity, // unlimited
+    baseFee: 4_500,
+    yearlyPerBranch: 1_500,
+    monthlyPerBranch: 1_800,
+    baseUsers: Infinity, // unlimited
   },
-  extraStaffRate: 500, // per person above base
+  extraUsersBlockSize: 5,
+  extraUsersBlockRate: 800, // $800 MXN per block of 5 extra users
 } as const;
 
 // ── Cost of Disorganization Constants ──
