@@ -985,3 +985,13 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git push 2>&1
+ find /Users/gibrann/Desktop/Barflow/app/dashboard/cuenta -type f -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" -o -name "*.js" | head -20
+ find /Users/gibrann/Desktop/Barflow -name "*.sql" -type f | grep -v node_modules | grep -v .next | grep -v .claude
+ find /Users/gibrann/Desktop/Barflow -name ".env*" -o -name "*config*" -o -name "*constants*" | grep -v node_modules | head -20
+ find /Users/gibrann/Desktop/Barflow/components -name "*subscription*" -o -name "*trial*" -o -name "*account*" | grep -v node_modules | grep -v .next | head -20
+ find /Users/gibrann/Desktop/Barflow/app/api -name "*stripe*" -o -name "*checkout*" -o -name "*subscription*" | grep -v node_modules
+ find /Users/gibrann/Desktop/Barflow/app/api/stripe/create-checkout-session -type f
+ grep -r "create-checkout-session\|stripe.*route\|checkout" /Users/gibrann/Desktop/Barflow/app/api --include="*.ts" 2>/dev/null | head -20
+ find /Users/gibrann/Desktop/Barflow -path "*dtos*" -o -path "*schemas*" | grep -E "\.(ts|tsx)$" | head -10
+ grep -r "1,999\|3,999\|19,980\|39,990" /Users/gibrann/Desktop/Barflow --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 2>/dev/null | head -20
+ grep -r "1,999\|3,999\|19,980\|39,990" /Users/gibrann/Desktop/Barflow/app /Users/gibrann/Desktop/Barflow/components --include="*.ts" --include="*.tsx" 2>/dev/null
