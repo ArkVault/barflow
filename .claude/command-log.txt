@@ -919,3 +919,56 @@ echo "Files copied"
  sleep 6 && echo "done"
  sleep 2 && echo "done"
  cd /Users/gibrann/Desktop/Barflow && git checkout -- app/dashboard/proyecciones/page.tsx components/shells/prod-shell.tsx 2>/dev/null && rm -f components/proyecciones-tabs.tsx components/ui/slider.tsx && rm -f lib/roi/calculator.ts components/roi/roi-calculator.tsx && rmdir lib/roi components/roi 2>/dev/null; echo "cleaned"
+ git status && echo "---BRANCH---" && git branch --show-current && echo "---LOG---" && git log --oneline -10
+ cd /Users/gibrann/Desktop/Barflow && git status && echo "---BRANCH---" && git branch --show-current && echo "---LOG---" && git log --oneline -5
+ git diff --name-only main...HEAD
+ git diff main...HEAD -- app/dashboard/proyecciones/page.tsx components/proyecciones-tabs.tsx components/roi/roi-calculator.tsx components/ui/slider.tsx lib/roi/calculator.ts
+ git diff main...HEAD -- hooks/use-subscription.ts
+ cd /Users/gibrann/Desktop/Barflow && ls components/proyecciones-content.tsx 2>/dev/null && echo "EXISTS" || echo "NOT FOUND"
+ cd /Users/gibrann/Desktop/Barflow && ls components/proyecciones-tabs.tsx components/roi/roi-calculator.tsx components/ui/slider.tsx lib/roi/calculator.ts 2>/dev/null; echo "---"; ls components/roi/ 2>/dev/null || echo "no roi dir"
+ cd /Users/gibrann/Desktop/Barflow && git checkout -b feature/proyecciones-tabs-roi main
+ cd /Users/gibrann/Desktop/Barflow && mkdir -p components/roi lib/roi && cp .claude/worktrees/upbeat-hellman/components/proyecciones-tabs.tsx components/proyecciones-tabs.tsx && cp .claude/worktrees/upbeat-hellman/components/roi/roi-calculator.tsx components/roi/roi-calculator.tsx && cp .claude/worktrees/upbeat-hellman/components/ui/slider.tsx components/ui/slider.tsx && cp .claude/worktrees/upbeat-hellman/lib/roi/calculator.ts lib/roi/calculator.ts && echo "DONE"
+ cd /Users/gibrann/Desktop/Barflow && cat package.json | grep -E "radix.*slider" || echo "NOT FOUND"
+ cd /Users/gibrann/Desktop/Barflow && npx next build 2>&1 | tail -30
+ cd /Users/gibrann/Desktop/Barflow && npm run build 2>&1 | tail -40
+ cd /Users/gibrann/Desktop/Barflow && cat package.json | grep -A5 '"scripts"'
+ cd /Users/gibrann/Desktop/Barflow && which next || which npx
+ cd /Users/gibrann/Desktop/Barflow && ls node_modules/.bin/next && node_modules/.bin/next build 2>&1 | tail -40
+ cd /Users/gibrann/Desktop/Barflow && git status && echo "---" && git log --oneline -3
+ cd /Users/gibrann/Desktop/Barflow && git add app/dashboard/proyecciones/page.tsx components/proyecciones-tabs.tsx components/roi/roi-calculator.tsx components/ui/slider.tsx lib/roi/calculator.ts && git commit -m "$(cat <<'EOF'
+feat: add pill-style tabs and ROI calculator to Proyecciones page
+
+Replace single-view projections with tabbed interface (Inventory, Sales, ROI)
+using pill-style tabs matching POS design. Each projection tab includes
+Semanal/Mensual period sub-tabs. Add interactive ROI calculator with sliders,
+comparison bars, KPI cards, and value props.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push -u origin feature/proyecciones-tabs-roi 2>&1
+ cd /Users/gibrann/Desktop/Barflow && gh pr create --title "feat: Proyecciones pill tabs + ROI calculator" --body "$(cat <<'EOF'
+## Summary
+- **Tabbed interface**: Replace single-view projections with 3 pill-style tabs (Inventory, Sales, ROI) matching POS design pattern
+- **Period sub-tabs**: Each projection tab has Semanal/Mensual period toggles with calendar icons
+- **ROI Calculator**: Interactive financial tool with sliders (sales $50K-$1M, branches 1-15, staff 1-50), toggles (annual billing, shrinkage), comparison bars, KPI cards, and value props checklist
+
+## New files
+- `components/proyecciones-tabs.tsx` — Main tab orchestrator with reusable generic `PillTabs<T>` component
+- `components/roi/roi-calculator.tsx` — Full ROI calculator UI (~456 lines)
+- `lib/roi/calculator.ts` — Pure financial calculation engine (pricing, costs, ROI formulas)
+- `components/ui/slider.tsx` — shadcn/ui Slider (Radix primitive)
+
+## Modified files
+- `app/dashboard/proyecciones/page.tsx` — Swap `ProyeccionesContent` → `ProyeccionesTabs`
+
+## Test plan
+- [ ] Verify pill tabs switch between Inventory, Sales, and ROI views
+- [ ] Verify Semanal/Mensual sub-tabs on Inventory and Sales charts
+- [ ] Verify ROI sliders update calculations in real-time
+- [ ] Verify annual/monthly billing toggle affects pricing
+- [ ] Verify responsive layout on mobile
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)" --base main
