@@ -972,3 +972,16 @@ EOF
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )" --base main
+ cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/next build 2>&1 | tail -15
+ cd /Users/gibrann/Desktop/Barflow && git add components/roi/roi-calculator.tsx && git commit -m "$(cat <<'EOF'
+style: make ROI calculator colors subtle and neon like projection charts
+
+Replace flat Tailwind colors (rose-500, emerald-500) with neon gradient
+system matching the chart style — gradient bar fills with glow effects
+(drop-shadow, boxShadow), soft rgba text colors with textShadow, subtle
+inset container glows, and low-opacity color washes throughout.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push 2>&1
