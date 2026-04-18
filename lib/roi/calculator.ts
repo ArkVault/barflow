@@ -16,9 +16,9 @@ export interface CostBreakdown {
 }
 
 export interface SubscriptionCost {
-  plan: "single" | "cadena" | "enterprise";
+  plan: "starter" | "business" | "cadena" | "enterprise";
   baseCost: number;
-  extraStaffCost: number;
+  extraUsersCost: number;
   totalMonthly: number;
 }
 
@@ -31,27 +31,27 @@ export interface ROIResult {
   roiPercentage: number;
 }
 
-// ── Pricing Constants ──
+// ── Pricing Constants (must mirror PLAN_PRICING in lib/stripe/config.ts) ──
 
 const PRICING = {
-  single: {
-    annual: 2999,
-    monthly: 3499,
-    baseStaff: 5, // 3 meseros + 1 admin + 1 jefe de barra
-  },
+  // Single-branch plans
+  starter: { yearly: 1_499, monthly: 1_899, baseUsers: 5 },
+  business: { yearly: 2_999, monthly: 3_499, baseUsers: 10 },
+  // Multi-branch plans
   cadena: {
-    baseAnnual: 2999,
-    baseMonthly: 3499,
-    additionalAnnual: 2399,
-    additionalMonthly: 2999,
-    baseStaff: 7, // 5 meseros + 1 admin + 1 jefe por sucursal
+    yearlyPerBranch: 2_399,
+    monthlyPerBranch: 2_999,
+    baseUsersPerBranch: 10,
   },
   enterprise: {
-    baseFee: 4500,
-    perBranch: 1800,
-    baseStaff: Infinity, // unlimited
+    baseFee: 4_500,
+    yearlyPerBranch: 1_500,
+    monthlyPerBranch: 1_800,
+    baseUsers: Infinity,
   },
-  extraStaffRate: 500, // per person above base
+  // Extra users: blocks of 5 users = $800 MXN/month
+  extraUsersBlockSize: 5,
+  extraUsersBlockRate: 800,
 } as const;
 
 // ── Cost of Disorganization Constants ──
@@ -88,37 +88,42 @@ export function calculateSubscriptionCost(inputs: ROIInputs): SubscriptionCost {
 
   let plan: SubscriptionCost["plan"];
   let baseCost: number;
-  let baseStaff: number;
+  let baseUsers: number;
 
   if (branchCount === 1) {
-    plan = "single";
-    baseCost = annualBilling ? PRICING.single.annual : PRICING.single.monthly;
-    baseStaff = PRICING.single.baseStaff;
+    // Default to Business for single branch (includes AI projections & inventory protection)
+    plan = "business";
+    baseCost = annualBilling
+      ? PRICING.business.yearly
+      : PRICING.business.monthly;
+    baseUsers = PRICING.business.baseUsers;
   } else if (branchCount <= 5) {
     plan = "cadena";
-    const base = annualBilling
-      ? PRICING.cadena.baseAnnual
-      : PRICING.cadena.baseMonthly;
-    const additional = annualBilling
-      ? PRICING.cadena.additionalAnnual
-      : PRICING.cadena.additionalMonthly;
-    baseCost = base + additional * (branchCount - 1);
-    baseStaff = PRICING.cadena.baseStaff * branchCount;
+    // First branch at full price, each additional branch at cadena per-branch rate
+    const perBranch = annualBilling
+      ? PRICING.cadena.yearlyPerBranch
+      : PRICING.cadena.monthlyPerBranch;
+    baseCost = perBranch * branchCount;
+    baseUsers = PRICING.cadena.baseUsersPerBranch * branchCount;
   } else {
     plan = "enterprise";
-    baseCost =
-      PRICING.enterprise.baseFee + PRICING.enterprise.perBranch * branchCount;
-    baseStaff = Infinity;
+    const perBranch = annualBilling
+      ? PRICING.enterprise.yearlyPerBranch
+      : PRICING.enterprise.monthlyPerBranch;
+    baseCost = PRICING.enterprise.baseFee + perBranch * branchCount;
+    baseUsers = Infinity;
   }
 
-  const extraStaff = Math.max(0, totalStaff - baseStaff);
-  const extraStaffCost = extraStaff * PRICING.extraStaffRate;
+  const extraUsers = Math.max(0, totalStaff - baseUsers);
+  const extraBlocks = Math.ceil(extraUsers / PRICING.extraUsersBlockSize);
+  const extraUsersCost =
+    extraBlocks === Infinity ? 0 : extraBlocks * PRICING.extraUsersBlockRate;
 
   return {
     plan,
     baseCost,
-    extraStaffCost,
-    totalMonthly: baseCost + extraStaffCost,
+    extraUsersCost,
+    totalMonthly: baseCost + extraUsersCost,
   };
 }
 
@@ -160,10 +165,12 @@ export function formatMXN(amount: number): string {
 
 export function getPlanLabel(plan: SubscriptionCost["plan"]): string {
   switch (plan) {
-    case "single":
-      return "Bar Sucursal";
+    case "starter":
+      return "Starter";
+    case "business":
+      return "Business";
     case "cadena":
-      return "Cadena Flowstock";
+      return "Cadena";
     case "enterprise":
       return "Enterprise";
   }

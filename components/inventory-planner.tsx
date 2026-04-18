@@ -161,7 +161,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
 
   if (authLoading || loading) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-5xl mx-auto">
         <Card className="w-full max-w-5xl neumorphic border-0 p-12">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
@@ -175,7 +175,7 @@ export function InventoryPlanner({ onComplete }: InventoryPlannerProps) {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between">

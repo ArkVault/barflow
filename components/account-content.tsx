@@ -469,21 +469,28 @@ export default function AccountContent() {
 
   const getPlanName = () => {
     switch (subscription.planType) {
+      case "starter_monthly":
+        return language === "es" ? "Starter (Mensual)" : "Starter (Monthly)";
+      case "starter_yearly":
+        return language === "es" ? "Starter (Anual)" : "Starter (Yearly)";
+      case "business_monthly":
+        return language === "es" ? "Business (Mensual)" : "Business (Monthly)";
+      case "business_yearly":
+        return language === "es" ? "Business (Anual)" : "Business (Yearly)";
       case "chain":
-        return language === "es" ? "Plan Cadena" : "Chain Plan";
-      case "bar_yearly":
-        return language === "es" ? "1 Bar (Anual)" : "1 Bar (Yearly)";
-      case "bar_monthly":
-        return language === "es" ? "1 Bar (Mensual)" : "1 Bar (Monthly)";
+        return language === "es" ? "Cadena" : "Chain";
+      case "enterprise":
+        return language === "es" ? "Enterprise" : "Enterprise";
       default:
         return language === "es" ? "Trial Gratuito" : "Free Trial";
     }
   };
 
-  const currentPlanIsTopTier = subscription.planType === "chain";
+  const currentPlanIsTopTier =
+    subscription.planType === "enterprise" || subscription.planType === "chain";
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 md:px-8 lg:px-10 py-6 md:py-8 space-y-8">
       {/* Header */}
       <div className="space-y-2">
         <h2
@@ -890,88 +897,56 @@ export default function AccountContent() {
                     )}
                   </div>
 
-                  <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Plan 1: Stttock - 1 Bar */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5">
-                      <div className="absolute -top-3 left-4">
-                        <div className="inline-flex rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
-                          {language === "es" ? "Más Popular" : "Most Popular"}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 pt-2">
-                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
-                          <Building2 className="h-6 w-6 text-white" />
+                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                    {/* Plan 1: Starter */}
+                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-sky-500/20 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500">
+                          <Building2 className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h5 className="text-xl font-bold">Stttock - 1 Bar</h5>
-                          <p className="text-sm text-muted-foreground">
+                          <h5 className="text-lg font-bold">Starter</h5>
+                          <p className="text-xs text-muted-foreground">
                             {language === "es"
-                              ? "Una ubicación"
-                              : "One location"}
+                              ? "1 sucursal · 5 usuarios"
+                              : "1 branch · 5 users"}
                           </p>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold">$1,999</span>
-                          <span className="text-muted-foreground">
-                            {language === "es" ? "/mes" : "/month"}
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold">$1,899</span>
+                          <span className="text-sm text-muted-foreground">
+                            {language === "es" ? "/mes" : "/mo"}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-sky-400 font-medium">
                           {language === "es"
-                            ? "Pago mensual"
-                            : "Monthly payment"}
+                            ? "o $1,499/mes anual"
+                            : "or $1,499/mo yearly"}
                         </p>
-
-                        <div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                          <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                            💰{" "}
-                            {language === "es"
-                              ? "Ahorra con el plan anual"
-                              : "Save with yearly plan"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            $1,665
-                            {language === "es"
-                              ? "/mes (pago anual $19,980)"
-                              : "/mo (yearly $19,980)"}
-                          </p>
-                          <p className="text-xs font-medium text-green-500 mt-1">
-                            {language === "es"
-                              ? "¡2 meses gratis!"
-                              : "2 months free!"}
-                          </p>
-                        </div>
                       </div>
 
-                      <ul className="space-y-2">
+                      <ul className="space-y-1.5">
                         {[
                           language === "es" ? "1 sucursal" : "1 branch",
+                          language === "es"
+                            ? "Hasta 5 usuarios"
+                            : "Up to 5 users",
                           language === "es"
                             ? "Inventario ilimitado"
                             : "Unlimited inventory",
                           language === "es"
-                            ? "Importación rápida con IA"
-                            : "Fast AI import",
-                          language === "es"
-                            ? "Proyecciones con IA"
-                            : "AI projections",
-                          language === "es"
-                            ? "Gestión de ventas"
-                            : "Sales management",
-                          language === "es"
-                            ? "Soporte por email"
-                            : "Email support",
-                        ].map((feature, i) => (
+                            ? "Importación con IA"
+                            : "AI import",
+                        ].map((f, i) => (
                           <li
                             key={i}
                             className="flex items-center gap-2 text-sm"
                           >
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                            {feature}
+                            <CheckCircle className="h-3.5 w-3.5 text-sky-400 flex-shrink-0" />
+                            {f}
                           </li>
                         ))}
                       </ul>
@@ -980,11 +955,11 @@ export default function AccountContent() {
                         onClick={() =>
                           handleUpgrade(
                             process.env
-                              .NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID!,
+                              .NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID!,
                           )
                         }
                         disabled={isUpgrading}
-                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold"
+                        className="w-full bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white font-semibold"
                       >
                         {isUpgrading ? (
                           <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -996,89 +971,61 @@ export default function AccountContent() {
                       </Button>
                     </div>
 
-                    {/* Plan 2: Stttock - Cadena (5 sucursales) */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5">
+                    {/* Plan 2: Business */}
+                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-blue-500/30 bg-gradient-to-br from-blue-500/8 via-transparent to-indigo-500/5">
                       <div className="absolute -top-3 left-4">
-                        <div className="inline-flex rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
-                          {language === "es" ? "Crecimiento" : "Growth"}
+                        <div className="inline-flex rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
+                          {language === "es" ? "Popular" : "Popular"}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3 pt-2">
-                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-                          <Zap className="h-6 w-6 text-white" />
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500">
+                          <Zap className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h5 className="text-xl font-bold">
-                            Stttock - Cadena
-                          </h5>
-                          <p className="text-sm text-muted-foreground">
+                          <h5 className="text-lg font-bold">Business</h5>
+                          <p className="text-xs text-muted-foreground">
                             {language === "es"
-                              ? "Hasta 5 sucursales"
-                              : "Up to 5 branches"}
+                              ? "1 sucursal · 10 usuarios"
+                              : "1 branch · 10 users"}
                           </p>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold">$3,999</span>
-                          <span className="text-muted-foreground">
-                            {language === "es" ? "/mes" : "/month"}
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold">$3,499</span>
+                          <span className="text-sm text-muted-foreground">
+                            {language === "es" ? "/mes" : "/mo"}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-blue-400 font-medium">
                           {language === "es"
-                            ? "Hasta 5 sucursales incluidas"
-                            : "Up to 5 branches included"}
+                            ? "o $2,999/mes anual"
+                            : "or $2,999/mo yearly"}
                         </p>
-
-                        <div className="mt-3 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                          <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                            💎{" "}
-                            {language === "es"
-                              ? "Plan anual disponible"
-                              : "Yearly plan available"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            $39,990
-                            {language === "es"
-                              ? "/año (2 meses gratis)"
-                              : "/year (2 months free)"}
-                          </p>
-                        </div>
                       </div>
 
-                      <ul className="space-y-2">
+                      <ul className="space-y-1.5">
                         {[
+                          language === "es" ? "1 sucursal" : "1 branch",
                           language === "es"
-                            ? "Hasta 5 sucursales"
-                            : "Up to 5 branches",
+                            ? "Hasta 10 usuarios"
+                            : "Up to 10 users",
                           language === "es"
-                            ? "Dashboard consolidado"
-                            : "Consolidated dashboard",
+                            ? "Protección de inventario"
+                            : "Inventory protection",
                           language === "es"
-                            ? "Transferencias entre sucursales"
-                            : "Inter-branch transfers",
-                          language === "es"
-                            ? "IA avanzada: tendencias y proyecciones"
-                            : "Advanced AI: trends & projections",
-                          language === "es"
-                            ? "Automatizaciones admin"
-                            : "Admin automations",
-                          language === "es"
-                            ? "Reportes avanzados"
-                            : "Advanced reports",
-                          language === "es"
-                            ? "Soporte prioritario"
-                            : "Priority support",
-                        ].map((feature, i) => (
+                            ? "Proyecciones con IA"
+                            : "AI projections",
+                        ].map((f, i) => (
                           <li
                             key={i}
                             className="flex items-center gap-2 text-sm"
                           >
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                            {feature}
+                            <CheckCircle className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                            {f}
                           </li>
                         ))}
                       </ul>
@@ -1086,11 +1033,12 @@ export default function AccountContent() {
                       <Button
                         onClick={() =>
                           handleUpgrade(
-                            process.env.NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID!,
+                            process.env
+                              .NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID!,
                           )
                         }
                         disabled={isUpgrading}
-                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
+                        className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold"
                       >
                         {isUpgrading ? (
                           <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -1102,82 +1050,120 @@ export default function AccountContent() {
                       </Button>
                     </div>
 
-                    {/* Plan 3: Stttock - Cadena Enterprise (+5 sucursales) */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5">
-                      <div className="absolute -top-3 left-4">
-                        <div className="inline-flex rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold text-black uppercase tracking-wider shadow-lg">
-                          ⭐ Enterprise
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 pt-2">
-                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
-                          <Crown className="h-6 w-6 text-white" />
+                    {/* Plan 3: Cadena (quote-only) */}
+                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                          <Building2 className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h5 className="text-xl font-bold">
-                            Stttock - Cadena+
-                          </h5>
-                          <p className="text-sm text-muted-foreground">
-                            {language === "es"
-                              ? "Más de 5 sucursales"
-                              : "More than 5 branches"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold">
-                            {language === "es" ? "Personalizado" : "Custom"}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {language === "es"
-                            ? "Precio según necesidades"
-                            : "Price based on needs"}
-                        </p>
-
-                        <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                            🚀{" "}
-                            {language === "es"
-                              ? "Solución a medida"
-                              : "Tailored solution"}
-                          </p>
+                          <h5 className="text-lg font-bold">Cadena</h5>
                           <p className="text-xs text-muted-foreground">
                             {language === "es"
-                              ? "Precio por sucursal con descuentos por volumen"
-                              : "Per-branch pricing with volume discounts"}
+                              ? "2–5 sucursales"
+                              : "2–5 branches"}
                           </p>
                         </div>
                       </div>
 
-                      <ul className="space-y-2">
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-purple-400">
+                          {language === "es"
+                            ? "desde $2,399/suc/mes"
+                            : "from $2,399/branch/mo"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {language === "es"
+                            ? "Cotización personalizada"
+                            : "Custom quote"}
+                        </p>
+                      </div>
+
+                      <ul className="space-y-1.5">
+                        {[
+                          language === "es" ? "2–5 sucursales" : "2–5 branches",
+                          language === "es"
+                            ? "Dashboard consolidado"
+                            : "Consolidated dashboard",
+                          language === "es"
+                            ? "Transferencias entre sucursales"
+                            : "Inter-branch transfers",
+                          language === "es"
+                            ? "Soporte prioritario"
+                            : "Priority support",
+                        ].map((f, i) => (
+                          <li
+                            key={i}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <Button
+                        onClick={() => setShowQuoteModal(true)}
+                        variant="outline"
+                        className="w-full border-purple-500/50 hover:bg-purple-500/10 hover:border-purple-500 font-semibold"
+                      >
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        {language === "es"
+                          ? "Solicitar Cotización"
+                          : "Request Quote"}
+                      </Button>
+                    </div>
+
+                    {/* Plan 4: Enterprise (quote-only) */}
+                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
+                          <Crown className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="text-lg font-bold">Enterprise</h5>
+                          <p className="text-xs text-muted-foreground">
+                            {language === "es"
+                              ? "+5 sucursales"
+                              : "5+ branches"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-amber-400">
+                          {language === "es"
+                            ? "desde $4,500 base"
+                            : "from $4,500 base"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {language === "es"
+                            ? "+ $1,500/suc/mes anual"
+                            : "+ $1,500/branch/mo yearly"}
+                        </p>
+                      </div>
+
+                      <ul className="space-y-1.5">
                         {[
                           language === "es"
                             ? "Sucursales ilimitadas"
                             : "Unlimited branches",
                           language === "es"
-                            ? "Centralización avanzada"
-                            : "Advanced centralization",
+                            ? "Usuarios ilimitados"
+                            : "Unlimited users",
                           language === "es"
                             ? "Integraciones personalizadas"
                             : "Custom integrations",
                           language === "es"
-                            ? "IA avanzada y predicciones"
-                            : "Advanced AI & predictions",
-                          language === "es" ? "API dedicada" : "Dedicated API",
-                          language === "es"
                             ? "Gerente de cuenta dedicado"
                             : "Dedicated account manager",
-                        ].map((feature, i) => (
+                        ].map((f, i) => (
                           <li
                             key={i}
                             className="flex items-center gap-2 text-sm"
                           >
-                            <CheckCircle className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                            {feature}
+                            <CheckCircle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
+                            {f}
                           </li>
                         ))}
                       </ul>
@@ -1188,7 +1174,9 @@ export default function AccountContent() {
                         className="w-full border-amber-500/50 hover:bg-amber-500/10 hover:border-amber-500 font-semibold"
                       >
                         <MessageSquare className="mr-2 h-4 w-4" />
-                        {language === "es" ? "Obtener Cotización" : "Get Quote"}
+                        {language === "es"
+                          ? "Solicitar Cotización"
+                          : "Request Quote"}
                       </Button>
                     </div>
                   </div>

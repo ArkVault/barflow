@@ -1,11 +1,11 @@
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 let _resend: Resend | null = null;
 
 function getResend(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn('RESEND_API_KEY not set — email sending is disabled');
+    console.warn("RESEND_API_KEY not set — email sending is disabled");
     return null;
   }
   if (!_resend) {
@@ -14,7 +14,7 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM_ADDRESS = 'Stttock <noreply@barflow.mx>';
+const FROM_ADDRESS = "Stttock <noreply@barflow.mx>";
 
 // ─── Quote Request Notification ───────────────────────────────────────────────
 
@@ -29,7 +29,7 @@ interface QuoteEmailData {
 
 export async function sendQuoteNotification(
   to: string,
-  data: QuoteEmailData
+  data: QuoteEmailData,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
@@ -46,18 +46,18 @@ export async function sendQuoteNotification(
             <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Nombre</td><td style="padding: 8px 0;">${data.name}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Email</td><td style="padding: 8px 0;">${data.email}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Teléfono</td><td style="padding: 8px 0;">${data.phone}</td></tr>
-            <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Negocio</td><td style="padding: 8px 0;">${data.businessName || 'No especificado'}</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Negocio</td><td style="padding: 8px 0;">${data.businessName || "No especificado"}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Sucursales</td><td style="padding: 8px 0;">${data.branches}</td></tr>
-            ${data.message ? `<tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Mensaje</td><td style="padding: 8px 0;">${data.message}</td></tr>` : ''}
+            ${data.message ? `<tr><td style="padding: 8px 0; font-weight: 600; color: #555;">Mensaje</td><td style="padding: 8px 0;">${data.message}</td></tr>` : ""}
           </table>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
-          <p style="font-size: 12px; color: #999;">Enviado desde Stttock el ${new Date().toLocaleDateString('es-MX')}</p>
+          <p style="font-size: 12px; color: #999;">Enviado desde Stttock el ${new Date().toLocaleDateString("es-MX")}</p>
         </div>
       `,
     });
     return true;
   } catch (error) {
-    console.error('Failed to send quote notification email:', error);
+    console.error("Failed to send quote notification email:", error);
     return false;
   }
 }
@@ -66,7 +66,7 @@ export async function sendQuoteNotification(
 
 export async function sendWelcomeEmail(
   to: string,
-  userName: string
+  userName: string,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
@@ -75,7 +75,7 @@ export async function sendWelcomeEmail(
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [to],
-      subject: 'Bienvenido a Stttock 🎉',
+      subject: "Bienvenido a Stttock 🎉",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a2e;">¡Bienvenido a Stttock!</h1>
@@ -88,7 +88,7 @@ export async function sendWelcomeEmail(
             <li>📋 Importación automática de menús</li>
           </ul>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flowstock-686958505968.us-central1.run.app'}/dashboard"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://flowstock-686958505968.us-central1.run.app"}/dashboard"
                style="background: #1a1a2e; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
               Ir al Dashboard
             </a>
@@ -101,7 +101,7 @@ export async function sendWelcomeEmail(
     });
     return true;
   } catch (error) {
-    console.error('Failed to send welcome email:', error);
+    console.error("Failed to send welcome email:", error);
     return false;
   }
 }
@@ -111,7 +111,7 @@ export async function sendWelcomeEmail(
 export async function sendTrialEndingEmail(
   to: string,
   userName: string,
-  daysLeft: number
+  daysLeft: number,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
@@ -129,20 +129,20 @@ export async function sendTrialEndingEmail(
           <p>Para seguir utilizando todas las funcionalidades sin interrupción, elige un plan que se adapte a tu negocio:</p>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="background: #f8f9fa;">
-              <td style="padding: 12px; border: 1px solid #eee;"><strong>Bar Sucursal</strong><br><span style="color: #666;">$899 MXN/mes</span></td>
-              <td style="padding: 12px; border: 1px solid #eee;">Ideal para 1 ubicación</td>
+              <td style="padding: 12px; border: 1px solid #eee;"><strong>Starter</strong><br><span style="color: #666;">desde $1,499 MXN/mes</span></td>
+              <td style="padding: 12px; border: 1px solid #eee;">1 sucursal · hasta 5 usuarios</td>
             </tr>
             <tr>
-              <td style="padding: 12px; border: 1px solid #eee;"><strong>Bar Anual</strong><br><span style="color: #666;">$700 MXN/mes</span></td>
-              <td style="padding: 12px; border: 1px solid #eee;">Ahorra $2,388/año</td>
+              <td style="padding: 12px; border: 1px solid #eee;"><strong>Business</strong><br><span style="color: #666;">desde $2,999 MXN/mes</span></td>
+              <td style="padding: 12px; border: 1px solid #eee;">1 sucursal · 10 usuarios · IA</td>
             </tr>
             <tr style="background: #f8f9fa;">
-              <td style="padding: 12px; border: 1px solid #eee;"><strong>Cadena</strong><br><span style="color: #666;">$2,999 MXN/mes</span></td>
-              <td style="padding: 12px; border: 1px solid #eee;">Hasta 5 sucursales</td>
+              <td style="padding: 12px; border: 1px solid #eee;"><strong>Cadena / Enterprise</strong><br><span style="color: #666;">Cotización personalizada</span></td>
+              <td style="padding: 12px; border: 1px solid #eee;">Múltiples sucursales</td>
             </tr>
           </table>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flowstock-686958505968.us-central1.run.app'}/dashboard"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://flowstock-686958505968.us-central1.run.app"}/dashboard"
                style="background: #1a1a2e; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
               Elegir Plan
             </a>
@@ -154,7 +154,7 @@ export async function sendTrialEndingEmail(
     });
     return true;
   } catch (error) {
-    console.error('Failed to send trial ending email:', error);
+    console.error("Failed to send trial ending email:", error);
     return false;
   }
 }
@@ -164,7 +164,7 @@ export async function sendTrialEndingEmail(
 export async function sendSubscriptionConfirmedEmail(
   to: string,
   userName: string,
-  planName: string
+  planName: string,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
@@ -173,13 +173,13 @@ export async function sendSubscriptionConfirmedEmail(
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [to],
-      subject: '¡Tu suscripción está activa! ✅',
+      subject: "¡Tu suscripción está activa! ✅",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a1a2e;">¡Suscripción activada!</h2>
           <p>Hola ${userName},</p>
           <p>Tu plan <strong>${planName}</strong> está ahora activo. Tienes acceso completo a todas las funcionalidades de Stttock.</p>
-          <p>Tu factura se encuentra disponible en tu <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flowstock-686958505968.us-central1.run.app'}/dashboard/cuenta">panel de cuenta</a>.</p>
+          <p>Tu factura se encuentra disponible en tu <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://flowstock-686958505968.us-central1.run.app"}/dashboard/cuenta">panel de cuenta</a>.</p>
           <p style="color: #666;">¡Gracias por confiar en Stttock!</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
           <p style="font-size: 12px; color: #999;">Stttock — Gestión inteligente de bares</p>
@@ -188,7 +188,7 @@ export async function sendSubscriptionConfirmedEmail(
     });
     return true;
   } catch (error) {
-    console.error('Failed to send subscription confirmed email:', error);
+    console.error("Failed to send subscription confirmed email:", error);
     return false;
   }
 }
@@ -197,7 +197,7 @@ export async function sendSubscriptionConfirmedEmail(
 
 export async function sendPaymentFailedEmail(
   to: string,
-  userName: string
+  userName: string,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
@@ -206,14 +206,14 @@ export async function sendPaymentFailedEmail(
     await resend.emails.send({
       from: FROM_ADDRESS,
       to: [to],
-      subject: '⚠️ Problema con tu pago',
+      subject: "⚠️ Problema con tu pago",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #e74c3c;">Problema con tu pago</h2>
           <p>Hola ${userName},</p>
           <p>No pudimos procesar tu último pago. Para evitar una interrupción del servicio, por favor actualiza tu método de pago.</p>
           <div style="text-align: center; margin: 32px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://flowstock-686958505968.us-central1.run.app'}/dashboard/cuenta"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://flowstock-686958505968.us-central1.run.app"}/dashboard/cuenta"
                style="background: #e74c3c; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
               Actualizar Pago
             </a>
@@ -226,7 +226,7 @@ export async function sendPaymentFailedEmail(
     });
     return true;
   } catch (error) {
-    console.error('Failed to send payment failed email:', error);
+    console.error("Failed to send payment failed email:", error);
     return false;
   }
 }
