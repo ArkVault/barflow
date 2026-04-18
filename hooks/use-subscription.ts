@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
-import { useSearchParams } from "next/navigation";
 
 // Dev accounts that bypass trial restrictions (comma-separated in env var)
 const DEV_EMAILS: string[] = (process.env.NEXT_PUBLIC_DEV_EMAILS || "")
@@ -24,7 +23,6 @@ export interface SubscriptionData {
 
 export function useSubscription() {
   const { user, establishmentId } = useAuth();
-  const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<SubscriptionData>({
     isActive: false,
     isTrialing: false,
@@ -106,10 +104,12 @@ export function useSubscription() {
 
   // Refetch when returning from Stripe checkout (?session_id= in URL)
   useEffect(() => {
-    if (searchParams?.get("session_id")) {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("session_id")) {
       fetchSubscription();
     }
-  }, [searchParams, fetchSubscription]);
+  }, [fetchSubscription]);
 
   return { subscription, loading, refetch: fetchSubscription };
 }

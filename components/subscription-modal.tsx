@@ -91,7 +91,7 @@ export function SubscriptionModal({
           ? `$${PLAN_PRICING.starter.yearly.toLocaleString("es-MX")}`
           : `$${PLAN_PRICING.starter.monthly.toLocaleString("es-MX")}`,
       period: billingCycle === "yearly" ? "/mes (anual)" : "/mes",
-      detail: `Hasta ${PLAN_PRICING.starter.maxUsers} usuarios`,
+      detail: `Hasta ${PLAN_PRICING.starter.baseUsers} usuarios`,
       priceId:
         billingCycle === "yearly"
           ? process.env.NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID!
@@ -100,7 +100,7 @@ export function SubscriptionModal({
       color: "from-blue-500 to-cyan-500",
       yearlyNote:
         billingCycle === "yearly"
-          ? `$${PLAN_PRICING.starter.yearlyTotal.toLocaleString("es-MX")}/año`
+          ? `$${(PLAN_PRICING.starter.yearly * 12).toLocaleString("es-MX")}/año`
           : undefined,
       monthlyCompare:
         billingCycle === "yearly"
@@ -108,7 +108,7 @@ export function SubscriptionModal({
           : undefined,
       features: [
         "1 sucursal",
-        `Hasta ${PLAN_PRICING.starter.maxUsers} usuarios`,
+        `Hasta ${PLAN_PRICING.starter.baseUsers} usuarios`,
         "Ventas y gestión administrativa",
         "Gestión completa de inventario",
         "Importación rápida con IA",
@@ -124,7 +124,7 @@ export function SubscriptionModal({
           ? `$${PLAN_PRICING.business.yearly.toLocaleString("es-MX")}`
           : `$${PLAN_PRICING.business.monthly.toLocaleString("es-MX")}`,
       period: billingCycle === "yearly" ? "/mes (anual)" : "/mes",
-      detail: `Hasta ${PLAN_PRICING.business.maxUsers} usuarios`,
+      detail: `Hasta ${PLAN_PRICING.business.baseUsers} usuarios`,
       priceId:
         billingCycle === "yearly"
           ? process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID!
@@ -135,7 +135,7 @@ export function SubscriptionModal({
       popular: true,
       yearlyNote:
         billingCycle === "yearly"
-          ? `$${PLAN_PRICING.business.yearlyTotal.toLocaleString("es-MX")}/año`
+          ? `$${(PLAN_PRICING.business.yearly * 12).toLocaleString("es-MX")}/año`
           : undefined,
       monthlyCompare:
         billingCycle === "yearly"
@@ -143,7 +143,7 @@ export function SubscriptionModal({
           : undefined,
       features: [
         "1 sucursal",
-        `Hasta ${PLAN_PRICING.business.maxUsers} usuarios`,
+        `Hasta ${PLAN_PRICING.business.baseUsers} usuarios`,
         "Blindaje de inventarios y mermas",
         "Proyecciones de inventario con IA",
         "Análisis de ventas en tiempo real",
@@ -335,7 +335,7 @@ export function SubscriptionModal({
                   {/* Extra users note */}
                   <p className="text-[11px] text-muted-foreground mb-3">
                     +5 usuarios adicionales: $
-                    {PLAN_PRICING.extraUsersBlock.toLocaleString("es-MX")}{" "}
+                    {PLAN_PRICING.extraUsersBlockRate.toLocaleString("es-MX")}{" "}
                     MXN/mes por bloque. Dispositivos: $0.
                   </p>
 
@@ -353,7 +353,7 @@ export function SubscriptionModal({
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => handleSubscribe(plan.priceId, plan.name)}
+                      onClick={() => handleSubscribe(plan.priceId!, plan.name)}
                       disabled={loading !== null}
                       className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90 text-white font-semibold h-11 shadow-lg transition-all duration-300`}
                     >
