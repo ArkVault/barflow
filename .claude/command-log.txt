@@ -1179,3 +1179,35 @@ curl -s https://api.stripe.com/v1/prices -u "$SK:" \
   -d "currency=mxn" \
   -d "recurring[interval]=year" \
   -d "nickname=Business Yearly" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+ ls -la /Users/gibrann/Desktop/Barflow/supabase/migrations/ | tail -20
+ cd /Users/gibrann/Desktop/Barflow && git status --short supabase/migrations/ 2>&1 | head -30
+ cd /Users/gibrann/Desktop/Barflow && git status --short && echo "---BRANCH---" && git branch --show-current && echo "---REMOTE---" && git remote -v
+ cd /Users/gibrann/Desktop/Barflow && git diff --stat HEAD 2>&1 | tail -30 && echo "---untracked---" && git ls-files --others --exclude-standard | head -20
+ tail -40 /private/tmp/claude-501/-Users-gibrann-Desktop-Barflow--claude-worktrees-upbeat-hellman/3ed1d168-93d8-4857-bc0e-2d597a8db46d/tasks/b1nznvfk1.output
+ export CLOUDSDK_PYTHON=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 && gcloud builds log adf9b9b4-7a21-422e-849a-7291e2c619a1 2>&1 | tail -80
+ which pnpm || ls node_modules/.bin/pnpm 2>/dev/null || echo "no pnpm" && pnpm --version 2>&1 | head -3
+ npx --yes pnpm@9 install --lockfile-only 2>&1 | tail -15
+ corepack enable 2>&1 | tail -3 && corepack prepare pnpm@9 --activate 2>&1 | tail -3 && pnpm --version
+ npm install -g pnpm@9 2>&1 | tail -10 && pnpm --version
+ COREPACK_INTEGRITY_KEYS=0 npm install -g pnpm@9 2>&1 | tail -5 && pnpm --version 2>&1
+ cd /Users/gibrann/Desktop/Barflow && pnpm install --lockfile-only 2>&1 | tail -15
+ tail -30 /private/tmp/claude-501/-Users-gibrann-Desktop-Barflow--claude-worktrees-upbeat-hellman/3ed1d168-93d8-4857-bc0e-2d597a8db46d/tasks/brigav5xl.output
+ export CLOUDSDK_PYTHON=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 && gcloud builds log b5af233a-6414-415a-8806-ae59a0febe41 2>&1 | tail -80
+ grep -A1 '"stripe"' package.json | head -5 && echo "---" && grep -n "apiVersion" lib/stripe/config.ts
+ git log --oneline -3 && echo "---" && sed -n '10,15p' lib/stripe/config.ts
+ git log --oneline -10 && echo "---PUSH STATUS---" && git status --short && git rev-parse HEAD origin/main
+ git branch --show-current && echo "---" && git log --oneline main -5 2>&1 && echo "---" && git log --oneline origin/main -5
+ pwd && git rev-parse --git-dir && git rev-parse --show-toplevel && git worktree list 2>&1 | head -10
+ sed -n '10,15p' /Users/gibrann/Desktop/Barflow/lib/stripe/config.ts && echo "---HEAD COMMIT---" && git -C /Users/gibrann/Desktop/Barflow log --oneline -3 && echo "---STATUS---" && git -C /Users/gibrann/Desktop/Barflow status --short | head -10
+ cd /Users/gibrann/Desktop/Barflow && git add lib/stripe/config.ts && git commit -m "$(cat <<'EOF'
+fix(stripe): pin apiVersion to 2025-11-17.clover to match installed types
+
+stripe@20.x types only allow "2025-11-17.clover"; the previous value
+"2026-02-25.clover" failed Cloud Build TypeScript check.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -5 && git push origin main 2>&1 | tail -5
+ tail -20 /private/tmp/claude-501/-Users-gibrann-Desktop-Barflow--claude-worktrees-upbeat-hellman/3ed1d168-93d8-4857-bc0e-2d597a8db46d/tasks/b9hv5lvit.output
+ export CLOUDSDK_PYTHON=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 && gcloud run services describe flowstock --region=us-central1 --format="value(status.url,status.latestReadyRevisionName)" 2>&1 | tail -5
+ curl -sI https://flowstock-686958505968.us-central1.run.app/ 2>&1 | head -5 && echo "---HEALTH---" && curl -s https://flowstock-686958505968.us-central1.run.app/api/health 2>&1 | head -3
