@@ -1070,3 +1070,5 @@ echo "---"
 grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/team/team-management.tsx | head -8
 echo "---"
 grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/planner-content.tsx | head -8
+ ls /Users/gibrann/Desktop/Barflow/components/shells/
+ grep -n "children\|main\|content\|<div" /Users/gibrann/Desktop/Barflow/components/shells/prod-shell.tsx | head -25
