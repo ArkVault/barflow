@@ -544,3 +544,4 @@ EOF
  ln -s /Users/gibrann/Desktop/Barflow/.env.local /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/.env.local
  diff /Users/gibrann/Desktop/Barflow/hooks/use-subscription.ts /Users/gibrann/Desktop/Barflow/.claude/worktrees/wonderful-shaw/hooks/use-subscription.ts
  cat /Users/gibrann/.claude/projects/-Users-gibrann-Desktop-Barflow--claude-worktrees-wonderful-shaw/b2afff07-dc5a-4567-9cbc-68340a1c342d/tool-results/mcp-Claude_Preview-preview_console_logs-1775886822600.txt | python3 -c "import json,sys; logs=json.load(sys.stdin); [print(l['type']+':', l['text'][:200]) for l in logs if l['type'] in ('error','warn') or 'Error' in l.get('text','')]" 2>/dev/null | head -40
+ git diff supabase/migrations/20251214_create_opentable_integration.sql | head -40
