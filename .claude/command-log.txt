@@ -1056,3 +1056,17 @@ for (const s of scenarios) {
 EOF
 cd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsx tmp-roi-test.mjs 2>&1
 rm /Users/gibrann/Desktop/Barflow/tmp-roi-test.mjs
+ ls /Users/gibrann/Desktop/Barflow/app/dashboard/
+ for p in cuenta proyecciones equipo productos insumos operaciones configuracion planner punto-de-venta; do
+  f="/Users/gibrann/Desktop/Barflow/app/dashboard/$p/page.tsx"
+  if [ -f "$f" ]; then
+    echo "=== $p ==="
+    head -40 "$f"
+    echo ""
+  fi
+done
+ grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/account-content.tsx | head -8
+echo "---"
+grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/team/team-management.tsx | head -8
+echo "---"
+grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/planner-content.tsx | head -8
