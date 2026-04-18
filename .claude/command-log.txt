@@ -1072,3 +1072,53 @@ echo "---"
 grep -n "p-[0-9]\|padding\|container\|max-w-" /Users/gibrann/Desktop/Barflow/components/planner-content.tsx | head -8
  ls /Users/gibrann/Desktop/Barflow/components/shells/
  grep -n "children\|main\|content\|<div" /Users/gibrann/Desktop/Barflow/components/shells/prod-shell.tsx | head -25
+ cd /Users/gibrann/Desktop/Barflow && git status && echo "---BRANCH---" && git branch --show-current && echo "---REMOTE---" && git remote -v && echo "---RECENT---" && git log --oneline -10
+ cd /Users/gibrann/Desktop/Barflow && git log main --oneline -5 2>&1 | head -10
+echo "---DIFF FROM MAIN---"
+git log main..HEAD --oneline 2>&1 | head -20
+echo "---CLOUDBUILD---"
+cat cloudbuild.yaml 2>&1 | head -60
+ cd /Users/gibrann/Desktop/Barflow && git add \
+  app/api/webhooks/stripe/route.ts \
+  app/dashboard/insumos/page.tsx \
+  app/dashboard/operaciones/page.tsx \
+  app/dashboard/page.tsx \
+  app/dashboard/productos/page.tsx \
+  app/dashboard/proyecciones/page.tsx \
+  app/dashboard/punto-de-venta/page.tsx \
+  components/account-content.tsx \
+  components/account-modal.tsx \
+  components/inventory-planner.tsx \
+  components/menu-manager.tsx \
+  components/onboarding-questionnaire.tsx \
+  components/roi/roi-calculator.tsx \
+  components/team/team-management.tsx \
+  lib/email/resend.ts \
+  lib/roi/calculator.ts \
+  lib/stripe/config.ts && \
+git status --short
+ cd /Users/gibrann/Desktop/Barflow && git commit -m "$(cat <<'EOF'
+feat: pricing audit — 4-tier plans + responsive page padding
+
+Pricing consistency overhaul (single source of truth in lib/stripe/config.ts):
+- New PLAN_PRICING constant: Starter (1,499/1,899), Business (2,999/3,499),
+  Cadena (per-branch quote), Enterprise (4,500 base + per-branch quote)
+- New PlanType union: starter_monthly, starter_yearly, business_monthly,
+  business_yearly, chain, enterprise (replaces old bar_monthly/bar_yearly)
+- Stripe webhook getPlanTypeFromPriceId + email plan names migrated
+- account-content / account-modal / onboarding rebuilt around new tiers
+- ROI calculator: PRICING constants, plan label, and extra-users billing
+  (blocks of 5 @ \$800/mo) match new structure
+
+Layout polish:
+- Standardized dashboard page padding to responsive
+  (px-6 md:px-8 lg:px-10 py-6 md:py-8) so content breathes proportionally
+  at every viewport without crowding the sidebar
+- Aligned Proyecciones (was container) and Equipo (was max-w-4xl) to the
+  shared max-w-5xl convention
+- Productos menu grid: 3 per row from lg+ (was xl+)
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)"
+ cd /Users/gibrann/Desktop/Barflow && git push origin feature/proyecciones-tabs-roi 2>&1 | tail -10
