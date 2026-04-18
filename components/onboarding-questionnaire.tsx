@@ -1001,10 +1001,11 @@ export function OnboardingQuestionnaire({
   const TOTAL = 5;
 
   // Resolve price ID based on branch selection
+  // Multiple branches → quote flow (no self-serve Stripe price); single branch → Starter monthly
   const priceId =
     branchMode === "multiple"
-      ? (process.env.NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID ?? "")
-      : (process.env.NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID ?? "");
+      ? "" // Cadena/Enterprise are quote-only — handled via Solicitar Cotización
+      : (process.env.NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID ?? "");
 
   useEffect(() => {
     setMounted(true);

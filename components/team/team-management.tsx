@@ -234,7 +234,7 @@ export default function TeamManagement() {
   const totalMembers = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="px-6 md:px-8 lg:px-10 py-6 md:py-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
       <div>
         <h2

@@ -23,13 +23,35 @@ export const stripe = {
   },
 };
 
+// ─── Canonical pricing (MXN / month) ────────────────────────────────────────
+export const PLAN_PRICING = {
+  starter: { monthly: 1_899, yearly: 1_499, baseUsers: 5 },
+  business: { monthly: 3_499, yearly: 2_999, baseUsers: 10 },
+  cadena: {
+    monthlyPerBranch: 2_999,
+    yearlyPerBranch: 2_399,
+    baseUsersPerBranch: 10,
+  },
+  enterprise: {
+    baseFee: 4_500,
+    monthlyPerBranch: 1_800,
+    yearlyPerBranch: 1_500,
+    baseUsers: Infinity,
+  },
+  extraUsersBlockSize: 5,
+  extraUsersBlockRate: 800,
+  devicesAlwaysFree: true,
+} as const;
+
 // Stripe configuration
 export const STRIPE_CONFIG = {
   // Price IDs — maps to NEXT_PUBLIC_STRIPE_*_PRICE_ID env vars
   prices: {
-    barMonthly: process.env.NEXT_PUBLIC_STRIPE_BAR_MONTHLY_PRICE_ID!,
-    barYearly: process.env.NEXT_PUBLIC_STRIPE_BAR_YEARLY_PRICE_ID!,
-    chain: process.env.NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID!,
+    starterMonthly: process.env.NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID!,
+    starterYearly: process.env.NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID!,
+    businessMonthly: process.env.NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID!,
+    businessYearly: process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID!,
+    // Cadena & Enterprise are quote-only — no self-serve price IDs
   },
   // Trial period in days
   trialPeriodDays: 30,
@@ -42,9 +64,12 @@ export const STRIPE_CONFIG = {
 // and getPlanTypeFromPriceId() in app/api/webhooks/stripe/route.ts
 export type PlanType =
   | "free_trial"
-  | "bar_monthly"
-  | "bar_yearly"
+  | "starter_monthly"
+  | "starter_yearly"
+  | "business_monthly"
+  | "business_yearly"
   | "chain"
+  | "enterprise"
   | "expired";
 
 // Subscription status

@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS public.reservations (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   
-  -- Ensure unique external reservations
-  CONSTRAINT unique_external_reservation UNIQUE NULLS NOT DISTINCT (source, external_id)
+  -- (unique external reservation constraint moved to partial index below)
+  -- This allows multiple manual reservations with external_id = NULL
 );
 
 -- Indexes for performance
@@ -85,7 +85,8 @@ CREATE INDEX idx_reservations_establishment ON public.reservations(establishment
 CREATE INDEX idx_reservations_date ON public.reservations(reservation_date);
 CREATE INDEX idx_reservations_status ON public.reservations(status);
 CREATE INDEX idx_reservations_table ON public.reservations(table_id);
-CREATE INDEX idx_reservations_external ON public.reservations(external_id) WHERE external_id IS NOT NULL;
+-- Only enforce uniqueness for external (non-manual) reservations
+CREATE UNIQUE INDEX idx_reservations_external ON public.reservations(source, external_id) WHERE external_id IS NOT NULL;
 
 -- Enable RLS
 ALTER TABLE public.opentable_integrations ENABLE ROW LEVEL SECURITY;
