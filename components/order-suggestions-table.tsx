@@ -36,97 +36,144 @@ interface OrderSuggestionsTableProps {
      period: 'week' | 'month';
 }
 
+// ─── Calculate real consumption from sales data ───
+const LOOKBACK_DAYS = 30; // Use last 30 days of sales for consumption rates
+
 export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
      const { language } = useLanguage();
      const { establishmentId } = useAuth();
      const [suggestions, setSuggestions] = useState<OrderSuggestion[]>([]);
      const [loading, setLoading] = useState(true);
+     const es = language === 'es';
 
      useEffect(() => {
           if (establishmentId) {
-               loadSuggestionsFromSupplies();
+               loadSuggestionsFromRealData();
           }
      }, [establishmentId, period]);
 
-     const loadSuggestionsFromSupplies = async () => {
+     const loadSuggestionsFromRealData = async () => {
           try {
                setLoading(true);
                const supabase = createClient();
 
-               // Fetch real supplies from database
-               const { data: supplies, error } = await supabase
+               // Fetch supplies
+               const { data: supplies, error: supplyError } = await supabase
                     .from('supplies')
                     .select('id, name, current_quantity, unit, min_threshold, optimal_quantity')
                     .eq('establishment_id', establishmentId)
                     .order('current_quantity', { ascending: true });
 
-               if (error) {
-                    console.error('Error loading supplies:', error);
+               if (supplyError || !supplies || supplies.length === 0) {
                     setSuggestions([]);
                     return;
                }
 
-               if (!supplies || supplies.length === 0) {
-                    setSuggestions([]);
-                    return;
+               // Fetch recent sales with product ingredients for real consumption
+               const cutoffDate = new Date();
+               cutoffDate.setDate(cutoffDate.getDate() - LOOKBACK_DAYS);
+
+               const { data: salesData, error: salesError } = await supabase
+                    .from('sales')
+                    .select(`
+                         id, quantity, sale_date,
+                         products (
+                              product_ingredients (
+                                   supply_id,
+                                   quantity_needed
+                              )
+                         )
+                    `)
+                    .eq('establishment_id', establishmentId)
+                    .gte('sale_date', cutoffDate.toISOString())
+                    .order('sale_date', { ascending: false });
+
+               // Build a consumption map: supply_id → total consumed in lookback period
+               const consumptionMap = new Map<string, number>();
+
+               if (!salesError && salesData) {
+                    for (const sale of salesData) {
+                         const ingredients = (sale as any).products?.product_ingredients;
+                         if (!Array.isArray(ingredients)) continue;
+
+                         for (const ing of ingredients) {
+                              if (!ing.supply_id || !ing.quantity_needed) continue;
+                              const prev = consumptionMap.get(ing.supply_id) || 0;
+                              consumptionMap.set(ing.supply_id, prev + ing.quantity_needed * (sale.quantity || 1));
+                         }
+                    }
                }
 
-               // Calculate consumption rate from sales (approx based on period)
-               const dailyConsumptionRate = period === 'week' ? 1.5 : 1.2; // Avg units per day
+               // Calculate date range of actual sales data
+               const saleDates = (salesData || []).map(s => new Date(s.sale_date).getTime());
+               const actualDays = saleDates.length > 0
+                    ? Math.max(1, (Date.now() - Math.min(...saleDates)) / (1000 * 60 * 60 * 24))
+                    : LOOKBACK_DAYS;
+
                const daysInPeriod = period === 'week' ? 7 : 30;
 
-               // Generate suggestions for supplies that need reordering
+               // Generate suggestions
                const orderSuggestions: OrderSuggestion[] = [];
 
-               supplies.forEach((supply: Supply) => {
-                    const status = calculateStockStatus(supply);
-                    const optimal = supply.optimal_quantity || supply.min_threshold * 3;
-                    const projectedConsumption = supply.current_quantity * dailyConsumptionRate;
+               for (const supply of supplies) {
+                    const totalConsumed = consumptionMap.get(supply.id) || 0;
+                    const dailyUsage = totalConsumed / actualDays;
+                    const periodUsage = dailyUsage * daysInPeriod;
 
-                    // Calculate days until critical (stock falls below min_threshold)
-                    const dailyUsage = projectedConsumption / daysInPeriod;
+                    const optimal = supply.optimal_quantity && supply.optimal_quantity > 0
+                         ? supply.optimal_quantity
+                         : supply.min_threshold * 3;
+
+                    // Days until stock falls below min_threshold
                     const daysUntilCritical = dailyUsage > 0
                          ? Math.floor((supply.current_quantity - supply.min_threshold) / dailyUsage)
                          : 999;
 
-                    // Only suggest orders for supplies that are low or critical
-                    if (status === 'critical' || status === 'low' || supply.current_quantity < optimal * 0.5) {
-                         const suggestedOrder = Math.max(0, Math.ceil(optimal - supply.current_quantity));
+                    // Determine if this supply needs reordering
+                    const status = calculateStockStatus(supply);
+                    const projectedStockAtEndOfPeriod = supply.current_quantity - periodUsage;
+                    const needsReorder = status === 'critical' || status === 'low'
+                         || projectedStockAtEndOfPeriod < supply.min_threshold
+                         || supply.current_quantity < optimal * 0.5;
 
-                         let priority: 'high' | 'medium' | 'low';
-                         if (status === 'critical' || daysUntilCritical <= 2) {
-                              priority = 'high';
-                         } else if (status === 'low' || daysUntilCritical <= 5) {
-                              priority = 'medium';
-                         } else {
-                              priority = 'low';
-                         }
+                    if (!needsReorder) continue;
 
-                         if (suggestedOrder > 0) {
-                              orderSuggestions.push({
-                                   supplyId: supply.id,
-                                   supply: supply.name,
-                                   unit: supply.unit,
-                                   currentStock: supply.current_quantity,
-                                   optimalStock: optimal,
-                                   suggestedOrder: suggestedOrder,
-                                   priority: priority,
-                                   daysUntilCritical: Math.max(0, daysUntilCritical)
-                              });
-                         }
+                    // Suggest enough to reach optimal level + cover the period's consumption
+                    const suggestedOrder = Math.max(0, Math.ceil(
+                         optimal - supply.current_quantity + periodUsage
+                    ));
+
+                    if (suggestedOrder <= 0) continue;
+
+                    let priority: 'high' | 'medium' | 'low';
+                    if (status === 'critical' || daysUntilCritical <= 2) {
+                         priority = 'high';
+                    } else if (status === 'low' || daysUntilCritical <= 5) {
+                         priority = 'medium';
+                    } else {
+                         priority = 'low';
                     }
-               });
 
-               // Sort by priority (high first) then by days until critical
+                    orderSuggestions.push({
+                         supplyId: supply.id,
+                         supply: supply.name,
+                         unit: supply.unit,
+                         currentStock: supply.current_quantity,
+                         optimalStock: optimal,
+                         suggestedOrder,
+                         priority,
+                         daysUntilCritical: Math.max(0, daysUntilCritical),
+                    });
+               }
+
+               // Sort by priority then urgency
                orderSuggestions.sort((a, b) => {
-                    const priorityOrder = { high: 0, medium: 1, low: 2 };
-                    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-                         return priorityOrder[a.priority] - priorityOrder[b.priority];
-                    }
+                    const order = { high: 0, medium: 1, low: 2 };
+                    if (order[a.priority] !== order[b.priority]) return order[a.priority] - order[b.priority];
                     return a.daysUntilCritical - b.daysUntilCritical;
                });
 
-               setSuggestions(orderSuggestions.slice(0, 10)); // Top 10 suggestions
+               setSuggestions(orderSuggestions.slice(0, 15));
           } catch (error) {
                console.error('Error generating suggestions:', error);
                setSuggestions([]);
@@ -146,10 +193,10 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
 
      const getPriorityLabel = (priority: string) => {
           switch (priority) {
-               case 'high': return language === 'es' ? 'Alta' : 'High';
-               case 'medium': return language === 'es' ? 'Media' : 'Medium';
-               case 'low': return language === 'es' ? 'Baja' : 'Low';
-               default: return language === 'es' ? 'Normal' : 'Normal';
+               case 'high': return es ? 'Alta' : 'High';
+               case 'medium': return es ? 'Media' : 'Medium';
+               case 'low': return es ? 'Baja' : 'Low';
+               default: return 'Normal';
           }
      };
 
@@ -160,17 +207,17 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                          <div>
                               <CardTitle className="text-lg flex items-center gap-2">
                                    <ShoppingCart className="w-5 h-5" />
-                                   {language === 'es' ? 'Pedidos Sugeridos' : 'Suggested Orders'}
+                                   {es ? 'Pedidos Sugeridos' : 'Suggested Orders'}
                               </CardTitle>
                               <CardDescription>
-                                   {language === 'es'
-                                        ? 'Basado en niveles actuales de inventario'
-                                        : 'Based on current inventory levels'}
+                                   {es
+                                        ? 'Basado en consumo real de los últimos 30 días'
+                                        : 'Based on real consumption from the last 30 days'}
                               </CardDescription>
                          </div>
                          {suggestions.length > 0 && (
                               <Button className="neumorphic-hover border-0" size="sm">
-                                   {language === 'es' ? 'Generar Orden de Compra' : 'Generate Purchase Order'}
+                                   {es ? 'Generar Orden de Compra' : 'Generate Purchase Order'}
                               </Button>
                          )}
                     </div>
@@ -180,7 +227,7 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                          <div className="flex items-center justify-center py-8">
                               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                               <span className="ml-2 text-sm text-muted-foreground">
-                                   {language === 'es' ? 'Analizando inventario...' : 'Analyzing inventory...'}
+                                   {es ? 'Analizando inventario...' : 'Analyzing inventory...'}
                               </span>
                          </div>
                     ) : suggestions.length === 0 ? (
@@ -189,30 +236,28 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                                    <ShoppingCart className="w-6 h-6 text-green-600 dark:text-green-400" />
                               </div>
                               <p className="text-sm font-medium text-foreground">
-                                   {language === 'es' ? '¡Inventario en buen estado!' : 'Inventory in good shape!'}
+                                   {es ? '¡Inventario en buen estado!' : 'Inventory in good shape!'}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                   {language === 'es'
-                                        ? 'No hay pedidos urgentes en este momento'
-                                        : 'No urgent orders needed at this time'}
+                                   {es ? 'No hay pedidos urgentes en este momento' : 'No urgent orders needed at this time'}
                               </p>
                          </div>
                     ) : (
                          <Table>
                               <TableHeader>
                                    <TableRow>
-                                        <TableHead>{language === 'es' ? 'Insumo' : 'Supply'}</TableHead>
-                                        <TableHead className="text-center">{language === 'es' ? 'Stock Actual' : 'Current Stock'}</TableHead>
-                                        <TableHead className="text-center">{language === 'es' ? 'Stock Óptimo' : 'Optimal Stock'}</TableHead>
-                                        <TableHead className="text-center">{language === 'es' ? 'Cantidad Sugerida' : 'Suggested Qty'}</TableHead>
-                                        <TableHead className="text-center">{language === 'es' ? 'Prioridad' : 'Priority'}</TableHead>
-                                        <TableHead className="text-center">{language === 'es' ? 'Días Críticos' : 'Critical Days'}</TableHead>
-                                        <TableHead className="text-right">{language === 'es' ? 'Acción' : 'Action'}</TableHead>
+                                        <TableHead>{es ? 'Insumo' : 'Supply'}</TableHead>
+                                        <TableHead className="text-center">{es ? 'Stock Actual' : 'Current Stock'}</TableHead>
+                                        <TableHead className="text-center">{es ? 'Stock Óptimo' : 'Optimal Stock'}</TableHead>
+                                        <TableHead className="text-center">{es ? 'Cantidad Sugerida' : 'Suggested Qty'}</TableHead>
+                                        <TableHead className="text-center">{es ? 'Prioridad' : 'Priority'}</TableHead>
+                                        <TableHead className="text-center">{es ? 'Días Críticos' : 'Critical Days'}</TableHead>
+                                        <TableHead className="text-right">{es ? 'Acción' : 'Action'}</TableHead>
                                    </TableRow>
                               </TableHeader>
                               <TableBody>
-                                   {suggestions.map((suggestion, index) => (
-                                        <TableRow key={index}>
+                                   {suggestions.map((suggestion) => (
+                                        <TableRow key={suggestion.supplyId}>
                                              <TableCell className="font-medium">{suggestion.supply}</TableCell>
                                              <TableCell className="text-center">
                                                   {suggestion.currentStock} {suggestion.unit}
@@ -239,14 +284,14 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                                                   </div>
                                              </TableCell>
                                              <TableCell className="text-right">
-                                                  <Link href={`/demo/insumos?restock=${suggestion.supplyId}`}>
+                                                  <Link href={`/dashboard/insumos?restock=${suggestion.supplyId}`}>
                                                        <Button
                                                             variant="ghost"
                                                             size="sm"
                                                             className="neumorphic border-0 bg-primary/10 hover:bg-primary/20 text-primary focus:outline-none focus:ring-0 focus-visible:ring-0"
                                                        >
                                                             <Plus className="w-3 h-3 mr-1" />
-                                                            {language === 'es' ? 'Abastecer' : 'Restock'}
+                                                            {es ? 'Abastecer' : 'Restock'}
                                                        </Button>
                                                   </Link>
                                              </TableCell>
@@ -259,9 +304,9 @@ export function OrderSuggestionsTable({ period }: OrderSuggestionsTableProps) {
                     {suggestions.length > 0 && (
                          <div className="mt-4 p-2 rounded bg-muted/30 border border-muted/50">
                               <p className="text-xs text-muted-foreground">
-                                   💡 <strong>{language === 'es' ? 'Datos reales:' : 'Real data:'}</strong> {language === 'es'
-                                        ? 'Sugerencias basadas en tus niveles de inventario actuales y umbrales configurados'
-                                        : 'Suggestions based on your current inventory levels and configured thresholds'}
+                                   {es
+                                        ? '💡 Sugerencias calculadas a partir del consumo real de ventas de los últimos 30 días, no estimaciones genéricas.'
+                                        : '💡 Suggestions calculated from actual sales consumption over the last 30 days, not generic estimates.'}
                               </p>
                          </div>
                     )}
