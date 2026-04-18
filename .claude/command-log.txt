@@ -1014,3 +1014,45 @@ sleep 15 && curl -s -o /dev/null -w "HTTP: %{http_code}" http://localhost:3001
  pkill -f "next dev" 2>/dev/null; sleep 2; echo "killed"
  grep -n "1,999\|1 Bar\|Stttock.*Bar\|Available Plans" /Users/gibrann/Desktop/Barflow/components/account-content.tsx 2>/dev/null | head -20
  pushd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1; popd
+ cd /Users/gibrann/Desktop/Barflow && cat > /tmp/roi-test.mjs <<'EOF'
+import { calculateSubscriptionCost, getPlanLabel, formatMXN } from "./lib/roi/calculator.ts";
+
+const scenarios = [
+  { branchCount: 1, totalStaff: 5,  annualBilling: false, label: "1 branch, monthly" },
+  { branchCount: 1, totalStaff: 5,  annualBilling: true,  label: "1 branch, annual" },
+  { branchCount: 1, totalStaff: 12, annualBilling: true,  label: "1 branch, 12 users (extra)" },
+  { branchCount: 3, totalStaff: 20, annualBilling: false, label: "3 branches, monthly" },
+  { branchCount: 3, totalStaff: 20, annualBilling: true,  label: "3 branches, annual" },
+  { branchCount: 5, totalStaff: 50, annualBilling: true,  label: "5 branches, annual" },
+  { branchCount: 7, totalStaff: 80, annualBilling: false, label: "7 branches, monthly" },
+  { branchCount: 7, totalStaff: 80, annualBilling: true,  label: "7 branches, annual" },
+];
+
+for (const s of scenarios) {
+  const c = calculateSubscriptionCost(s);
+  console.log(`${s.label.padEnd(35)} → Plan: ${getPlanLabel(c.plan).padEnd(12)} base=${formatMXN(c.baseCost).padEnd(12)} extraUsers=${formatMXN(c.extraUsersCost).padEnd(8)} total=${formatMXN(c.totalMonthly)}`);
+}
+EOF
+npx tsx /tmp/roi-test.mjs 2>&1
+ cd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsx /tmp/roi-test.mjs 2>&1
+ cat > /Users/gibrann/Desktop/Barflow/tmp-roi-test.mjs <<'EOF'
+import { calculateSubscriptionCost, getPlanLabel, formatMXN } from "./lib/roi/calculator.ts";
+
+const scenarios = [
+  { branchCount: 1, totalStaff: 5,  annualBilling: false, label: "1 branch, monthly, 5 users" },
+  { branchCount: 1, totalStaff: 5,  annualBilling: true,  label: "1 branch, annual,  5 users" },
+  { branchCount: 1, totalStaff: 12, annualBilling: true,  label: "1 branch, annual,  12 users" },
+  { branchCount: 3, totalStaff: 20, annualBilling: false, label: "3 branches, monthly" },
+  { branchCount: 3, totalStaff: 20, annualBilling: true,  label: "3 branches, annual" },
+  { branchCount: 5, totalStaff: 50, annualBilling: true,  label: "5 branches, annual" },
+  { branchCount: 7, totalStaff: 80, annualBilling: false, label: "7 branches, monthly" },
+  { branchCount: 7, totalStaff: 80, annualBilling: true,  label: "7 branches, annual" },
+];
+
+for (const s of scenarios) {
+  const c = calculateSubscriptionCost(s);
+  console.log(`${s.label.padEnd(38)} → ${getPlanLabel(c.plan).padEnd(11)} base=${formatMXN(c.baseCost).padEnd(13)} +users=${formatMXN(c.extraUsersCost).padEnd(8)} total=${formatMXN(c.totalMonthly)}`);
+}
+EOF
+cd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsx tmp-roi-test.mjs 2>&1
+rm /Users/gibrann/Desktop/Barflow/tmp-roi-test.mjs
