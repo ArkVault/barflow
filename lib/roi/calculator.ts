@@ -95,37 +95,45 @@ export function calculateSubscriptionCost(inputs: ROIInputs): SubscriptionCost {
 
   let plan: SubscriptionCost["plan"];
   let baseCost: number;
-  let baseStaff: number;
+  let baseUsers: number;
 
   if (branchCount === 1) {
-    plan = "single";
-    baseCost = annualBilling ? PRICING.single.annual : PRICING.single.monthly;
-    baseStaff = PRICING.single.baseStaff;
+    // Single branch: use Business plan (includes inventory protection & projections)
+    plan = "business";
+    baseCost = annualBilling
+      ? PRICING.business.yearly
+      : PRICING.business.monthly;
+    baseUsers = PRICING.business.baseUsers;
   } else if (branchCount <= 5) {
     plan = "cadena";
-    const base = annualBilling
-      ? PRICING.cadena.baseAnnual
-      : PRICING.cadena.baseMonthly;
-    const additional = annualBilling
-      ? PRICING.cadena.additionalAnnual
-      : PRICING.cadena.additionalMonthly;
-    baseCost = base + additional * (branchCount - 1);
-    baseStaff = PRICING.cadena.baseStaff * branchCount;
+    // Business base for first branch + per-branch for additional
+    const firstBranch = annualBilling
+      ? PRICING.business.yearly
+      : PRICING.business.monthly;
+    const perBranch = annualBilling
+      ? PRICING.cadena.yearlyPerBranch
+      : PRICING.cadena.monthlyPerBranch;
+    baseCost = firstBranch + perBranch * (branchCount - 1);
+    baseUsers = PRICING.cadena.baseUsersPerBranch * branchCount;
   } else {
     plan = "enterprise";
-    baseCost =
-      PRICING.enterprise.baseFee + PRICING.enterprise.perBranch * branchCount;
-    baseStaff = Infinity;
+    const perBranch = annualBilling
+      ? PRICING.enterprise.yearlyPerBranch
+      : PRICING.enterprise.monthlyPerBranch;
+    baseCost = PRICING.enterprise.baseFee + perBranch * branchCount;
+    baseUsers = Infinity;
   }
 
-  const extraStaff = Math.max(0, totalStaff - baseStaff);
-  const extraStaffCost = extraStaff * PRICING.extraStaffRate;
+  // Extra users: blocks of 5 at $800/block
+  const extraUsers = Math.max(0, totalStaff - baseUsers);
+  const extraBlocks = Math.ceil(extraUsers / PRICING.extraUsersBlockSize);
+  const extraUsersCost = extraBlocks * PRICING.extraUsersBlockRate;
 
   return {
     plan,
     baseCost,
-    extraStaffCost,
-    totalMonthly: baseCost + extraStaffCost,
+    extraUsersCost,
+    totalMonthly: baseCost + extraUsersCost,
   };
 }
 
@@ -167,10 +175,12 @@ export function formatMXN(amount: number): string {
 
 export function getPlanLabel(plan: SubscriptionCost["plan"]): string {
   switch (plan) {
-    case "single":
-      return "Bar Sucursal";
+    case "starter":
+      return "Starter";
+    case "business":
+      return "Business";
     case "cadena":
-      return "Cadena Flowstock";
+      return "Cadena";
     case "enterprise":
       return "Enterprise";
   }

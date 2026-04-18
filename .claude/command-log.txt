@@ -995,3 +995,22 @@ EOF
  find /Users/gibrann/Desktop/Barflow -path "*dtos*" -o -path "*schemas*" | grep -E "\.(ts|tsx)$" | head -10
  grep -r "1,999\|3,999\|19,980\|39,990" /Users/gibrann/Desktop/Barflow --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 2>/dev/null | head -20
  grep -r "1,999\|3,999\|19,980\|39,990" /Users/gibrann/Desktop/Barflow/app /Users/gibrann/Desktop/Barflow/components --include="*.ts" --include="*.tsx" 2>/dev/null
+ cd /Users/gibrann/Desktop/Barflow && npm run dev 2>&1 &
+sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "not up yet"
+ cd /Users/gibrann/Desktop/Barflow && npm run dev > /tmp/flowstock-dev.log 2>&1 &
+echo "PID: $!"
+ sleep 12 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null
+ tail -30 /tmp/flowstock-dev.log
+ cat /Users/gibrann/Desktop/Barflow/package.json | grep -A5 '"scripts"'
+ ls /Users/gibrann/Desktop/Barflow/package-lock.json /Users/gibrann/Desktop/Barflow/yarn.lock /Users/gibrann/Desktop/Barflow/pnpm-lock.yaml 2>&1 | head -5
+ ls /Users/gibrann/Desktop/Barflow/node_modules/.bin/next 2>&1
+ cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/next dev --port 3001 > /tmp/flowstock-dev2.log 2>&1 &
+echo "PID: $!"
+sleep 15 && curl -s -o /dev/null -w "HTTP: %{http_code}" http://localhost:3001
+ tail -40 /tmp/flowstock-dev2.log
+ cd /Users/gibrann/Desktop/Barflow && node_modules/.bin/tsc --noEmit 2>&1 | head -50
+ cd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1 | head -60
+ pushd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit; popd
+ pkill -f "next dev" 2>/dev/null; sleep 2; echo "killed"
+ grep -n "1,999\|1 Bar\|Stttock.*Bar\|Available Plans" /Users/gibrann/Desktop/Barflow/components/account-content.tsx 2>/dev/null | head -20
+ pushd /Users/gibrann/Desktop/Barflow && /Users/gibrann/Desktop/Barflow/node_modules/.bin/tsc --noEmit 2>&1; popd

@@ -345,10 +345,10 @@ export function ROICalculator() {
                     maxValue={maxBarValue}
                     color="emerald"
                   />
-                  {result.subscriptionCost.extraStaffCost > 0 && (
+                  {result.subscriptionCost.extraUsersCost > 0 && (
                     <ComparisonBar
-                      label="Staff adicional"
-                      value={result.subscriptionCost.extraStaffCost}
+                      label="Usuarios adicionales"
+                      value={result.subscriptionCost.extraUsersCost}
                       maxValue={maxBarValue}
                       color="emerald"
                     />
