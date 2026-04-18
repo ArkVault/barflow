@@ -1122,3 +1122,60 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )"
  cd /Users/gibrann/Desktop/Barflow && git push origin feature/proyecciones-tabs-roi 2>&1 | tail -10
+ grep -E "^STRIPE_SECRET_KEY" /Users/gibrann/Desktop/Barflow/.env.local | head -1 | sed 's/=.*/=<REDACTED>/'
+echo "---"
+grep -E "^STRIPE_SECRET_KEY" /Users/gibrann/Desktop/Barflow/.env.local | head -1 | grep -oE 'sk_[a-z]+' | head -1
+ cd /Users/gibrann/Desktop/Barflow && SK=$(grep '^STRIPE_SECRET_KEY=' .env.local | cut -d= -f2)
+
+echo "=== Creating Product: Stttock Starter ==="
+STARTER_PROD=$(curl -s https://api.stripe.com/v1/products \
+  -u "$SK:" \
+  -d "name=Stttock Starter" \
+  -d "description=1 sucursal · hasta 5 usuarios · inventario ilimitado")
+echo "$STARTER_PROD" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+STARTER_ID=$(echo "$STARTER_PROD" | python3 -c "import json,sys;print(json.load(sys.stdin)['id'])")
+
+echo ""
+echo "=== Creating Product: Stttock Business ==="
+BUSINESS_PROD=$(curl -s https://api.stripe.com/v1/products \
+  -u "$SK:" \
+  -d "name=Stttock Business" \
+  -d "description=1 sucursal · hasta 10 usuarios · proyecciones IA · protección de inventario")
+echo "$BUSINESS_PROD" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+BUSINESS_ID=$(echo "$BUSINESS_PROD" | python3 -c "import json,sys;print(json.load(sys.stdin)['id'])")
+
+echo ""
+echo "=== Creating Price: Starter Monthly \$1,899 MXN ==="
+curl -s https://api.stripe.com/v1/prices -u "$SK:" \
+  -d "product=$STARTER_ID" \
+  -d "unit_amount=189900" \
+  -d "currency=mxn" \
+  -d "recurring[interval]=month" \
+  -d "nickname=Starter Monthly" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+
+echo ""
+echo "=== Creating Price: Starter Yearly \$17,988 MXN ==="
+curl -s https://api.stripe.com/v1/prices -u "$SK:" \
+  -d "product=$STARTER_ID" \
+  -d "unit_amount=1798800" \
+  -d "currency=mxn" \
+  -d "recurring[interval]=year" \
+  -d "nickname=Starter Yearly" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+
+echo ""
+echo "=== Creating Price: Business Monthly \$3,499 MXN ==="
+curl -s https://api.stripe.com/v1/prices -u "$SK:" \
+  -d "product=$BUSINESS_ID" \
+  -d "unit_amount=349900" \
+  -d "currency=mxn" \
+  -d "recurring[interval]=month" \
+  -d "nickname=Business Monthly" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
+
+echo ""
+echo "=== Creating Price: Business Yearly \$35,988 MXN ==="
+curl -s https://api.stripe.com/v1/prices -u "$SK:" \
+  -d "product=$BUSINESS_ID" \
+  -d "unit_amount=3598800" \
+  -d "currency=mxn" \
+  -d "recurring[interval]=year" \
+  -d "nickname=Business Yearly" | python3 -c "import json,sys;d=json.load(sys.stdin);print('ID:',d.get('id'));print('Error:',d.get('error',{}).get('message',''))"
