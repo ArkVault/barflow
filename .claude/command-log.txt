@@ -561,3 +561,20 @@ EOF
  export CLOUDSDK_PYTHON=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 && set -a && source .env.local && set +a && gcloud builds submit \
   --config=cloudbuild.yaml \
   --substitutions=_NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL",_NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY",_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",_STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY",_STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET",_GEMINI_API_KEY="$GEMINI_API_KEY",_NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID="$NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID",_NEXT_PUBLIC_APP_URL="https://flowstock-686958505968.us-central1.run.app" 2>&1 | tee /tmp/cloudbuild-deploy.log
+ git status --short Dockerfile pnpm-lock.yaml package.json && echo "---" && git diff --stat Dockerfile pnpm-lock.yaml
+ git add Dockerfile pnpm-lock.yaml && git commit -m "$(cat <<'EOF'
+fix(deploy): update Dockerfile ARG/ENV to new Stripe price var names + sync pnpm lockfile
+
+- Dockerfile referenced old NEXT_PUBLIC_STRIPE_BAR_MONTHLY/YEARLY/CHAIN
+  vars; replaced with STARTER_MONTHLY/YEARLY + BUSINESS_MONTHLY/YEARLY +
+  CHAIN so the new tier price IDs are baked into the client bundle.
+- Regenerated pnpm-lock.yaml — package.json had added bcryptjs,
+  @types/bcryptjs, and framer-motion without lockfile updates, breaking
+  pnpm install --frozen-lockfile in Cloud Build.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)" 2>&1 | tail -10 && git push origin main 2>&1 | tail -5
+ export CLOUDSDK_PYTHON=/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 && set -a && source .env.local && set +a && gcloud builds submit \
+  --config=cloudbuild.yaml \
+  --substitutions=_NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL",_NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY",_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",_STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY",_STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET",_GEMINI_API_KEY="$GEMINI_API_KEY",_NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID="$NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID",_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID="$NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID",_NEXT_PUBLIC_APP_URL="https://flowstock-686958505968.us-central1.run.app" 2>&1 | tee /tmp/cloudbuild-deploy-2.log
