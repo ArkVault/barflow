@@ -47,44 +47,52 @@ export default function LoginPage() {
         }
 
         // Sign up with Supabase
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              bar_name: formData.barName,
+        const { data: authData, error: signUpError } =
+          await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+              data: {
+                bar_name: formData.barName,
+              },
+              emailRedirectTo: `${window.location.origin}/dashboard`,
             },
-            emailRedirectTo: `${window.location.origin}/demo`,
-          },
-        });
+          });
 
         if (signUpError) {
-          console.error('Signup error:', signUpError);
+          console.error("Signup error:", signUpError);
           throw signUpError;
         }
 
         if (authData.user) {
           // Create establishment for the user
           const { error: estError } = await supabase
-            .from('establishments')
+            .from("establishments")
             .insert({
               user_id: authData.user.id,
               name: formData.barName,
             });
 
           if (estError) {
-            console.error('Error creating establishment:', estError);
+            console.error("Error creating establishment:", estError);
           }
 
           // Check if email confirmation is required
           if (authData.session) {
             toast.success("¡Cuenta creada exitosamente! Redirigiendo...");
             setTimeout(() => {
-              window.location.href = "/demo";
+              window.location.href = "/dashboard";
             }, 1000);
           } else {
-            toast.success("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
-            setFormData({ email: formData.email, password: "", confirmPassword: "", barName: "" });
+            toast.success(
+              "¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.",
+            );
+            setFormData({
+              email: formData.email,
+              password: "",
+              confirmPassword: "",
+              barName: "",
+            });
             setIsSignUp(false);
           }
         }
@@ -96,16 +104,19 @@ export default function LoginPage() {
           return;
         }
 
-        const { data, error: loginError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        });
+        const { data, error: loginError } =
+          await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          });
 
         if (loginError) {
-          console.error('Login error:', loginError);
-          if (loginError.message.includes('Invalid login credentials')) {
-            toast.error("Email o contraseña incorrectos. ¿No tienes cuenta? Regístrate.");
-          } else if (loginError.message.includes('Email not confirmed')) {
+          console.error("Login error:", loginError);
+          if (loginError.message.includes("Invalid login credentials")) {
+            toast.error(
+              "Email o contraseña incorrectos. ¿No tienes cuenta? Regístrate.",
+            );
+          } else if (loginError.message.includes("Email not confirmed")) {
             toast.error("Por favor confirma tu email antes de iniciar sesión");
           } else {
             toast.error(loginError.message);
@@ -115,13 +126,13 @@ export default function LoginPage() {
         }
 
         if (data.session) {
-          console.log('Login successful, session created:', data.session);
+          console.log("Login successful, session created:", data.session);
           toast.success("¡Bienvenido de vuelta!");
           setTimeout(() => {
-            window.location.href = "/demo";
+            window.location.href = "/dashboard";
           }, 500);
         } else {
-          console.error('No session created after login');
+          console.error("No session created after login");
           toast.error("No se pudo iniciar sesión. Intenta de nuevo.");
           setLoading(false);
         }
@@ -170,7 +181,9 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
               <Sparkles className="w-4 h-4 text-purple-300" />
-              <span className="text-sm font-medium text-purple-100">Sistema Profesional de Gestión</span>
+              <span className="text-sm font-medium text-purple-100">
+                Sistema Profesional de Gestión
+              </span>
             </div>
 
             <img
@@ -186,8 +199,8 @@ export default function LoginPage() {
           </div>
 
           <p className="text-xl text-gray-300 leading-relaxed max-w-lg">
-            Optimiza tu inventario, proyecta ventas y toma decisiones basadas en datos.
-            La herramienta profesional para bares modernos.
+            Optimiza tu inventario, proyecta ventas y toma decisiones basadas en
+            datos. La herramienta profesional para bares modernos.
           </p>
 
           <div className="grid grid-cols-2 gap-4 pt-4">
@@ -196,9 +209,13 @@ export default function LoginPage() {
                 <div className="p-2 rounded-lg bg-purple-500/20">
                   <BarChart3 className="w-5 h-5 text-purple-300" />
                 </div>
-                <h3 className="font-semibold text-white">Análisis en Tiempo Real</h3>
+                <h3 className="font-semibold text-white">
+                  Análisis en Tiempo Real
+                </h3>
               </div>
-              <p className="text-sm text-gray-400">Monitorea tu inventario y ventas al instante</p>
+              <p className="text-sm text-gray-400">
+                Monitorea tu inventario y ventas al instante
+              </p>
             </div>
 
             <div className="glass-card p-4 rounded-xl">
@@ -208,7 +225,9 @@ export default function LoginPage() {
                 </div>
                 <h3 className="font-semibold text-white">IA Predictiva</h3>
               </div>
-              <p className="text-sm text-gray-400">Proyecciones inteligentes de demanda</p>
+              <p className="text-sm text-gray-400">
+                Proyecciones inteligentes de demanda
+              </p>
             </div>
           </div>
         </div>
@@ -235,7 +254,10 @@ export default function LoginPage() {
                     className="h-10 object-contain"
                   />
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                <h2
+                  className="text-3xl font-bold text-white mb-2"
+                  style={{ fontFamily: "Satoshi, sans-serif" }}
+                >
                   {isSignUp ? "Crear Cuenta" : "Bienvenido"}
                 </h2>
                 <p className="text-gray-300">
@@ -301,7 +323,10 @@ export default function LoginPage() {
 
                 {isSignUp && (
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-white font-medium">
+                    <Label
+                      htmlFor="confirmPassword"
+                      className="text-white font-medium"
+                    >
                       Confirmar Contraseña
                     </Label>
                     <Input
@@ -364,7 +389,8 @@ export default function LoginPage() {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px);
           }
           50% {
@@ -373,7 +399,8 @@ export default function LoginPage() {
         }
 
         @keyframes float-delay {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px);
           }
           50% {
@@ -418,7 +445,7 @@ export default function LoginPage() {
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.18);
-          box-shadow: 
+          box-shadow:
             0 8px 32px 0 rgba(0, 0, 0, 0.37),
             inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
             inset 0 -1px 0 0 rgba(255, 255, 255, 0.05);
