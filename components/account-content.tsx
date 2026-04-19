@@ -840,8 +840,8 @@ export default function AccountContent() {
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {language === "es"
-                            ? "de 30 días de prueba gratuita"
-                            : "of 30-day free trial"}
+                            ? "de 21 días de prueba gratuita"
+                            : "of 21-day free trial"}
                         </p>
                       </div>
                     </div>

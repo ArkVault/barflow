@@ -80,7 +80,7 @@ export async function sendWelcomeEmail(
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a2e;">¡Bienvenido a Stttock!</h1>
           <p>Hola ${userName},</p>
-          <p>Tu cuenta ha sido creada exitosamente. Tienes <strong>30 días de prueba gratuita</strong> para explorar todas las funcionalidades:</p>
+          <p>Tu cuenta ha sido creada exitosamente. Tienes <strong>21 días de prueba gratuita</strong> para explorar todas las funcionalidades:</p>
           <ul style="line-height: 1.8;">
             <li>📊 Control de inventario en tiempo real</li>
             <li>🍹 Punto de venta inteligente</li>

@@ -50,13 +50,13 @@ const T = {
     uploadLoading: "Importando…",
     // SlidePayment
     paymentTitle: "¡Casi listo!",
-    paymentSubtitle: "Prueba Flowstock gratis durante 30 días",
+    paymentSubtitle: "Prueba Flowstock gratis durante 21 días",
     paymentDesc:
-      "Ingresa tu tarjeta para reservar tu lugar. No se realizará ningún cargo hasta el día 31.",
+      "Ingresa tu tarjeta para reservar tu lugar. No se realizará ningún cargo hasta el día 22.",
     paymentBtn: "Iniciar prueba gratis",
     paymentLoading: "Redirigiendo…",
     paymentFeatures: [
-      "Sin cargo por 30 días",
+      "Sin cargo por 21 días",
       "Cancela cuando quieras",
       "Acceso completo desde el día 1",
     ],
@@ -100,13 +100,13 @@ const T = {
     uploadNext: "Import and continue",
     uploadLoading: "Importing…",
     paymentTitle: "Almost there!",
-    paymentSubtitle: "Try Flowstock free for 30 days",
+    paymentSubtitle: "Try Flowstock free for 21 days",
     paymentDesc:
-      "Enter your card to reserve your spot. No charge until day 31.",
+      "Enter your card to reserve your spot. No charge until day 22.",
     paymentBtn: "Start free trial",
     paymentLoading: "Redirecting…",
     paymentFeatures: [
-      "No charge for 30 days",
+      "No charge for 21 days",
       "Cancel anytime",
       "Full access from day 1",
     ],

@@ -2,11 +2,17 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -31,9 +37,9 @@ export default function SignUpPage() {
     }
 
     try {
-      // Calculate trial end date (30 days from now)
+      // Calculate trial end date (21 days from now)
       const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 30);
+      trialEndDate.setDate(trialEndDate.getDate() + 21);
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -41,8 +47,8 @@ export default function SignUpPage() {
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm`,
           data: {
-            email_confirm: true
-          }
+            email_confirm: true,
+          },
         },
       });
 
@@ -51,22 +57,24 @@ export default function SignUpPage() {
       if (data.user) {
         // Create establishment with trial period
         const { error: estError } = await supabase
-          .from('establishments')
+          .from("establishments")
           .insert({
             user_id: data.user.id,
-            name: email.split('@')[0] + "'s Bar", // Default name
+            name: email.split("@")[0] + "'s Bar", // Default name
             trial_end_date: trialEndDate.toISOString(),
-            subscription_status: 'trialing',
-            plan_type: 'free_trial'
+            subscription_status: "trialing",
+            plan_type: "free_trial",
           });
 
         if (estError) {
-          console.error('Error creating establishment:', estError);
+          console.error("Error creating establishment:", estError);
         }
 
         // Show success message
-        toast.success("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
-        router.push('/auth/sign-up-success');
+        toast.success(
+          "¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.",
+        );
+        router.push("/auth/sign-up-success");
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ocurrió un error");
@@ -80,7 +88,9 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm">
         <Card className="neumorphic border-0">
           <CardHeader>
-            <CardTitle className="text-2xl text-balance">Crear Cuenta</CardTitle>
+            <CardTitle className="text-2xl text-balance">
+              Crear Cuenta
+            </CardTitle>
             <CardDescription>
               Regístrate para comenzar con Stttock
             </CardDescription>
@@ -123,7 +133,11 @@ export default function SignUpPage() {
                   />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full neumorphic-hover border-0" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full neumorphic-hover border-0"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creando cuenta..." : "Registrarse"}
                 </Button>
               </div>
