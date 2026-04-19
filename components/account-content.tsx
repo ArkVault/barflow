@@ -54,7 +54,15 @@ interface QuoteFormData {
 }
 
 export default function AccountContent() {
-  const { user, establishmentId } = useAuth();
+  const { user, establishmentId, recommendedPlan } = useAuth();
+  const recommendedCardName = (() => {
+    if (!recommendedPlan) return null;
+    if (recommendedPlan.startsWith("starter")) return "Starter";
+    if (recommendedPlan.startsWith("business")) return "Business";
+    if (recommendedPlan === "chain") return "Cadena";
+    if (recommendedPlan === "enterprise") return "Enterprise";
+    return null;
+  })();
   const { subscription } = useSubscription();
   const { language } = useLanguage();
   const [profile, setProfile] = useState<UserProfile>({
@@ -899,7 +907,19 @@ export default function AccountContent() {
 
                   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                     {/* Plan 1: Starter */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-sky-500/20 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5">
+                    <div
+                      className={`relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5 ${recommendedCardName === "Starter" ? "border-2 border-emerald-500 ring-2 ring-emerald-500/40" : "border border-sky-500/20"}`}
+                    >
+                      {recommendedCardName === "Starter" && (
+                        <div className="absolute -top-3 left-4">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg">
+                            <Sparkles className="w-3 h-3" />
+                            {language === "es"
+                              ? "Recomendado para ti"
+                              : "Recommended for you"}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500">
                           <Building2 className="h-5 w-5 text-white" />
@@ -972,7 +992,19 @@ export default function AccountContent() {
                     </div>
 
                     {/* Plan 2: Business */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-blue-500/30 bg-gradient-to-br from-blue-500/8 via-transparent to-indigo-500/5">
+                    <div
+                      className={`relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform bg-gradient-to-br from-blue-500/8 via-transparent to-indigo-500/5 ${recommendedCardName === "Business" ? "border-2 border-emerald-500 ring-2 ring-emerald-500/40" : "border border-blue-500/30"}`}
+                    >
+                      {recommendedCardName === "Business" && (
+                        <div className="absolute -top-3 left-4">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg">
+                            <Sparkles className="w-3 h-3" />
+                            {language === "es"
+                              ? "Recomendado para ti"
+                              : "Recommended for you"}
+                          </span>
+                        </div>
+                      )}
                       <div className="absolute -top-3 left-4">
                         <div className="inline-flex rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
                           {language === "es" ? "Popular" : "Popular"}
@@ -1051,7 +1083,19 @@ export default function AccountContent() {
                     </div>
 
                     {/* Plan 3: Cadena (quote-only) */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5">
+                    <div
+                      className={`relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5 ${recommendedCardName === "Cadena" ? "border-2 border-emerald-500 ring-2 ring-emerald-500/40" : "border border-purple-500/20"}`}
+                    >
+                      {recommendedCardName === "Cadena" && (
+                        <div className="absolute -top-3 left-4">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg">
+                            <Sparkles className="w-3 h-3" />
+                            {language === "es"
+                              ? "Recomendado para ti"
+                              : "Recommended for you"}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
                           <Building2 className="h-5 w-5 text-white" />
@@ -1115,7 +1159,19 @@ export default function AccountContent() {
                     </div>
 
                     {/* Plan 4: Enterprise (quote-only) */}
-                    <div className="relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform border border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5">
+                    <div
+                      className={`relative neumorphic rounded-2xl p-6 space-y-5 hover:scale-[1.02] transition-transform bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 ${recommendedCardName === "Enterprise" ? "border-2 border-emerald-500 ring-2 ring-emerald-500/40" : "border border-amber-500/20"}`}
+                    >
+                      {recommendedCardName === "Enterprise" && (
+                        <div className="absolute -top-3 left-4">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg">
+                            <Sparkles className="w-3 h-3" />
+                            {language === "es"
+                              ? "Recomendado para ti"
+                              : "Recommended for you"}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
                           <Crown className="h-5 w-5 text-white" />

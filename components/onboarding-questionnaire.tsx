@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { computeRecommendedPlan } from "@/lib/pricing/recommendation";
 
 // Set to true to always show the onboarding (for QA/testing)
 const TEST_MODE = true;
@@ -668,11 +669,13 @@ function SlideExcelUpload({
   userId,
   onBack,
   teamCounts,
+  recommendedPlanType,
 }: {
   t: Translations;
   userId: string;
   onBack: () => void;
   teamCounts: TeamCounts;
+  recommendedPlanType: string;
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -718,6 +721,7 @@ function SlideExcelUpload({
       await markOnboardingComplete(userId, supabase, {
         team_counts: teamCounts,
         inventory_method: "excel",
+        recommended_plan: recommendedPlanType,
       });
       // Excel users won't see the Planner popup
       localStorage.setItem("inventory_method", "excel");
@@ -966,11 +970,20 @@ function SlidePayment({
 async function markOnboardingComplete(
   userId: string,
   supabase: ReturnType<typeof createClient>,
-  extra?: Record<string, unknown>,
+  extra?: Record<string, unknown> & { recommended_plan?: string | null },
 ) {
   await supabase.auth.updateUser({
     data: { onboarding_complete: true, ...extra },
   });
+
+  // Persist recommended_plan on the establishment row so server-rendered pages
+  // (Account > Suscripción) and any future user can read it without auth metadata.
+  if (extra?.recommended_plan) {
+    await supabase
+      .from("establishments")
+      .update({ recommended_plan: extra.recommended_plan })
+      .eq("user_id", userId);
+  }
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -1000,12 +1013,15 @@ export function OnboardingQuestionnaire({
 
   const TOTAL = 5;
 
-  // Resolve price ID based on branch selection
-  // Multiple branches → quote flow (no self-serve Stripe price); single branch → Starter monthly
-  const priceId =
-    branchMode === "multiple"
-      ? "" // Cadena/Enterprise are quote-only — handled via Solicitar Cotización
-      : (process.env.NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID ?? "");
+  // Recommendation derived from onboarding answers.
+  // Used for: pre-filled checkout below, and persisted to establishments.recommended_plan
+  // so SubscriptionModal & Account > Suscripción can highlight the same plan later.
+  const recommendation = computeRecommendedPlan({
+    teamCounts,
+    branchMode,
+    inventoryMethod: inventoryChoice,
+  });
+  const priceId = recommendation.priceId;
 
   useEffect(() => {
     setMounted(true);
@@ -1049,6 +1065,7 @@ export function OnboardingQuestionnaire({
     await markOnboardingComplete(userId, supabase, {
       team_counts: teamCounts,
       inventory_method: "manual",
+      recommended_plan: recommendation.planType,
     });
     // Signal to WelcomePlannerPopup that the user chose manual inventory
     localStorage.setItem("inventory_method", "manual");
@@ -1176,6 +1193,7 @@ export function OnboardingQuestionnaire({
             t={t}
             userId={userId}
             teamCounts={teamCounts}
+            recommendedPlanType={recommendation.planType}
             onBack={() => setSlide(4)}
           />
         )}

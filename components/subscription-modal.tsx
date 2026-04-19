@@ -21,6 +21,10 @@ import { getStripe } from "@/lib/stripe/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { PLAN_PRICING } from "@/lib/stripe/config";
+import {
+  planTypeToCardName,
+  planTypeToBillingCycle,
+} from "@/lib/pricing/recommendation";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -34,7 +38,8 @@ export function SubscriptionModal({
   trialEnded = false,
 }: SubscriptionModalProps) {
   const [loading, setLoading] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, recommendedPlan } = useAuth();
+  const recommendedCardName = planTypeToCardName(recommendedPlan);
 
   const handleSubscribe = async (priceId: string, planName: string) => {
     if (!user) {
@@ -77,8 +82,9 @@ export function SubscriptionModal({
     }
   };
 
+  // Pre-select billing cycle from the user's recommended plan (yearly fallback).
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
-    "yearly",
+    planTypeToBillingCycle(recommendedPlan),
   );
 
   const plans = [
@@ -247,16 +253,32 @@ export function SubscriptionModal({
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-5 mt-6">
           {plans.map((plan) => {
             const Icon = plan.icon;
+            const isRecommended =
+              !!recommendedCardName && plan.title === recommendedCardName;
             return (
               <div key={plan.name} className="relative group">
                 <div
-                  className={`absolute -inset-0.5 bg-gradient-to-r ${plan.color} rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-500`}
+                  className={`absolute -inset-0.5 bg-gradient-to-r ${plan.color} rounded-2xl blur ${isRecommended ? "opacity-60" : "opacity-30"} group-hover:opacity-70 transition duration-500`}
                 />
 
                 <div
-                  className={`relative bg-card border rounded-2xl p-5 h-full flex flex-col ${plan.popular ? "border-2 border-purple-500" : ""}`}
+                  className={`relative bg-card border rounded-2xl p-5 h-full flex flex-col ${
+                    isRecommended
+                      ? "border-2 border-emerald-500 ring-2 ring-emerald-500/40"
+                      : plan.popular
+                        ? "border-2 border-purple-500"
+                        : ""
+                  }`}
                 >
-                  {plan.badge && (
+                  {isRecommended && (
+                    <div className="absolute -top-3 left-4">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500">
+                        <Sparkles className="w-3 h-3" />
+                        Recomendado para ti
+                      </span>
+                    </div>
+                  )}
+                  {plan.badge && !isRecommended && (
                     <div className="absolute -top-3 right-4">
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${plan.color}`}
