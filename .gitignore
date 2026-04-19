@@ -101,3 +101,14 @@ id_rsa
 id_rsa.pub
 *.ppk
 cloudbuild.substitutions*.yaml
+
+# Claude Code — local artifacts that may capture commands/secrets
+# Keep tracked: hooks/, settings.json, CLAUDE.md (project config for team)
+# Ignore: per-machine logs and worktree state
+.claude/command-log.txt
+.claude/launch.json
+.claude/worktrees/
+.claude/projects/
+.claude/cache/
+.claude/local/
+.claude/*.local.*

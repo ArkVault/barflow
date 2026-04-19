@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Project pre-commit hook. Activate with: git config core.hooksPath .githooks
+exec bash .claude/hooks/scan-secrets.sh
