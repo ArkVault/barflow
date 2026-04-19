@@ -8,14 +8,39 @@ yarn-error.log*
 .next
 out
 
-# Environment files (passed via Cloud Run secrets)
+# Environment files (passed via Cloud Run substitutions, never baked into image)
 .env
 .env.*
 !.env.example
 
+# Secret material — defense in depth (also in .gitignore)
+*.key
+*.secret
+*.pem
+*.p12
+*.pfx
+*.cert
+*.crt
+secrets.json
+credentials.json
+gcp-key.json
+*-sa-key.json
+service-account*.json
+id_rsa
+id_rsa.pub
+
 # Git
 .git
 .gitignore
+.githooks/
+
+# Claude Code local artifacts (logs, worktrees, hooks — not needed at runtime)
+.claude/
+
+# Other editor/tool dirs
+.cursor/
+.vercel
+cloudbuild.substitutions*.yaml
 
 # IDE
 .vscode
