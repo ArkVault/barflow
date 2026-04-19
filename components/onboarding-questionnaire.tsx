@@ -721,7 +721,7 @@ function SlideExcelUpload({
       });
       // Excel users won't see the Planner popup
       localStorage.setItem("inventory_method", "excel");
-      router.push("/demo/insumos");
+      router.push("/dashboard/insumos");
     } catch (err) {
       console.error("Import failed:", err);
     } finally {
