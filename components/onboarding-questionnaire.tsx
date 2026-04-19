@@ -670,12 +670,14 @@ function SlideExcelUpload({
   onBack,
   teamCounts,
   recommendedPlanType,
+  establishmentName,
 }: {
   t: Translations;
   userId: string;
   onBack: () => void;
   teamCounts: TeamCounts;
   recommendedPlanType: string;
+  establishmentName: string;
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -722,6 +724,7 @@ function SlideExcelUpload({
         team_counts: teamCounts,
         inventory_method: "excel",
         recommended_plan: recommendedPlanType,
+        establishment_name: establishmentName,
       });
       // Excel users won't see the Planner popup
       localStorage.setItem("inventory_method", "excel");
@@ -970,18 +973,29 @@ function SlidePayment({
 async function markOnboardingComplete(
   userId: string,
   supabase: ReturnType<typeof createClient>,
-  extra?: Record<string, unknown> & { recommended_plan?: string | null },
+  extra?: Record<string, unknown> & {
+    recommended_plan?: string | null;
+    establishment_name?: string | null;
+  },
 ) {
+  // Split out the establishment-row-only fields so we don't bloat auth metadata.
+  const { establishment_name, ...authMeta } = extra ?? {};
   await supabase.auth.updateUser({
-    data: { onboarding_complete: true, ...extra },
+    data: { onboarding_complete: true, ...authMeta },
   });
 
-  // Persist recommended_plan on the establishment row so server-rendered pages
-  // (Account > Suscripción) and any future user can read it without auth metadata.
-  if (extra?.recommended_plan) {
+  // Persist onboarding choices on the establishment row so server-rendered pages
+  // (Account > Suscripción, sidebar) and future users can read them without auth metadata.
+  const estUpdate: Record<string, unknown> = {};
+  if (extra?.recommended_plan)
+    estUpdate.recommended_plan = extra.recommended_plan;
+  if (establishment_name && String(establishment_name).trim().length > 0) {
+    estUpdate.name = String(establishment_name).trim();
+  }
+  if (Object.keys(estUpdate).length > 0) {
     await supabase
       .from("establishments")
-      .update({ recommended_plan: extra.recommended_plan })
+      .update(estUpdate)
       .eq("user_id", userId);
   }
 }
@@ -1066,6 +1080,7 @@ export function OnboardingQuestionnaire({
       team_counts: teamCounts,
       inventory_method: "manual",
       recommended_plan: recommendation.planType,
+      establishment_name: name,
     });
     // Signal to WelcomePlannerPopup that the user chose manual inventory
     localStorage.setItem("inventory_method", "manual");
@@ -1194,6 +1209,7 @@ export function OnboardingQuestionnaire({
             userId={userId}
             teamCounts={teamCounts}
             recommendedPlanType={recommendation.planType}
+            establishmentName={name}
             onBack={() => setSlide(4)}
           />
         )}

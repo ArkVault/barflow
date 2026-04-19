@@ -397,7 +397,10 @@ export function SubscriptionModal({
 
         <div className="mt-6 p-4 rounded-lg bg-muted/50 border">
           <p className="text-sm text-center text-muted-foreground">
-            🔒 Pago seguro procesado por Stripe • Cancela en cualquier momento •
+            🔒 Pago seguro procesado por Stripe • Puedes cancelar en cualquier
+            momento; no se te cobrará antes de finalizar tu periodo de prueba.
+          </p>
+          <p className="text-xs text-center text-muted-foreground mt-1">
             Sin compromisos a largo plazo
           </p>
         </div>
