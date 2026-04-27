@@ -13,6 +13,8 @@ const DEV_EMAILS: string[] = (process.env.NEXT_PUBLIC_DEV_EMAILS || "")
 export interface SubscriptionData {
   isActive: boolean;
   isTrialing: boolean;
+  isCanceling: boolean;
+  isPaused: boolean;
   trialEnded: boolean;
   planType: string | null;
   trialEndDate: Date | null;
@@ -26,6 +28,8 @@ export function useSubscription() {
   const [subscription, setSubscription] = useState<SubscriptionData>({
     isActive: false,
     isTrialing: false,
+    isCanceling: false,
+    isPaused: false,
     trialEnded: false,
     planType: null,
     trialEndDate: null,
@@ -69,10 +73,13 @@ export function useSubscription() {
           )
         : 0;
 
-      const hasActiveSubscription = data.subscription_status === "active";
-      // Stripe trialing counts as trialing regardless of local trial_end_date
+      const hasActiveSubscription =
+        data.subscription_status === "active" ||
+        data.subscription_status === "canceling";
       const isStripeTrialing = data.subscription_status === "trialing";
       const isEffectivelyTrialing = isTrialing || isStripeTrialing;
+      const isCanceling = data.subscription_status === "canceling";
+      const isPaused = data.subscription_status === "paused";
 
       const isDevAccount = user?.email
         ? DEV_EMAILS.includes(user.email)
@@ -80,8 +87,13 @@ export function useSubscription() {
 
       setSubscription({
         isActive:
-          isDevAccount || hasActiveSubscription || isEffectivelyTrialing,
+          isDevAccount ||
+          hasActiveSubscription ||
+          isEffectivelyTrialing ||
+          isPaused,
         isTrialing: isEffectivelyTrialing,
+        isCanceling,
+        isPaused,
         trialEnded: isDevAccount
           ? false
           : trialEnded && !hasActiveSubscription && !isStripeTrialing,

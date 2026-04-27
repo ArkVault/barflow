@@ -221,10 +221,15 @@ export async function POST(req: NextRequest) {
           const planType = getPlanTypeFromPriceId(priceId);
           const trialEnd = (subscription as any).trial_end as number | null;
 
+          // cancel_at_period_end=true means user scheduled cancellation — reflect in DB
+          const dbStatus = (subscription as any).cancel_at_period_end
+            ? "canceling"
+            : subscription.status;
+
           await supabase
             .from("establishments")
             .update({
-              subscription_status: subscription.status,
+              subscription_status: dbStatus,
               plan_type: planType,
               current_period_end: new Date(
                 (subscription as any).current_period_end * 1000,
@@ -237,7 +242,7 @@ export async function POST(req: NextRequest) {
             .eq("id", establishmentId);
 
           console.log(
-            `✅ Subscription updated: ${establishmentId} -> ${subscription.status} (${planType})`,
+            `✅ Subscription updated: ${establishmentId} -> ${dbStatus} (${planType})`,
           );
         }
         break;

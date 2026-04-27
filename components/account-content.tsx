@@ -37,6 +37,7 @@ import { updateEstablishmentSettings } from "@/app/dashboard/configuracion/actio
 import { GlowButton } from "./glow-button";
 import { useLanguage } from "@/hooks/use-language";
 import { PLAN_PRICING } from "@/lib/stripe/config";
+import { CancelSubscriptionModal } from "./cancel-subscription-modal";
 
 interface UserProfile {
   email: string;
@@ -80,6 +81,7 @@ export default function AccountContent() {
   >("profile");
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "monthly",
   );
@@ -798,7 +800,7 @@ export default function AccountContent() {
                   <p className="text-sm font-medium text-muted-foreground mb-1">
                     {language === "es" ? "Plan Actual" : "Current Plan"}
                   </p>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <h3 className="text-3xl font-semibold tracking-tight">
                       {getPlanName()}
                     </h3>
@@ -811,13 +813,42 @@ export default function AccountContent() {
                         </span>
                       </div>
                     )}
+                    {subscription.isCanceling && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/30">
+                        <X className="h-4 w-4 text-destructive" />
+                        <span className="text-sm font-bold text-destructive">
+                          {language === "es"
+                            ? "Cancelación programada"
+                            : "Cancellation scheduled"}
+                        </span>
+                      </div>
+                    )}
+                    {subscription.isPaused && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30">
+                        <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                          {language === "es" ? "Pausada" : "Paused"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div
-                  className={`rounded-full p-3 ring-1 ${subscription.isTrialing ? "bg-amber-500/10 ring-amber-500/20" : "bg-green-500/10 ring-green-500/20"}`}
+                  className={`rounded-full p-3 ring-1 ${
+                    subscription.isTrialing
+                      ? "bg-amber-500/10 ring-amber-500/20"
+                      : subscription.isCanceling
+                        ? "bg-destructive/10 ring-destructive/20"
+                        : subscription.isPaused
+                          ? "bg-orange-500/10 ring-orange-500/20"
+                          : "bg-green-500/10 ring-green-500/20"
+                  }`}
                 >
                   {subscription.isTrialing ? (
                     <Clock className="h-7 w-7 text-amber-500" />
+                  ) : subscription.isCanceling ? (
+                    <X className="h-7 w-7 text-destructive" />
+                  ) : subscription.isPaused ? (
+                    <Clock className="h-7 w-7 text-orange-500" />
                   ) : (
                     <CheckCircle className="h-7 w-7 text-green-600 dark:text-green-500" />
                   )}
@@ -917,6 +948,23 @@ export default function AccountContent() {
                   </span>
                 </GlowButton>
               )}
+
+              {/* Cancel subscription — only for active paid subscribers */}
+              {subscription.subscriptionStatus === "active" &&
+                !subscription.isTrialing &&
+                subscription.planType !== "free_trial" && (
+                  <div className="pt-2 border-t border-border mt-4">
+                    <button
+                      onClick={() => setShowCancelModal(true)}
+                      className="w-full text-xs text-muted-foreground hover:text-destructive transition-colors py-2 flex items-center justify-center gap-1.5"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      {language === "es"
+                        ? "Cancelar suscripción"
+                        : "Cancel subscription"}
+                    </button>
+                  </div>
+                )}
             </div>
 
             {/* Plan Cards */}
@@ -2000,6 +2048,15 @@ export default function AccountContent() {
           </div>
         </div>
       )}
+      {/* Cancel Subscription Modal */}
+      <CancelSubscriptionModal
+        open={showCancelModal}
+        onOpenChange={setShowCancelModal}
+        planType={subscription.planType}
+        onSuccess={() => {
+          setShowCancelModal(false);
+        }}
+      />
     </div>
   );
 }

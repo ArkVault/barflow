@@ -81,6 +81,8 @@ export type SubscriptionStatus =
   | "trialing"
   | "past_due"
   | "canceled"
+  | "canceling"
+  | "paused"
   | "unpaid"
   | "incomplete"
   | "incomplete_expired";
