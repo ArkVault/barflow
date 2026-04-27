@@ -280,7 +280,9 @@ export async function POST(req: NextRequest) {
 
           console.log(`⏰ Trial ending soon: ${establishmentId} (3 days)`);
 
-          // Send trial ending notification email
+          // Send trial ending notification email with plan-specific billing note
+          const priceId = subscription.items.data[0]?.price.id;
+          const planType = getPlanTypeFromPriceId(priceId);
           const { data: estData } = await supabase
             .from("establishments")
             .select("user_id")
@@ -289,7 +291,12 @@ export async function POST(req: NextRequest) {
           if (estData?.user_id) {
             const email = await getUserEmail(supabase, estData.user_id);
             if (email) {
-              await sendTrialEndingEmail(email, email.split("@")[0], 3);
+              await sendTrialEndingEmail(
+                email,
+                email.split("@")[0],
+                3,
+                planType,
+              );
             }
           }
         }

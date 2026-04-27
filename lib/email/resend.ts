@@ -112,9 +112,29 @@ export async function sendTrialEndingEmail(
   to: string,
   userName: string,
   daysLeft: number,
+  planType?: string,
 ): Promise<boolean> {
   const resend = getResend();
   if (!resend) return false;
+
+  const isYearly =
+    planType === "starter_yearly" || planType === "business_yearly";
+
+  const billingNote = isYearly
+    ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;margin:16px 0;">
+        <p style="margin:0 0 6px;font-weight:600;color:#15803d;">📋 Detalle de tu primer cobro</p>
+        <p style="margin:0;color:#166534;font-size:14px;">
+          Al terminar tu prueba se realizarán <strong>dos cargos simultáneos</strong>:<br>
+          · <strong>Mes 2 diferido</strong> — el mes que usaste gratis como parte de la promoción anual<br>
+          · <strong>Mes 3 (inicio de suscripción)</strong> — primer mes de tu plan activo<br><br>
+          A partir del mes 3 se factura anualmente de forma automática.
+        </p>
+      </div>`
+    : `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin:16px 0;">
+        <p style="margin:0;color:#1e40af;font-size:14px;">
+          Al terminar tu prueba, el cobro mensual inicia automáticamente. Puedes cancelar en cualquier momento desde tu panel.
+        </p>
+      </div>`;
 
   try {
     await resend.emails.send({
@@ -126,6 +146,7 @@ export async function sendTrialEndingEmail(
           <h2 style="color: #1a1a2e;">Tu prueba gratuita termina pronto</h2>
           <p>Hola ${userName},</p>
           <p>Tu periodo de prueba en Stttock termina en <strong>${daysLeft} días</strong>.</p>
+          ${billingNote}
           <p>Para seguir utilizando todas las funcionalidades sin interrupción, elige un plan que se adapte a tu negocio:</p>
           <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="background: #f8f9fa;">

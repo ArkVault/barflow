@@ -250,6 +250,37 @@ export function SubscriptionModal({
           </span>
         </div>
 
+        {/* Annual promo callout */}
+        {billingCycle === "yearly" && (
+          <div className="flex items-start gap-3 rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-3 text-sm mx-auto max-w-xl">
+            <span className="text-lg leading-none">🎁</span>
+            <div>
+              <p className="font-semibold text-green-700 dark:text-green-400">
+                2 meses sin cobro al suscribirte anualmente
+              </p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                Mes 1 gratis · Mes 2 gratis (cobro diferido). Al final del mes 2
+                se realiza el primer cargo: mes 2 diferido + mes 3 como inicio
+                de tu suscripción anual.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {billingCycle === "monthly" && (
+          <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm mx-auto max-w-xl">
+            <span className="text-lg leading-none">✨</span>
+            <div>
+              <p className="font-semibold text-blue-700 dark:text-blue-400">
+                Primer mes gratis
+              </p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                Sin cobro el mes 1. A partir del mes 2 se factura mensualmente.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-5 mt-6">
           {plans.map((plan) => {
             const Icon = plan.icon;
