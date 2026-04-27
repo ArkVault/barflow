@@ -189,6 +189,7 @@ export async function POST(req: NextRequest) {
         if (establishmentId) {
           const priceId = subscription.items.data[0]?.price.id;
           const planType = getPlanTypeFromPriceId(priceId);
+          const trialEnd = (subscription as any).trial_end as number | null;
 
           await supabase
             .from("establishments")
@@ -199,6 +200,10 @@ export async function POST(req: NextRequest) {
               current_period_end: new Date(
                 (subscription as any).current_period_end * 1000,
               ).toISOString(),
+              // Sync trial_end_date with Stripe's authoritative value
+              ...(trialEnd && {
+                trial_end_date: new Date(trialEnd * 1000).toISOString(),
+              }),
             })
             .eq("id", establishmentId);
 
@@ -212,9 +217,9 @@ export async function POST(req: NextRequest) {
         const establishmentId = subscription.metadata?.establishment_id;
 
         if (establishmentId) {
-          // Detect plan changes
           const priceId = subscription.items.data[0]?.price.id;
           const planType = getPlanTypeFromPriceId(priceId);
+          const trialEnd = (subscription as any).trial_end as number | null;
 
           await supabase
             .from("establishments")
@@ -224,6 +229,10 @@ export async function POST(req: NextRequest) {
               current_period_end: new Date(
                 (subscription as any).current_period_end * 1000,
               ).toISOString(),
+              // Keep trial_end_date in sync (trial_end becomes null when trial ends)
+              trial_end_date: trialEnd
+                ? new Date(trialEnd * 1000).toISOString()
+                : null,
             })
             .eq("id", establishmentId);
 

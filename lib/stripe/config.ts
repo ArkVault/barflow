@@ -54,7 +54,10 @@ export const STRIPE_CONFIG = {
     // Cadena & Enterprise are quote-only — no self-serve price IDs
   },
   // Trial period in days
-  trialPeriodDays: 30,
+  trialPeriodDays: {
+    monthly: 30, // 1 month free, billing starts month 2
+    yearly: 60, // 2 months free promotion on annual plans
+  },
   // Success and cancel URLs
   successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
   cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,

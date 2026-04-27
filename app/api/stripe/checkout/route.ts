@@ -85,8 +85,13 @@ export async function POST(req: NextRequest) {
       trialEndDate = establishment?.trial_end_date ?? null;
     }
 
-    // Pass only remaining trial days so Stripe trial = local trial (no bonus days)
-    const remainingTrialDays = trialEndDate
+    // Annual plans: 2 months free regardless of signup date (promotion)
+    // Monthly plans: only remaining days of the local trial (1 month free at signup)
+    const isYearly =
+      priceId === STRIPE_CONFIG.prices.starterYearly ||
+      priceId === STRIPE_CONFIG.prices.businessYearly;
+
+    const remainingLocalDays = trialEndDate
       ? Math.max(
           0,
           Math.ceil(
@@ -94,6 +99,10 @@ export async function POST(req: NextRequest) {
           ),
         )
       : 0;
+
+    const trialDays = isYearly
+      ? STRIPE_CONFIG.trialPeriodDays.yearly
+      : remainingLocalDays;
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
@@ -146,9 +155,7 @@ export async function POST(req: NextRequest) {
         establishment_id: resolvedEstablishmentId || "",
       },
       subscription_data: {
-        ...(remainingTrialDays > 0 && {
-          trial_period_days: remainingTrialDays,
-        }),
+        ...(trialDays > 0 && { trial_period_days: trialDays }),
         metadata: {
           user_id: userId,
           establishment_id: resolvedEstablishmentId || "",
