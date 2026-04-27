@@ -15,6 +15,10 @@ import {
   Gift,
   CheckCircle,
   Loader2,
+  Trash2,
+  Database,
+  Link2,
+  FileX,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
@@ -370,9 +374,41 @@ export function CancelSubscriptionModal({
             </DialogHeader>
             <p className="text-sm text-muted-foreground text-center mt-2">
               {language === "es"
-                ? "Tu suscripción seguirá activa hasta el fin del período actual. Después perderás acceso a todas las funcionalidades."
-                : "Your subscription stays active until the end of the current period. After that, you'll lose access to all features."}
+                ? "Tu suscripción seguirá activa hasta el fin del período actual. Al vencer, se eliminará permanentemente:"
+                : "Your subscription stays active until the end of the current period. When it expires, the following will be permanently deleted:"}
             </p>
+            <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-2">
+              {[
+                {
+                  icon: Database,
+                  es: "Tu base de datos de inventario y ventas",
+                  en: "Your inventory and sales database",
+                },
+                {
+                  icon: FileX,
+                  es: "Archivos, menús e imágenes subidas",
+                  en: "Uploaded files, menus and images",
+                },
+                {
+                  icon: Link2,
+                  es: "Integraciones y conexiones configuradas",
+                  en: "Configured integrations and connections",
+                },
+                {
+                  icon: Trash2,
+                  es: "Cuenta y todos los datos del establecimiento",
+                  en: "Account and all establishment data",
+                },
+              ].map(({ icon: Icon, es, en }) => (
+                <div
+                  key={es}
+                  className="flex items-center gap-2.5 text-xs text-destructive/80"
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                  <span>{language === "es" ? es : en}</span>
+                </div>
+              ))}
+            </div>
             <div className="flex gap-3 mt-4">
               <Button
                 variant="outline"
