@@ -1,30 +1,31 @@
 # Flowstock — Project Memory
 
 #General
+
 - Be concise in output but thorough in reasoning.
--Prefer editing over rewriting whole files.
--Do not re-read files you have already read unless the file may have changed.
--Test your code before declaring done.
--No sycophantic openers or closing fluff.
--Keep solutions simple and direct.
--Explicit Reasoning: Perform all logic, planning, and architectural decisions inside a <thinking> block before providing any output.
--Minimalist Edits: Use diff blocks or specific line-based changes rather than rewriting entire files to preserve context and history.
--Production Standards: Prioritize robust error handling, type safety, and edge-case management (e.g., null checks, timeouts).
--Dependency Discipline: Do not suggest new libraries or packages unless the task is impossible with the current stack.
--Consistency: Adhere strictly to the existing project’s naming conventions (e.g., camelCase vs. snake_case) and architectural patterns.
--Functional Focus: Only refactor code if it yields a measurable improvement in performance or readability; avoid "stylistic" changes.
--Clean Architecture & SOLID: Organize code to separate concerns (entities, use cases, adapters). Follow SOLID principles—specifically, ensure classes have a single responsibility and favor composition over inheritance.
--KISS Principle: Keep it Simple, Stupid. Avoid over-engineering; choose the simplest solution that meets the requirement without adding unnecessary abstraction.
--Security-First Mindset: Check for common vulnerabilities (e.g., SQL injection, XSS, insecure headers). Never hardcode secrets or API keys; always use environment variables.
--Test-Driven Development: Write unit tests for core logic before declaring a task finished. Ensure high test coverage for edge cases.
+  -Prefer editing over rewriting whole files.
+  -Do not re-read files you have already read unless the file may have changed.
+  -Test your code before declaring done.
+  -No sycophantic openers or closing fluff.
+  -Keep solutions simple and direct.
+  -Explicit Reasoning: Perform all logic, planning, and architectural decisions inside a <thinking> block before providing any output.
+  -Minimalist Edits: Use diff blocks or specific line-based changes rather than rewriting entire files to preserve context and history.
+  -Production Standards: Prioritize robust error handling, type safety, and edge-case management (e.g., null checks, timeouts).
+  -Dependency Discipline: Do not suggest new libraries or packages unless the task is impossible with the current stack.
+  -Consistency: Adhere strictly to the existing project’s naming conventions (e.g., camelCase vs. snake_case) and architectural patterns.
+  -Functional Focus: Only refactor code if it yields a measurable improvement in performance or readability; avoid "stylistic" changes.
+  -Clean Architecture & SOLID: Organize code to separate concerns (entities, use cases, adapters). Follow SOLID principles—specifically, ensure classes have a single responsibility and favor composition over inheritance.
+  -KISS Principle: Keep it Simple, Stupid. Avoid over-engineering; choose the simplest solution that meets the requirement without adding unnecessary abstraction.
+  -Security-First Mindset: Check for common vulnerabilities (e.g., SQL injection, XSS, insecure headers). Never hardcode secrets or API keys; always use environment variables.
+  -Test-Driven Development: Write unit tests for core logic before declaring a task finished. Ensure high test coverage for edge cases.
 
 ## Project Overview
 
 - **Name**: Flowstock (formerly Barflow) — Bar inventory/POS SaaS
 - **Stack**: Next.js 16 (App Router) + Supabase + Stripe + Google Gemini AI + GCP Cloud Run
 - **Repo**: https://github.com/ArkVault/barflow.git
-- **Production URL**: https://flowstock-686958505968.us-central1.run.app
-- **Branch strategy**: All work on `phase3/production-enablement`, push only to that branch
+- **Production URL**: https://stttock-53y2oh2qiq-uc.a.run.app (`stttock` is the current service; `flowstock` is the old one)
+- **Branch strategy**: All work on `main`
 
 ## Stripe Live Account
 
@@ -33,17 +34,17 @@
   - Stttock Starter (`prod_UMCWHZK4SbQeeu`): Monthly $1,899 MXN (`price_1TNU7qDaYn7MP37Q4mCXeHuo`), Yearly $17,988 MXN (`price_1TNU7qDaYn7MP37QEnwHeND2`)
   - Stttock Business (`prod_UMCWbGYVWh1tLt`): Monthly $3,499 MXN (`price_1TNU7rDaYn7MP37Q4Aku3rU3`), Yearly $35,988 MXN (`price_1TNU7rDaYn7MP37Q2idlLxtp`)
   - Cadena Flowstock (`prod_U8cJlpyToSzC6l`): legacy `price_1TAL5aDaYn7MP37QnIViOKSQ` — quote-only flow
-- Webhook endpoint: `https://flowstock-686958505968.us-central1.run.app/api/stripe/webhook`
+- Webhook endpoint: `https://stttock-53y2oh2qiq-uc.a.run.app/api/stripe/webhook`
 
 ## Deploy Command
 
 ```bash
 cd /Users/gibrann/Desktop/Barflow && gcloud builds submit \
-  --config=cloudbuild.yaml \
-  --substitutions=_NEXT_PUBLIC_SUPABASE_URL="...",_NEXT_PUBLIC_SUPABASE_ANON_KEY="...",_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="...",_STRIPE_SECRET_KEY="...",_STRIPE_WEBHOOK_SECRET="...",_GEMINI_API_KEY="...",_NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID="price_1TNU7qDaYn7MP37Q4mCXeHuo",_NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID="price_1TNU7qDaYn7MP37QEnwHeND2",_NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID="price_1TNU7rDaYn7MP37Q4Aku3rU3",_NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID="price_1TNU7rDaYn7MP37Q2idlLxtp",_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID="price_1TAL5aDaYn7MP37QnIViOKSQ",_NEXT_PUBLIC_APP_URL="https://flowstock-686958505968.us-central1.run.app"
+  --config=cloudbuild-stttock.yaml \
+  --substitutions=_NEXT_PUBLIC_SUPABASE_URL="...",_NEXT_PUBLIC_SUPABASE_ANON_KEY="...",_NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="...",_STRIPE_SECRET_KEY="...",_STRIPE_WEBHOOK_SECRET="...",_GEMINI_API_KEY="...",_NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID="price_1TNU7qDaYn7MP37Q4mCXeHuo",_NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID="price_1TNU7qDaYn7MP37QEnwHeND2",_NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID="price_1TNU7rDaYn7MP37Q4Aku3rU3",_NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID="price_1TNU7rDaYn7MP37Q2idlLxtp",_NEXT_PUBLIC_STRIPE_CHAIN_PRICE_ID="price_1TAL5aDaYn7MP37QnIViOKSQ",_NEXT_PUBLIC_APP_URL="https://stttock-53y2oh2qiq-uc.a.run.app"
 ```
 
-Note: Get actual values from `.env.local`. Do NOT include `_SUPABASE_SERVICE_ROLE_KEY` (not in cloudbuild.yaml template).
+Note: Get actual values from `.env.local`. Do NOT include `_SUPABASE_SERVICE_ROLE_KEY` (not in cloudbuild-stttock.yaml template).
 
 ## Roadmap Status (as of 2026-03-15)
 
