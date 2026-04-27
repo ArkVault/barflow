@@ -36,6 +36,7 @@ import { Switch } from "@/components/ui/switch";
 import { updateEstablishmentSettings } from "@/app/dashboard/configuracion/actions";
 import { GlowButton } from "./glow-button";
 import { useLanguage } from "@/hooks/use-language";
+import { PLAN_PRICING } from "@/lib/stripe/config";
 
 interface UserProfile {
   email: string;
@@ -79,6 +80,9 @@ export default function AccountContent() {
   >("profile");
   const [showUpgradeOptions, setShowUpgradeOptions] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
+    "monthly",
+  );
   const [isSendingQuote, setIsSendingQuote] = useState(false);
 
   // Quote form state
@@ -821,53 +825,83 @@ export default function AccountContent() {
               </div>
 
               {/* Trial Days Counter - Prominent Display */}
-              {subscription.isTrialing && (
-                <div className="mb-6 p-6 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-full bg-amber-500/20">
-                        <Clock className="h-8 w-8 text-amber-500" />
+              {subscription.isTrialing &&
+                (() => {
+                  const isAnnualTrial =
+                    (subscription.planType === "starter_yearly" ||
+                      subscription.planType === "business_yearly") &&
+                    subscription.subscriptionStatus === "trialing";
+
+                  const trialLabel = isAnnualTrial
+                    ? language === "es"
+                      ? "Promo anual · 2 meses gratis"
+                      : "Annual promo · 2 months free"
+                    : language === "es"
+                      ? "de 30 días de prueba gratuita"
+                      : "of 30-day free trial";
+
+                  return (
+                    <div className="mb-6 p-6 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 rounded-full bg-amber-500/20">
+                            <Clock className="h-8 w-8 text-amber-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              {language === "es"
+                                ? "Tiempo restante de prueba"
+                                : "Trial time remaining"}
+                            </p>
+                            <p className="text-4xl font-bold text-amber-500">
+                              {subscription.daysRemaining}{" "}
+                              {language === "es" ? "días" : "days"}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {trialLabel}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {language === "es" ? "Vence el" : "Expires on"}
+                          </p>
+                          <p className="text-sm font-medium">
+                            {subscription.trialEndDate?.toLocaleDateString(
+                              language === "es" ? "es-MX" : "en-US",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              },
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
+
+                      {isAnnualTrial ? (
+                        <div className="mt-4 rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-center">
+                          <p className="font-semibold text-green-700 dark:text-green-400">
+                            {language === "es"
+                              ? "📋 Al vencer el trial: cobro de mes 2 (diferido) + mes 3 (inicio anual)"
+                              : "📋 When trial ends: charge for month 2 (deferred) + month 3 (annual start)"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === "es"
+                              ? "A partir del mes 3 tu suscripción se renueva anualmente."
+                              : "From month 3, your subscription renews annually."}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="mt-4 text-sm text-muted-foreground text-center">
                           {language === "es"
-                            ? "Tiempo restante de prueba"
-                            : "Trial time remaining"}
+                            ? "⚠️ Al terminar el período de prueba, necesitarás un plan activo para continuar."
+                            : "⚠️ After the trial ends, you'll need an active plan to continue."}
                         </p>
-                        <p className="text-4xl font-bold text-amber-500">
-                          {subscription.daysRemaining}{" "}
-                          {language === "es" ? "días" : "days"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {language === "es"
-                            ? "de 21 días de prueba gratuita"
-                            : "of 21-day free trial"}
-                        </p>
-                      </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {language === "es" ? "Vence el" : "Expires on"}
-                      </p>
-                      <p className="text-sm font-medium">
-                        {subscription.trialEndDate?.toLocaleDateString(
-                          language === "es" ? "es-MX" : "en-US",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground text-center">
-                    {language === "es"
-                      ? "⚠️ Al terminar el período de prueba, necesitarás un plan activo para continuar."
-                      : "⚠️ After the trial ends, you'll need an active plan to continue."}
-                  </p>
-                </div>
-              )}
+                  );
+                })()}
 
               {/* Upgrade Button */}
               {!currentPlanIsTopTier && !showUpgradeOptions && (
@@ -905,6 +939,70 @@ export default function AccountContent() {
                     )}
                   </div>
 
+                  {/* Billing cycle toggle */}
+                  <div className="flex items-center justify-center gap-3">
+                    <span
+                      className={`text-sm font-medium ${billingCycle === "monthly" ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {language === "es" ? "Mensual" : "Monthly"}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setBillingCycle(
+                          billingCycle === "monthly" ? "yearly" : "monthly",
+                        )
+                      }
+                      className={`relative w-14 h-7 rounded-full transition-colors ${billingCycle === "yearly" ? "bg-purple-500" : "bg-muted"}`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${billingCycle === "yearly" ? "translate-x-7" : ""}`}
+                      />
+                    </button>
+                    <span
+                      className={`text-sm font-medium ${billingCycle === "yearly" ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                      {language === "es" ? "Anual" : "Annual"}{" "}
+                      <span className="text-green-500 text-xs font-semibold">
+                        {language === "es" ? "Ahorra ~20%" : "Save ~20%"}
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* Promo callout */}
+                  {billingCycle === "yearly" ? (
+                    <div className="flex items-start gap-3 rounded-xl border border-green-500/30 bg-green-500/5 px-4 py-3 text-sm">
+                      <span className="text-lg leading-none">🎁</span>
+                      <div>
+                        <p className="font-semibold text-green-700 dark:text-green-400">
+                          {language === "es"
+                            ? "2 meses sin cobro al suscribirte anualmente"
+                            : "2 months free when subscribing annually"}
+                        </p>
+                        <p className="text-muted-foreground text-xs mt-0.5">
+                          {language === "es"
+                            ? "Mes 1 gratis · Mes 2 gratis (cobro diferido). Al final del mes 2 se cobra mes 2 diferido + mes 3 como inicio de tu suscripción anual."
+                            : "Month 1 free · Month 2 free (deferred). At end of month 2, you're charged for month 2 deferred + month 3 as your annual subscription start."}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm">
+                      <span className="text-lg leading-none">✨</span>
+                      <div>
+                        <p className="font-semibold text-blue-700 dark:text-blue-400">
+                          {language === "es"
+                            ? "Primer mes gratis"
+                            : "First month free"}
+                        </p>
+                        <p className="text-muted-foreground text-xs mt-0.5">
+                          {language === "es"
+                            ? "Sin cobro el mes 1. A partir del mes 2 se factura mensualmente."
+                            : "No charge for month 1. Billed monthly from month 2."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                     {/* Plan 1: Starter */}
                     <div
@@ -936,15 +1034,32 @@ export default function AccountContent() {
 
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-bold">$1,899</span>
+                          <span className="text-3xl font-bold">
+                            $
+                            {billingCycle === "yearly"
+                              ? PLAN_PRICING.starter.yearly.toLocaleString(
+                                  "es-MX",
+                                )
+                              : PLAN_PRICING.starter.monthly.toLocaleString(
+                                  "es-MX",
+                                )}
+                          </span>
                           <span className="text-sm text-muted-foreground">
-                            {language === "es" ? "/mes" : "/mo"}
+                            {billingCycle === "yearly"
+                              ? language === "es"
+                                ? "/mes (anual)"
+                                : "/mo (yearly)"
+                              : language === "es"
+                                ? "/mes"
+                                : "/mo"}
                           </span>
                         </div>
                         <p className="text-xs text-sky-400 font-medium">
-                          {language === "es"
-                            ? "o $1,499/mes anual"
-                            : "or $1,499/mo yearly"}
+                          {billingCycle === "yearly"
+                            ? `$${(PLAN_PRICING.starter.yearly * 12).toLocaleString("es-MX")}/${language === "es" ? "año" : "yr"}`
+                            : language === "es"
+                              ? "o $1,499/mes anual"
+                              : "or $1,499/mo yearly"}
                         </p>
                       </div>
 
@@ -974,8 +1089,11 @@ export default function AccountContent() {
                       <Button
                         onClick={() =>
                           handleUpgrade(
-                            process.env
-                              .NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID!,
+                            billingCycle === "yearly"
+                              ? process.env
+                                  .NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID!
+                              : process.env
+                                  .NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID!,
                           )
                         }
                         disabled={isUpgrading}
@@ -1027,15 +1145,32 @@ export default function AccountContent() {
 
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl font-bold">$3,499</span>
+                          <span className="text-3xl font-bold">
+                            $
+                            {billingCycle === "yearly"
+                              ? PLAN_PRICING.business.yearly.toLocaleString(
+                                  "es-MX",
+                                )
+                              : PLAN_PRICING.business.monthly.toLocaleString(
+                                  "es-MX",
+                                )}
+                          </span>
                           <span className="text-sm text-muted-foreground">
-                            {language === "es" ? "/mes" : "/mo"}
+                            {billingCycle === "yearly"
+                              ? language === "es"
+                                ? "/mes (anual)"
+                                : "/mo (yearly)"
+                              : language === "es"
+                                ? "/mes"
+                                : "/mo"}
                           </span>
                         </div>
                         <p className="text-xs text-blue-400 font-medium">
-                          {language === "es"
-                            ? "o $2,999/mes anual"
-                            : "or $2,999/mo yearly"}
+                          {billingCycle === "yearly"
+                            ? `$${(PLAN_PRICING.business.yearly * 12).toLocaleString("es-MX")}/${language === "es" ? "año" : "yr"}`
+                            : language === "es"
+                              ? "o $2,999/mes anual"
+                              : "or $2,999/mo yearly"}
                         </p>
                       </div>
 
@@ -1065,8 +1200,11 @@ export default function AccountContent() {
                       <Button
                         onClick={() =>
                           handleUpgrade(
-                            process.env
-                              .NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID!,
+                            billingCycle === "yearly"
+                              ? process.env
+                                  .NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PRICE_ID!
+                              : process.env
+                                  .NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PRICE_ID!,
                           )
                         }
                         disabled={isUpgrading}
