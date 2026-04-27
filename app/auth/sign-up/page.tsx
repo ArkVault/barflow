@@ -37,9 +37,9 @@ export default function SignUpPage() {
     }
 
     try {
-      // Calculate trial end date (21 days from now)
+      // Calculate trial end date (30 days from now — first month free)
       const trialEndDate = new Date();
-      trialEndDate.setDate(trialEndDate.getDate() + 21);
+      trialEndDate.setDate(trialEndDate.getDate() + 30);
 
       const { data, error } = await supabase.auth.signUp({
         email,

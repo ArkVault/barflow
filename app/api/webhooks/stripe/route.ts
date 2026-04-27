@@ -244,7 +244,9 @@ export async function POST(req: NextRequest) {
             .update({
               subscription_status: "canceled",
               stripe_subscription_id: null,
-              plan_type: "free_trial", // Revert to free trial
+              plan_type: "expired",
+              // Clear trial so a canceled user can't re-enter the free trial window
+              trial_end_date: null,
             })
             .eq("id", establishmentId);
 

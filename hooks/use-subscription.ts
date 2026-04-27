@@ -69,18 +69,22 @@ export function useSubscription() {
           )
         : 0;
 
-      const hasActiveSubscription =
-        data.subscription_status === "active" ||
-        data.subscription_status === "trialing";
+      const hasActiveSubscription = data.subscription_status === "active";
+      // Stripe trialing counts as trialing regardless of local trial_end_date
+      const isStripeTrialing = data.subscription_status === "trialing";
+      const isEffectivelyTrialing = isTrialing || isStripeTrialing;
 
       const isDevAccount = user?.email
         ? DEV_EMAILS.includes(user.email)
         : false;
 
       setSubscription({
-        isActive: isDevAccount || hasActiveSubscription || isTrialing,
-        isTrialing,
-        trialEnded: isDevAccount ? false : trialEnded && !hasActiveSubscription,
+        isActive:
+          isDevAccount || hasActiveSubscription || isEffectivelyTrialing,
+        isTrialing: isEffectivelyTrialing,
+        trialEnded: isDevAccount
+          ? false
+          : trialEnded && !hasActiveSubscription && !isStripeTrialing,
         planType: data.plan_type,
         trialEndDate,
         daysRemaining,

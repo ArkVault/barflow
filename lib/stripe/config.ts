@@ -54,7 +54,7 @@ export const STRIPE_CONFIG = {
     // Cadena & Enterprise are quote-only — no self-serve price IDs
   },
   // Trial period in days
-  trialPeriodDays: 21,
+  trialPeriodDays: 30,
   // Success and cancel URLs
   successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
   cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
